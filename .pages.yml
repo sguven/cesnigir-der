@@ -75,6 +75,8 @@ content:
       - { name: telefon, label: Başkanın telefonu, type: string }
       - { name: baskan2, label: Başkan yardımcısı, type: string }
       - { name: telefon2, label: Başkan yardımcısının telefonu, type: string }
+      - { name: yonetim_kurulu, label: Yönetim kurulu (her satıra bir isim), type: text }
+      - { name: denetim_kurulu, label: Denetim kurulu (her satıra bir isim), type: text }
       - { name: whatsapp, label: WhatsApp, type: string }
       - { name: eposta, label: E-posta, type: string }
       - { name: adres, label: Adres, type: string }

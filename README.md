@@ -43,7 +43,7 @@ Anahtar yalnızca o telefonun tarayıcısında saklanır. Telefon kaybolursa Git
 | `data/resmi-gunler.json` | Resmî bayramlar ve dinî günler (2026-2027) |
 | `data/galeri.json` | Fotoğraflar |
 | `data/pazar.json` | Pazar ve yardımlaşma ilanları |
-| `data/dernek.json` | Hakkımızda, başkan, iletişim, kasa durumu |
+| `data/dernek.json` | Hakkımızda, başkan, yönetim ve denetim kurulu, iletişim, kasa durumu |
 
 ## Sürüm eki
 

@@ -74,6 +74,9 @@
     { name: 'whatsapp', label: 'WhatsApp numarası', type: 'tel', help: 'Telefonla aynıysa boş bırakın.' },
     { name: 'eposta', label: 'E-posta', type: 'email' },
     { name: 'adres', label: 'Adres', type: 'text' },
+    { name: 'yonetim_kurulu', label: 'Yönetim kurulu', type: 'textarea', placeholder: 'Ahmet Yılmaz - Başkan\nMehmet Demir - Sayman\nAli Kaya', group: 'Kurullar',
+      groupHelp: 'Her satıra bir isim yazın. Görevi varsa isimden sonra tire koyup yazın (Ahmet Yılmaz - Sayman). Sitede "Hakkımızda" sayfasında görünür. Boş bırakırsanız görünmez.' },
+    { name: 'denetim_kurulu', label: 'Denetim kurulu', type: 'textarea', placeholder: 'Hasan Çelik\nVeli Şahin\nOsman Kurt' },
     { name: 'canli_yayin', label: 'YouTube canlı yayın adresi', type: 'url', placeholder: 'https://www.youtube.com/live/…', group: 'Canlı Yayın',
       groupHelp: 'YouTube\'daki canlı yayının adresini yapıştırın. Sitenin ana sayfasında "Köyden Canlı Görüntü" olarak oynar. Boş bırakırsanız görünmez.' },
     { name: 'kasa_donem', label: 'Kasa durumu: hangi ay?', type: 'text', placeholder: 'Örnek: Kasım 2026', group: 'Kasa Durumu', groupHelp: 'Doldurursanız sitede "Kasa Durumu" kutusu çıkar. Boş bırakırsanız görünmez.' },
@@ -373,7 +376,7 @@
       '<a class="tile" href="#/liste/etkinlikler">' + icon('cal') + 'Takvim<small id="n-etkinlikler">&nbsp;</small></a>' +
       '<a class="tile" href="#/galeri">' + icon('photo') + 'Fotoğraflar<small id="n-galeri">&nbsp;</small></a>' +
       '<a class="tile" href="#/liste/pazar">' + icon('bag') + 'Market<small id="n-pazar">&nbsp;</small></a>' +
-      '<a class="tile wide" href="#/dernek">' + icon('people') + '<span>Dernek Bilgileri<small>Telefon, başkan, kasa durumu</small></span></a>' +
+      '<a class="tile wide" href="#/dernek">' + icon('people') + '<span>Dernek Bilgileri<small>Başkan, kurullar, telefon, kasa</small></span></a>' +
       '</div>' +
       '<div class="note">' + icon('warn') + '<div>Kaydettiğiniz her şey <b>1-2 dakika içinde</b> sitede görünür.</div></div>' +
       '<p style="text-align:center;margin-top:28px"><button type="button" class="btn btn-gray" id="logout">Bu telefondan çıkış yap</button></p>';

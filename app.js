@@ -296,11 +296,27 @@
       '<li><span>Merkez</span>Ankara Caddesi, Çarşı Merkezi</li>' +
       '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li>' +
       '</ul></div>' + kasa + '</aside></div></section>' +
-      villageSection() + placesSection();
+      boardsSection(d) + villageSection() + placesSection();
   }
 
   function rows(list) {
     return '<ul class="facts">' + list.map(function (r) { return '<li><span>' + r[0] + '</span>' + r[1] + '</li>'; }).join('') + '</ul>';
+  }
+
+  /* Kurullar: panelde her satıra bir isim yazılır; görev varsa isimden sonra tireyle ("Ad Soyad - Sayman") */
+  function boardList(t) {
+    return String(t || '').split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean).map(function (x) {
+      var m = /^(.*?)\s+[-–—:]\s+(.+)$/.exec(x);
+      return '<li><b>' + esc(m ? m[1] : x) + '</b>' + (m ? '<span>' + esc(m[2]) + '</span>' : '') + '</li>';
+    }).join('');
+  }
+  function boardsSection(d) {
+    var y = boardList(d.yonetim_kurulu), n = boardList(d.denetim_kurulu);
+    if (!y && !n) return '';
+    return '<section class="section"><div class="container"><div class="sec-head"><h2>Dernek Kurulları</h2></div><div class="pair" style="margin-bottom:0">' +
+      (y ? '<div class="box box-pad"><h3>Yönetim Kurulu</h3><ol class="kurul">' + y + '</ol></div>' : '') +
+      (n ? '<div class="box box-pad"><h3>Denetim Kurulu</h3><ol class="kurul">' + n + '</ol></div>' : '') +
+      '</div></div></section>';
   }
 
   function villageSection() {
