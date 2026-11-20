@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "tur": "Satılık",
+    "baslik": "biber salcasi",
+    "fiyat": "1500",
+    "aciklama": "kilosu 1500lora",
+    "kisi": "Serhat",
+    "telefon": "05551234567",
+    "foto": "images/yuklenen/2026-11-19-235554-21m6y.jpg",
+    "tarih": "2026-11-19"
+  }
+]
