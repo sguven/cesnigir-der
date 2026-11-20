@@ -196,7 +196,8 @@
       '<div class="box box-pad" style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap"><img src="' + B + 'images/logo.png" alt="Çeşnigir-Der logosu" width="120" height="120" style="flex:none">' +
       '<div style="flex:1 1 260px">' + paras.map(function (s) { return '<p style="margin:0 0 12px">' + esc(s) + '</p>'; }).join('') + '</div></div>' +
       '<div class="sec-head" style="margin-top:30px"><h2>Çeşnigir Köprüsü</h2></div>' +
-      '<div class="village" style="grid-template-columns:1fr"><img src="' + B + 'images/kopru.jpg" alt="Çeşnigir Köprüsü" loading="lazy"></div>' +
+      '<div class="village" style="grid-template-columns:1fr"><img src="' + B + 'images/kopru-1972.jpg" alt="Çeşnigir Köprüsü 1972\'de, baraj sularından önce." loading="lazy"></div>' +
+      '<p class="muted small" style="margin:6px 0 0">15 Eylül 1972, baraj öncesi. Fotoğraf: Volker Höhfeld, CC BY-SA 4.0 (Wikimedia Commons)</p>' +
       '<p style="margin-top:16px">Köye adını veren köprü kesme taştan yapılmıştır; 110 metre uzunluğunda ve on iki gözlüdür. "Çeşnigir", Osmanlı sarayında padişahın yemeklerini tadan görevlinin unvanıdır. Kızılırmak türkülerinden "Nettin Kızılırmak Allı Gelini"nde anlatılan olayın köyümüzde yaşandığı aktarılır.</p>' +
       '<ul class="timeline"><li><b>13. yüzyıl</b>Köprü Anadolu Selçuklu döneminde yapılır.</li>' +
       '<li><b>1402</b>Rivayete göre Timur\'un ordusu Ankara Savaşı\'na giderken köprüden geçer.</li><li><b>16. yüzyıl</b>Yavuz Sultan Selim, Mısır Seferi sırasında köprüyü Mimar Sinan\'a yeniden yaptırır.</li><li><b>1777</b>Köy, kayıtlarda "Çaşnigir Köprüsü" adıyla geçer.</li><li><b>1815</b>Kayıtlardaki adı "Çaşnigir Derbendi" olur.</li><li><b>1972</b>Köprüköy belediye kurularak belde olur.</li><li><b>1989</b>Kapulukaya Barajı\'nın suları yükselir, köprü araç trafiğine kapanır.</li>' +
@@ -209,7 +210,7 @@
       '<li><b>Sulu Mağara</b>Keskin\'de üç katlı, 285 metrelik mağara; yakınında Ceritkale Kanyonu yürüyüşü.</li></ul>' +
       '</div><aside><div class="box box-pad"><h3>Dernek Bilgileri</h3><ul class="facts">' +
       (d.baskan ? '<li><span>Dernek Başkanı</span>' + esc(d.baskan) + '</li>' : '') +
-      '<li><span>Kuruluş</span>2025</li>' +
+      '<li><span>Merkez</span>Ankara Caddesi, Çarşı Merkezi</li>' +
       '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li>' +
       (d.telefon ? '<li><span>Telefon</span>' + esc(d.telefon) + '</li>' : '') + '</ul></div>' + kasa + '</aside></div></section>';
   }
