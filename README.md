@@ -48,6 +48,11 @@ Anahtar yalnızca o telefonun tarayıcısında saklanır. Telefon kaybolursa Git
 | `data/pazar.json` | Pazar ve yardımlaşma ilanları |
 | `data/dernek.json` | Hakkımızda, başkan, iletişim, kasa durumu |
 
+## Sürüm eki
+
+Sayfalardaki `site.css?v=…`, `app.js?v=…` gibi ekler, yeni sürüm yayınlanınca telefonda eski dosyanın kalmamasını sağlar.
+Bir `.js` ya da `.css` dosyası değişince o sayfanın `index.html` dosyasındaki `?v=` değerini de değiştirin.
+
 ## Bilgisayarda denemek
 
 ```

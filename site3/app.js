@@ -54,7 +54,7 @@
     var today = C.todayIso(), end = C.addDays(today, days), out = [];
     data.etkinlikler.forEach(function (e) {
       var iso = C.normIso(e.tarih);
-      if (iso && iso >= today) out.push({ iso: iso, ad: e.ad, tur: e.tur, saat: e.saat, yer: e.yer, foto: e.foto, koy: true });
+      if (iso && iso >= today) out.push({ iso: iso, ad: e.ad, tur: e.tur, saat: e.saat, yer: e.yer, foto: e.foto, id: eid(e), koy: true });
     });
     (data.resmi.tarihli || []).forEach(function (e) {
       var iso = C.normIso(e.tarih);
@@ -71,21 +71,29 @@
   }
 
 
-  // Köy etkinliğinin fotoğrafı ve WhatsApp'ta paylaş düğmesi (resmî günlerde yok)
+  // Etkinliğin kendi adresi: #/etkinlik/2026-11-29-ali-ayse
+  function eid(e) { return (C.normIso(e.tarih) || 'x') + '-' + (C.slug(e.ad).slice(0, 50) || 'etkinlik'); }
+  // WhatsApp'ta paylaş düğmesi: bağlantı doğrudan etkinliğin sayfasına gider; fotoğraf varsa telefonda fotoğrafla birlikte paylaşılır (ortak.js)
+  function shareBtn(e, det, cls) {
+    var src = img(e.foto);
+    var text = (e.tur ? e.tur + ': ' : '') + e.ad + '\n' + C.longDate(e.iso, true) + (det ? ' · ' + det : '') + '\n' + location.href.split('#')[0] + '#/etkinlik/' + e.id;
+    return '<a class="' + cls + '" href="https://wa.me/?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener"' +
+      (src ? ' data-share-photo="' + esc(src) + '" data-share-text="' + esc(text) + '"' : '') + '>' + icon('wa') + 'WhatsApp\'ta paylaş</a>';
+  }
+  // Köy etkinliğinin fotoğrafı ve paylaş düğmesi (resmî günlerde yok)
   function evExtras(e, det) {
     if (!e.koy) return '';
-    var src = img(e.foto), title = (e.tur ? e.tur + ': ' : '') + e.ad;
-    var text = title + '\n' + C.longDate(e.iso, true) + (det ? ' · ' + det : '') + '\n' + location.href.split('#')[0] + '#/etkinlikler';
+    var src = img(e.foto);
     return (src ? '<button type="button" class="ev-photo" data-photo="' + esc(src) + '" data-cap="' + esc(e.ad) + '" aria-label="Fotoğrafı büyüt">' +
-      '<img src="' + esc(src) + '" alt="' + esc(e.ad) + '" loading="lazy"></button>' : '') +
-      '<a class="ev-share" href="https://wa.me/?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp\'ta paylaş</a>';
+      '<img src="' + esc(src) + '" alt="' + esc(e.ad) + '" loading="lazy"></button>' : '') + shareBtn(e, det, 'ev-share');
   }
 
   function evRow(e) {
     var p = C.parts(e.iso), until = C.untilText(e.iso), det = [e.saat, e.yer].filter(Boolean).join(' · ');
     return '<div class="ev' + (e.koy ? ' koy' : ' official') + '"><div class="ev-date" aria-hidden="true"><span>' + C.AY_KISA[p.m] + '</span><b>' + p.d +
       '</b><small>' + C.GUN[p.wd] + '</small></div><div class="ev-info">' + (until ? '<div class="ev-when">' + esc(until) + '</div>' : '') +
-      (e.tur ? '<span class="' + C.badgeClass(e.tur) + '">' + esc(e.tur) + '</span> ' : '') + '<b>' + esc(e.ad) + '</b>' +
+      (e.tur ? '<span class="' + C.badgeClass(e.tur) + '">' + esc(e.tur) + '</span> ' : '') +
+      (e.koy ? '<a class="ev-link" href="#/etkinlik/' + esc(e.id) + '"><b>' + esc(e.ad) + '</b></a>' : '<b>' + esc(e.ad) + '</b>') +
       '<div class="muted">' + esc(C.longDate(e.iso, true)) + (det ? ' · ' + esc(det) : '') + '</div>' + evExtras(e, det) + '</div></div>';
   }
 
@@ -171,6 +179,24 @@
     if (cur) h += '</div>';
     return band('Etkinlikler', 'Düğün, nişan, mevlit, toplantılar ve resmî günler.') +
       '<section class="section"><div class="container" style="max-width:860px">' + (h || '<div class="box empty"><b>Yaklaşan bir gün yok</b></div>') + '</div></section>';
+  }
+
+  // Tek etkinliğin sayfası: paylaşılan bağlantı buraya gelir (geçmiş etkinlikler de açılır)
+  function pageEvent(id) {
+    var x = data.etkinlikler.filter(function (v) { return eid(v) === id; })[0];
+    var crumb = '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/etkinlikler">Etkinlikler</a></div></div></div>';
+    if (!x) return band('Etkinlik bulunamadı') + '<section class="section"><div class="container"><p>Bu etkinlik kaldırılmış olabilir.</p><a class="btn" href="#/etkinlikler">Tüm etkinlikler</a></div></section>';
+    var e = { iso: C.normIso(x.tarih), ad: x.ad, tur: x.tur, saat: x.saat, yer: x.yer, foto: x.foto, id: id, koy: true };
+    var src = img(e.foto), until = C.untilText(e.iso), det = [e.saat, e.yer].filter(Boolean).join(' · ');
+    return crumb + '<section class="section"><div class="container"><article class="article">' +
+      '<div class="news-meta">' + (e.tur ? '<span class="' + C.badgeClass(e.tur) + '">' + esc(e.tur) + '</span>' : '') +
+      (until ? '<span class="ev-when">' + esc(until) + '</span>' : '') + '</div>' +
+      '<h1>' + esc(e.ad) + '</h1>' +
+      '<div class="box box-pad" style="margin-bottom:18px"><ul class="facts"><li><span>Gün</span>' + esc(C.longDate(e.iso, true)) + '</li>' +
+      (e.saat ? '<li><span>Saat</span>' + esc(e.saat) + '</li>' : '') + (e.yer ? '<li><span>Yer</span>' + esc(e.yer) + '</li>' : '') + '</ul></div>' +
+      (src ? '<button type="button" class="article-img" data-photo="' + esc(src) + '" data-cap="' + esc(e.ad) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(src) + '" alt="' + esc(e.ad) + '"></button>' : '') +
+      '<div class="btn-row">' + shareBtn(e, det, 'btn btn-green') + '<a class="btn btn-light" href="#/etkinlikler">‹ Tüm etkinlikler</a></div>' +
+      '</article></div></section>';
   }
 
   function pagePhotos() {
@@ -313,6 +339,7 @@
     if (page === 'duyuru') html = pageArticle(decodeURIComponent(p.slice(1).join('/')));
     else if (page === 'duyurular') html = pageNews();
     else if (page === 'etkinlikler') html = pageEvents();
+    else if (page === 'etkinlik') html = pageEvent(decodeURIComponent(p.slice(1).join('/')));
     else if (page === 'fotograflar') html = pagePhotos();
     else if (page === 'pazar') html = pageMarket();
     else if (page === 'hakkimizda') html = pageAbout();
@@ -323,7 +350,8 @@
     tapped = false; curHash = hash;
     main.innerHTML = html;
     main.classList.remove('gir'); void main.offsetWidth; main.classList.add('gir');
-    var navKey = page === 'duyuru' ? 'duyurular' : page;
+    var navKey = page === 'duyuru' ? 'duyurular' : page === 'etkinlik' ? 'etkinlikler' : page;
+    if (page === 'etkinlik') { var sp = main.querySelector('[data-share-photo]'); if (sp) C.warmShare(sp.getAttribute('data-share-photo')); }
     document.querySelectorAll('[data-nav]').forEach(function (a) {
       if (a.getAttribute('data-nav') === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
@@ -385,6 +413,7 @@
 
   function bind() {
     window.addEventListener('hashchange', route);
+    C.bindShare();
     window.addEventListener('scroll', headerPhoto, { passive: true }); window.addEventListener('resize', headerPhoto);
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     window.addEventListener('scroll', function () { pos[curHash] = window.pageYOffset; }, { passive: true });

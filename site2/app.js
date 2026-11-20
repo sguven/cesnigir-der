@@ -21,13 +21,18 @@
   /* ---------------- sekmeler ---------------- */
   function showTab(fromHash) {
     var h = (location.hash || '').replace('#', '');
-    var tab = TABS.indexOf(h) >= 0 ? h : 'anasayfa';
+    var evId = /^e-/.test(h) ? h : '';   // paylaşılan etkinlik bağlantısı: Takvim sekmesinde o etkinliğe gider
+    var tab = evId ? 'takvim' : TABS.indexOf(h) >= 0 ? h : 'anasayfa';
     var postId = /^d-/.test(h) ? h : '';
     TABS.forEach(function (t) { $(t).hidden = t !== tab; });
     document.querySelectorAll('.tab').forEach(function (a) {
       if (a.getAttribute('data-tab') === tab) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });
+    if (evId) {
+      var ev = [].filter.call($('events').querySelectorAll('[data-eid]'), function (x) { return x.getAttribute('data-eid') === evId; })[0];
+      if (ev) { ev.scrollIntoView({ block: 'center' }); return; }
+    }
     if (postId) {
       var el = $(postId);
       if (el) { el.scrollIntoView({ block: 'start' }); return; }
@@ -94,7 +99,7 @@
     var today = C.todayIso(), end = C.addDays(today, limitDays), out = [];
     data.etkinlikler.forEach(function (e) {
       var iso = C.normIso(e.tarih);
-      if (iso && iso >= today) out.push({ iso: iso, ad: e.ad, tur: e.tur, saat: e.saat, yer: e.yer, foto: e.foto, koy: true });
+      if (iso && iso >= today) out.push({ iso: iso, ad: e.ad, tur: e.tur, saat: e.saat, yer: e.yer, foto: e.foto, id: 'e-' + (iso + '-' + (C.slug(e.ad).slice(0, 50) || 'etkinlik')), koy: true });
     });
     (data.resmi.tarihli || []).forEach(function (e) {
       var iso = C.normIso(e.tarih);
@@ -116,16 +121,17 @@
   function evExtras(e, det) {
     if (!e.koy) return '';
     var src = C.imgSrc(e.foto, '../'), title = (e.tur ? e.tur + ': ' : '') + e.ad;
-    var text = title + '\n' + C.longDate(e.iso, true) + (det ? ' · ' + det : '') + '\n' + location.href.split('#')[0] + '#takvim';
+    var text = title + '\n' + C.longDate(e.iso, true) + (det ? ' · ' + det : '') + '\n' + location.href.split('#')[0] + '#' + e.id;
     return (src ? '<button type="button" class="ev-photo" data-photo="' + esc(src) + '" data-cap="' + esc(e.ad) + '" aria-label="Fotoğrafı büyüt">' +
       '<img src="' + esc(src) + '" alt="' + esc(e.ad) + '" loading="lazy"></button>' : '') +
-      '<a class="ev-share" href="https://wa.me/?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp\'ta paylaş</a>';
+      '<a class="ev-share" href="https://wa.me/?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener"' +
+      (src ? ' data-share-photo="' + esc(src) + '" data-share-text="' + esc(text) + '"' : '') + '>' + icon('wa') + 'WhatsApp\'ta paylaş</a>';
   }
 
   function evRow(e) {
     var p = C.parts(e.iso), until = C.untilText(e.iso);
     var det = [e.saat, e.yer].filter(Boolean).join(' · ');
-    return '<div class="ev' + (e.koy ? ' koy' : ' official') + '">' +
+    return '<div class="ev' + (e.koy ? ' koy' : ' official') + '"' + (e.koy ? ' data-eid="' + esc(e.id) + '"' : '') + '>' +
       '<div class="ev-date" aria-hidden="true"><span>' + C.AY_KISA[p.m] + '</span><b>' + p.d + '</b><small>' + C.GUN[p.wd] + '</small></div>' +
       '<div class="ev-info">' + (until ? '<div class="ev-when">' + esc(until) + '</div>' : '') +
       (e.tur ? '<span class="' + C.badgeClass(e.tur) + '">' + esc(e.tur) + '</span> ' : '') +
@@ -322,6 +328,7 @@
     renderGallery();
     renderMarket();
     renderAbout();
-    if (/^#d-/.test(location.hash)) showTab(false);
+    if (/^#[de]-/.test(location.hash)) showTab(false);
+    C.bindShare();
   });
 })();
