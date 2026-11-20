@@ -51,7 +51,7 @@ main:focus{outline:none}
   background:var(--white);color:var(--bordo);font-weight:700;font-size:18px;cursor:pointer}
 .menu-btn svg{width:24px;height:24px}
 
-@media (max-width:1000px){
+@media (max-width:1180px){
   .menu-btn{display:flex}
   .nav{display:none;position:absolute;left:0;right:0;top:100%;background:var(--white);flex-direction:column;gap:0;
     border-bottom:4px solid var(--bordo);box-shadow:0 10px 20px rgba(35,26,20,.15);padding:6px 0}
@@ -237,3 +237,14 @@ main:focus{outline:none}
 .viewer :focus-visible{outline-color:#fff}
 
 @media (prefers-reduced-motion:reduce){ .gal img{transition:none} }
+
+/* köyümüz ve gezi */
+.fig{margin:0 0 18px}
+.fig img{display:block;width:100%;border-radius:10px;aspect-ratio:3/2;object-fit:cover}
+.fig img.wide{aspect-ratio:2/1}
+.fig figcaption{font-size:14px;color:var(--ink2);margin-top:6px}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-bottom:18px}
+.kredi{display:block;font-size:14px;color:var(--ink2);margin-top:4px}
+.check-list{margin:0;padding-left:22px}
+.check-list li{margin:6px 0}
+.nav a{white-space:nowrap}

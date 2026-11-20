@@ -107,11 +107,11 @@
     if (g.length) h += '<section class="section alt"><div class="container"><div class="sec-head"><h2>Fotoğraflardan</h2><a href="#/fotograflar">Tüm fotoğraflar (' + data.galeri.length + ') ›</a></div>' +
       galleryGrid(g, 'strip') + '</div></section>';
 
-    h += '<section class="section"><div class="container village"><img src="' + B + 'images/kopru.jpg" alt="Çeşnigir Köprüsü\'nün taş kemerleri ve Kızılırmak." loading="lazy">' +
+    h += '<section class="section"><div class="container village"><img src="' + B + 'images/koprukoy-gol.jpg" alt="Göl kıyısından Köprüköy ve Çeşnigir Köprüsü." loading="lazy">' +
       '<div><div class="sec-head"><h2>Köyümüz Köprüköy</h2></div>' +
       '<p>Köyümüz adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır. Selçuklu döneminden kalan on iki gözlü bu taş köprü, yüzyıllarca Ankara ile Kırşehir arasındaki yolun geçiş noktası oldu.</p>' +
       '<p class="muted">Kapulukaya Baraj Gölü kıyısında, Keskin\'e 25 km, Kırıkkale\'ye 37 km uzaklıktayız.</p>' +
-      '<a class="btn btn-light" href="#/hakkimizda">Derneğimizi tanıyın</a></div></div></section>';
+      '<div class="btn-row"><a class="btn btn-light" href="#/koyumuz">Köyümüz ve tarihçe</a><a class="btn btn-light" href="#/gezi">Gezilecek yerler</a></div></div></div></section>';
     return h;
   }
 
@@ -183,6 +183,11 @@
       '<section class="section"><div class="container">' + body + '</div></section>';
   }
 
+  function credit(who, file) {
+    return '<span class="kredi">Fotoğraf: <a href="https://commons.wikimedia.org/wiki/File:' + file + '" target="_blank" rel="noopener">' + who + '</a></span>';
+  }
+  var EG = 'Egeasln, CC BY-SA 4.0', IS = 'Ingeborg Simon, CC BY-SA 3.0', VH = 'Volker Höhfeld, CC BY-SA 4.0';
+
   function pageAbout() {
     var d = data.dernek;
     var paras = String(d.hakkimizda || '').split(/\n\s*\n/).map(function (s) { return s.trim(); }).filter(Boolean);
@@ -195,25 +200,88 @@
       '<section class="section"><div class="container grid-main"><div>' +
       '<div class="box box-pad" style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap"><img src="' + B + 'images/logo.png" alt="Çeşnigir-Der logosu" width="120" height="120" style="flex:none">' +
       '<div style="flex:1 1 260px">' + paras.map(function (s) { return '<p style="margin:0 0 12px">' + esc(s) + '</p>'; }).join('') + '</div></div>' +
-      '<div class="sec-head" style="margin-top:30px"><h2>Çeşnigir Köprüsü</h2></div>' +
-      '<div class="village" style="grid-template-columns:1fr"><img src="' + B + 'images/kopru-1972.jpg" alt="Çeşnigir Köprüsü 1972\'de, baraj sularından önce." loading="lazy"></div>' +
-      '<p class="muted small" style="margin:6px 0 0">15 Eylül 1972, baraj öncesi. Fotoğraf: Volker Höhfeld, CC BY-SA 4.0 (Wikimedia Commons)</p>' +
-      '<p style="margin-top:16px">Köye adını veren köprü kesme taştan yapılmıştır; 110 metre uzunluğunda ve on iki gözlüdür. "Çeşnigir", Osmanlı sarayında padişahın yemeklerini tadan görevlinin unvanıdır. Kızılırmak türkülerinden "Nettin Kızılırmak Allı Gelini"nde anlatılan olayın köyümüzde yaşandığı aktarılır.</p>' +
-      '<ul class="timeline"><li><b>13. yüzyıl</b>Köprü Anadolu Selçuklu döneminde yapılır.</li>' +
-      '<li><b>1402</b>Rivayete göre Timur\'un ordusu Ankara Savaşı\'na giderken köprüden geçer.</li><li><b>16. yüzyıl</b>Yavuz Sultan Selim, Mısır Seferi sırasında köprüyü Mimar Sinan\'a yeniden yaptırır.</li><li><b>1777</b>Köy, kayıtlarda "Çaşnigir Köprüsü" adıyla geçer.</li><li><b>1815</b>Kayıtlardaki adı "Çaşnigir Derbendi" olur.</li><li><b>1972</b>Köprüköy belediye kurularak belde olur.</li><li><b>1989</b>Kapulukaya Barajı\'nın suları yükselir, köprü araç trafiğine kapanır.</li>' +
-      '<li><b>2010</b>Köprü restore edilir; bugün yayalara açıktır.</li><li><b>2013</b>Nüfus 2.000\'in altına düşünce belediye kapanır, Köprüköy yeniden köy olur.</li><li><b>2019–2020</b>Kırıkkale Valiliği çalışmalarıyla Çeşnigir Kanyonu turizme kazandırılır: seyir terası, tekne turu, yürüyüş parkuru.</li></ul>' +
-      '<div class="sec-head" style="margin-top:30px"><h2>Çevremizde Gezilecek Yerler</h2></div><ul class="timeline">' +
-      '<li><b>Çeşnigir Kanyonu</b>Valiliğin düzenlediği mesire alanı, iki seyir terası (biri cam zeminli), tekne turu ve 6,5 km yürüyüş-bisiklet yolu.</li>' +
-      '<li><b>Kapulukaya Baraj Gölü</b>Köyün batısındaki göl kıyısı; sazan ve tatlı su levreği.</li>' +
-      '<li><b>Büklükale</b>Karşı kıyıda 5 bin yıllık yerleşim; Japon kazı ekibi 2010\'da Hitit çivi yazılı tablet buldu.</li>' +
-      '<li><b>Haydar Sultan Türbesi</b>Köprüköy\'den Behrek Dağı eteklerine uzanan yürüyüş rotasının sonu; bahçesinde Deliler Kuyusu.</li>' +
-      '<li><b>Sulu Mağara</b>Keskin\'de üç katlı, 285 metrelik mağara; yakınında Ceritkale Kanyonu yürüyüşü.</li></ul>' +
+      '<div class="sec-head" style="margin-top:30px"><h2>Neler yapıyoruz?</h2></div>' +
+      '<ul class="check-list">' +
+      '<li>Köyden haberleri ve duyuruları herkese ulaştırıyoruz.</li>' +
+      '<li>Düğün, nişan, mevlit ve cenaze gibi özel günleri takvimde duyuruyoruz.</li>' +
+      '<li>Köylülerin alım satım ve yardımlaşma ilanlarına aracılık ediyoruz.</li>' +
+      '<li>Çeşnigir Köprüsü\'nü ve Köprüköy\'ün tarihini tanıtıyoruz.</li>' +
+      '<li>Köyde yaşayanla gurbetteki hemşehrilerimiz arasındaki bağı canlı tutuyoruz.</li></ul>' +
+      '<div class="btn-row" style="margin-top:22px"><a class="btn btn-light" href="#/koyumuz">Köyümüz ve tarihçe</a><a class="btn btn-light" href="#/gezi">Gezilecek yerler</a></div>' +
       '</div><aside><div class="box box-pad"><h3>Dernek Bilgileri</h3><ul class="facts">' +
       (d.baskan ? '<li><span>Dernek Başkanı</span>' + esc(d.baskan) + '</li>' : '') +
       '<li><span>Kuruluş</span>Eylül 2026</li>' +
+      '<li><span>Açılış töreni</span>6 Eylül 2026</li>' +
       '<li><span>Merkez</span>Ankara Caddesi, Çarşı Merkezi</li>' +
       '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li>' +
       (d.telefon ? '<li><span>Telefon</span>' + esc(d.telefon) + '</li>' : '') + '</ul></div>' + kasa + '</aside></div></section>';
+  }
+
+  function rows(list) {
+    return '<ul class="facts">' + list.map(function (r) { return '<li><span>' + r[0] + '</span>' + r[1] + '</li>'; }).join('') + '</ul>';
+  }
+
+  function pageVillage() {
+    var W = 'https://tr.wikipedia.org/wiki/';
+    return band('Köyümüz Köprüköy', 'Kızılırmak kıyısında, adını Çeşnigir Köprüsü\'nden alan köy') +
+      '<section class="section"><div class="container grid-main"><div>' +
+      '<figure class="fig"><img src="' + B + 'images/koprukoy-gol.jpg" alt="Kapulukaya Baraj Gölü kıyısında Köprüköy: kayalık yamaçta kırmızı çatılı evler, solda Çeşnigir Köprüsü." loading="lazy">' +
+      '<figcaption>Göl kıyısından Köprüköy ve Çeşnigir Köprüsü. ' + credit(IS, '%C3%87e%C5%9Fnigir_K%C3%B6pr%C3%BCs%C3%BC_02.jpg') + '</figcaption></figure>' +
+      '<p>Kırıkkale\'nin Keskin ilçesine bağlı Köprüköy, adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır. Köyün Selçuklu döneminde kurulduğu kabul edilir. Kayıtlarda 1777\'de "Çaşnigir Köprüsü", 1815\'te "Çaşnigir Derbendi" adıyla geçer. Kızılırmak türkülerinden "Nettin Kızılırmak Allı Gelini"nde anlatılan olayın köyümüzde yaşandığı aktarılır.</p>' +
+      '<div class="sec-head" style="margin-top:30px"><h2>Çeşnigir Köprüsü</h2></div>' +
+      '<div class="pair"><figure class="fig"><img src="' + B + 'images/kopru-1972.jpg" alt="1972\'de Çeşnigir Köprüsü: baraj öncesi, kemerlerin altından akan turkuaz Kızılırmak." loading="lazy">' +
+      '<figcaption>15 Eylül 1972, baraj suları yükselmeden önce. ' + credit(VH, 'K%C3%B6pr%C3%BCk%C3%B6y_15_09_1972_historischen_%C3%87e%C5%9Fnigir-Br%C3%BCcke_%C3%BCber_den_K%C4%B1z%C4%B1l%C4%B1rmak.jpg') + '</figcaption></figure>' +
+      '<figure class="fig"><img src="' + B + 'images/kopru-bugun.jpg" alt="Bugün Çeşnigir Köprüsü: kemerlerin yarısı baraj suyunda." loading="lazy">' +
+      '<figcaption>Bugün: su kemerlerin yarısına ulaşıyor. ' + credit(EG, 'Cesnigir_paradise3_(cropped).jpg') + '</figcaption></figure></div>' +
+      '<p>Köprü kesme taştan yapılmıştır: 110 metre uzunluğunda, 6 metre genişliğindedir, orta açıklığı 18,60 metredir. Dokuzu aşağıda, üçü yukarıda on iki gözü vardır; nehre sağlam oturması için ortası belirgin biçimde yükselir. "Çeşnigir", Osmanlı sarayında padişahın yemeklerini tadan görevlinin unvanıdır. Osmanlı döneminde köprü, yol güvenliği için kurulan derbend (geçit tutma) düzeninin önemli noktalarından biriydi.</p>' +
+      '<div class="sec-head" style="margin-top:30px"><h2>Tarihçe</h2></div>' +
+      '<ul class="timeline">' +
+      '<li><b>13. yüzyıl</b>Köprü Anadolu Selçuklu döneminde yapılır. Kesin yapım tarihi ve yaptıranı bilinmiyor.</li>' +
+      '<li><b>1402</b>Rivayete göre Timur\'un ordusu Ankara Savaşı\'na giderken köprüden geçer.</li>' +
+      '<li><b>16. yüzyıl</b>Yavuz Sultan Selim, Mısır Seferi sırasında köprüyü Mimar Sinan\'a yeniden yaptırır.</li>' +
+      '<li><b>1777</b>Köy, kayıtlarda "Çaşnigir Köprüsü" adıyla geçer.</li>' +
+      '<li><b>1815</b>Kayıtlardaki adı "Çaşnigir Derbendi" olur.</li>' +
+      '<li><b>29 Şubat 1972</b>Köprüköy belediye kurularak belde olur.</li>' +
+      '<li><b>1985–2000</b>Belde en kalabalık yıllarını yaşar: 1985\'te 3.020, 2000\'de 3.836 kişi.</li>' +
+      '<li><b>1989</b>Kapulukaya Barajı\'nın suları yükselir, köprü araç trafiğine kapanır.</li>' +
+      '<li><b>2010</b>Cumhuriyet döneminde birkaç kez onarılan köprüyü son olarak Karayolları 4. Bölge Müdürlüğü restore eder; bugün yayalara açıktır.</li>' +
+      '<li><b>2013</b>Nüfus 2.000\'in altına düşünce belediye kapanır, Köprüköy yeniden köy olur.</li>' +
+      '<li><b>2019–2020</b>Kırıkkale Valiliği çalışmalarıyla Çeşnigir Kanyonu turizme kazandırılır.</li></ul>' +
+      '<div class="pair" style="margin-top:28px"><div class="box box-pad"><h3>Nüfusun seyri</h3>' +
+      rows([['1985', '3.020'], ['1990', '2.914'], ['2000', '3.836'], ['2010', '1.638'], ['2013', '1.023'], ['2020', '604'], ['2024', '720']]) + '</div>' +
+      '<div class="box box-pad"><h3>Belde dönemi belediye başkanları</h3>' +
+      rows([['1973', 'Mehmet Güven'], ['1977', 'M. Dede Köprülü'], ['1984', 'Şerafettin Güven'], ['1989', 'Şerafettin Güven'], ['1994', 'Muzaffer Büken'], ['1999', 'Selahattin Güven'], ['2004', 'Oğuzhan Köprülü'], ['2009', 'Hasan Taşpınar']]) + '</div></div>' +
+      '<p class="muted small" style="margin-top:20px">Kaynak: <a href="' + W + 'K%C3%B6pr%C3%BCk%C3%B6y,_Keskin" target="_blank" rel="noopener">Vikipedi, Köprüköy (Keskin)</a> · <a href="' + W + '%C3%87e%C5%9Fnigir_K%C3%B6pr%C3%BCs%C3%BC" target="_blank" rel="noopener">Vikipedi, Çeşnigir Köprüsü</a> · <a href="https://kureansiklopedi.com/tr/detay/cesnigir-koprusu-7f5c9" target="_blank" rel="noopener">KÜRE Ansiklopedi</a> · <a href="https://www.yeniankara.com.tr/turkiye-haberleri/kirikkale-keskin-tarihi-casnigir-koprusu-keskin-askeri-hastanesi-190184" target="_blank" rel="noopener">Yeni Ankara</a></p>' +
+      '</div><aside><div class="box box-pad"><h3>Köy Bilgileri</h3>' +
+      rows([['Konum', 'Kapulukaya Baraj Gölü\'nün doğu kıyısı, Karakeçili\'nin karşısı'], ['Uzaklık', 'Keskin 25 km, Kırıkkale 37 km, Ankara yaklaşık 113 km'], ['Rakım', '803 m'], ['Nüfus', '720 (2024)'],
+        ['Geçim', 'Buğday, arpa, patates, nohut, fasulye, ayçiçeği, pancar; hayvancılık; tatlı su levreği ve sazan balıkçılığı'], ['Yönetim', 'Muhtar ve ihtiyar heyeti'], ['Posta kodu', '71860']]) +
+      '</div><div class="box box-pad" style="margin-top:20px"><h3>Çevremiz</h3><p style="margin:0 0 14px">Çeşnigir Kanyonu\'nun mesire alanı, seyir terasları ve tekne turu köyümüzün hemen yanında.</p><a class="btn" href="#/gezi">Gezilecek yerler</a></div></aside></div></section>';
+  }
+
+  var GEZI = [
+    ['Çeşnigir Kanyonu Mesire Alanı', 'Kırıkkale Valiliği\'nin 2019-2020\'de yaklaşık 500 bin metrekarelik alanda düzenlediği kanyon: tarihi köprü, dinlenme ve piknik alanları, göl kenarında yürüyüş yolları.', 'mesire-parki.jpg', EG, 'Cesnigir_paradise.jpg'],
+    ['Seyir Terasları', 'Kanyona bakan iki seyir terası var; biri cam zeminli. Kızılırmak\'ı ve karşı kıyıdaki tarlaları yukarıdan görmek için en iyi yer.', 'seyir-terasi.jpg', 'Hadi Mousavi', ''],
+    ['Kanyonda Tekne Turu', 'Ahşap iskeleden kalkan teknelerle Kızılırmak\'ın kayalık kanyonu su üzerinden gezilir.', 'tekne-iskelesi.jpg', '', ''],
+    ['Yürüyüş ve Bisiklet Yolu', 'Kanyon boyunca yaklaşık 6,5 km\'lik yürüyüş ve bisiklet yolu. Daha uzun rota Büklükale\'den başlar, köprüyü geçip Köprüköy\'den Behrek (Böğrek) Dağı eteklerine, Haydar Sultan Türbesi ve Deliler Kuyusu\'na uzanır. Yanınıza su ve atıştırmalık alın.', 'kopru-merdiven.jpg', IS, '%C3%87e%C5%9Fnigir_K%C3%B6pr%C3%BCs%C3%BC_04.jpg'],
+    ['Kapulukaya Baraj Gölü Kıyısı', 'Köyün batısında uzanan göl kıyısı; sazan ve tatlı su levreği avlanır. Sisli sabahlarda vadiyi kaplayan sis görülmeye değer.', 'kopru-gol.jpg', IS, '%C3%87e%C5%9Fnigir_K%C3%B6pr%C3%BCs%C3%BC_01.jpg'],
+    ['Büklükale Ören Yeri', 'Köprünün karşı kıyısında, Karakeçili yakınında 5 bin yıllık yerleşim. Japon arkeolog Kimiyoshi Matsumura başkanlığında 2009\'dan beri kazılıyor; 7 metre yüksekliğinde sur ve 2010\'da bulunan Hitit çivi yazılı tablet en bilinen buluntuları.', 'buklukale.jpg', IS, 'B%C3%BCkl%C3%BCkale_01.jpg'],
+    ['Sulu Mağara (Keskin)', 'Keskin\'de üç katlı, 285 metrelik mağara; içi yıl boyu 18 derece civarında. Yakınındaki Ceritkale Kanyonu\'nda yaklaşık 10 km\'lik doğa yürüyüşü yapılabiliyor.', 'sulu-magara.jpg', '', '']
+  ];
+
+  function pagePlaces() {
+    return band('Gezilecek Yerler', 'Çeşnigir Kanyonu, Kızılırmak kıyısı ve çevresi') +
+      '<section class="section"><div class="container">' +
+      '<figure class="fig" style="margin-bottom:24px"><img class="wide" src="' + B + 'images/mesire.jpg" alt="Kızılırmak kıyısındaki mesire alanının tepeden görünüşü: seyir terası, yürüyüş yolları ve tekne iskelesi." loading="lazy"></figure>' +
+      '<div class="cards">' + GEZI.map(function (g) {
+        var kredi = g[4] ? credit(g[3], g[4]) : (g[3] ? '<span class="kredi">Fotoğraf: ' + g[3] + '</span>' : '');
+        return '<article class="box mk"><img src="' + B + 'images/' + g[2] + '" alt="' + esc(g[0]) + '" loading="lazy">' +
+          '<div class="box-pad"><h3>' + g[0] + '</h3><p>' + g[1] + '</p>' + kredi + '</div></article>';
+      }).join('') + '</div>' +
+      '<div class="pair" style="margin-top:28px">' +
+      '<figure class="fig"><img src="' + B + 'images/kanyon-kopru.jpg" alt="Çeşnigir Köprüsü, yeşil sudaki yansımasıyla." loading="lazy"><figcaption>Köprünün kıyıdan görünüşü. ' + credit(EG, 'Cesnigir_paradise3.jpg') + '</figcaption></figure>' +
+      '<figure class="fig"><img src="' + B + 'images/kanyon-teras.jpg" alt="Kızılırmak\'ın kayalar arasından geçtiği kanyon ve seyir terası." loading="lazy"><figcaption>Kanyon ve seyir terası. ' + credit(EG, 'Cesnigir_paradise2.jpg') + '</figcaption></figure></div>' +
+      '<p class="muted small" style="margin-top:20px">Kaynak: <a href="https://www.turkiyegazetesi.com.tr/gundem/bakan-kurumdan-tarihi-bolgede-tekne-turu-717166" target="_blank" rel="noopener">Türkiye Gazetesi</a> · <a href="https://www.discovercappadocia.com/hiking/cesnigir-bridge-koprukoy-hasandede/85" target="_blank" rel="noopener">Discover Cappadocia</a> · <a href="https://en.wikipedia.org/wiki/B%C3%BCkl%C3%BCkale" target="_blank" rel="noopener">Vikipedi, Büklükale</a> · <a href="https://cnnturk.com/yasam/galeri/dogal-agri-kesici-etkisini-duyan-buraya-kosuyor-turkiyenin-her-yerinden-ziyaretci-akini-var-hem-sifa-dagitiyor-hem-de-tarihi-sulu-magara-2182485" target="_blank" rel="noopener">CNN Türk</a></p>' +
+      '</div></section>';
   }
 
   function pageContact() {
@@ -238,6 +306,8 @@
     else if (page === 'fotograflar') html = pagePhotos();
     else if (page === 'pazar') html = pageMarket();
     else if (page === 'hakkimizda') html = pageAbout();
+    else if (page === 'koyumuz') html = pageVillage();
+    else if (page === 'gezi') html = pagePlaces();
     else if (page === 'iletisim') html = pageContact();
     else { page = ''; html = pageHome(); }
     main.innerHTML = html;
