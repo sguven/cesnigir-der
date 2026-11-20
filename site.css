@@ -1,0 +1,102 @@
+/* Çeşnigir-Der · sitenin kendi parçaları */
+
+/* kapak */
+.cover-img{display:block;width:100%;aspect-ratio:8/3;object-fit:cover}
+.cover-title{font-size:25px;font-weight:800}
+.cover-sub{margin:6px 0 14px}
+
+/* yaklaşan kutusu (ana sayfa) */
+.up-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px 4px}
+.up-head h2{font-size:21px}
+.up-head a{font-size:17px;font-weight:700;text-decoration:none}
+
+/* gönderi kartı (Facebook akışı gibi) */
+.post-head{display:flex;align-items:center;gap:10px;padding:14px 16px 8px}
+.post-head img{width:46px;height:46px;border-radius:50%;flex:none}
+.post-who{min-width:0;line-height:1.3}
+.post-who b{display:block;font-size:18px}
+.post-who span{font-size:16px;color:var(--ink2)}
+.post-body{padding:0 16px 12px}
+.post-body h3{font-size:22px;font-weight:700;margin:6px 0 6px}
+.post-body p{margin:0 0 8px;white-space:pre-line}
+.more-btn{border:0;background:none;padding:4px 0;color:var(--ink2);font-weight:700;cursor:pointer;font-size:18px}
+.post-img{display:block;width:100%;max-height:560px;object-fit:cover;background:#E4E6EB;cursor:zoom-in;border:0;padding:0}
+.post-img img{display:block;width:100%;max-height:560px;object-fit:cover}
+.post-src{font-size:16px;color:var(--ink2);margin:0 0 4px}
+.post-actions{display:flex;border-top:1px solid var(--line);margin:0 12px}
+.post-actions a,.post-actions button{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;border:0;background:none;
+  color:var(--ink2);font-weight:700;font-size:17px;text-decoration:none;cursor:pointer;border-radius:8px}
+.post-actions a:hover,.post-actions button:hover{background:#F2F3F5}
+.post-actions svg{width:22px;height:22px}
+.post-actions .wa{color:var(--green)}
+
+/* etkinlik satırı */
+.ev{display:flex;gap:14px;align-items:center;padding:14px 16px;border-top:1px solid var(--line)}
+.ev:first-child{border-top:0}
+.ev-date{flex:none;width:66px;text-align:center;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#fff}
+.ev-date span{display:block;background:var(--red);color:#fff;font-size:14px;font-weight:700;padding:2px 0;text-transform:uppercase}
+.ev-date b{display:block;font-size:28px;line-height:1.15;padding:2px 0 0}
+.ev-date small{display:block;font-size:13px;color:var(--ink2);padding-bottom:4px}
+.ev-info{min-width:0}
+.ev-info b{display:block;font-size:20px;line-height:1.3}
+.ev-info .muted{font-size:17px}
+.ev.official .ev-date span{background:#45484D}
+.ev.official .ev-info b{font-weight:600}
+.ev-when{font-size:16px;font-weight:700;color:var(--blue-dark)}
+
+/* galeri */
+.hint{margin:-6px 6px 12px;font-size:17px}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px}
+.gallery button{border:0;padding:0;background:#E4E6EB;cursor:zoom-in;aspect-ratio:1/1;overflow:hidden}
+.gallery img{display:block;width:100%;height:100%;object-fit:cover}
+
+/* tam ekran görüntüleyici */
+.viewer{position:fixed;inset:0;z-index:60;background:#000;color:#fff;display:flex;flex-direction:column}
+.viewer-top{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top))}
+.viewer-count{font-size:18px;font-weight:700}
+.viewer-close{display:flex;align-items:center;gap:6px;min-height:50px;padding:0 18px;border-radius:99px;border:0;background:#fff;color:#000;font-weight:800;font-size:18px;cursor:pointer}
+.viewer-close svg{width:22px;height:22px}
+.viewer-stage{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;touch-action:pan-y}
+.viewer-stage img{max-width:100%;max-height:100%;object-fit:contain}
+.viewer-cap{margin:0;padding:8px 16px;font-size:17px;text-align:center;min-height:1.5em}
+.viewer-nav{display:flex;gap:10px;padding:8px 12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+.viewer-nav .btn{flex:1}
+.viewer :focus-visible{outline-color:#fff}
+
+/* pazar */
+.mk-img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
+.mk-body{padding:14px 16px 16px}
+.mk-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.mk-body h3{font-size:22px;margin:0 0 4px}
+.mk-price{font-size:24px;font-weight:800;margin:0 0 6px}
+.mk-body p{margin:0 0 12px;white-space:pre-line}
+.mk-who{font-size:17px;color:var(--ink2);margin:0 0 10px}
+
+/* dernek */
+.about-card h3{font-size:22px;margin:0 0 8px}
+.about-card p{margin:0 0 10px}
+.facts{margin:4px 0 0;padding:0;list-style:none}
+.facts li{padding:10px 0;border-top:1px solid var(--line);font-size:18px}
+.facts li span{display:block;font-size:15px;color:var(--ink2)}
+.kasa{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.kasa div{background:var(--bg);border-radius:10px;padding:12px}
+.kasa div span{display:block;font-size:15px;color:var(--ink2)}
+.kasa div b{font-size:22px}
+.kasa .total{grid-column:1/-1;background:var(--blue-soft)}
+.kasa .total b{font-size:28px;color:var(--blue-dark)}
+.photo-wide{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
+.footer-note{text-align:center;font-size:15px;color:var(--ink2);padding:10px 0 4px}
+.footer-note a{color:var(--ink2)}
+
+/* geniş ekran: sekmeler üstte */
+@media (min-width:900px){
+  .tabbar{top:0;bottom:auto;border-top:0;border-bottom:1px solid var(--line);background:transparent;pointer-events:none;padding:0}
+  .tabbar-in{max-width:1100px;display:flex;justify-content:flex-end;gap:2px;padding-right:16px;height:76px;align-items:center}
+  .tab{pointer-events:auto;flex-direction:row;gap:8px;min-height:52px;padding:0 14px;border-top:0;border-radius:10px;font-size:17px}
+  .tab svg{width:22px;height:22px}
+  .tab[aria-current="page"]{background:var(--blue-soft)}
+  .topbar-in{max-width:1100px;min-height:76px}
+  .tabbar{z-index:31}
+  .topbar{z-index:30}
+  .wrap{padding-bottom:40px}
+}

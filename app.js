@@ -1,67 +1,14 @@
 /* Çeşnigir-Der sitesi
-   Sayfadaki değişken içerik data/ klasöründeki JSON dosyalarından okunur.
-   İçeriği değiştirmek için bu dosyaya dokunmaya gerek yok. */
+   İçerik data/ klasöründeki dosyalardan okunur. İçerik yönetim panelinden (/yonetim/) değiştirilir. */
 (function () {
   'use strict';
+  var C = window.CD, esc = C.esc;
+  var TABS = ['anasayfa', 'takvim', 'fotograflar', 'pazar', 'dernek'];
+  var SITE_URL = location.origin + location.pathname;
+  var data = { duyurular: [], etkinlikler: [], resmi: { sabit: [], tarihli: [] }, galeri: [], pazar: [], dernek: {} };
 
-  var MN = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-  var KIND = {
-    koy: ['Köy etkinliği', 'var(--accent)'],
-    resmi: ['Resmî bayram', '#2E2118'],
-    dini: ['Dinî gün', '#7A5514'],
-    milli: ['Millî ve özel gün', '#4F5B2E']
-  };
-
-  /* ---------- yardımcılar ---------- */
   function $(id) { return document.getElementById(id); }
-
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-
-  // Fotoğraf yolu: images/x.jpg, /images/x.jpg veya https://... kabul edilir.
-  function imgSrc(p) {
-    p = String(p == null ? '' : p).trim();
-    if (!p) return '';
-    if (/^https?:\/\//i.test(p)) return p;
-    if (/^[a-z][a-z0-9+.\-]*:/i.test(p) || p.indexOf('//') === 0) return '';
-    return p.replace(/^\/+/, '');
-  }
-
-  // Dış bağlantı: sadece http(s)
-  function linkUrl(u) {
-    u = String(u == null ? '' : u).trim();
-    return /^https?:\/\//i.test(u) ? u : '';
-  }
-
-  function paras(s) {
-    return String(s == null ? '' : s).split(/\n\s*\n/).map(function (p) { return p.trim(); }).filter(Boolean);
-  }
-
-  function items(d) {
-    var a = Array.isArray(d) ? d : (d && Array.isArray(d.items) ? d.items : []);
-    return a.filter(function (x) { return x && typeof x === 'object'; });
-  }
-
-  function pad(n) { return (n < 10 ? '0' : '') + n; }
-
-  // "2026-11-7" veya "2026-11-07T00:00:00Z" -> "2026-11-07"; geçersizse ''
-  function normIso(s) {
-    var m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(String(s == null ? '' : s).trim());
-    return m ? m[1] + '-' + pad(+m[2]) + '-' + pad(+m[3]) : '';
-  }
-
-  function longDate(iso) {
-    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-    return m ? (+m[3]) + ' ' + MN[+m[2] - 1] + ' ' + m[1] : '';
-  }
-
-  function todayIso() {
-    var t = new Date();
-    return t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate());
-  }
+  function icon(name) { return '<svg aria-hidden="true"><use href="#i-' + name + '"/></svg>'; }
 
   function load(name) {
     return fetch('data/' + name + '.json', { cache: 'no-cache' }).then(function (r) {
@@ -69,312 +16,293 @@
       return r.json();
     });
   }
+  function soft(name, fallback) { return load(name).catch(function () { return fallback; }); }
 
-  function fail(targetId) {
-    var el = $(targetId);
-    if (el) el.innerHTML = '<p class="muted">Bu bölüm şu anda yüklenemedi. Lütfen sayfayı yenileyin.</p>';
-  }
-
-  function section(name, targetId, render) {
-    load(name).then(render).catch(function () { fail(targetId); });
-  }
-
-  /* ---------- haberler ---------- */
-  function renderNews(d) {
-    var list = items(d), el = $('haber-icerik');
-    if (!list.length) { el.innerHTML = '<p class="muted">Henüz haber yok.</p>'; return; }
-    var f = list[0], rest = list.slice(1);
-
-    function meta(n) { return [n.tarih, n.kaynak].filter(Boolean).join(' · '); }
-    function more(n) {
-      var u = linkUrl(n.link);
-      return u ? '<a class="more" href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">Kaynağında oku</a>' : '';
-    }
-
-    var src = imgSrc(f.foto);
-    var main = '<article class="card news-main">' +
-      (src ? '<img src="' + esc(src) + '" alt="' + esc(f.foto_aciklama) + '" loading="lazy">' : '') +
-      '<div class="news-body"><span class="meta">' + esc(meta(f)) + '</span>' +
-      '<h3>' + esc(f.baslik) + '</h3>' +
-      '<p class="muted">' + esc(f.ozet) + '</p>' + more(f) + '</div></article>';
-
-    var side = '';
-    if (rest.length) {
-      side = '<div class="card news-side"><h3>Diğer haberler</h3>' + rest.map(function (n) {
-        return '<article class="news-item"><span class="meta">' + esc(meta(n)) + '</span>' +
-          '<h4>' + esc(n.baslik) + '</h4><p>' + esc(n.ozet) + '</p>' + more(n) + '</article>';
-      }).join('') + '</div>';
-    }
-    el.innerHTML = '<div class="news-wrap">' + main + side + '</div>';
-  }
-
-  /* ---------- fotoğraf galerisi ve büyütme penceresi ---------- */
-  var gal = [], galOpen = false, lbIdx = null, lastFocus = null;
-
-  function renderGallery(d) {
-    gal = items(d).filter(function (x) { return imgSrc(x.foto); });
-    var el = $('galeri-icerik');
-    if (!gal.length) { el.innerHTML = '<p class="muted">Henüz fotoğraf yok.</p>'; return; }
-    drawGallery();
-  }
-
-  function drawGallery() {
-    var el = $('galeri-icerik');
-    var h = gal[0];
-    var thumbs = galOpen ? gal.slice(1) : gal.slice(1, 7);
-    var html = '<button type="button" class="hero-btn" data-i="0" aria-label="Fotoğrafı büyüt: ' + esc(h.aciklama) + '">' +
-      '<img src="' + esc(imgSrc(h.foto)) + '" alt="' + esc(h.aciklama) + '"></button>';
-    if (thumbs.length) {
-      html += '<div class="thumbs">' + thumbs.map(function (x, k) {
-        var i = k + 1;
-        return '<button type="button" class="thumb-btn" data-i="' + i + '" aria-label="Fotoğrafı büyüt: ' + esc(x.aciklama) + '">' +
-          '<img src="' + esc(imgSrc(x.foto)) + '" alt="' + esc(x.aciklama) + '" loading="lazy"></button>';
-      }).join('') + '</div>';
-    }
-    html += '<div class="gal-bar">';
-    if (gal.length > 7) {
-      html += '<button type="button" id="galToggle" aria-expanded="' + galOpen + '">' +
-        (galOpen ? 'Daha az göster' : 'Tüm fotoğrafları göster (' + gal.length + ')') + '</button>';
-    }
-    html += '<span class="small muted">Büyütmek için fotoğrafa dokunun.</span></div>';
-    el.innerHTML = html;
-  }
-
-  function lbShow(i) {
-    var n = gal.length;
-    lbIdx = (i + n) % n;
-    var x = gal[lbIdx];
-    $('lbImg').src = imgSrc(x.foto);
-    $('lbImg').alt = x.aciklama || '';
-    $('lbCount').textContent = (lbIdx + 1) + ' / ' + n;
-  }
-
-  function lbOpen(i) {
-    lastFocus = document.activeElement;
-    lbShow(i);
-    $('lb').hidden = false;
-    document.body.style.overflow = 'hidden';
-    $('lbClose').focus();
-  }
-
-  function lbClose() {
-    $('lb').hidden = true;
-    $('lbImg').removeAttribute('src');
-    lbIdx = null;
-    document.body.style.overflow = '';
-    if (lastFocus && lastFocus.focus) {
-      try { lastFocus.focus(); } catch (e) { /* yok say */ }
-    }
-  }
-
-  function bindGallery() {
-    $('galeri-icerik').addEventListener('click', function (e) {
-      var t = e.target.closest('[data-i]');
-      if (t) { lbOpen(+t.getAttribute('data-i')); return; }
-      if (e.target.closest('#galToggle')) { galOpen = !galOpen; drawGallery(); var b = $('galToggle'); if (b) b.focus(); }
+  /* ---------------- sekmeler ---------------- */
+  function showTab(fromHash) {
+    var h = (location.hash || '').replace('#', '');
+    var tab = TABS.indexOf(h) >= 0 ? h : 'anasayfa';
+    var postId = /^d-/.test(h) ? h : '';
+    TABS.forEach(function (t) { $(t).hidden = t !== tab; });
+    document.querySelectorAll('.tab').forEach(function (a) {
+      if (a.getAttribute('data-tab') === tab) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
     });
-    $('lbClose').addEventListener('click', lbClose);
-    $('lbPrev').addEventListener('click', function () { lbShow(lbIdx - 1); });
-    $('lbNext').addEventListener('click', function () { lbShow(lbIdx + 1); });
-    $('lb').addEventListener('click', function (e) { if (e.target === $('lb')) lbClose(); });
+    if (postId) {
+      var el = $(postId);
+      if (el) { el.scrollIntoView({ block: 'start' }); return; }
+    }
+    if (fromHash) window.scrollTo(0, 0);
+  }
+
+  /* ---------------- ana sayfa ---------------- */
+  function renderHomeActions() {
+    var d = data.dernek, h = '';
+    var tel = C.telHref(d.telefon), wa = C.waHref(d.whatsapp || d.telefon);
+    if (tel) h += '<a class="btn btn-blue" href="tel:' + esc(tel) + '">' + icon('phone') + 'Derneği Ara</a>';
+    if (wa) h += '<a class="btn btn-green" href="' + esc(wa) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp</a>';
+    h += '<a class="btn" href="https://www.google.com/maps?q=39.5808,33.4294" target="_blank" rel="noopener">' + icon('pin') + 'Köye Yol Tarifi</a>';
+    $('home-actions').innerHTML = h;
+  }
+
+  function postId(p, i) { return 'd-' + (C.normIso(p.tarih) || 'x') + '-' + (C.slug(p.baslik).slice(0, 40) || i); }
+
+  function renderFeed() {
+    var list = data.duyurular.slice().sort(function (a, b) {
+      var x = C.normIso(a.tarih), y = C.normIso(b.tarih);
+      return x < y ? 1 : x > y ? -1 : 0;
+    });
+    var el = $('feed');
+    if (!list.length) {
+      el.innerHTML = '<div class="card empty"><b>Henüz duyuru yok</b>Yeni duyurular burada görünecek.</div>';
+      return;
+    }
+    el.innerHTML = list.map(function (p, i) {
+      var id = postId(p, i);
+      var src = C.imgSrc(p.foto), link = C.linkUrl(p.link);
+      var text = String(p.metin || '').trim();
+      var long = text.length > 320;
+      var shareText = (p.tur ? p.tur + ': ' : '') + (p.baslik || '') + '\n' + SITE_URL + '#' + id;
+      var h = '<article class="card post" id="' + esc(id) + '">' +
+        '<div class="post-head"><img src="images/logo.jpg" alt=""><div class="post-who"><b>Çeşnigir-Der</b>' +
+        '<span>' + esc(C.relDate(p.tarih)) + '</span></div></div>' +
+        '<div class="post-body">' + (p.tur ? '<span class="' + C.badgeClass(p.tur) + '">' + esc(p.tur) + '</span>' : '') +
+        '<h3>' + esc(p.baslik) + '</h3>';
+      if (text) {
+        h += '<p class="post-text" data-full="' + esc(text) + '">' + esc(long ? text.slice(0, 280).replace(/\s+\S*$/, '') + '…' : text) + '</p>';
+        if (long) h += '<button type="button" class="more-btn" data-more>Devamını gör</button>';
+      }
+      if (p.kaynak) h += '<p class="post-src">Kaynak: ' + esc(p.kaynak) + '</p>';
+      h += '</div>';
+      if (src) h += '<button type="button" class="post-img" data-photo="' + esc(src) + '" data-cap="' + esc(p.baslik) + '" aria-label="Fotoğrafı büyüt">' +
+        '<img src="' + esc(src) + '" alt="' + esc(p.foto_aciklama || p.baslik) + '" loading="lazy"></button>';
+      h += '<div class="post-actions">' +
+        '<a class="wa" href="https://wa.me/?text=' + encodeURIComponent(shareText) + '" target="_blank" rel="noopener" aria-label="WhatsApp\'ta paylaş">' + icon('wa') + 'Paylaş</a>' +
+        (link ? '<a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + icon('link') + 'Haberi aç</a>' : '') +
+        '</div></article>';
+      return h;
+    }).join('');
+  }
+
+  /* ---------------- takvim ---------------- */
+  function upcoming(limitDays) {
+    var today = C.todayIso(), end = C.addDays(today, limitDays), out = [];
+    data.etkinlikler.forEach(function (e) {
+      var iso = C.normIso(e.tarih);
+      if (iso && iso >= today) out.push({ iso: iso, ad: e.ad, tur: e.tur, saat: e.saat, yer: e.yer, koy: true });
+    });
+    (data.resmi.tarihli || []).forEach(function (e) {
+      var iso = C.normIso(e.tarih);
+      if (iso && iso >= today && iso <= end) out.push({ iso: iso, ad: e.ad, tur: '', koy: false });
+    });
+    var y0 = +today.slice(0, 4);
+    [y0, y0 + 1].forEach(function (y) {
+      (data.resmi.sabit || []).forEach(function (e) {
+        var iso = y + '-' + C.pad(+e.ay) + '-' + C.pad(+e.gun);
+        if (iso >= today && iso <= end) out.push({ iso: iso, ad: e.ad, tur: '', koy: false });
+      });
+    });
+    out.sort(function (a, b) { return a.iso < b.iso ? -1 : a.iso > b.iso ? 1 : (a.koy ? -1 : 1); });
+    return out;
+  }
+
+  function evRow(e) {
+    var p = C.parts(e.iso), until = C.untilText(e.iso);
+    var det = [e.saat, e.yer].filter(Boolean).join(' · ');
+    return '<div class="ev' + (e.koy ? '' : ' official') + '">' +
+      '<div class="ev-date" aria-hidden="true"><span>' + C.AY_KISA[p.m] + '</span><b>' + p.d + '</b><small>' + C.GUN[p.wd] + '</small></div>' +
+      '<div class="ev-info">' + (until ? '<div class="ev-when">' + esc(until) + '</div>' : '') +
+      (e.tur ? '<span class="' + C.badgeClass(e.tur) + '">' + esc(e.tur) + '</span> ' : '') +
+      '<b>' + esc(e.ad) + '</b>' +
+      '<div class="muted">' + esc(C.longDate(e.iso, true)) + (det ? ' · ' + esc(det) : '') + '</div></div></div>';
+  }
+
+  function renderEvents() {
+    var list = upcoming(120);
+    $('events').innerHTML = list.length
+      ? '<div class="card">' + list.map(evRow).join('') + '</div>'
+      : '<div class="card empty"><b>Yaklaşan bir gün yok</b>Düğün, mevlit ve toplantılar burada görünecek.</div>';
+
+    var next = upcoming(30).slice(0, 3);
+    $('home-upcoming').innerHTML = next.length
+      ? '<div class="card"><div class="up-head"><h2>Yaklaşan Günler</h2><a href="#takvim">Tümünü gör</a></div>' + next.map(evRow).join('') + '</div>'
+      : '';
+  }
+
+  /* ---------------- fotoğraflar ---------------- */
+  var viewerList = [], viewerIdx = 0, lastFocus = null;
+
+  function renderGallery() {
+    var list = data.galeri.filter(function (x) { return C.imgSrc(x.foto); });
+    var el = $('gallery');
+    if (!list.length) { el.className = 'card empty'; el.innerHTML = '<b>Henüz fotoğraf yok</b>'; return; }
+    el.innerHTML = list.map(function (x, i) {
+      return '<button type="button" data-gal="' + i + '" aria-label="Fotoğrafı büyüt: ' + esc(x.aciklama) + '">' +
+        '<img src="' + esc(C.imgSrc(x.foto)) + '" alt="' + esc(x.aciklama) + '" loading="lazy"></button>';
+    }).join('');
+  }
+
+  function openViewer(list, i) {
+    viewerList = list; lastFocus = document.activeElement;
+    $('viewer').hidden = false;
+    document.body.style.overflow = 'hidden';
+    var single = list.length < 2;
+    $('vPrev').hidden = single; $('vNext').hidden = single;
+    showPhoto(i);
+    $('vClose').focus();
+  }
+  function showPhoto(i) {
+    var n = viewerList.length;
+    viewerIdx = (i + n) % n;
+    var x = viewerList[viewerIdx];
+    $('vImg').src = x.src; $('vImg').alt = x.cap || '';
+    $('vCap').textContent = x.cap || '';
+    $('vCount').textContent = n > 1 ? (viewerIdx + 1) + ' / ' + n : '';
+  }
+  function closeViewer() {
+    $('viewer').hidden = true;
+    $('vImg').removeAttribute('src');
+    document.body.style.overflow = '';
+    if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) { /* yok say */ } }
+  }
+
+  /* ---------------- pazar ---------------- */
+  function renderMarket() {
+    var list = data.pazar.slice().sort(function (a, b) {
+      var x = C.normIso(a.tarih), y = C.normIso(b.tarih);
+      return x < y ? 1 : x > y ? -1 : 0;
+    });
+    var el = $('market');
+    var dtel = C.telHref(data.dernek.telefon);
+    if (!list.length) {
+      el.innerHTML = '<div class="card empty"><b>Şu anda ilan yok</b>İlan vermek isterseniz derneği arayın.' +
+        (dtel ? '<div style="margin-top:14px"><a class="btn btn-blue" href="tel:' + esc(dtel) + '">' + icon('phone') + 'Derneği Ara</a></div>' : '') + '</div>';
+      return;
+    }
+    el.innerHTML = list.map(function (x) {
+      var src = C.imgSrc(x.foto), tel = C.telHref(x.telefon), wa = C.waHref(x.telefon, (x.baslik || '') + ' ilanı için yazıyorum.');
+      return '<article class="card">' +
+        (src ? '<button type="button" class="post-img" data-photo="' + esc(src) + '" data-cap="' + esc(x.baslik) + '" aria-label="Fotoğrafı büyüt"><img class="mk-img" src="' + esc(src) + '" alt="' + esc(x.baslik) + '" loading="lazy"></button>' : '') +
+        '<div class="mk-body"><div class="mk-top">' + (x.tur ? '<span class="' + C.badgeClass(x.tur) + '">' + esc(x.tur) + '</span>' : '<span></span>') +
+        '<span class="muted small">' + esc(C.relDate(x.tarih)) + '</span></div>' +
+        '<h3>' + esc(x.baslik) + '</h3>' +
+        (x.fiyat ? '<p class="mk-price">' + esc(x.fiyat) + ' ₺</p>' : '') +
+        (x.aciklama ? '<p>' + esc(x.aciklama) + '</p>' : '') +
+        (x.kisi ? '<p class="mk-who">' + esc(x.kisi) + '</p>' : '') +
+        ((tel || wa) ? '<div class="btn-row">' +
+          (tel ? '<a class="btn btn-blue" href="tel:' + esc(tel) + '">' + icon('phone') + 'Ara</a>' : '') +
+          (wa ? '<a class="btn btn-green" href="' + esc(wa) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp</a>' : '') +
+          '</div>' : '') +
+        '</div></article>';
+    }).join('');
+  }
+
+  /* ---------------- dernek ---------------- */
+  function renderAbout() {
+    var d = data.dernek, h = '';
+    h += '<div class="card card-pad about-card"><h3>Hakkımızda</h3>';
+    String(d.hakkimizda || '').split(/\n\s*\n/).map(function (s) { return s.trim(); }).filter(Boolean)
+      .forEach(function (p) { h += '<p>' + esc(p) + '</p>'; });
+    if (d.baskan) h += '<ul class="facts"><li><span>Dernek Başkanı</span>' + esc(d.baskan) + '</li></ul>';
+    h += '</div>';
+
+    var tel = C.telHref(d.telefon), wa = C.waHref(d.whatsapp || d.telefon);
+    var mail = /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(d.eposta || '') ? d.eposta : '';
+    h += '<div class="card card-pad about-card"><h3>Bize Ulaşın</h3>';
+    if (tel || wa || mail) {
+      h += '<div class="btn-row" style="margin-bottom:10px">' +
+        (tel ? '<a class="btn btn-blue" href="tel:' + esc(tel) + '">' + icon('phone') + 'Ara</a>' : '') +
+        (wa ? '<a class="btn btn-green" href="' + esc(wa) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp</a>' : '') +
+        (mail ? '<a class="btn" href="mailto:' + esc(mail) + '">' + icon('mail') + 'E-posta</a>' : '') + '</div>';
+    }
+    h += '<ul class="facts">' +
+      (d.telefon ? '<li><span>Telefon</span>' + esc(d.telefon) + '</li>' : '') +
+      (d.adres ? '<li><span>Adres</span>' + esc(d.adres) + '</li>' : '') + '</ul>' +
+      '<a class="btn btn-wide" style="margin-top:10px" href="https://www.google.com/maps?q=39.5808,33.4294" target="_blank" rel="noopener">' + icon('pin') + 'Haritada Göster</a></div>';
+
+    if (d.kasa || d.gelir || d.gider) {
+      h += '<div class="card card-pad about-card"><h3>Kasa Durumu</h3>' +
+        (d.kasa_donem ? '<p class="muted small">' + esc(d.kasa_donem) + '</p>' : '') + '<div class="kasa">' +
+        (d.gelir ? '<div><span>Gelir</span><b>' + esc(d.gelir) + ' ₺</b></div>' : '') +
+        (d.gider ? '<div><span>Gider</span><b>' + esc(d.gider) + ' ₺</b></div>' : '') +
+        (d.kasa ? '<div class="total"><span>Kasadaki para</span><b>' + esc(d.kasa) + ' ₺</b></div>' : '') + '</div></div>';
+    }
+
+    h += '<div class="card about-card"><button type="button" class="post-img" data-photo="images/kopru.jpg" data-cap="Çeşnigir Köprüsü" aria-label="Fotoğrafı büyüt">' +
+      '<img class="photo-wide" src="images/kopru.jpg" alt="Çeşnigir Köprüsü\'nün taş kemerleri ve Kızılırmak." loading="lazy"></button>' +
+      '<div class="card-pad"><h3>Köyümüz Köprüköy</h3>' +
+      '<p>Köyümüz adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır. Selçuklu döneminden kalan bu taş köprü on iki gözlüdür ve yüzyıllarca Ankara ile Kırşehir arasındaki yolun geçiş noktası olmuştur.</p>' +
+      '<p class="muted small" style="margin:0">Kapulukaya Baraj Gölü kıyısında, Keskin\'e yaklaşık 30 km uzaklıktayız.</p></div></div>';
+
+    h += '<p class="footer-note">© ' + new Date().getFullYear() + ' Çeşnigir-Der · <a href="yonetim/">Yönetici girişi</a></p>';
+    $('about').innerHTML = h;
+  }
+
+  /* ---------------- olaylar ---------------- */
+  function bind() {
+    window.addEventListener('hashchange', function () { showTab(true); });
+    document.addEventListener('click', function (e) {
+      var more = e.target.closest('[data-more]');
+      if (more) {
+        var p = more.previousElementSibling;
+        p.textContent = p.getAttribute('data-full');
+        more.remove();
+        return;
+      }
+      var g = e.target.closest('[data-gal]');
+      if (g) {
+        var list = data.galeri.filter(function (x) { return C.imgSrc(x.foto); })
+          .map(function (x) { return { src: C.imgSrc(x.foto), cap: x.aciklama }; });
+        openViewer(list, +g.getAttribute('data-gal'));
+        return;
+      }
+      var ph = e.target.closest('[data-photo]');
+      if (ph) openViewer([{ src: ph.getAttribute('data-photo'), cap: ph.getAttribute('data-cap') }], 0);
+    });
+    $('vClose').addEventListener('click', closeViewer);
+    $('vPrev').addEventListener('click', function () { showPhoto(viewerIdx - 1); });
+    $('vNext').addEventListener('click', function () { showPhoto(viewerIdx + 1); });
     document.addEventListener('keydown', function (e) {
-      if ($('lb').hidden) return;
-      if (e.key === 'Escape') { lbClose(); }
-      else if (e.key === 'ArrowLeft') { lbShow(lbIdx - 1); }
-      else if (e.key === 'ArrowRight') { lbShow(lbIdx + 1); }
+      if ($('viewer').hidden) return;
+      if (e.key === 'Escape') closeViewer();
+      else if (e.key === 'ArrowLeft' && viewerList.length > 1) showPhoto(viewerIdx - 1);
+      else if (e.key === 'ArrowRight' && viewerList.length > 1) showPhoto(viewerIdx + 1);
       else if (e.key === 'Tab') {
-        var f = [$('lbClose'), $('lbPrev'), $('lbNext')];
+        var f = [$('vClose'), $('vPrev'), $('vNext')].filter(function (b) { return !b.hidden; });
         var k = f.indexOf(document.activeElement);
         e.preventDefault();
         f[(k + (e.shiftKey ? f.length - 1 : 1)) % f.length].focus();
       }
     });
-  }
-
-  /* ---------- ilanlar ---------- */
-  function renderIlanlar(d) {
-    var list = items(d), el = $('ilan-icerik');
-    if (!list.length) { el.innerHTML = '<p class="muted">Şu anda ilan yok.</p>'; return; }
-    el.innerHTML = list.map(function (n) {
-      return '<article class="card ilan"><div class="ilan-top"><strong>' + esc(n.tur) + '</strong><span>' + esc(n.tarih) + '</span></div>' +
-        '<h3>' + esc(n.baslik) + '</h3>' +
-        (n.aciklama ? '<p>' + esc(n.aciklama) + '</p>' : '') + '</article>';
-    }).join('');
-  }
-
-  function renderPazar(d) {
-    var list = items(d), el = $('pazar-icerik');
-    if (!list.length) { el.innerHTML = '<p class="muted">Şu anda pazar veya yardım ilanı yok.</p>'; return; }
-    el.innerHTML = list.map(function (n) {
-      var src = imgSrc(n.foto);
-      return '<article class="card pz">' +
-        (src ? '<img src="' + esc(src) + '" alt="' + esc(n.baslik) + '" loading="lazy">' : '') +
-        '<div class="pz-body"><div class="ilan-top"><strong>' + esc(n.tur) + '</strong><span>' + esc(n.tarih) + '</span></div>' +
-        '<h3>' + esc(n.baslik) + '</h3>' +
-        (n.fiyat ? '<div class="pz-price">' + esc(n.fiyat) + ' ₺</div>' : '') +
-        (n.aciklama ? '<p class="muted" style="margin:0">' + esc(n.aciklama) + '</p>' : '') +
-        (n.iletisim ? '<div class="pz-contact">' + esc(n.iletisim) + '</div>' : '') +
-        '</div></article>';
-    }).join('');
-  }
-
-  /* ---------- gezilecek yerler ---------- */
-  function renderGezi(d) {
-    var list = items(d), el = $('gezi-icerik');
-    if (!list.length) { el.innerHTML = ''; return; }
-    el.innerHTML = list.map(function (n) {
-      var src = imgSrc(n.foto);
-      return '<article class="card gz">' +
-        (src ? '<img src="' + esc(src) + '" alt="" loading="lazy">' : '<div class="gz-ph">Fotoğraf eklenecek</div>') +
-        '<div class="gz-body"><h3>' + esc(n.baslik) + '</h3><p>' + esc(n.aciklama) + '</p></div></article>';
-    }).join('');
-  }
-
-  /* ---------- genel bilgiler (hakkımızda, iletişim) ---------- */
-  function renderGenel(d) {
-    d = d || {};
-    $('hk-ek').innerHTML = paras(d.hakkimizda_ek).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
-    $('baskan').textContent = d.baskan || '';
-
-    var h = '<span class="ft-h">İletişim</span>';
-    if (d.adres) h += '<span>' + esc(d.adres) + '</span>';
-    if (d.telefon) {
-      var tel = String(d.telefon).replace(/[^\d+]/g, '');
-      h += /^\+?\d{7,}$/.test(tel)
-        ? '<a href="tel:' + esc(tel) + '">' + esc(d.telefon) + '</a>'
-        : '<span>' + esc(d.telefon) + '</span>';
-    }
-    if (d.eposta) {
-      h += /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(d.eposta)
-        ? '<a href="mailto:' + esc(d.eposta) + '">' + esc(d.eposta) + '</a>'
-        : '<span>' + esc(d.eposta) + '</span>';
-    }
-    $('ft-iletisim').innerHTML = h;
-  }
-
-  /* ---------- finansal durum ---------- */
-  function renderFinans(d) {
-    d = d || {};
-    function money(v) { return v ? esc(v) + ' ₺' : '—'; }
-    $('finans-icerik').innerHTML =
-      '<p class="muted fin-note">' + esc(d.donem) + ' · Son güncelleme: ' + esc(d.guncelleme) + '</p>' +
-      '<div class="fin-grid">' +
-      '<div class="card fin"><div class="l">Bu ayki gelir</div><div class="v">' + money(d.gelir) + '</div></div>' +
-      '<div class="card fin"><div class="l">Bu ayki gider</div><div class="v">' + money(d.gider) + '</div></div>' +
-      '<div class="fin dark"><div class="l">Kasadaki tutar</div><div class="v">' + money(d.kasa) + '</div></div>' +
-      '</div>';
-  }
-
-  /* ---------- takvim ---------- */
-  var official = { sabit: [], tarihli: [] };
-  var village = [];
-  var cal = { y: 2026, m: 10 };
-  var MIN = { y: 2026, m: 0 };
-  var MAX = { y: 2027, m: 11 };
-
-  function ym(o) { return o.y * 12 + o.m; }
-
-  function eventsFor(y, m, d) {
-    var iso = y + '-' + pad(m + 1) + '-' + pad(d), out = [];
-    village.forEach(function (e) {
-      if (e._iso === iso) {
-        var det = [e.saat, e.yer].filter(Boolean).join(' · ');
-        out.push({ kisa: e.kisa || 'Etkinlik', ad: e.ad || '', det: det, tur: 'koy' });
-      }
-    });
-    official.tarihli.forEach(function (e) {
-      if (normIso(e.tarih) === iso) out.push({ kisa: e.kisa, ad: e.ad, det: '', tur: e.tur });
-    });
-    official.sabit.forEach(function (e) {
-      if (+e.ay === m + 1 && +e.gun === d) out.push({ kisa: e.kisa, ad: e.ad, det: '', tur: e.tur });
-    });
-    return out;
-  }
-
-  function drawCalendar() {
-    var y = cal.y, m = cal.m;
-    var offset = (new Date(y, m, 1).getDay() + 6) % 7;
-    var dim = new Date(y, m + 1, 0).getDate();
-    var today = todayIso();
-    var cells = '', list = '', any = false, i, d, k;
-
-    for (i = 0; i < offset; i++) cells += '<div class="day pad"></div>';
-    for (d = 1; d <= dim; d++) {
-      var evs = eventsFor(y, m, d);
-      var iso = y + '-' + pad(m + 1) + '-' + pad(d);
-      var kind = evs.length ? (KIND[evs[0].tur] || KIND.koy) : null;
-      cells += '<div class="day' + (iso === today ? ' today' : '') + '"><b>' + d + '</b>' +
-        (evs.length ? '<span class="chip" style="background:' + kind[1] + '">' + esc(evs[0].kisa) + '</span>' : '') + '</div>';
-      for (k = 0; k < evs.length; k++) {
-        any = true;
-        var kd = KIND[evs[k].tur] || KIND.koy;
-        list += '<div class="ev"><i aria-hidden="true" style="background:' + kd[1] + '"></i><strong>' + d + ' ' + MN[m] + '</strong>' +
-          '<span class="nm">' + esc(evs[k].ad) + (evs[k].det ? ' <span class="small muted">· ' + esc(evs[k].det) + '</span>' : '') + '</span>' +
-          '<span class="kd">' + esc(kd[0]) + '</span></div>';
-      }
-    }
-    for (i = (offset + dim) % 7; i !== 0 && i < 7; i++) cells += '<div class="day pad"></div>';
-
-    $('calGrid').innerHTML = cells;
-    $('calList').innerHTML = any ? list : '<p class="muted" style="margin:0">Bu ay için kayıtlı bir gün yok.</p>';
-    $('calTitle').textContent = MN[m] + ' ' + y;
-    $('calPrev').disabled = ym(cal) <= ym(MIN);
-    $('calNext').disabled = ym(cal) >= ym(MAX);
-  }
-
-  function drawUpcoming() {
-    var today = todayIso();
-    var up = village.filter(function (e) { return e._iso && e._iso >= today; })
-      .sort(function (a, b) { return a._iso < b._iso ? -1 : a._iso > b._iso ? 1 : 0; })
-      .slice(0, 6);
-    $('yaklasan').innerHTML = up.length ? up.map(function (e) {
-      var det = [longDate(e._iso), e.saat, e.yer].filter(Boolean).join(' · ');
-      return '<div class="up"><strong>' + esc(e.kisa || 'Etkinlik') + '</strong> · ' + esc(e.ad) +
-        '<br><span class="small muted">' + esc(det) + '</span></div>';
-    }).join('') : '<p class="muted" style="margin:0">Yaklaşan bir etkinlik yok.</p>';
-  }
-
-  function initCalendar() {
-    Promise.all([load('resmi-gunler'), load('takvim')]).then(function (r) {
-      official = { sabit: r[0].sabit || [], tarihli: r[0].tarihli || [] };
-      village = items(r[1]).map(function (e) { e._iso = normIso(e.tarih); return e; }).filter(function (e) { return e._iso; });
-
-      village.forEach(function (e) {
-        var y = +e._iso.slice(0, 4), m = +e._iso.slice(5, 7) - 1, o = { y: y, m: m };
-        if (ym(o) > ym(MAX)) MAX = o;
-        if (ym(o) < ym(MIN)) MIN = o;
-      });
-
-      var t = new Date(), now = { y: t.getFullYear(), m: t.getMonth() };
-      cal = ym(now) < ym(MIN) ? { y: MIN.y, m: MIN.m } : ym(now) > ym(MAX) ? { y: MAX.y, m: MAX.m } : now;
-
-      $('calPrev').addEventListener('click', function () {
-        if (ym(cal) <= ym(MIN)) return;
-        cal = cal.m === 0 ? { y: cal.y - 1, m: 11 } : { y: cal.y, m: cal.m - 1 };
-        drawCalendar();
-      });
-      $('calNext').addEventListener('click', function () {
-        if (ym(cal) >= ym(MAX)) return;
-        cal = cal.m === 11 ? { y: cal.y + 1, m: 0 } : { y: cal.y, m: cal.m + 1 };
-        drawCalendar();
-      });
-      drawCalendar();
-      drawUpcoming();
-    }).catch(function () {
-      $('calGrid').innerHTML = '<p class="muted" style="grid-column:1/-1;padding:12px">Takvim şu anda yüklenemedi. Lütfen sayfayı yenileyin.</p>';
-      $('yaklasan').innerHTML = '';
+    // parmakla kaydırma
+    var sx = null;
+    $('vImg').parentNode.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
+    $('vImg').parentNode.addEventListener('touchend', function (e) {
+      if (sx === null || viewerList.length < 2) return;
+      var dx = e.changedTouches[0].clientX - sx; sx = null;
+      if (Math.abs(dx) > 50) showPhoto(viewerIdx + (dx < 0 ? 1 : -1));
     });
   }
 
-  /* ---------- başlat ---------- */
-  $('yil').textContent = new Date().getFullYear();
-  bindGallery();
-  section('haberler', 'haber-icerik', renderNews);
-  section('galeri', 'galeri-icerik', renderGallery);
-  section('ilanlar', 'ilan-icerik', renderIlanlar);
-  section('pazar', 'pazar-icerik', renderPazar);
-  section('gezi', 'gezi-icerik', renderGezi);
-  section('finans', 'finans-icerik', renderFinans);
-  load('genel').then(renderGenel).catch(function () { $('ft-iletisim').innerHTML = ''; });
-  initCalendar();
+  /* ---------------- başlat ---------------- */
+  bind();
+  showTab(false);
+  Promise.all([
+    soft('duyurular', []), soft('etkinlikler', []), soft('resmi-gunler', { sabit: [], tarihli: [] }),
+    soft('galeri', []), soft('pazar', []), soft('dernek', {})
+  ]).then(function (r) {
+    data.duyurular = C.arr(r[0]);
+    data.etkinlikler = C.arr(r[1]);
+    data.resmi = r[2] && typeof r[2] === 'object' ? r[2] : { sabit: [], tarihli: [] };
+    data.galeri = C.arr(r[3]);
+    data.pazar = C.arr(r[4]);
+    data.dernek = r[5] && typeof r[5] === 'object' && !Array.isArray(r[5]) ? r[5] : {};
+    renderHomeActions();
+    renderFeed();
+    renderEvents();
+    renderGallery();
+    renderMarket();
+    renderAbout();
+    if (/^#d-/.test(location.hash)) showTab(false);
+  });
 })();

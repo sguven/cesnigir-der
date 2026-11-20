@@ -1,5 +1,5 @@
-# Çeşnigir-Der yönetim paneli (Pages CMS) ayarları
-# Panel: https://app.pagescms.org
+# Yedek yönetim ekranı (Pages CMS): https://app.pagescms.org
+# Asıl panel sitenin içinde: /yonetim/
 
 media:
   input: images
@@ -7,203 +7,73 @@ media:
   categories: [image]
 
 content:
-  - name: haberler
-    label: Haberler
+  - name: duyurular
+    label: Duyurular
     type: file
-    path: data/haberler.json
+    path: data/duyurular.json
     format: json
     list: true
     fields:
-      - name: baslik
-        label: Başlık
-        type: string
-        required: true
-      - name: tarih
-        label: Tarih
-        description: "Örnek: 25 Eylül 2026"
-        type: string
-      - name: kaynak
-        label: Kaynak
-        description: "Haberin geldiği yer. Örnek: Kırıkkale Haber"
-        type: string
-      - name: ozet
-        label: Kısa özet
-        type: text
-      - name: foto
-        label: Fotoğraf
-        description: "İlk haberin fotoğrafı büyük gösterilir. Boş bırakılabilir."
-        type: image
-      - name: foto_aciklama
-        label: Fotoğrafta ne var?
-        description: "Görme engelliler için kısa bir açıklama."
-        type: string
-      - name: link
-        label: Haberin bağlantısı
-        description: "Haber başka bir sitedeyse adresini yapıştırın. Boş bırakılabilir."
-        type: string
+      - { name: tur, label: Tür, type: select, options: { values: [Vefat, Düğün, Nişan, Mevlit, Toplantı, Duyuru, Haber] } }
+      - { name: tarih, label: Tarih, type: date, required: true, options: { format: yyyy-MM-dd } }
+      - { name: baslik, label: Başlık, type: string, required: true }
+      - { name: metin, label: Açıklama, type: text }
+      - { name: foto, label: Fotoğraf, type: image }
+      - { name: kaynak, label: Haberin kaynağı, type: string }
+      - { name: link, label: Haberin adresi, type: string }
 
-  - name: ilanlar
-    label: Köyden İlanlar
+  - name: etkinlikler
+    label: Takvim
     type: file
-    path: data/ilanlar.json
+    path: data/etkinlikler.json
     format: json
     list: true
     fields:
-      - name: tur
-        label: İlan türü
-        type: select
-        options:
-          values: [Vefat, Düğün, Nişan, Mevlit, Toplantı, Duyuru]
-      - name: tarih
-        label: Tarih
-        description: "Örnek: 5 Aralık 2026"
-        type: string
-      - name: baslik
-        label: Başlık
-        type: string
-        required: true
-      - name: aciklama
-        label: Açıklama
-        type: text
-
-  - name: takvim
-    label: Köy Takvimi
-    type: file
-    path: data/takvim.json
-    format: json
-    list: true
-    fields:
-      - name: tarih
-        label: Gün
-        type: date
-        required: true
-        options:
-          format: yyyy-MM-dd
-      - name: kisa
-        label: Takvimde görünecek kısa ad
-        description: "Bir iki kelime. Örnek: Düğün, Mevlit, Toplantı"
-        type: string
-      - name: ad
-        label: Etkinliğin adı
-        description: "Örnek: Ahmet ve Ayşe'nin düğünü"
-        type: string
-        required: true
-      - name: saat
-        label: Saat
-        type: string
-      - name: yer
-        label: Yer
-        type: string
+      - { name: tur, label: Tür, type: select, options: { values: [Düğün, Nişan, Mevlit, Toplantı, Etkinlik] } }
+      - { name: tarih, label: Gün, type: date, required: true, options: { format: yyyy-MM-dd } }
+      - { name: ad, label: Etkinlik, type: string, required: true }
+      - { name: saat, label: Saat, type: string }
+      - { name: yer, label: Yer, type: string }
 
   - name: pazar
-    label: Pazar ve Yardım
+    label: Pazar
     type: file
     path: data/pazar.json
     format: json
     list: true
     fields:
-      - name: tur
-        label: Tür
-        type: select
-        options:
-          values: [Satılık, Aranıyor, Yardım talebi]
-      - name: tarih
-        label: Tarih
-        type: string
-      - name: baslik
-        label: Başlık
-        type: string
-        required: true
-      - name: fiyat
-        label: Fiyat (₺)
-        description: "Sadece rakam. Boş bırakılabilir."
-        type: string
-      - name: aciklama
-        label: Açıklama
-        type: text
-      - name: iletisim
-        label: İletişim
-        description: "Örnek: Ali Yılmaz · 0555 000 00 00"
-        type: string
-      - name: foto
-        label: Fotoğraf
-        type: image
+      - { name: tur, label: Tür, type: select, options: { values: [Satılık, Aranıyor, Yardım isteği] } }
+      - { name: tarih, label: Tarih, type: date, options: { format: yyyy-MM-dd } }
+      - { name: baslik, label: Başlık, type: string, required: true }
+      - { name: fiyat, label: Fiyat (TL), type: string }
+      - { name: aciklama, label: Açıklama, type: text }
+      - { name: kisi, label: İlan sahibi, type: string }
+      - { name: telefon, label: Telefon, type: string }
+      - { name: foto, label: Fotoğraf, type: image }
 
   - name: galeri
-    label: Fotoğraf Galerisi
+    label: Fotoğraflar
     type: file
     path: data/galeri.json
     format: json
     list: true
     fields:
-      - name: foto
-        label: Fotoğraf
-        type: image
-        required: true
-      - name: aciklama
-        label: Fotoğrafta ne var?
-        type: string
+      - { name: foto, label: Fotoğraf, type: image, required: true }
+      - { name: aciklama, label: Açıklama, type: string }
 
-  - name: gezi
-    label: Gezilecek Yerler
+  - name: dernek
+    label: Dernek Bilgileri
     type: file
-    path: data/gezi.json
-    format: json
-    list: true
-    fields:
-      - name: baslik
-        label: Yerin adı
-        type: string
-        required: true
-      - name: aciklama
-        label: Açıklama
-        type: text
-      - name: foto
-        label: Fotoğraf
-        type: image
-
-  - name: genel
-    label: Dernek ve İletişim Bilgileri
-    type: file
-    path: data/genel.json
+    path: data/dernek.json
     format: json
     fields:
-      - name: baskan
-        label: Dernek başkanı
-        type: string
-      - name: hakkimizda_ek
-        label: Hakkımızda ek metni
-        description: "Paragrafları boş bir satırla ayırın."
-        type: text
-      - name: adres
-        label: Adres
-        type: string
-      - name: telefon
-        label: Telefon
-        type: string
-      - name: eposta
-        label: E-posta
-        type: string
-
-  - name: finans
-    label: Finansal Durum
-    type: file
-    path: data/finans.json
-    format: json
-    fields:
-      - name: donem
-        label: Dönem
-        description: "Örnek: Kasım 2026"
-        type: string
-      - name: guncelleme
-        label: Son güncelleme tarihi
-        type: string
-      - name: gelir
-        label: Bu ayki gelir (₺)
-        type: string
-      - name: gider
-        label: Bu ayki gider (₺)
-        type: string
-      - name: kasa
-        label: Kasadaki tutar (₺)
-        type: string
+      - { name: hakkimizda, label: Hakkımızda, type: text }
+      - { name: baskan, label: Başkan, type: string }
+      - { name: telefon, label: Telefon, type: string }
+      - { name: whatsapp, label: WhatsApp, type: string }
+      - { name: eposta, label: E-posta, type: string }
+      - { name: adres, label: Adres, type: string }
+      - { name: kasa_donem, label: Kasa dönemi, type: string }
+      - { name: gelir, label: Gelir (TL), type: string }
+      - { name: gider, label: Gider (TL), type: string }
+      - { name: kasa, label: Kasadaki para (TL), type: string }

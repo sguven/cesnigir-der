@@ -1,46 +1,48 @@
 # Çeşnigir-Der web sitesi
 
 Köprüköy Çeşnigir Kültür Sosyal Yardımlaşma ve Dayanışma Derneği'nin sitesi.
-Sade bir statik sitedir: sunucu, veritabanı veya derleme adımı yoktur. GitHub Pages ile yayınlanır.
+Adres: https://sguven.github.io/cesnigir-der/
 
-## Klasörler
+Sade, telefon öncelikli bir statik site. Sunucu veya veritabanı yok; GitHub Pages ile yayınlanır.
 
-| Dosya veya klasör | Ne işe yarar |
+## Bölümler
+
+Alt menüde beş bölüm var: Ana Sayfa (duyuru akışı), Takvim, Fotoğraflar, Pazar, Dernek.
+
+## İçerik nasıl değişir?
+
+**Yönetim paneli:** https://sguven.github.io/cesnigir-der/yonetim/
+
+- Panel değişiklikleri doğrudan bu depodaki `data/` dosyalarına kaydeder. Site 1-2 dakika içinde güncellenir.
+- Telefondan yüklenen fotoğraflar otomatik küçültülür (en fazla 1600 piksel) ve `images/yuklenen/` klasörüne gider.
+- Panel, her telefona bir kez girilen bir GitHub erişim anahtarıyla çalışır (aşağıya bakın).
+
+**Yedek:** Pages CMS (https://app.pagescms.org) aynı dosyaları düzenleyebilir. Ayarı `.pages.yml` içinde.
+
+## Panel için giriş anahtarı
+
+1. GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token
+2. Repository access: **Only select repositories** → `sguven/cesnigir-der`
+3. Permissions → Repository permissions → **Contents: Read and write** (başka izin gerekmez)
+4. Oluşan anahtarı panelin "Giriş anahtarı" kutusuna bir kez yapıştırın.
+
+Anahtar yalnızca o telefonun tarayıcısında saklanır. Telefon kaybolursa GitHub'dan anahtarı silmeniz yeterli; panel o telefonda çalışmayı bırakır.
+
+## Dosyalar
+
+| Dosya | Ne işe yarar |
 |---|---|
-| `index.html` | Sayfanın iskeleti ve değişmeyen metinler (tarihçe, köy bilgileri, harita) |
-| `style.css` | Görünüm |
-| `app.js` | `data/` içindeki dosyaları okuyup sayfaya yerleştirir |
-| `data/` | Değişen tüm içerik burada |
-| `images/` | Fotoğraflar |
-
-## İçerik nerede değişir?
-
-| Sayfadaki bölüm | Dosya |
-|---|---|
-| Haberler | `data/haberler.json` |
-| Açılışımızdan Fotoğraflar | `data/galeri.json` |
-| Köyden İlanlar | `data/ilanlar.json` |
-| Köy takvimi ve yaklaşan günler | `data/takvim.json` |
-| Pazar ve Yardım İlanları | `data/pazar.json` |
-| Gezilecek Yerler | `data/gezi.json` |
-| Hakkımızda (başkan, ek metin) ve İletişim | `data/genel.json` |
-| Finansal Durum | `data/finans.json` |
-| Resmî bayramlar ve dinî günler | `data/resmi-gunler.json` (nadiren değişir) |
-
-Kurallar:
-
-- Listelerdeki sıra sayfadaki sıradır. Haberlerde ilk kayıt büyük kart olur, diğerleri yandaki listeye girer. Yeni haber en üste eklenir.
-- Takvimde tarih `2026-12-05` biçiminde yazılır (yıl-ay-gün).
-- Fotoğraflar `images/` klasörüne konur, dosyaya `images/dosya-adi.jpg` diye başvurulur. Telefondan çekilen fotoğrafları yüklemeden önce küçültmek (en fazla 1800 piksel genişlik) siteyi hızlı tutar.
-- Bir kutuyu boş bırakmak o satırı gizler (örneğin fotoğrafsız haber).
-
-## Yayına almadan önce
-
-Şu an veri dosyalarında köşeli parantezli yer tutucular var, örneğin `[TARİH]`, `[AD SOYAD]`, `[TUTAR]`. Bunlar önceki tasarımdan aynen taşındı. Site halka açılmadan önce gerçek bilgilerle değiştirilmeli veya silinmelidir. Takvimdeki "(örnek)" etkinlikleri de öyle.
+| `index.html`, `site.css`, `app.js` | Site |
+| `style.css`, `ortak.js` | Site ve panelin ortak görünümü ve yardımcıları |
+| `yonetim/` | Yönetim paneli |
+| `data/duyurular.json` | Duyurular, vefat/düğün ilanları, haberler |
+| `data/etkinlikler.json` | Takvimdeki köy etkinlikleri |
+| `data/resmi-gunler.json` | Resmî bayramlar ve dinî günler (2026-2027) |
+| `data/galeri.json` | Fotoğraflar |
+| `data/pazar.json` | Pazar ve yardımlaşma ilanları |
+| `data/dernek.json` | Hakkımızda, başkan, iletişim, kasa durumu |
 
 ## Bilgisayarda denemek
-
-Tarayıcıda `index.html` dosyasına çift tıklamak yetmez, çünkü sayfa veri dosyalarını `fetch` ile okur. Klasörde şunu çalıştırın:
 
 ```
 python3 -m http.server 8000
