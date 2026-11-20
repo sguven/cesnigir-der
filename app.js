@@ -159,7 +159,7 @@
 
   function lbClose() {
     $('lb').hidden = true;
-    $('lbImg').src = '';
+    $('lbImg').removeAttribute('src');
     lbIdx = null;
     document.body.style.overflow = '';
     if (lastFocus && lastFocus.focus) {
