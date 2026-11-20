@@ -122,6 +122,37 @@
     return 'https://wa.me/' + d + (text ? '?text=' + encodeURIComponent(text) : '');
   }
 
+  // YouTube adresinden gömülü oynatıcı adresi üretir.
+  // Desteklenen: watch?v=, youtu.be/, /live/, /embed/, /shorts/, kanal canlı yayını (/channel/UC.../live)
+  function ytEmbed(u) {
+    u = String(u || '').trim();
+    if (!u) return '';
+    if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+    var url;
+    try { url = new URL(u); } catch (e) { return ''; }
+    var host = url.hostname.replace(/^(www\.|m\.)/, '');
+    var id = '', ch = '';
+    if (host === 'youtu.be') id = url.pathname.split('/')[1] || '';
+    else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+      var p = url.pathname.split('/').filter(Boolean);
+      if (p[0] === 'watch') id = url.searchParams.get('v') || '';
+      else if (p[0] === 'live' || p[0] === 'embed' || p[0] === 'shorts') {
+        if (p[1] === 'live_stream') ch = url.searchParams.get('channel') || '';
+        else id = p[1] || '';
+      } else if (p[0] === 'channel' && /^UC[\w-]{20,}$/.test(p[1] || '')) ch = p[1];
+    }
+    var q = 'autoplay=1&mute=1&playsinline=1&rel=0';
+    if (/^[\w-]{6,20}$/.test(id)) return 'https://www.youtube.com/embed/' + id + '?' + q;
+    if (/^UC[\w-]{20,}$/.test(ch)) return 'https://www.youtube.com/embed/live_stream?channel=' + ch + '&' + q;
+    return '';
+  }
+
+  function ytFrame(src) {
+    return '<iframe src="' + esc(src) + '" title="Köprüköy canlı yayın" loading="lazy" ' +
+      'allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen ' +
+      'referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe>';
+  }
+
   function arr(d) {
     var a = Array.isArray(d) ? d : (d && Array.isArray(d.items) ? d.items : []);
     return a.filter(function (x) { return x && typeof x === 'object'; });
@@ -132,6 +163,7 @@
     DUYURU_TURLERI: DUYURU_TURLERI, ETKINLIK_TURLERI: ETKINLIK_TURLERI, PAZAR_TURLERI: PAZAR_TURLERI,
     slug: slug, badgeClass: badgeClass, esc: esc, pad: pad, normIso: normIso, parts: parts,
     todayIso: todayIso, addDays: addDays, daysBetween: daysBetween, longDate: longDate, relDate: relDate,
-    untilText: untilText, imgSrc: imgSrc, linkUrl: linkUrl, telHref: telHref, waHref: waHref, arr: arr
+    untilText: untilText, imgSrc: imgSrc, linkUrl: linkUrl, telHref: telHref, waHref: waHref, arr: arr,
+    ytEmbed: ytEmbed, ytFrame: ytFrame
   };
 })();

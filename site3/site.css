@@ -110,6 +110,9 @@ main:focus{outline:none}
 .empty{padding:26px 20px;text-align:center;color:var(--ink2)}
 .empty b{display:block;color:var(--ink);font-size:20px}
 
+/* canlı yayın */
+.live-dot{display:inline-block;width:14px;height:14px;border-radius:50%;background:#D93025;margin-right:10px;vertical-align:middle}
+
 /* rozetler */
 .badge{display:inline-block;font-size:15px;font-weight:700;padding:2px 10px;border-radius:4px;background:var(--sand);color:var(--ink);letter-spacing:.02em}
 .b-vefat{background:#2B2B2B;color:#fff}

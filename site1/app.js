@@ -391,7 +391,11 @@
   section('galeri', 'galeri-icerik', renderGallery);
   load('pazar').then(function (d) { renderPazar(byDateDesc(d)); }).catch(function () { fail('pazar-icerik'); });
   renderGezi(GEZI);
-  load('dernek').then(function (d) { renderGenel(d); renderFinans(d); })
+  load('dernek').then(function (d) {
+    renderGenel(d); renderFinans(d);
+    var live = window.CD && window.CD.ytEmbed(d && d.canli_yayin);
+    if (live) { $('canli-icerik').innerHTML = window.CD.ytFrame(live); $('canli').hidden = false; $('nav-canli').hidden = false; }
+  })
     .catch(function () { $('ft-iletisim').innerHTML = ''; fail('finans-icerik'); });
   initCalendar();
 })();

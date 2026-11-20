@@ -10,6 +10,9 @@
 .up-head h2{font-size:21px}
 .up-head a{font-size:17px;font-weight:700;text-decoration:none}
 
+/* canlı yayın */
+.live-dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:#D93025;margin-right:8px;vertical-align:middle}
+
 /* gönderi kartı (Facebook akışı gibi) */
 .post-head{display:flex;align-items:center;gap:10px;padding:14px 16px 8px}
 .post-head img{width:46px;height:46px;border-radius:50%;flex:none}

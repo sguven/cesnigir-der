@@ -71,6 +71,8 @@
     { name: 'whatsapp', label: 'WhatsApp numarası', type: 'tel', help: 'Telefonla aynıysa boş bırakın.' },
     { name: 'eposta', label: 'E-posta', type: 'email' },
     { name: 'adres', label: 'Adres', type: 'text' },
+    { name: 'canli_yayin', label: 'YouTube canlı yayın adresi', type: 'url', placeholder: 'https://www.youtube.com/live/…', group: 'Canlı Yayın',
+      groupHelp: 'YouTube\'daki canlı yayının adresini yapıştırın. Sitenin ana sayfasında "Köyden Canlı Görüntü" olarak oynar. Boş bırakırsanız görünmez.' },
     { name: 'kasa_donem', label: 'Kasa durumu: hangi ay?', type: 'text', placeholder: 'Örnek: Kasım 2026', group: 'Kasa Durumu', groupHelp: 'Doldurursanız sitede "Kasa Durumu" kutusu çıkar. Boş bırakırsanız görünmez.' },
     { name: 'gelir', label: 'Bu ayki gelir (TL)', type: 'text', inputmode: 'numeric' },
     { name: 'gider', label: 'Bu ayki gider (TL)', type: 'text', inputmode: 'numeric' },
@@ -612,6 +614,11 @@
       document.getElementById('saveBtn').onclick = function () {
         var v = readForm(root, DERNEK_FIELDS);
         if (!v) return;
+        if (v.canli_yayin && !C.ytEmbed(v.canli_yayin)) {
+          var box = root.querySelector('[data-field="canli_yayin"]'), er = box.querySelector('.err');
+          box.classList.add('bad'); er.textContent = 'Bu bir YouTube video ya da canlı yayın adresi değil gibi görünüyor.'; er.hidden = false;
+          box.scrollIntoView({ block: 'center' }); return;
+        }
         busy('Kaydediliyor…');
         updateJson('data/dernek.json', function (data) {
           var o = data && typeof data === 'object' && !Array.isArray(data) ? data : {};

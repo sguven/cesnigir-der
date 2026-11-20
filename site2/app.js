@@ -45,6 +45,12 @@
     $('home-actions').innerHTML = h;
   }
 
+  function renderLive() {
+    var src = C.ytEmbed(data.dernek.canli_yayin);
+    $('live').innerHTML = src ? '<div class="card"><div class="up-head"><h2><span class="live-dot" aria-hidden="true"></span>Köyden Canlı Görüntü</h2></div>' +
+      '<div style="position:relative;aspect-ratio:16/9;background:#000">' + C.ytFrame(src) + '</div></div>' : '';
+  }
+
   function postId(p, i) { return 'd-' + (C.normIso(p.tarih) || 'x') + '-' + (C.slug(p.baslik).slice(0, 40) || i); }
 
   function renderFeed() {
@@ -298,6 +304,7 @@
     data.pazar = C.arr(r[4]);
     data.dernek = r[5] && typeof r[5] === 'object' && !Array.isArray(r[5]) ? r[5] : {};
     renderHomeActions();
+    renderLive();
     renderFeed();
     renderEvents();
     renderGallery();
