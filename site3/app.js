@@ -326,10 +326,22 @@
     document.title = (page && t ? t.textContent + ' · ' : '') + 'Çeşnigir-Der · Köprüköy';
   }
 
-  // Başlığın arkasındaki köprü fotoğrafı: ana sayfada büyük fotoğraf başlığın altından çıkana kadar bekler (site.css, .hdr-foto)
+  // Başlığın arkasındaki köprü fotoğrafı: ana sayfada büyük fotoğraf başlığın altına girdikçe, kaydırmayla aynı hızda belirir
+  // (site.css, --hf). Ani bir geçiş yok: fotoğrafın ne kadarı başlığın altına girdiyse o kadar görünür.
+  var hfTick = false, hfLast = -1;
   function headerPhoto() {
-    var hero = document.querySelector('.hero'), hdr = document.querySelector('.header');
-    document.body.classList.toggle('hdr-foto', !hero || hero.getBoundingClientRect().bottom <= hdr.getBoundingClientRect().bottom + 2);
+    if (hfTick) return; hfTick = true;
+    requestAnimationFrame(function () {
+      hfTick = false;
+      var hero = document.querySelector('.hero'), k = 1;
+      if (hero) {
+        var r = hero.getBoundingClientRect(), b = document.querySelector('.header').getBoundingClientRect().bottom;
+        k = r.height ? Math.min(1, Math.max(0, (b - r.top) / r.height)) : 0;
+        k = k * k * (3 - 2 * k);   // başta ve sonda yumuşak
+      }
+      k = Math.round(k * 100) / 100;
+      if (k !== hfLast) { hfLast = k; document.documentElement.style.setProperty('--hf', k); }
+    });
   }
 
   function setMenu(open) {

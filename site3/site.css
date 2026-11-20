@@ -43,17 +43,15 @@ main:focus{outline:none}
   .header{background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5)}
   .menu-btn{background:rgba(255,255,255,.55)}
 }
-/* telefonda başlığın arkasında köprü fotoğrafı durur. Ana sayfada büyük fotoğraf kaydırılıp geçince belirir (app.js: hdr-foto),
-   diğer sayfalarda hep oradadır. Üstündeki açık ton yazıyı okunur tutar. */
+/* telefonda başlığın arkasında köprü fotoğrafı durur. Ana sayfada büyük fotoğraf başlığın altına girdikçe kaydırmayla birlikte
+   yavaş yavaş belirir (app.js: --hf, 0 ile 1 arası), diğer sayfalarda hep oradadır. Üstündeki açık ton yazıyı okunur tutar. */
 @media (max-width:1000px){
-  .header::before,.header::after{content:"";position:absolute;inset:0;z-index:-1;opacity:0;transition:opacity .3s;pointer-events:none}
+  .header::before,.header::after{content:"";position:absolute;inset:0;z-index:-1;opacity:var(--hf,0);pointer-events:none}
   .header::before{background:url(../images/banner.jpg) 35% 96%/130% auto no-repeat #0D1B2E}
   .header::after{background:linear-gradient(90deg,rgba(255,255,255,.66),rgba(255,255,255,.4) 62%,rgba(255,255,255,.2))}
-  .hdr-foto .header::before,.hdr-foto .header::after{opacity:1}
-  .hdr-foto .header{background:none;-webkit-backdrop-filter:none;backdrop-filter:none}
-  .hdr-foto .logo b{color:var(--bordo-dark);text-shadow:0 0 6px #fff,0 0 2px #fff}
-  .hdr-foto .logo small{color:var(--ink);text-shadow:0 0 5px #fff,0 0 2px #fff}
-  .hdr-foto .menu-btn{background:rgba(255,255,255,.86)}
+  .logo b{color:var(--bordo-dark);text-shadow:0 0 6px #fff,0 0 2px #fff}
+  .logo small{color:var(--ink);text-shadow:0 0 5px #fff,0 0 2px #fff}
+  .menu-btn{background:rgba(255,255,255,.86)}
 }
 .header-in{display:flex;align-items:center;gap:16px;min-height:78px}
 .logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);min-width:0}
@@ -279,7 +277,7 @@ a,button{touch-action:manipulation}
 #icerik.gir{animation:gir .22s ease-out}
 @keyframes gir{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 /* fotoğraflar yüklenirken yerleri ayrılı durur, yazılar aşağı kaymaz */
-.hero img{aspect-ratio:8/3}
+.hero img{aspect-ratio:8/3;height:auto}
 .article-img img{background:var(--sand);min-height:160px}
 @media (max-width:640px){
   .news-img:not(.noimg){aspect-ratio:16/9}
@@ -293,6 +291,6 @@ a,button{touch-action:manipulation}
 }
 @media (prefers-reduced-motion:reduce){
   #icerik.gir{animation:none}
-  .btn,.menu-btn,.filters button,.news,.nav,.nav.open,.header::before,.header::after{transition:none}
+  .btn,.menu-btn,.filters button,.news,.nav,.nav.open{transition:none}
   .btn:active,.menu-btn:active,.filters button:active,.news:active{transform:none}
 }
