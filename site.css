@@ -47,7 +47,7 @@ main:focus{outline:none}
    yavaş yavaş belirir (app.js: --hf, 0 ile 1 arası), diğer sayfalarda hep oradadır. Üstündeki açık ton yazıyı okunur tutar. */
 @media (max-width:1000px){
   .header::before,.header::after{content:"";position:absolute;inset:0;z-index:-1;opacity:var(--hf,0);pointer-events:none}
-  .header::before{background:url(../images/banner.jpg) 35% 96%/130% auto no-repeat #0D1B2E}
+  .header::before{background:url(images/banner.jpg) 35% 96%/130% auto no-repeat #0D1B2E}
   .header::after{background:linear-gradient(90deg,rgba(255,255,255,.66),rgba(255,255,255,.4) 62%,rgba(255,255,255,.2))}
   .logo b{color:var(--bordo-dark);text-shadow:0 0 6px #fff,0 0 2px #fff}
   .logo small{color:var(--ink);text-shadow:0 0 5px #fff,0 0 2px #fff}
@@ -215,6 +215,10 @@ main:focus{outline:none}
 .facts li{padding:11px 0;border-top:1px solid var(--line)}
 .facts li:first-child{border-top:0}
 .facts span{display:block;font-size:15px;color:var(--ink2)}
+.kisi{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2px 14px;padding:3px 0}
+.kisi a,.kisi span{white-space:nowrap;font-size:inherit;color:inherit}
+.facts .kisi a{color:var(--bordo);font-weight:700}
+.facts .kisi span{display:inline}
 .kasa{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .kasa div{background:var(--cream);border-radius:8px;padding:12px}
 .kasa span{display:block;font-size:15px;color:var(--ink2)}

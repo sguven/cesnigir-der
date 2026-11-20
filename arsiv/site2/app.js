@@ -11,7 +11,7 @@
   function icon(name) { return '<svg aria-hidden="true"><use href="#i-' + name + '"/></svg>'; }
 
   function load(name) {
-    return fetch('../data/' + name + '.json', { cache: 'no-cache' }).then(function (r) {
+    return fetch('../../data/' + name + '.json', { cache: 'no-cache' }).then(function (r) {
       if (!r.ok) throw new Error(name);
       return r.json();
     });
@@ -69,12 +69,12 @@
     }
     el.innerHTML = list.map(function (p, i) {
       var id = postId(p, i);
-      var src = C.imgSrc(p.foto, '../'), link = C.linkUrl(p.link);
+      var src = C.imgSrc(p.foto, '../../'), link = C.linkUrl(p.link);
       var text = String(p.metin || '').trim();
       var long = text.length > 320;
       var shareText = (p.tur ? String(p.tur).toLocaleUpperCase('tr') + ': ' : '') + (p.baslik || '') + '\n' + SITE_URL + '#' + id;
       var h = '<article class="card post" id="' + esc(id) + '">' +
-        '<div class="post-head"><img src="../images/logo-160.png" alt=""><div class="post-who"><b>Çeşnigir-Der</b>' +
+        '<div class="post-head"><img src="../../images/logo-160.png" alt=""><div class="post-who"><b>Çeşnigir-Der</b>' +
         '<span>' + esc(C.relDate(p.tarih)) + '</span></div></div>' +
         '<div class="post-body">' + (p.tur ? '<span class="' + C.badgeClass(p.tur) + '">' + esc(p.tur) + '</span>' : '') +
         '<h3>' + esc(p.baslik) + '</h3>';
@@ -120,7 +120,7 @@
   // Köy etkinliğinin fotoğrafı ve WhatsApp'ta paylaş düğmesi (resmî günlerde yok)
   function evExtras(e, det) {
     if (!e.koy) return '';
-    var src = C.imgSrc(e.foto, '../'), title = (e.tur ? String(e.tur).toLocaleUpperCase('tr') + ': ' : '') + e.ad;
+    var src = C.imgSrc(e.foto, '../../'), title = (e.tur ? String(e.tur).toLocaleUpperCase('tr') + ': ' : '') + e.ad;
     var text = title + '\n' + C.longDate(e.iso, true) + (det ? ' · ' + det : '') + '\n' + location.href.split('#')[0] + '#' + e.id;
     return (src ? '<button type="button" class="ev-photo" data-photo="' + esc(src) + '" data-cap="' + esc(e.ad) + '" aria-label="Fotoğrafı büyüt">' +
       '<img src="' + esc(src) + '" alt="' + esc(e.ad) + '" loading="lazy"></button>' : '') +
@@ -155,12 +155,12 @@
   var viewerList = [], viewerIdx = 0, lastFocus = null;
 
   function renderGallery() {
-    var list = data.galeri.filter(function (x) { return C.imgSrc(x.foto, '../'); });
+    var list = data.galeri.filter(function (x) { return C.imgSrc(x.foto, '../../'); });
     var el = $('gallery');
     if (!list.length) { el.className = 'card empty'; el.innerHTML = '<b>Henüz fotoğraf yok</b>'; return; }
     el.innerHTML = list.map(function (x, i) {
       return '<button type="button" data-gal="' + i + '" aria-label="Fotoğrafı büyüt: ' + esc(x.aciklama) + '">' +
-        '<img src="' + esc(C.imgSrc(x.foto, '../')) + '" alt="' + esc(x.aciklama) + '" loading="lazy"></button>';
+        '<img src="' + esc(C.imgSrc(x.foto, '../../')) + '" alt="' + esc(x.aciklama) + '" loading="lazy"></button>';
     }).join('');
   }
 
@@ -202,7 +202,7 @@
       return;
     }
     el.innerHTML = list.map(function (x) {
-      var src = C.imgSrc(x.foto, '../'), tel = C.telHref(x.telefon), wa = C.waHref(x.telefon, (x.baslik || '') + ' ilanı için yazıyorum.');
+      var src = C.imgSrc(x.foto, '../../'), tel = C.telHref(x.telefon), wa = C.waHref(x.telefon, (x.baslik || '') + ' ilanı için yazıyorum.');
       return '<article class="card">' +
         (src ? '<button type="button" class="post-img" data-photo="' + esc(src) + '" data-cap="' + esc(x.baslik) + '" aria-label="Fotoğrafı büyüt"><img class="mk-img" src="' + esc(src) + '" alt="' + esc(x.baslik) + '" loading="lazy"></button>' : '') +
         '<div class="mk-body"><div class="mk-top">' + (x.tur ? '<span class="' + C.badgeClass(x.tur) + '">' + esc(x.tur) + '</span>' : '<span></span>') +
@@ -251,14 +251,14 @@
         (d.kasa ? '<div class="total"><span>Kasadaki para</span><b>' + esc(d.kasa) + ' ₺</b></div>' : '') + '</div></div>';
     }
 
-    h += '<div class="card about-card"><button type="button" class="post-img" data-photo="../images/kopru.jpg" data-cap="Çeşnigir Köprüsü" aria-label="Fotoğrafı büyüt">' +
-      '<img class="photo-wide" src="../images/kopru.jpg" alt="Çeşnigir Köprüsü\'nün taş kemerleri ve Kızılırmak." loading="lazy"></button>' +
+    h += '<div class="card about-card"><button type="button" class="post-img" data-photo="../../images/kopru.jpg" data-cap="Çeşnigir Köprüsü" aria-label="Fotoğrafı büyüt">' +
+      '<img class="photo-wide" src="../../images/kopru.jpg" alt="Çeşnigir Köprüsü\'nün taş kemerleri ve Kızılırmak." loading="lazy"></button>' +
       '<div class="card-pad"><h3>Köyümüz Köprüköy</h3>' +
       '<p>Köyümüz adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır. Selçuklu döneminden kalan bu taş köprü on iki gözlüdür ve yüzyıllarca Ankara ile Kırşehir arasındaki yolun geçiş noktası olmuştur.</p>' +
       '<p class="muted small" style="margin:0">Kapulukaya Baraj Gölü kıyısında, Keskin\'e 25 km, Kırıkkale\'ye 37 km uzaklıktayız.</p>' +
       '<p class="muted small" style="margin:8px 0 0">Gezilecek yerler: Çeşnigir Kanyonu mesire alanı, seyir terasları, tekne turu, 6,5 km yürüyüş yolu, karşı kıyıda Büklükale ören yeri.</p></div></div>';
 
-    h += '<p class="footer-note">© ' + new Date().getFullYear() + ' Çeşnigir-Der · <a href="../yonetim/">Yönetici girişi</a></p>';
+    h += '<p class="footer-note">© ' + new Date().getFullYear() + ' Çeşnigir-Der · <a href="../../yonetim/">Yönetici girişi</a></p>';
     $('about').innerHTML = h;
   }
 
@@ -275,8 +275,8 @@
       }
       var g = e.target.closest('[data-gal]');
       if (g) {
-        var list = data.galeri.filter(function (x) { return C.imgSrc(x.foto, '../'); })
-          .map(function (x) { return { src: C.imgSrc(x.foto, '../'), cap: x.aciklama }; });
+        var list = data.galeri.filter(function (x) { return C.imgSrc(x.foto, '../../'); })
+          .map(function (x) { return { src: C.imgSrc(x.foto, '../../'), cap: x.aciklama }; });
         openViewer(list, +g.getAttribute('data-gal'));
         return;
       }

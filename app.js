@@ -1,9 +1,9 @@
 /* Çeşnigir-Der · Tasarım 3
    Sayfalar: Ana Sayfa, Duyurular (ve ayrıntı), Etkinlikler, Fotoğraflar, Market, Hakkımızda, İletişim.
-   İçerik ../data/ klasöründen okunur; yönetim panelinden değişir. */
+   İçerik data/ klasöründen okunur; yönetim panelinden değişir. */
 (function () {
   'use strict';
-  var C = window.CD, esc = C.esc, B = '../';
+  var C = window.CD, esc = C.esc, B = '';
   var MAP = 'https://www.google.com/maps?q=39.5765122,33.4357454';
   var data = null;
   var main = document.getElementById('icerik');
@@ -31,6 +31,14 @@
   function band(title, sub) {
     return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › ' + esc(title) + '</div>' +
       '<h1>' + esc(title) + '</h1>' + (sub ? '<p>' + esc(sub) + '</p>' : '') + '</div></div>';
+  }
+  /* Dernek başkanı satırları: isimler alt alta, her ismin yanında aranabilir numarası */
+  function people(d) {
+    return [[d.baskan, d.telefon], [d.baskan2, d.telefon2]].filter(function (x) { return x[0] || x[1]; }).map(function (x) {
+      var tel = C.telHref(x[1]);
+      return '<div class="kisi"><b>' + esc(x[0] || '') + '</b>' +
+        (x[1] ? (tel ? '<a href="tel:' + esc(tel) + '">' + esc(x[1]) + '</a>' : '<span>' + esc(x[1]) + '</span>') : '') + '</div>';
+    }).join('');
   }
   function contactButtons(d, wide) {
     var tel = C.telHref(d.telefon), wa = C.waHref(d.whatsapp || d.telefon), h = '';
@@ -76,7 +84,7 @@
   function iid(x) { return (C.normIso(x.tarih) || 'x') + '-' + (C.slug(x.baslik).slice(0, 50) || 'ilan'); }
   function upper(t) { return String(t || '').toLocaleUpperCase('tr'); }
 
-  /* Paylaşım: WhatsApp ve Facebook düğmeleri. Bağlantı doğrudan o etkinliğe, ilana ya da duyuruya gider (…/site3/?e=…, ?i=…, ?d=…:
+  /* Paylaşım: WhatsApp ve Facebook düğmeleri. Bağlantı doğrudan o etkinliğe, ilana ya da duyuruya gider (…/?e=…, ?i=…, ?d=…:
      Facebook # işaretinden sonrasını attığı için soru işaretli adres kullanılır; sayfa açılınca openShared() ilgili sayfaya geçer).
      o: { key: 'e'|'i'|'d', id, tur, title, det, photo }  ·  big: ayrıntı sayfasındaki büyük düğmeler */
   function shareUrl(o) { return location.href.split(/[?#]/)[0] + '?' + o.key + '=' + encodeURIComponent(o.id); }
@@ -277,12 +285,12 @@
       '<li>Çeşnigir Köprüsü\'nü ve Köprüköy\'ün tarihini tanıtıyoruz.</li>' +
       '<li>Köyde yaşayanla gurbetteki hemşehrilerimiz arasındaki bağı canlı tutuyoruz.</li></ul>' +
       '</div><aside><div class="box box-pad"><h3>Dernek Bilgileri</h3><ul class="facts">' +
-      (d.baskan ? '<li><span>Dernek Başkanı</span>' + esc(d.baskan) + '</li>' : '') +
-      '<li><span>Kuruluş</span>Eylül 2026</li>' +
+      (people(d) ? '<li><span>Dernek Başkanı</span>' + people(d) + '</li>' : '') +
+      '<li><span>Kuruluş</span>Aralık 2025</li>' +
       '<li><span>Açılış töreni</span>6 Eylül 2026</li>' +
       '<li><span>Merkez</span>Ankara Caddesi, Çarşı Merkezi</li>' +
       '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li>' +
-      (d.telefon ? '<li><span>Telefon</span>' + esc(d.telefon) + '</li>' : '') + '</ul></div>' + kasa + '</aside></div></section>' +
+      '</ul></div>' + kasa + '</aside></div></section>' +
       villageSection() + placesSection();
   }
 
@@ -357,7 +365,7 @@
       '<section class="section"><div class="container grid-main"><div class="box"><iframe class="map" title="Çeşnigir-Der haritası" loading="lazy" ' +
       'src="https://www.google.com/maps?q=39.5765122,33.4357454&z=17&output=embed"></iframe></div>' +
       '<aside><div class="box box-pad"><h3>Bize Ulaşın</h3><ul class="facts" style="margin-bottom:14px">' +
-      (d.telefon ? '<li><span>Telefon</span>' + esc(d.telefon) + '</li>' : '') +
+      (people(d) ? '<li><span>Dernek Başkanı</span>' + people(d) + '</li>' : '') +
       (mail ? '<li><span>E-posta</span><a href="mailto:' + esc(mail) + '">' + esc(mail) + '</a></li>' : '') +
       '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li></ul>' +
       contactButtons(d) + '</div></aside></div></section>';
@@ -427,7 +435,7 @@
     $('topContact').innerHTML = tel ? 'Bize ulaşın: <a href="tel:' + esc(tel) + '">' + esc(d.telefon) + '</a>' : '';
     var f = '';
     if (d.adres) f += '<div>' + esc(d.adres) + '</div>';
-    if (tel) f += '<div><a href="tel:' + esc(tel) + '">' + esc(d.telefon) + '</a></div>';
+    f += people(d);
     if (/@/.test(d.eposta || '')) f += '<div><a href="mailto:' + esc(d.eposta) + '">' + esc(d.eposta) + '</a></div>';
     f += '<div><a href="' + MAP + '" target="_blank" rel="noopener">Haritada göster</a></div>';
     $('footContact').innerHTML = f;

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Çeşnigir-Der · Arşiv</title>
+<link rel="icon" href="../images/logo-160.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<style>
+:root{--bordo:#7A2E1C;--ink:#231A14;--ink2:#5A4C40;--line:#E2D6C3;--cream:#FAF6EF}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:18px;line-height:1.55}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 18px 48px}
+header{display:flex;align-items:center;gap:16px;margin-bottom:8px}
+header img{width:84px;height:84px}
+h1{margin:0;font-size:clamp(24px,4vw,32px)}
+.lead{color:var(--ink2);margin:6px 0 26px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.shot{display:block;background:#EFE6D6;aspect-ratio:9/12;overflow:hidden;border-bottom:1px solid var(--line)}
+.shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+.body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+.body h2{margin:0;font-size:22px}
+.body p{margin:0;color:var(--ink2)}
+.btn{margin-top:auto;display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:8px;background:var(--bordo);color:#fff;
+  font-weight:700;text-decoration:none}
+.btn:hover{background:#5A1F12}
+.btn:focus-visible{outline:3px solid #B8862E;outline-offset:2px}
+.foot{margin-top:28px;color:var(--ink2);font-size:16px}
+.foot a{color:var(--bordo);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><img src="../images/logo.png" alt="Çeşnigir-Der logosu"><div><h1>Çeşnigir-Der · Arşiv</h1></div></header>
+<p class="lead">Kullanılmayan eski tasarımlar burada saklanıyor. Sitenin kendisi Tasarım 3 ile yayında: <a href="../" style="color:var(--bordo);font-weight:700">siteye dön</a>.</p>
+<div class="grid">
+<article class="card">
+<a class="shot" href="site1/" tabindex="-1" aria-hidden="true"><img src="../images/onizleme/site1.jpg" alt="" loading="lazy"></a>
+<div class="body"><h2>Tasarım 1</h2><p>Sıcak, kilim desenli, tek uzun sayfa. Tarihçe, gezilecek yerler ve aylık takvim dahil, en ayrıntılı olanı.</p>
+<a class="btn" href="site1/">Tasarım 1'i aç</a></div>
+</article>
+<article class="card">
+<a class="shot" href="site2/" tabindex="-1" aria-hidden="true"><img src="../images/onizleme/site2.jpg" alt="" loading="lazy"></a>
+<div class="body"><h2>Tasarım 2</h2><p>Facebook'a benzeyen sade akış. Altta büyük sekme düğmeleri var, telefonda kullanımı en kolay olanı.</p>
+<a class="btn" href="site2/">Tasarım 2'yi aç</a></div>
+</article>
+</div>
+<p class="foot">Yönetim paneli: <a href="../yonetim/">yonetim/</a></p>
+</div>
+</body>
+</html>

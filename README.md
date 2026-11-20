@@ -5,15 +5,12 @@ Adres: https://sguven.github.io/cesnigir-der/
 
 Sade, telefon öncelikli bir statik site. Sunucu veya veritabanı yok; GitHub Pages ile yayınlanır.
 
-## Tasarımlar
+## Tasarım
 
-Ana adres bir tasarım seçim sayfasıdır. Üç tasarım aynı `data/` dosyalarını okur:
+Ana adreste Tasarım 3 yayında (klasik dernek sitesi, üstte menü, ayrı sayfalar): `index.html`, `site.css`, `app.js`.
 
-- `site1/` · Tasarım 1: sıcak, kilim desenli, tek uzun sayfa
-- `site2/` · Tasarım 2: Facebook benzeri akış, altta sekmeler
-- `site3/` · Tasarım 3: klasik dernek sitesi, üstte menü, ayrı sayfalar
-
-Biri seçilince ana adrese o tasarım taşınabilir.
+Denenen diğer iki tasarım `arsiv/` klasöründe saklanıyor (`arsiv/site1/`, `arsiv/site2/`); siteden bağlantı verilmez.
+Eski `site3/` adresi ana adrese yönlendirir, daha önce paylaşılan bağlantılar çalışmaya devam eder.
 
 ## İçerik nasıl değişir?
 

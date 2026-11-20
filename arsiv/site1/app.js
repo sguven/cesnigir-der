@@ -27,7 +27,7 @@
     if (!p) return '';
     if (/^https?:\/\//i.test(p)) return p;
     if (/^[a-z][a-z0-9+.\-]*:/i.test(p) || p.indexOf('//') === 0) return '';
-    return '../' + p.replace(/^\/+/, '');
+    return '../../' + p.replace(/^\/+/, '');
   }
 
   // Dış bağlantı: sadece http(s)
@@ -64,7 +64,7 @@
   }
 
   function load(name) {
-    return fetch('../data/' + name + '.json', { cache: 'no-cache' }).then(function (r) {
+    return fetch('../../data/' + name + '.json', { cache: 'no-cache' }).then(function (r) {
       if (!r.ok) throw new Error(name);
       return r.json();
     });
