@@ -36,7 +36,7 @@ content:
       - { name: yer, label: Yer, type: string }
 
   - name: pazar
-    label: Pazar
+    label: Market
     type: file
     path: data/pazar.json
     format: json

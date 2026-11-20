@@ -1,5 +1,5 @@
 /* Çeşnigir-Der · Tasarım 3
-   Sayfalar: Ana Sayfa, Duyurular (ve ayrıntı), Etkinlikler, Fotoğraflar, Pazar, Hakkımızda, İletişim.
+   Sayfalar: Ana Sayfa, Duyurular (ve ayrıntı), Etkinlikler, Fotoğraflar, Market, Hakkımızda, İletişim.
    İçerik ../data/ klasöründen okunur; yönetim panelinden değişir. */
 (function () {
   'use strict';
@@ -179,7 +179,7 @@
         '</div></article>';
     }).join('') + '</div>' : '<div class="box empty"><b>Şu anda ilan yok</b>İlan vermek isterseniz derneği arayın.' +
       (dtel ? '<p style="margin:14px 0 0"><a class="btn" href="tel:' + esc(dtel) + '">' + icon('phone') + 'Derneği Ara</a></p>' : '') + '</div>';
-    return band('Pazar ve Yardımlaşma', 'Köyümüzden satılık ürünler, aranan şeyler ve yardım istekleri.') +
+    return band('Market ve Yardımlaşma', 'Köyümüzden satılık ürünler, aranan şeyler ve yardım istekleri.') +
       '<section class="section"><div class="container">' + body + '</div></section>';
   }
 

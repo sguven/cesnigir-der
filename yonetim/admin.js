@@ -49,8 +49,8 @@
       sort: 'asc'
     },
     pazar: {
-      file: 'data/pazar.json', title: 'Pazar ve Yardımlaşma', one: 'ilan', icon: 'bag',
-      addLabel: 'Yeni Pazar İlanı Ekle', help: 'Satılık ürünler, aranan şeyler ve yardım istekleri.',
+      file: 'data/pazar.json', title: 'Market ve Yardımlaşma', one: 'ilan', icon: 'bag',
+      addLabel: 'Yeni Market İlanı Ekle', help: 'Satılık ürünler, aranan şeyler ve yardım istekleri.',
       fields: [
         { name: 'tur', label: 'İlan türü', type: 'choice', opts: C.PAZAR_TURLERI, required: true, def: 'Satılık' },
         { name: 'baslik', label: 'Ne satılıyor / aranıyor?', type: 'text', required: true, placeholder: 'Örnek: Köy yumurtası' },
@@ -369,7 +369,7 @@
       '<a class="tile" href="#/liste/duyurular">' + icon('news') + 'Duyurular<small id="n-duyurular">&nbsp;</small></a>' +
       '<a class="tile" href="#/liste/etkinlikler">' + icon('cal') + 'Takvim<small id="n-etkinlikler">&nbsp;</small></a>' +
       '<a class="tile" href="#/galeri">' + icon('photo') + 'Fotoğraflar<small id="n-galeri">&nbsp;</small></a>' +
-      '<a class="tile" href="#/liste/pazar">' + icon('bag') + 'Pazar<small id="n-pazar">&nbsp;</small></a>' +
+      '<a class="tile" href="#/liste/pazar">' + icon('bag') + 'Market<small id="n-pazar">&nbsp;</small></a>' +
       '<a class="tile wide" href="#/dernek">' + icon('people') + '<span>Dernek Bilgileri<small>Telefon, başkan, kasa durumu</small></span></a>' +
       '</div>' +
       '<div class="note">' + icon('warn') + '<div>Kaydettiğiniz her şey <b>1-2 dakika içinde</b> sitede görünür.</div></div>' +
