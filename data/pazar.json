@@ -1,0 +1,38 @@
+[
+  {
+    "tur": "Satılık",
+    "tarih": "[TARİH]",
+    "baslik": "[ÜRÜN ADI]",
+    "fiyat": "[FİYAT]",
+    "aciklama": "",
+    "iletisim": "[AD SOYAD] · [TELEFON]",
+    "foto": ""
+  },
+  {
+    "tur": "Satılık",
+    "tarih": "[TARİH]",
+    "baslik": "[ÜRÜN ADI]",
+    "fiyat": "[FİYAT]",
+    "aciklama": "",
+    "iletisim": "[AD SOYAD] · [TELEFON]",
+    "foto": ""
+  },
+  {
+    "tur": "Aranıyor",
+    "tarih": "[TARİH]",
+    "baslik": "[ARANAN ŞEY]",
+    "fiyat": "",
+    "aciklama": "[Ne arandığı ve ayrıntılar]",
+    "iletisim": "[AD SOYAD] · [TELEFON]",
+    "foto": ""
+  },
+  {
+    "tur": "Yardım talebi",
+    "tarih": "[TARİH]",
+    "baslik": "[YARDIM TALEBİ BAŞLIĞI]",
+    "fiyat": "",
+    "aciklama": "[Neye ihtiyaç olduğu ve nasıl destek olunabileceği]",
+    "iletisim": "İletişim: dernek aracılığıyla",
+    "foto": ""
+  }
+]

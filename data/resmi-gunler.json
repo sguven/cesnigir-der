@@ -1,0 +1,42 @@
+{
+  "sabit": [
+    { "ay": 1, "gun": 1, "kisa": "Yılbaşı", "ad": "Yılbaşı", "tur": "resmi" },
+    { "ay": 3, "gun": 18, "kisa": "Çanakkale", "ad": "Çanakkale Zaferi ve Şehitleri Anma Günü", "tur": "milli" },
+    { "ay": 4, "gun": 23, "kisa": "23 Nisan", "ad": "Ulusal Egemenlik ve Çocuk Bayramı", "tur": "resmi" },
+    { "ay": 5, "gun": 1, "kisa": "1 Mayıs", "ad": "Emek ve Dayanışma Günü", "tur": "resmi" },
+    { "ay": 5, "gun": 19, "kisa": "19 Mayıs", "ad": "Atatürk'ü Anma, Gençlik ve Spor Bayramı", "tur": "resmi" },
+    { "ay": 7, "gun": 15, "kisa": "15 Temmuz", "ad": "Demokrasi ve Millî Birlik Günü", "tur": "resmi" },
+    { "ay": 8, "gun": 30, "kisa": "Zafer B.", "ad": "Zafer Bayramı", "tur": "resmi" },
+    { "ay": 10, "gun": 29, "kisa": "Cumhuriyet", "ad": "Cumhuriyet Bayramı", "tur": "resmi" },
+    { "ay": 11, "gun": 10, "kisa": "10 Kasım", "ad": "Atatürk'ü Anma Günü", "tur": "milli" },
+    { "ay": 11, "gun": 24, "kisa": "Öğretmenler", "ad": "Öğretmenler Günü", "tur": "milli" }
+  ],
+  "tarihli": [
+    { "tarih": "2026-03-19", "kisa": "Arife", "ad": "Ramazan Bayramı arifesi", "tur": "dini" },
+    { "tarih": "2026-03-20", "kisa": "Ramazan B.", "ad": "Ramazan Bayramı 1. gün", "tur": "dini" },
+    { "tarih": "2026-03-21", "kisa": "Ramazan B.", "ad": "Ramazan Bayramı 2. gün", "tur": "dini" },
+    { "tarih": "2026-03-22", "kisa": "Ramazan B.", "ad": "Ramazan Bayramı 3. gün", "tur": "dini" },
+    { "tarih": "2026-05-26", "kisa": "Arife", "ad": "Kurban Bayramı arifesi", "tur": "dini" },
+    { "tarih": "2026-05-27", "kisa": "Kurban B.", "ad": "Kurban Bayramı 1. gün", "tur": "dini" },
+    { "tarih": "2026-05-28", "kisa": "Kurban B.", "ad": "Kurban Bayramı 2. gün", "tur": "dini" },
+    { "tarih": "2026-05-29", "kisa": "Kurban B.", "ad": "Kurban Bayramı 3. gün", "tur": "dini" },
+    { "tarih": "2026-05-30", "kisa": "Kurban B.", "ad": "Kurban Bayramı 4. gün", "tur": "dini" },
+    { "tarih": "2026-08-24", "kisa": "Kandil", "ad": "Mevlid Kandili", "tur": "dini" },
+    { "tarih": "2026-12-10", "kisa": "Kandil", "ad": "Regaip Kandili, üç ayların başlangıcı", "tur": "dini" },
+    { "tarih": "2027-01-04", "kisa": "Kandil", "ad": "Miraç Kandili", "tur": "dini" },
+    { "tarih": "2027-01-22", "kisa": "Kandil", "ad": "Berat Kandili", "tur": "dini" },
+    { "tarih": "2027-02-08", "kisa": "Ramazan", "ad": "Ramazan'ın başlangıcı", "tur": "dini" },
+    { "tarih": "2027-03-05", "kisa": "Kadir G.", "ad": "Kadir Gecesi", "tur": "dini" },
+    { "tarih": "2027-03-08", "kisa": "Arife", "ad": "Ramazan Bayramı arifesi", "tur": "dini" },
+    { "tarih": "2027-03-09", "kisa": "Ramazan B.", "ad": "Ramazan Bayramı 1. gün", "tur": "dini" },
+    { "tarih": "2027-03-10", "kisa": "Ramazan B.", "ad": "Ramazan Bayramı 2. gün", "tur": "dini" },
+    { "tarih": "2027-03-11", "kisa": "Ramazan B.", "ad": "Ramazan Bayramı 3. gün", "tur": "dini" },
+    { "tarih": "2027-05-15", "kisa": "Arife", "ad": "Kurban Bayramı arifesi", "tur": "dini" },
+    { "tarih": "2027-05-16", "kisa": "Kurban B.", "ad": "Kurban Bayramı 1. gün", "tur": "dini" },
+    { "tarih": "2027-05-17", "kisa": "Kurban B.", "ad": "Kurban Bayramı 2. gün", "tur": "dini" },
+    { "tarih": "2027-05-18", "kisa": "Kurban B.", "ad": "Kurban Bayramı 3. gün", "tur": "dini" },
+    { "tarih": "2027-05-19", "kisa": "Kurban B.", "ad": "Kurban Bayramı 4. gün", "tur": "dini" },
+    { "tarih": "2027-12-02", "kisa": "Kandil", "ad": "Regaip Kandili", "tur": "dini" },
+    { "tarih": "2027-12-24", "kisa": "Kandil", "ad": "Miraç Kandili", "tur": "dini" }
+  ]
+}

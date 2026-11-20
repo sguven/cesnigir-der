@@ -1,0 +1,26 @@
+[
+  {
+    "tur": "Vefat",
+    "tarih": "[TARİH]",
+    "baslik": "[VEFAT İLANI BAŞLIĞI]",
+    "aciklama": "[Cenaze yeri, saati ve taziye bilgileri]"
+  },
+  {
+    "tur": "Düğün",
+    "tarih": "[TARİH]",
+    "baslik": "[DÜĞÜN İLANI BAŞLIĞI]",
+    "aciklama": "[Düğün yeri, günü ve aile bilgileri]"
+  },
+  {
+    "tur": "Toplantı",
+    "tarih": "[TARİH]",
+    "baslik": "[TOPLANTI BAŞLIĞI]",
+    "aciklama": "[Toplantı yeri, saati ve gündem maddeleri]"
+  },
+  {
+    "tur": "Duyuru",
+    "tarih": "[TARİH]",
+    "baslik": "[DUYURU BAŞLIĞI]",
+    "aciklama": "[Duyurunun kısa özeti]"
+  }
+]

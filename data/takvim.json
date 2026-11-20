@@ -1,0 +1,30 @@
+[
+  {
+    "tarih": "2026-11-07",
+    "kisa": "Düğün",
+    "ad": "[AD] ve [AD] düğünü (örnek)",
+    "saat": "[SAAT]",
+    "yer": "[YER]"
+  },
+  {
+    "tarih": "2026-11-14",
+    "kisa": "Mevlit",
+    "ad": "[AD SOYAD] için mevlit (örnek)",
+    "saat": "[SAAT]",
+    "yer": "[YER]"
+  },
+  {
+    "tarih": "2026-11-22",
+    "kisa": "Toplantı",
+    "ad": "[TOPLANTI ADI] (örnek)",
+    "saat": "[SAAT]",
+    "yer": "[YER]"
+  },
+  {
+    "tarih": "2026-11-28",
+    "kisa": "Nişan",
+    "ad": "[AD] ve [AD] nişanı (örnek)",
+    "saat": "[SAAT]",
+    "yer": "[YER]"
+  }
+]
