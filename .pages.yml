@@ -34,6 +34,7 @@ content:
       - { name: ad, label: Etkinlik, type: string, required: true }
       - { name: saat, label: Saat, type: string }
       - { name: yer, label: Yer, type: string }
+      - { name: foto, label: Fotoğraf, type: image }
 
   - name: pazar
     label: Market

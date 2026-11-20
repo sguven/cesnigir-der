@@ -54,7 +54,7 @@
     var today = C.todayIso(), end = C.addDays(today, days), out = [];
     data.etkinlikler.forEach(function (e) {
       var iso = C.normIso(e.tarih);
-      if (iso && iso >= today) out.push({ iso: iso, ad: e.ad, tur: e.tur, saat: e.saat, yer: e.yer, koy: true });
+      if (iso && iso >= today) out.push({ iso: iso, ad: e.ad, tur: e.tur, saat: e.saat, yer: e.yer, foto: e.foto, koy: true });
     });
     (data.resmi.tarihli || []).forEach(function (e) {
       var iso = C.normIso(e.tarih);
@@ -70,12 +70,23 @@
     return out.sort(function (a, b) { return a.iso < b.iso ? -1 : a.iso > b.iso ? 1 : (a.koy ? -1 : 1); });
   }
 
+
+  // Köy etkinliğinin fotoğrafı ve WhatsApp'ta paylaş düğmesi (resmî günlerde yok)
+  function evExtras(e, det) {
+    if (!e.koy) return '';
+    var src = img(e.foto), title = (e.tur ? e.tur + ': ' : '') + e.ad;
+    var text = title + '\n' + C.longDate(e.iso, true) + (det ? ' · ' + det : '') + '\n' + location.href.split('#')[0] + '#/etkinlikler';
+    return (src ? '<button type="button" class="ev-photo" data-photo="' + esc(src) + '" data-cap="' + esc(e.ad) + '" aria-label="Fotoğrafı büyüt">' +
+      '<img src="' + esc(src) + '" alt="' + esc(e.ad) + '" loading="lazy"></button>' : '') +
+      '<a class="ev-share" href="https://wa.me/?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp\'ta paylaş</a>';
+  }
+
   function evRow(e) {
     var p = C.parts(e.iso), until = C.untilText(e.iso), det = [e.saat, e.yer].filter(Boolean).join(' · ');
-    return '<div class="ev' + (e.koy ? '' : ' official') + '"><div class="ev-date" aria-hidden="true"><span>' + C.AY_KISA[p.m] + '</span><b>' + p.d +
+    return '<div class="ev' + (e.koy ? ' koy' : ' official') + '"><div class="ev-date" aria-hidden="true"><span>' + C.AY_KISA[p.m] + '</span><b>' + p.d +
       '</b><small>' + C.GUN[p.wd] + '</small></div><div class="ev-info">' + (until ? '<div class="ev-when">' + esc(until) + '</div>' : '') +
       (e.tur ? '<span class="' + C.badgeClass(e.tur) + '">' + esc(e.tur) + '</span> ' : '') + '<b>' + esc(e.ad) + '</b>' +
-      '<div class="muted">' + esc(C.longDate(e.iso, true)) + (det ? ' · ' + esc(det) : '') + '</div></div></div>';
+      '<div class="muted">' + esc(C.longDate(e.iso, true)) + (det ? ' · ' + esc(det) : '') + '</div>' + evExtras(e, det) + '</div></div>';
   }
 
   function galleryGrid(list, cls) {

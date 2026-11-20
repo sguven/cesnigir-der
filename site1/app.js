@@ -340,8 +340,11 @@
       .slice(0, 6);
     $('yaklasan').innerHTML = up.length ? up.map(function (e) {
       var det = [longDate(e._iso), e.saat, e.yer].filter(Boolean).join(' · ');
+      var src = imgSrc(e.foto), text = (e.tur ? e.tur + ': ' : '') + (e.ad || '') + '\n' + det + '\n' + location.href.split('#')[0] + '#takvim';
       return '<div class="up"><strong>' + esc(e.tur || e.kisa || 'Etkinlik') + '</strong> · ' + esc(e.ad) +
-        '<br><span class="small muted">' + esc(det) + '</span></div>';
+        '<br><span class="small muted">' + esc(det) + '</span>' +
+        (src ? '<img class="up-img" src="' + esc(src) + '" alt="' + esc(e.ad) + '" loading="lazy">' : '') +
+        '<a class="up-share" href="https://wa.me/?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener">WhatsApp\'ta paylaş</a></div>';
     }).join('') : '<p class="muted" style="margin:0">Yaklaşan bir etkinlik yok.</p>';
   }
 

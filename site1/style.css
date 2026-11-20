@@ -224,3 +224,8 @@ footer :focus-visible{outline-color:#fff}
 .band-dark .tarih-ikili figcaption a{color:#FFFFFF}
 .gezi-kare{margin:24px 0 0}
 .gz-kredi{display:block;margin-top:8px;font-size:14px;color:var(--muted)}
+
+/* etkinliğin fotoğrafı ve WhatsApp'ta paylaş bağlantısı */
+.up-img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;margin-top:10px}
+.up-share{display:inline-block;margin-top:10px;padding:10px 14px;border:2px solid #0B7A54;color:#0B7A54;font-weight:600;text-decoration:none}
+.up-share:hover{background:#0B7A54;color:#fff}
