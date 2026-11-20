@@ -222,7 +222,8 @@
   var GEZI = [
     { baslik: 'Çeşnigir Köprüsü Mesire Alanı', aciklama: 'Yayalara açık tarihi köprü ve çevresinde Kırıkkale Valiliği\'nin düzenlediği dinlenme alanı.', foto: 'images/mesire.jpg' },
     { baslik: 'Kapulukaya Baraj Gölü Kıyısı', aciklama: 'Köyün batısında uzanan göl kıyısı; sazan ve tatlı su levreği avlanır.' },
-    { baslik: 'Gün Batımı Seyri', aciklama: 'Köprü ve göl üzerinde gün batımı, fotoğrafçıların Kırıkkale\'deki bilinen duraklarından.' },
+    { baslik: 'Seyir Terası', aciklama: 'Kızılırmak\'ın kayalık kanyonuna bakan seyir terasından nehir ve karşı kıyıdaki tarlalar yukarıdan izlenir. Fotoğraf: Hadi Mousavi.', foto: 'images/seyir-terasi.jpg' },
+    { baslik: 'Tekne İskelesi', aciklama: 'Ahşap iskeleden kalkan tekne turlarıyla Kızılırmak\'ın kayalık kanyonunu su üzerinden gezmek mümkün.', foto: 'images/tekne-iskelesi.jpg' },
     { baslik: 'Yürüyüş ve Bisiklet Rotası', aciklama: 'Çeşnigir Köprüsü\'nden başlayıp Köprüköy üzerinden Hasandede\'ye uzanan parkur.' }
   ];
   function renderGezi(d) {

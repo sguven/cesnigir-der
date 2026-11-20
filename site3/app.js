@@ -201,7 +201,7 @@
       '<p style="margin-top:16px">Köye adını veren köprü kesme taştan yapılmıştır; 110 metre uzunluğunda ve on iki gözlüdür. "Çeşnigir", Osmanlı sarayında padişahın yemeklerini tadan görevlinin unvanıdır.</p>' +
       '<ul class="timeline"><li><b>13. yüzyıl</b>Köprü Anadolu Selçuklu döneminde yapılır.</li>' +
       '<li><b>1989</b>Kapulukaya Barajı\'nın suları yükselir, köprü araç trafiğine kapanır.</li>' +
-      '<li><b>2010</b>Köprü restore edilir; bugün yayalara açıktır.</li></ul>' +
+      '<li><b>2010</b>Köprü restore edilir; bugün yayalara açıktır.</li><li><b>2019–2020</b>Kırıkkale Valiliği çalışmalarıyla Çeşnigir Kanyonu turizme kazandırılır: seyir terası, tekne turu, yürüyüş parkuru.</li></ul>' +
       '</div><aside><div class="box box-pad"><h3>Dernek Bilgileri</h3><ul class="facts">' +
       (d.baskan ? '<li><span>Dernek Başkanı</span>' + esc(d.baskan) + '</li>' : '') +
       '<li><span>Kuruluş</span>2025</li>' +
