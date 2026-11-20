@@ -111,7 +111,7 @@
       '<div><div class="sec-head"><h2>Köyümüz Köprüköy</h2></div>' +
       '<p>Köyümüz adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır. Selçuklu döneminden kalan on iki gözlü bu taş köprü, yüzyıllarca Ankara ile Kırşehir arasındaki yolun geçiş noktası oldu.</p>' +
       '<p class="muted">Kapulukaya Baraj Gölü kıyısında, Keskin\'e 25 km, Kırıkkale\'ye 37 km uzaklıktayız.</p>' +
-      '<div class="btn-row"><a class="btn btn-light" href="#/koyumuz">Köyümüz ve tarihçe</a><a class="btn btn-light" href="#/gezi">Gezilecek yerler</a></div></div></div></section>';
+      '<a class="btn btn-light" href="#/hakkimizda">Köyümüz, tarihçe ve gezilecek yerler</a></div></div></section>';
     return h;
   }
 
@@ -207,24 +207,23 @@
       '<li>Köylülerin alım satım ve yardımlaşma ilanlarına aracılık ediyoruz.</li>' +
       '<li>Çeşnigir Köprüsü\'nü ve Köprüköy\'ün tarihini tanıtıyoruz.</li>' +
       '<li>Köyde yaşayanla gurbetteki hemşehrilerimiz arasındaki bağı canlı tutuyoruz.</li></ul>' +
-      '<div class="btn-row" style="margin-top:22px"><a class="btn btn-light" href="#/koyumuz">Köyümüz ve tarihçe</a><a class="btn btn-light" href="#/gezi">Gezilecek yerler</a></div>' +
       '</div><aside><div class="box box-pad"><h3>Dernek Bilgileri</h3><ul class="facts">' +
       (d.baskan ? '<li><span>Dernek Başkanı</span>' + esc(d.baskan) + '</li>' : '') +
       '<li><span>Kuruluş</span>Eylül 2026</li>' +
       '<li><span>Açılış töreni</span>6 Eylül 2026</li>' +
       '<li><span>Merkez</span>Ankara Caddesi, Çarşı Merkezi</li>' +
       '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li>' +
-      (d.telefon ? '<li><span>Telefon</span>' + esc(d.telefon) + '</li>' : '') + '</ul></div>' + kasa + '</aside></div></section>';
+      (d.telefon ? '<li><span>Telefon</span>' + esc(d.telefon) + '</li>' : '') + '</ul></div>' + kasa + '</aside></div></section>' +
+      villageSection() + placesSection();
   }
 
   function rows(list) {
     return '<ul class="facts">' + list.map(function (r) { return '<li><span>' + r[0] + '</span>' + r[1] + '</li>'; }).join('') + '</ul>';
   }
 
-  function pageVillage() {
+  function villageSection() {
     var W = 'https://tr.wikipedia.org/wiki/';
-    return band('Köyümüz Köprüköy', 'Kızılırmak kıyısında, adını Çeşnigir Köprüsü\'nden alan köy') +
-      '<section class="section"><div class="container grid-main"><div>' +
+    return '<section class="section alt"><div class="container"><div class="sec-head"><h2>Köyümüz Köprüköy</h2></div></div><div class="container grid-main"><div>' +
       '<figure class="fig"><img src="' + B + 'images/koprukoy-gol.jpg" alt="Kapulukaya Baraj Gölü kıyısında Köprüköy: kayalık yamaçta kırmızı çatılı evler, solda Çeşnigir Köprüsü." loading="lazy">' +
       '<figcaption>Göl kıyısından Köprüköy ve Çeşnigir Köprüsü. ' + credit(IS, '%C3%87e%C5%9Fnigir_K%C3%B6pr%C3%BCs%C3%BC_02.jpg') + '</figcaption></figure>' +
       '<p>Kırıkkale\'nin Keskin ilçesine bağlı Köprüköy, adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır. Köyün Selçuklu döneminde kurulduğu kabul edilir. Kayıtlarda 1777\'de "Çaşnigir Köprüsü", 1815\'te "Çaşnigir Derbendi" adıyla geçer. Kızılırmak türkülerinden "Nettin Kızılırmak Allı Gelini"nde anlatılan olayın köyümüzde yaşandığı aktarılır.</p>' +
@@ -255,7 +254,7 @@
       '</div><aside><div class="box box-pad"><h3>Köy Bilgileri</h3>' +
       rows([['Konum', 'Kapulukaya Baraj Gölü\'nün doğu kıyısı, Karakeçili\'nin karşısı'], ['Uzaklık', 'Keskin 25 km, Kırıkkale 37 km, Ankara yaklaşık 113 km'], ['Rakım', '803 m'], ['Nüfus', '720 (2024)'],
         ['Geçim', 'Buğday, arpa, patates, nohut, fasulye, ayçiçeği, pancar; hayvancılık; tatlı su levreği ve sazan balıkçılığı'], ['Yönetim', 'Muhtar ve ihtiyar heyeti'], ['Posta kodu', '71860']]) +
-      '</div><div class="box box-pad" style="margin-top:20px"><h3>Çevremiz</h3><p style="margin:0 0 14px">Çeşnigir Kanyonu\'nun mesire alanı, seyir terasları ve tekne turu köyümüzün hemen yanında.</p><a class="btn" href="#/gezi">Gezilecek yerler</a></div></aside></div></section>';
+      '</div></aside></div></section>';
   }
 
   var GEZI = [
@@ -268,9 +267,8 @@
     ['Sulu Mağara (Keskin)', 'Keskin\'de üç katlı, 285 metrelik mağara; içi yıl boyu 18 derece civarında. Yakınındaki Ceritkale Kanyonu\'nda yaklaşık 10 km\'lik doğa yürüyüşü yapılabiliyor.', 'sulu-magara.jpg', '', '']
   ];
 
-  function pagePlaces() {
-    return band('Gezilecek Yerler', 'Çeşnigir Kanyonu, Kızılırmak kıyısı ve çevresi') +
-      '<section class="section"><div class="container">' +
+  function placesSection() {
+    return '<section class="section"><div class="container"><div class="sec-head"><h2>Gezilecek Yerler</h2></div>' +
       '<figure class="fig" style="margin-bottom:24px"><img class="wide" src="' + B + 'images/mesire.jpg" alt="Kızılırmak kıyısındaki mesire alanının tepeden görünüşü: seyir terası, yürüyüş yolları ve tekne iskelesi." loading="lazy"></figure>' +
       '<div class="cards">' + GEZI.map(function (g) {
         var kredi = g[4] ? credit(g[3], g[4]) : (g[3] ? '<span class="kredi">Fotoğraf: ' + g[3] + '</span>' : '');
@@ -306,8 +304,7 @@
     else if (page === 'fotograflar') html = pagePhotos();
     else if (page === 'pazar') html = pageMarket();
     else if (page === 'hakkimizda') html = pageAbout();
-    else if (page === 'koyumuz') html = pageVillage();
-    else if (page === 'gezi') html = pagePlaces();
+    else if (page === 'koyumuz' || page === 'gezi') { page = 'hakkimizda'; html = pageAbout(); }
     else if (page === 'iletisim') html = pageContact();
     else { page = ''; html = pageHome(); }
     main.innerHTML = html;
