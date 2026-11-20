@@ -72,7 +72,7 @@
       var src = C.imgSrc(p.foto, '../'), link = C.linkUrl(p.link);
       var text = String(p.metin || '').trim();
       var long = text.length > 320;
-      var shareText = (p.tur ? p.tur + ': ' : '') + (p.baslik || '') + '\n' + SITE_URL + '#' + id;
+      var shareText = (p.tur ? String(p.tur).toLocaleUpperCase('tr') + ': ' : '') + (p.baslik || '') + '\n' + SITE_URL + '#' + id;
       var h = '<article class="card post" id="' + esc(id) + '">' +
         '<div class="post-head"><img src="../images/logo-160.png" alt=""><div class="post-who"><b>Çeşnigir-Der</b>' +
         '<span>' + esc(C.relDate(p.tarih)) + '</span></div></div>' +
@@ -120,7 +120,7 @@
   // Köy etkinliğinin fotoğrafı ve WhatsApp'ta paylaş düğmesi (resmî günlerde yok)
   function evExtras(e, det) {
     if (!e.koy) return '';
-    var src = C.imgSrc(e.foto, '../'), title = (e.tur ? e.tur + ': ' : '') + e.ad;
+    var src = C.imgSrc(e.foto, '../'), title = (e.tur ? String(e.tur).toLocaleUpperCase('tr') + ': ' : '') + e.ad;
     var text = title + '\n' + C.longDate(e.iso, true) + (det ? ' · ' + det : '') + '\n' + location.href.split('#')[0] + '#' + e.id;
     return (src ? '<button type="button" class="ev-photo" data-photo="' + esc(src) + '" data-cap="' + esc(e.ad) + '" aria-label="Fotoğrafı büyüt">' +
       '<img src="' + esc(src) + '" alt="' + esc(e.ad) + '" loading="lazy"></button>' : '') +

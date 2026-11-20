@@ -351,7 +351,7 @@
       .slice(0, 6);
     $('yaklasan').innerHTML = up.length ? up.map(function (e) {
       var det = [longDate(e._iso), e.saat, e.yer].filter(Boolean).join(' · ');
-      var src = imgSrc(e.foto), text = (e.tur ? e.tur + ': ' : '') + (e.ad || '') + '\n' + det + '\n' + location.href.split('#')[0] + '#' + upId(e);
+      var src = imgSrc(e.foto), text = (e.tur ? String(e.tur).toLocaleUpperCase('tr') + ': ' : '') + (e.ad || '') + '\n' + det + '\n' + location.href.split('#')[0] + '#' + upId(e);
       return '<div class="up" data-eid="' + esc(upId(e)) + '"><strong>' + esc(e.tur || e.kisa || 'Etkinlik') + '</strong> · ' + esc(e.ad) +
         '<br><span class="small muted">' + esc(det) + '</span>' +
         (src ? '<img class="up-img" src="' + esc(src) + '" alt="' + esc(e.ad) + '" loading="lazy">' : '') +

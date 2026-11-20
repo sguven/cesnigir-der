@@ -73,19 +73,28 @@
 
   // Etkinliğin kendi adresi: #/etkinlik/2026-11-29-ali-ayse
   function eid(e) { return (C.normIso(e.tarih) || 'x') + '-' + (C.slug(e.ad).slice(0, 50) || 'etkinlik'); }
-  // WhatsApp'ta paylaş düğmesi: bağlantı doğrudan etkinliğin sayfasına gider; fotoğraf varsa telefonda fotoğrafla birlikte paylaşılır (ortak.js)
-  function shareBtn(e, det, cls) {
-    var src = img(e.foto);
-    var text = (e.tur ? e.tur + ': ' : '') + e.ad + '\n' + C.longDate(e.iso, true) + (det ? ' · ' + det : '') + '\n' + location.href.split('#')[0] + '#/etkinlik/' + e.id;
-    return '<a class="' + cls + '" href="https://wa.me/?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener"' +
-      (src ? ' data-share-photo="' + esc(src) + '" data-share-text="' + esc(text) + '"' : '') + '>' + icon('wa') + 'WhatsApp\'ta paylaş</a>';
+  function iid(x) { return (C.normIso(x.tarih) || 'x') + '-' + (C.slug(x.baslik).slice(0, 50) || 'ilan'); }
+  function upper(t) { return String(t || '').toLocaleUpperCase('tr'); }
+
+  /* Paylaşım: WhatsApp ve Facebook düğmeleri. Bağlantı doğrudan o etkinliğe, ilana ya da duyuruya gider (…/site3/?e=…, ?i=…, ?d=…:
+     Facebook # işaretinden sonrasını attığı için soru işaretli adres kullanılır; sayfa açılınca openShared() ilgili sayfaya geçer).
+     o: { key: 'e'|'i'|'d', id, tur, title, det, photo }  ·  big: ayrıntı sayfasındaki büyük düğmeler */
+  function shareUrl(o) { return location.href.split(/[?#]/)[0] + '?' + o.key + '=' + encodeURIComponent(o.id); }
+  function shareButtons(o, big) {
+    var url = shareUrl(o), text = (o.tur ? upper(o.tur) + ': ' : '') + (o.title || '') + (o.det ? '\n' + o.det : '') + '\n' + url;
+    var wa = '<a class="' + (big ? 'btn btn-green' : 's-wa') + '" href="https://wa.me/?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener"' +
+      (o.photo ? ' data-share-photo="' + esc(o.photo) + '" data-share-text="' + esc(text) + '"' : '') + '>' + icon('wa') + (big ? 'WhatsApp\'ta paylaş' : 'WhatsApp') + '</a>';
+    var fb = '<a class="' + (big ? 'btn btn-fb' : 's-fb') + '" href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '" target="_blank" rel="noopener">' +
+      icon('fb') + (big ? 'Facebook\'ta paylaş' : 'Facebook') + '</a>';
+    return big ? wa + fb : '<div class="share"><span>Paylaş:</span>' + wa + fb + '</div>';
   }
-  // Köy etkinliğinin fotoğrafı ve paylaş düğmesi (resmî günlerde yok)
+  function evShare(e, det) { return { key: 'e', id: e.id, tur: e.tur, title: e.ad, det: C.longDate(e.iso, true) + (det ? ' · ' + det : ''), photo: img(e.foto) }; }
+  // Köy etkinliğinin fotoğrafı ve paylaş düğmeleri (resmî günlerde yok)
   function evExtras(e, det) {
     if (!e.koy) return '';
     var src = img(e.foto);
     return (src ? '<button type="button" class="ev-photo" data-photo="' + esc(src) + '" data-cap="' + esc(e.ad) + '" aria-label="Fotoğrafı büyüt">' +
-      '<img src="' + esc(src) + '" alt="' + esc(e.ad) + '" loading="lazy"></button>' : '') + shareBtn(e, det, 'ev-share');
+      '<img src="' + esc(src) + '" alt="' + esc(e.ad) + '" loading="lazy"></button>' : '') + shareButtons(evShare(e, det));
   }
 
   function evRow(e) {
@@ -154,7 +163,6 @@
     var p = data.duyurular.filter(function (x) { return pid(x) === id; })[0];
     if (!p) return band('Duyuru bulunamadı') + '<section class="section"><div class="container"><p>Bu duyuru kaldırılmış olabilir.</p><a class="btn" href="#/duyurular">Tüm duyurular</a></div></section>';
     var src = img(p.foto), link = C.linkUrl(p.link);
-    var share = (p.tur ? p.tur + ': ' : '') + p.baslik + '\n' + location.href;
     var paras = String(p.metin || '').split(/\n\s*\n|\n/).map(function (s) { return s.trim(); }).filter(Boolean);
     return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/duyurular">Duyurular</a></div></div></div>' +
       '<section class="section"><div class="container"><article class="article">' +
@@ -163,7 +171,7 @@
       (src ? '<button type="button" class="article-img" data-photo="' + esc(src) + '" data-cap="' + esc(p.baslik) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(src) + '" alt="' + esc(p.foto_aciklama || p.baslik) + '"></button>' : '') +
       '<div class="article-text">' + paras.map(function (s) { return '<p>' + esc(s) + '</p>'; }).join('') + '</div>' +
       (p.kaynak ? '<p class="muted small">Kaynak: ' + esc(p.kaynak) + '</p>' : '') +
-      '<div class="btn-row"><a class="btn btn-green" href="https://wa.me/?text=' + encodeURIComponent(share) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp\'ta paylaş</a>' +
+      '<div class="btn-row">' + shareButtons({ key: 'd', id: id, tur: p.tur, title: p.baslik, photo: src }, true) +
       (link ? '<a class="btn btn-light" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + icon('link') + 'Haberin kaynağı</a>' : '') +
       '<a class="btn btn-light" href="#/duyurular">‹ Tüm duyurular</a></div>' +
       '</article></div></section>';
@@ -195,7 +203,7 @@
       '<div class="box box-pad" style="margin-bottom:18px"><ul class="facts"><li><span>Gün</span>' + esc(C.longDate(e.iso, true)) + '</li>' +
       (e.saat ? '<li><span>Saat</span>' + esc(e.saat) + '</li>' : '') + (e.yer ? '<li><span>Yer</span>' + esc(e.yer) + '</li>' : '') + '</ul></div>' +
       (src ? '<button type="button" class="article-img" data-photo="' + esc(src) + '" data-cap="' + esc(e.ad) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(src) + '" alt="' + esc(e.ad) + '"></button>' : '') +
-      '<div class="btn-row">' + shareBtn(e, det, 'btn btn-green') + '<a class="btn btn-light" href="#/etkinlikler">‹ Tüm etkinlikler</a></div>' +
+      '<div class="btn-row">' + shareButtons(evShare(e, det), true) + '<a class="btn btn-light" href="#/etkinlikler">‹ Tüm etkinlikler</a></div>' +
       '</article></div></section>';
   }
 
@@ -204,16 +212,39 @@
       (data.galeri.length ? galleryGrid(data.galeri) : '<div class="box empty"><b>Henüz fotoğraf yok</b></div>') + '</div></section>';
   }
 
+  // İlan sahibine ulaşma düğmeleri ve ilanın paylaşım bilgisi
+  function mkContact(x) {
+    var tel = C.telHref(x.telefon), wa = C.waHref(x.telefon, (x.baslik || '') + ' ilanı için yazıyorum.');
+    return (tel || wa) ? '<div class="btn-row" style="margin-top:6px">' + (tel ? '<a class="btn" href="tel:' + esc(tel) + '">' + icon('phone') + 'Ara</a>' : '') +
+      (wa ? '<a class="btn btn-green" href="' + esc(wa) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp\'tan yaz</a>' : '') + '</div>' : '';
+  }
+  function mkShare(x) { return { key: 'i', id: iid(x), tur: x.tur, title: x.baslik, det: x.fiyat ? x.fiyat + ' ₺' : '', photo: img(x.foto) }; }
+
+  // Tek ilanın sayfası: paylaşılan bağlantı buraya gelir
+  function pageListing(id) {
+    var x = data.pazar.filter(function (v) { return iid(v) === id; })[0];
+    if (!x) return band('İlan bulunamadı') + '<section class="section"><div class="container"><p>Bu ilan kaldırılmış olabilir.</p><a class="btn" href="#/pazar">Tüm ilanlar</a></div></section>';
+    var src = img(x.foto);
+    return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/pazar">Market</a></div></div></div>' +
+      '<section class="section"><div class="container"><article class="article">' +
+      '<div class="news-meta">' + (x.tur ? '<span class="' + C.badgeClass(x.tur) + '">' + esc(x.tur) + '</span>' : '') + '<span>' + esc(C.longDate(x.tarih)) + '</span></div>' +
+      '<h1>' + esc(x.baslik) + '</h1>' + (x.fiyat ? '<div class="mk-price" style="margin:-6px 0 12px">' + esc(x.fiyat) + ' ₺</div>' : '') +
+      (src ? '<button type="button" class="article-img" data-photo="' + esc(src) + '" data-cap="' + esc(x.baslik) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(src) + '" alt="' + esc(x.baslik) + '"></button>' : '') +
+      '<div class="article-text">' + (x.aciklama ? '<p>' + esc(x.aciklama) + '</p>' : '') + (x.kisi ? '<p class="muted">İlan sahibi: ' + esc(x.kisi) + '</p>' : '') + '</div>' +
+      mkContact(x) +
+      '<div class="btn-row">' + shareButtons(mkShare(x), true) + '<a class="btn btn-light" href="#/pazar">‹ Tüm ilanlar</a></div>' +
+      '</article></div></section>';
+  }
+
   function pageMarket() {
     var list = byDate(data.pazar, -1), dtel = C.telHref(data.dernek.telefon);
     var body = list.length ? '<div class="cards">' + list.map(function (x) {
-      var src = img(x.foto), tel = C.telHref(x.telefon), wa = C.waHref(x.telefon, (x.baslik || '') + ' ilanı için yazıyorum.');
+      var src = img(x.foto);
       return '<article class="box mk">' + (src ? '<img src="' + esc(src) + '" alt="' + esc(x.baslik) + '" loading="lazy">' : '') +
         '<div class="box-pad"><div class="news-meta">' + (x.tur ? '<span class="' + C.badgeClass(x.tur) + '">' + esc(x.tur) + '</span>' : '') + '<span>' + esc(C.longDate(x.tarih)) + '</span></div>' +
-        '<h3>' + esc(x.baslik) + '</h3>' + (x.fiyat ? '<div class="mk-price">' + esc(x.fiyat) + ' ₺</div>' : '') +
+        '<h3><a class="ev-link" href="#/ilan/' + esc(iid(x)) + '"><b>' + esc(x.baslik) + '</b></a></h3>' + (x.fiyat ? '<div class="mk-price">' + esc(x.fiyat) + ' ₺</div>' : '') +
         (x.aciklama ? '<p>' + esc(x.aciklama) + '</p>' : '') + (x.kisi ? '<p class="muted">' + esc(x.kisi) + '</p>' : '') +
-        ((tel || wa) ? '<div class="btn-row" style="margin-top:6px">' + (tel ? '<a class="btn" href="tel:' + esc(tel) + '">' + icon('phone') + 'Ara</a>' : '') +
-          (wa ? '<a class="btn btn-green" href="' + esc(wa) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp</a>' : '') + '</div>' : '') +
+        mkContact(x) + shareButtons(mkShare(x)) +
         '</div></article>';
     }).join('') + '</div>' : '<div class="box empty"><b>Şu anda ilan yok</b>İlan vermek isterseniz derneği arayın.' +
       (dtel ? '<p style="margin:14px 0 0"><a class="btn" href="tel:' + esc(dtel) + '">' + icon('phone') + 'Derneği Ara</a></p>' : '') + '</div>';
@@ -342,6 +373,7 @@
     else if (page === 'etkinlik') html = pageEvent(decodeURIComponent(p.slice(1).join('/')));
     else if (page === 'fotograflar') html = pagePhotos();
     else if (page === 'pazar') html = pageMarket();
+    else if (page === 'ilan') html = pageListing(decodeURIComponent(p.slice(1).join('/')));
     else if (page === 'hakkimizda') html = pageAbout();
     else if (page === 'koyumuz' || page === 'gezi') { page = 'hakkimizda'; html = pageAbout(); }
     else if (page === 'iletisim') html = pageContact();
@@ -350,8 +382,8 @@
     tapped = false; curHash = hash;
     main.innerHTML = html;
     main.classList.remove('gir'); void main.offsetWidth; main.classList.add('gir');
-    var navKey = page === 'duyuru' ? 'duyurular' : page === 'etkinlik' ? 'etkinlikler' : page;
-    if (page === 'etkinlik') { var sp = main.querySelector('[data-share-photo]'); if (sp) C.warmShare(sp.getAttribute('data-share-photo')); }
+    var navKey = page === 'duyuru' ? 'duyurular' : page === 'etkinlik' ? 'etkinlikler' : page === 'ilan' ? 'pazar' : page;
+    if (page === 'etkinlik' || page === 'ilan' || page === 'duyuru') { var sp = main.querySelector('[data-share-photo]'); if (sp) C.warmShare(sp.getAttribute('data-share-photo')); }
     document.querySelectorAll('[data-nav]').forEach(function (a) {
       if (a.getAttribute('data-nav') === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
@@ -446,6 +478,17 @@
     st.addEventListener('touchend', function (e) { if (sx === null || vList.length < 2) return; var dx = e.changedTouches[0].clientX - sx; sx = null;
       if (Math.abs(dx) > 50) showV(vIdx + (dx < 0 ? 1 : -1)); });
   }
+
+  // Paylaşılan bağlantı (?e=…, ?i=…, ?d=…) ilgili sayfayı açar; adres çubuğu sade adrese döner
+  (function openShared() {
+    var q; try { q = new URLSearchParams(location.search); } catch (e) { return; }
+    var map = { e: 'etkinlik', i: 'ilan', d: 'duyuru' };
+    Object.keys(map).some(function (k) {
+      var v = q.get(k); if (!v) return false;
+      history.replaceState(null, '', location.pathname + '#/' + map[k] + '/' + encodeURIComponent(v));
+      return true;
+    });
+  })();
 
   bind();
   Promise.all([load('duyurular', []), load('etkinlikler', []), load('resmi-gunler', {}), load('galeri', []), load('pazar', []), load('dernek', {})])

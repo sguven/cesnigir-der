@@ -298,12 +298,20 @@ a,button{touch-action:manipulation}
 /* köy etkinliğinin fotoğrafı ve WhatsApp'ta paylaş düğmesi */
 .ev.koy{align-items:flex-start}
 .ev-info{flex:1}
-.ev-photo{display:block;width:100%;max-width:440px;aspect-ratio:16/9;margin:10px 0 0;padding:0;border:0;border-radius:8px;overflow:hidden;background:var(--sand);cursor:zoom-in}
-.ev-photo img{display:block;width:100%;height:100%;object-fit:cover}
-.ev-share{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:10px;padding:0 14px;border:2px solid var(--green);border-radius:8px;
-  color:var(--green);font-weight:700;font-size:16px;text-decoration:none;background:#fff}
-.ev-share:hover,.ev-share:active{background:var(--green);color:#fff}
-.ev-share svg{width:20px;height:20px;flex:none}
+.ev-photo{display:block;width:100%;max-width:440px;aspect-ratio:4/3;margin:10px 0 0;padding:0;border:0;border-radius:8px;overflow:hidden;background:var(--sand);cursor:zoom-in}
+.ev-photo img{display:block;width:100%;height:100%;object-fit:contain}   /* davetiye gibi dik görseller kırpılmasın */
+.share{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;margin-top:10px;max-width:340px}
+.share span{grid-column:1/-1;font-size:16px;font-weight:700;color:var(--ink2)}
+.share a{display:flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 6px;min-width:0;border:2px solid;border-radius:8px;font-weight:700;font-size:16px;
+  text-decoration:none;background:#fff;transition:background-color .15s,color .15s}
+.share svg{width:20px;height:20px;flex:none}
+.share .s-wa{color:var(--green);border-color:var(--green)}
+.share .s-wa:hover,.share .s-wa:active{background:var(--green);color:#fff}
+.share .s-fb{color:#1463C7;border-color:#1463C7}
+.share .s-fb:hover,.share .s-fb:active{background:#1463C7;color:#fff}
+.btn-fb{background:#1463C7}
+.btn-fb:hover{background:#0F4E9E}
+.mk h3 .ev-link b{font-weight:700}
 .ev-link{color:inherit;text-decoration:none}
 .ev-link b::after{content:" ›";color:var(--bordo)}
 .ev-link:hover b,.ev-link:active b{color:var(--bordo)}
