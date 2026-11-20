@@ -41,7 +41,6 @@
     var tel = C.telHref(d.telefon), wa = C.waHref(d.whatsapp || d.telefon);
     if (tel) h += '<a class="btn btn-blue" href="tel:' + esc(tel) + '">' + icon('phone') + 'Derneği Ara</a>';
     if (wa) h += '<a class="btn btn-green" href="' + esc(wa) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp</a>';
-    h += '<a class="btn" href="https://www.google.com/maps?q=39.577079,33.438984" target="_blank" rel="noopener">' + icon('pin') + 'Köye Yol Tarifi</a>';
     $('home-actions').innerHTML = h;
   }
 
@@ -224,8 +223,8 @@
     h += '<ul class="facts">' +
       (d.telefon ? '<li><span>Telefon</span>' + esc(d.telefon) + '</li>' : '') +
       (d.adres ? '<li><span>Adres</span>' + esc(d.adres) + '</li>' : '') + '</ul>' +
-      '<iframe title="Köprüköy haritası" loading="lazy" src="https://www.google.com/maps?q=39.577079,33.438984&z=14&output=embed" style="display:block;width:100%;height:300px;border:0;margin-top:12px"></iframe>' +
-      '<a class="btn btn-wide" style="margin-top:10px" href="https://www.google.com/maps?q=39.577079,33.438984" target="_blank" rel="noopener">' + icon('pin') + 'Haritada Göster</a></div>';
+      '<iframe title="Çeşnigir-Der haritası" loading="lazy" src="https://www.google.com/maps?q=39.5765122,33.4357454&z=17&output=embed" style="display:block;width:100%;height:300px;border:0;margin-top:12px"></iframe>' +
+      '<a class="btn btn-wide" style="margin-top:10px" href="https://www.google.com/maps?q=39.5765122,33.4357454" target="_blank" rel="noopener">' + icon('pin') + 'Haritada Göster</a></div>';
 
     if (d.kasa || d.gelir || d.gider) {
       h += '<div class="card card-pad about-card"><h3>Kasa Durumu</h3>' +
