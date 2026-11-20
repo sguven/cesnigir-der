@@ -224,6 +224,7 @@
     h += '<ul class="facts">' +
       (d.telefon ? '<li><span>Telefon</span>' + esc(d.telefon) + '</li>' : '') +
       (d.adres ? '<li><span>Adres</span>' + esc(d.adres) + '</li>' : '') + '</ul>' +
+      '<iframe title="Köprüköy haritası" loading="lazy" src="https://www.google.com/maps?q=39.577079,33.438984&z=14&output=embed" style="display:block;width:100%;height:300px;border:0;margin-top:12px"></iframe>' +
       '<a class="btn btn-wide" style="margin-top:10px" href="https://www.google.com/maps?q=39.577079,33.438984" target="_blank" rel="noopener">' + icon('pin') + 'Haritada Göster</a></div>';
 
     if (d.kasa || d.gelir || d.gider) {
