@@ -38,6 +38,11 @@ main:focus{outline:none}
 
 /* başlık ve menü */
 .header{background:var(--white);border-bottom:4px solid var(--bordo);position:sticky;top:0;z-index:30;box-shadow:0 2px 6px rgba(35,26,20,.08)}
+/* buzlu cam: arkasından geçen fotoğraf ve içerik hafifçe görünür (desteklemeyen tarayıcıda düz beyaz kalır) */
+@supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  .header{background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5)}
+  .menu-btn{background:rgba(255,255,255,.55)}
+}
 .header-in{display:flex;align-items:center;gap:16px;min-height:78px}
 .logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);min-width:0}
 .logo img{width:54px;height:54px;border-radius:50%;flex:none}
@@ -80,6 +85,11 @@ main:focus{outline:none}
 /* kahraman alan */
 .hero{background:#0D1B2E}
 .hero img{display:block;width:100%;max-height:520px;object-fit:cover;object-position:center}
+/* telefonda (dik): kaydırınca fotoğrafın üst yarısı cam başlığın arkasına girer, köprülü alt yarısı yerinde sabit kalır */
+@media (max-width:700px) and (orientation:portrait){
+  .hero{position:sticky;top:calc(var(--hh,82px) - 18.75vw);z-index:20;box-shadow:0 3px 8px rgba(35,26,20,.22)}
+  .hero img{height:37.5vw;max-height:none}
+}
 .welcome{background:var(--white);border-bottom:1px solid var(--line)}
 .welcome-in{display:flex;align-items:center;justify-content:space-between;gap:16px 28px;flex-wrap:wrap;padding:22px 18px}
 .welcome h1{font-size:clamp(24px,4vw,32px);color:var(--bordo-dark)}

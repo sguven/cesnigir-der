@@ -343,6 +343,10 @@
 
   function bind() {
     window.addEventListener('hashchange', route);
+    // başlığın yüksekliği: sabit kalan fotoğraf tam altına otursun diye (site.css, .hero)
+    var hdr = document.querySelector('.header');
+    var setHH = function () { document.documentElement.style.setProperty('--hh', hdr.offsetHeight + 'px'); };
+    setHH(); window.addEventListener('resize', setHH); window.addEventListener('load', setHH);
     $('menuBtn').addEventListener('click', function () {
       var open = !$('nav').classList.contains('open');
       $('nav').classList.toggle('open', open);
