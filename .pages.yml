@@ -12,10 +12,7 @@ content:
     type: file
     path: data/haberler.json
     format: json
-    list:
-      collapsible:
-        collapsed: true
-        summary: "{baslik} ({tarih})"
+    list: true
     fields:
       - name: baslik
         label: Başlık
@@ -50,10 +47,7 @@ content:
     type: file
     path: data/ilanlar.json
     format: json
-    list:
-      collapsible:
-        collapsed: true
-        summary: "{tur}: {baslik}"
+    list: true
     fields:
       - name: tur
         label: İlan türü
@@ -77,10 +71,7 @@ content:
     type: file
     path: data/takvim.json
     format: json
-    list:
-      collapsible:
-        collapsed: true
-        summary: "{tarih} · {ad}"
+    list: true
     fields:
       - name: tarih
         label: Gün
@@ -109,10 +100,7 @@ content:
     type: file
     path: data/pazar.json
     format: json
-    list:
-      collapsible:
-        collapsed: true
-        summary: "{tur}: {baslik}"
+    list: true
     fields:
       - name: tur
         label: Tür
@@ -146,10 +134,7 @@ content:
     type: file
     path: data/galeri.json
     format: json
-    list:
-      collapsible:
-        collapsed: true
-        summary: "{aciklama}"
+    list: true
     fields:
       - name: foto
         label: Fotoğraf
@@ -164,10 +149,7 @@ content:
     type: file
     path: data/gezi.json
     format: json
-    list:
-      collapsible:
-        collapsed: true
-        summary: "{baslik}"
+    list: true
     fields:
       - name: baslik
         label: Yerin adı
