@@ -110,7 +110,7 @@
     h += '<section class="section"><div class="container village"><img src="' + B + 'images/kopru.jpg" alt="Çeşnigir Köprüsü\'nün taş kemerleri ve Kızılırmak." loading="lazy">' +
       '<div><div class="sec-head"><h2>Köyümüz Köprüköy</h2></div>' +
       '<p>Köyümüz adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır. Selçuklu döneminden kalan on iki gözlü bu taş köprü, yüzyıllarca Ankara ile Kırşehir arasındaki yolun geçiş noktası oldu.</p>' +
-      '<p class="muted">Kapulukaya Baraj Gölü kıyısında, Keskin\'e yaklaşık 30 km uzaklıktayız.</p>' +
+      '<p class="muted">Kapulukaya Baraj Gölü kıyısında, Keskin\'e 25 km, Kırıkkale\'ye 37 km uzaklıktayız.</p>' +
       '<a class="btn btn-light" href="#/hakkimizda">Derneğimizi tanıyın</a></div></div></section>';
     return h;
   }
@@ -197,10 +197,10 @@
       '<div style="flex:1 1 260px">' + paras.map(function (s) { return '<p style="margin:0 0 12px">' + esc(s) + '</p>'; }).join('') + '</div></div>' +
       '<div class="sec-head" style="margin-top:30px"><h2>Çeşnigir Köprüsü</h2></div>' +
       '<div class="village" style="grid-template-columns:1fr"><img src="' + B + 'images/kopru.jpg" alt="Çeşnigir Köprüsü" loading="lazy"></div>' +
-      '<p style="margin-top:16px">Köye adını veren köprü kesme taştan yapılmıştır; 110 metre uzunluğunda ve on iki gözlüdür. "Çeşnigir", Osmanlı sarayında padişahın yemeklerini tadan görevlinin unvanıdır.</p>' +
+      '<p style="margin-top:16px">Köye adını veren köprü kesme taştan yapılmıştır; 110 metre uzunluğunda ve on iki gözlüdür. "Çeşnigir", Osmanlı sarayında padişahın yemeklerini tadan görevlinin unvanıdır. Kızılırmak türkülerinden "Nettin Kızılırmak Allı Gelini"nde anlatılan olayın köyümüzde yaşandığı aktarılır.</p>' +
       '<ul class="timeline"><li><b>13. yüzyıl</b>Köprü Anadolu Selçuklu döneminde yapılır.</li>' +
-      '<li><b>1989</b>Kapulukaya Barajı\'nın suları yükselir, köprü araç trafiğine kapanır.</li>' +
-      '<li><b>2010</b>Köprü restore edilir; bugün yayalara açıktır.</li><li><b>2019–2020</b>Kırıkkale Valiliği çalışmalarıyla Çeşnigir Kanyonu turizme kazandırılır: seyir terası, tekne turu, yürüyüş parkuru.</li></ul>' +
+      '<li><b>1402</b>Rivayete göre Timur\'un ordusu Ankara Savaşı\'na giderken köprüden geçer.</li><li><b>16. yüzyıl</b>Yavuz Sultan Selim, Mısır Seferi sırasında köprüyü Mimar Sinan\'a yeniden yaptırır.</li><li><b>1777</b>Köy, kayıtlarda "Çaşnigir Köprüsü" adıyla geçer.</li><li><b>1815</b>Kayıtlardaki adı "Çaşnigir Derbendi" olur.</li><li><b>1972</b>Köprüköy belediye kurularak belde olur.</li><li><b>1989</b>Kapulukaya Barajı\'nın suları yükselir, köprü araç trafiğine kapanır.</li>' +
+      '<li><b>2010</b>Köprü restore edilir; bugün yayalara açıktır.</li><li><b>2013</b>Nüfus 2.000\'in altına düşünce belediye kapanır, Köprüköy yeniden köy olur.</li><li><b>2019–2020</b>Kırıkkale Valiliği çalışmalarıyla Çeşnigir Kanyonu turizme kazandırılır: seyir terası, tekne turu, yürüyüş parkuru.</li></ul>' +
       '</div><aside><div class="box box-pad"><h3>Dernek Bilgileri</h3><ul class="facts">' +
       (d.baskan ? '<li><span>Dernek Başkanı</span>' + esc(d.baskan) + '</li>' : '') +
       '<li><span>Kuruluş</span>2025</li>' +

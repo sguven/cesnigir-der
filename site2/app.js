@@ -238,7 +238,7 @@
       '<img class="photo-wide" src="../images/kopru.jpg" alt="Çeşnigir Köprüsü\'nün taş kemerleri ve Kızılırmak." loading="lazy"></button>' +
       '<div class="card-pad"><h3>Köyümüz Köprüköy</h3>' +
       '<p>Köyümüz adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır. Selçuklu döneminden kalan bu taş köprü on iki gözlüdür ve yüzyıllarca Ankara ile Kırşehir arasındaki yolun geçiş noktası olmuştur.</p>' +
-      '<p class="muted small" style="margin:0">Kapulukaya Baraj Gölü kıyısında, Keskin\'e yaklaşık 30 km uzaklıktayız.</p></div></div>';
+      '<p class="muted small" style="margin:0">Kapulukaya Baraj Gölü kıyısında, Keskin\'e 25 km, Kırıkkale\'ye 37 km uzaklıktayız.</p></div></div>';
 
     h += '<p class="footer-note">© ' + new Date().getFullYear() + ' Çeşnigir-Der · <a href="../yonetim/">Yönetici girişi</a></p>';
     $('about').innerHTML = h;
