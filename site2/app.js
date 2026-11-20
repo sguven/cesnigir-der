@@ -41,7 +41,7 @@
     var tel = C.telHref(d.telefon), wa = C.waHref(d.whatsapp || d.telefon);
     if (tel) h += '<a class="btn btn-blue" href="tel:' + esc(tel) + '">' + icon('phone') + 'Derneği Ara</a>';
     if (wa) h += '<a class="btn btn-green" href="' + esc(wa) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp</a>';
-    h += '<a class="btn" href="https://www.google.com/maps?q=39.5808,33.4294" target="_blank" rel="noopener">' + icon('pin') + 'Köye Yol Tarifi</a>';
+    h += '<a class="btn" href="https://www.google.com/maps?q=39.577079,33.438984" target="_blank" rel="noopener">' + icon('pin') + 'Köye Yol Tarifi</a>';
     $('home-actions').innerHTML = h;
   }
 
@@ -224,7 +224,7 @@
     h += '<ul class="facts">' +
       (d.telefon ? '<li><span>Telefon</span>' + esc(d.telefon) + '</li>' : '') +
       (d.adres ? '<li><span>Adres</span>' + esc(d.adres) + '</li>' : '') + '</ul>' +
-      '<a class="btn btn-wide" style="margin-top:10px" href="https://www.google.com/maps?q=39.5808,33.4294" target="_blank" rel="noopener">' + icon('pin') + 'Haritada Göster</a></div>';
+      '<a class="btn btn-wide" style="margin-top:10px" href="https://www.google.com/maps?q=39.577079,33.438984" target="_blank" rel="noopener">' + icon('pin') + 'Haritada Göster</a></div>';
 
     if (d.kasa || d.gelir || d.gider) {
       h += '<div class="card card-pad about-card"><h3>Kasa Durumu</h3>' +

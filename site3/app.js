@@ -4,7 +4,7 @@
 (function () {
   'use strict';
   var C = window.CD, esc = C.esc, B = '../';
-  var MAP = 'https://www.google.com/maps?q=39.5808,33.4294';
+  var MAP = 'https://www.google.com/maps?q=39.577079,33.438984';
   var data = null;
   var main = document.getElementById('icerik');
 
@@ -213,7 +213,7 @@
     var d = data.dernek, mail = /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(d.eposta || '') ? d.eposta : '';
     return band('İletişim', 'Bize telefonla, WhatsApp\'tan ya da dernek binasında ulaşabilirsiniz.') +
       '<section class="section"><div class="container grid-main"><div class="box"><iframe class="map" title="Köprüköy haritası" loading="lazy" ' +
-      'src="https://www.google.com/maps?q=39.5808,33.4294&z=13&output=embed"></iframe></div>' +
+      'src="https://www.google.com/maps?q=39.577079,33.438984&z=13&output=embed"></iframe></div>' +
       '<aside><div class="box box-pad"><h3>Bize Ulaşın</h3><ul class="facts" style="margin-bottom:14px">' +
       (d.telefon ? '<li><span>Telefon</span>' + esc(d.telefon) + '</li>' : '') +
       (mail ? '<li><span>E-posta</span><a href="mailto:' + esc(mail) + '">' + esc(mail) + '</a></li>' : '') +
