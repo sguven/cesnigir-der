@@ -38,15 +38,16 @@
     },
     etkinlikler: {
       file: 'data/etkinlikler.json', title: 'Takvim', one: 'etkinlik', icon: 'cal',
-      addLabel: 'Yeni Etkinlik Ekle', help: 'Düğün, nişan, mevlit ve toplantılar. Sitede "Yaklaşan Günler" bölümünde görünür.',
+      addLabel: 'Yeni Etkinlik Ekle', help: 'Düğün, nişan, mevlit ve toplantılar. Sitede "Yaklaşan Günler" bölümünde görünür; WhatsApp\'ta paylaşılabilir.',
       fields: [
         { name: 'tur', label: 'Ne olacak?', type: 'choice', opts: C.ETKINLIK_TURLERI, required: true, def: 'Düğün' },
         { name: 'tarih', label: 'Hangi gün?', type: 'date', required: true, def: 'today' },
         { name: 'ad', label: 'Kimin / neyin?', type: 'text', required: true, placeholder: 'Örnek: Ali ile Ayşe\'nin düğünü' },
         { name: 'saat', label: 'Saat', type: 'text', placeholder: 'Örnek: 14:00 veya ikindiden sonra' },
-        { name: 'yer', label: 'Yer', type: 'text', placeholder: 'Örnek: Köy meydanı' }
+        { name: 'yer', label: 'Yer', type: 'text', placeholder: 'Örnek: Köy meydanı' },
+        { name: 'foto', label: 'Fotoğraf', type: 'photo', help: 'İsterseniz bir fotoğraf ekleyin (davetiye, afiş ya da bir resim).' }
       ],
-      sort: 'asc'
+      sort: 'asc', thumb: true
     },
     pazar: {
       file: 'data/pazar.json', title: 'Market ve Yardımlaşma', one: 'ilan', icon: 'bag',
