@@ -67,10 +67,10 @@
 
   var DERNEK_FIELDS = [
     { name: 'hakkimizda', label: 'Hakkımızda yazısı', type: 'textarea', help: 'Paragrafları boş bir satırla ayırın.' },
-    { name: 'baskan', label: 'Dernek başkanı (1. isim)', type: 'text', placeholder: 'Ad Soyad' },
-    { name: 'telefon', label: '1. ismin telefonu', type: 'tel', placeholder: '0555 123 45 67', help: 'Sitede ismin yanında görünür. "Derneği Ara" düğmesi de bu numarayı arar.' },
-    { name: 'baskan2', label: 'Dernek başkanı (2. isim)', type: 'text', placeholder: 'Ad Soyad', help: 'Sitede birinci ismin altında görünür. Yoksa boş bırakın.' },
-    { name: 'telefon2', label: '2. ismin telefonu', type: 'tel', placeholder: '0555 123 45 67' },
+    { name: 'baskan', label: 'Dernek başkanı', type: 'text', placeholder: 'Ad Soyad' },
+    { name: 'telefon', label: 'Başkanın telefonu', type: 'tel', placeholder: '0555 123 45 67', help: 'Sitede ismin yanında görünür. "Derneği Ara" düğmesi de bu numarayı arar.' },
+    { name: 'baskan2', label: 'Başkan yardımcısı', type: 'text', placeholder: 'Ad Soyad', help: 'Sitede başkanın altında görünür. Yoksa boş bırakın.' },
+    { name: 'telefon2', label: 'Başkan yardımcısının telefonu', type: 'tel', placeholder: '0555 123 45 67' },
     { name: 'whatsapp', label: 'WhatsApp numarası', type: 'tel', help: 'Telefonla aynıysa boş bırakın.' },
     { name: 'eposta', label: 'E-posta', type: 'email' },
     { name: 'adres', label: 'Adres', type: 'text' },

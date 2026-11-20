@@ -32,13 +32,18 @@
     return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › ' + esc(title) + '</div>' +
       '<h1>' + esc(title) + '</h1>' + (sub ? '<p>' + esc(sub) + '</p>' : '') + '</div></div>';
   }
-  /* Dernek başkanı satırları: isimler alt alta, her ismin yanında aranabilir numarası */
+  /* Başkan ve yardımcısı: alt alta, her ismin yanında aranabilir numarası. rows: <li> satırları (unvanlı), people: yalnız isimler */
+  function person(ad, no) {
+    var tel = C.telHref(no);
+    return '<div class="kisi"><b>' + esc(ad || '') + '</b>' +
+      (no ? (tel ? '<a href="tel:' + esc(tel) + '">' + esc(no) + '</a>' : '<span>' + esc(no) + '</span>') : '') + '</div>';
+  }
+  function peopleRows(d) {
+    return ((d.baskan || d.telefon) ? '<li><span>Dernek Başkanı</span>' + person(d.baskan, d.telefon) + '</li>' : '') +
+      ((d.baskan2 || d.telefon2) ? '<li><span>Başkan Yardımcısı</span>' + person(d.baskan2, d.telefon2) + '</li>' : '');
+  }
   function people(d) {
-    return [[d.baskan, d.telefon], [d.baskan2, d.telefon2]].filter(function (x) { return x[0] || x[1]; }).map(function (x) {
-      var tel = C.telHref(x[1]);
-      return '<div class="kisi"><b>' + esc(x[0] || '') + '</b>' +
-        (x[1] ? (tel ? '<a href="tel:' + esc(tel) + '">' + esc(x[1]) + '</a>' : '<span>' + esc(x[1]) + '</span>') : '') + '</div>';
-    }).join('');
+    return ((d.baskan || d.telefon) ? person(d.baskan, d.telefon) : '') + ((d.baskan2 || d.telefon2) ? person(d.baskan2, d.telefon2) : '');
   }
   function contactButtons(d, wide) {
     var tel = C.telHref(d.telefon), wa = C.waHref(d.whatsapp || d.telefon), h = '';
@@ -285,7 +290,7 @@
       '<li>Çeşnigir Köprüsü\'nü ve Köprüköy\'ün tarihini tanıtıyoruz.</li>' +
       '<li>Köyde yaşayanla gurbetteki hemşehrilerimiz arasındaki bağı canlı tutuyoruz.</li></ul>' +
       '</div><aside><div class="box box-pad"><h3>Dernek Bilgileri</h3><ul class="facts">' +
-      (people(d) ? '<li><span>Dernek Başkanı</span>' + people(d) + '</li>' : '') +
+      peopleRows(d) +
       '<li><span>Kuruluş</span>Aralık 2025</li>' +
       '<li><span>Açılış töreni</span>6 Eylül 2026</li>' +
       '<li><span>Merkez</span>Ankara Caddesi, Çarşı Merkezi</li>' +
@@ -365,7 +370,7 @@
       '<section class="section"><div class="container grid-main"><div class="box"><iframe class="map" title="Çeşnigir-Der haritası" loading="lazy" ' +
       'src="https://www.google.com/maps?q=39.5765122,33.4357454&z=17&output=embed"></iframe></div>' +
       '<aside><div class="box box-pad"><h3>Bize Ulaşın</h3><ul class="facts" style="margin-bottom:14px">' +
-      (people(d) ? '<li><span>Dernek Başkanı</span>' + people(d) + '</li>' : '') +
+      peopleRows(d) +
       (mail ? '<li><span>E-posta</span><a href="mailto:' + esc(mail) + '">' + esc(mail) + '</a></li>' : '') +
       '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li></ul>' +
       contactButtons(d) + '</div></aside></div></section>';

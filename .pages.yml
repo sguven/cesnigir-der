@@ -49,9 +49,9 @@ content:
       - { name: fiyat, label: Fiyat (TL), type: string }
       - { name: aciklama, label: Açıklama, type: text }
       - { name: kisi, label: İlan sahibi, type: string }
-      - { name: telefon, label: 1. ismin telefonu, type: string }
-      - { name: baskan2, label: Başkan (2. isim), type: string }
-      - { name: telefon2, label: 2. ismin telefonu, type: string }
+      - { name: telefon, label: Başkanın telefonu, type: string }
+      - { name: baskan2, label: Başkan yardımcısı, type: string }
+      - { name: telefon2, label: Başkan yardımcısının telefonu, type: string }
       - { name: foto, label: Fotoğraf, type: image }
 
   - name: galeri
@@ -71,10 +71,10 @@ content:
     format: json
     fields:
       - { name: hakkimizda, label: Hakkımızda, type: text }
-      - { name: baskan, label: Başkan (1. isim), type: string }
-      - { name: telefon, label: 1. ismin telefonu, type: string }
-      - { name: baskan2, label: Başkan (2. isim), type: string }
-      - { name: telefon2, label: 2. ismin telefonu, type: string }
+      - { name: baskan, label: Başkan, type: string }
+      - { name: telefon, label: Başkanın telefonu, type: string }
+      - { name: baskan2, label: Başkan yardımcısı, type: string }
+      - { name: telefon2, label: Başkan yardımcısının telefonu, type: string }
       - { name: whatsapp, label: WhatsApp, type: string }
       - { name: eposta, label: E-posta, type: string }
       - { name: adres, label: Adres, type: string }
