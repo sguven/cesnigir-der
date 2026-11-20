@@ -208,3 +208,4 @@ footer :focus-visible{outline-color:#fff}
 .tarih-list>div{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-top:1px solid rgba(201,162,90,.35)}
 .tarih-list dt{color:var(--gold-text)}
 .tarih-list dd{margin:0;color:#E2D8C6;text-align:right}
+.gezi-src{margin:16px 0 0}

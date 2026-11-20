@@ -220,11 +220,13 @@
 
   /* ---------- gezilecek yerler ---------- */
   var GEZI = [
-    { baslik: 'Çeşnigir Köprüsü Mesire Alanı', aciklama: 'Yayalara açık tarihi köprü ve çevresinde Kırıkkale Valiliği\'nin düzenlediği dinlenme alanı.', foto: 'images/mesire.jpg' },
-    { baslik: 'Kapulukaya Baraj Gölü Kıyısı', aciklama: 'Köyün batısında uzanan göl kıyısı; sazan ve tatlı su levreği avlanır.' },
-    { baslik: 'Seyir Terası', aciklama: 'Kızılırmak\'ın kayalık kanyonuna bakan seyir terasından nehir ve karşı kıyıdaki tarlalar yukarıdan izlenir. Fotoğraf: Hadi Mousavi.', foto: 'images/seyir-terasi.jpg' },
-    { baslik: 'Tekne İskelesi', aciklama: 'Ahşap iskeleden kalkan tekne turlarıyla Kızılırmak\'ın kayalık kanyonunu su üzerinden gezmek mümkün.', foto: 'images/tekne-iskelesi.jpg' },
-    { baslik: 'Yürüyüş ve Bisiklet Rotası', aciklama: 'Çeşnigir Köprüsü\'nden başlayıp Köprüköy üzerinden Hasandede\'ye uzanan parkur.' }
+    { baslik: 'Çeşnigir Kanyonu Mesire Alanı', aciklama: 'Kırıkkale Valiliği\'nin 2019-2020\'de yaklaşık 500 bin metrekarelik alanda düzenlediği kanyon: tarihi köprü, dinlenme ve piknik alanları, göl kenarında yürüyüş yolları.', foto: 'images/mesire.jpg' },
+    { baslik: 'Seyir Terasları', aciklama: 'Kanyona bakan iki seyir terası var; biri cam zeminli. Kızılırmak\'ı ve karşı kıyıdaki tarlaları yukarıdan görmek için en iyi yer. Fotoğraf: Hadi Mousavi.', foto: 'images/seyir-terasi.jpg' },
+    { baslik: 'Kanyonda Tekne Turu', aciklama: 'Ahşap iskeleden kalkan teknelerle Kızılırmak\'ın kayalık kanyonu su üzerinden gezilir.', foto: 'images/tekne-iskelesi.jpg' },
+    { baslik: 'Yürüyüş ve Bisiklet Yolu', aciklama: 'Kanyon boyunca yaklaşık 6,5 km\'lik yürüyüş ve bisiklet yolu. Daha uzun rota Büklükale\'den başlar, köprüyü geçip Köprüköy\'den Behrek (Böğrek) Dağı eteklerine, Haydar Sultan Türbesi ve Deliler Kuyusu\'na uzanır. Yanınıza su ve atıştırmalık alın.' },
+    { baslik: 'Kapulukaya Baraj Gölü Kıyısı', aciklama: 'Köyün batısında uzanan göl kıyısı; sazan ve tatlı su levreği avlanır. Sisli sabahlarda vadiyi kaplayan sis görülmeye değer.' },
+    { baslik: 'Büklükale Ören Yeri', aciklama: 'Köprünün karşı kıyısında, Karakeçili yakınında 5 bin yıllık yerleşim. Japon arkeolog Kimiyoshi Matsumura başkanlığında 2009\'dan beri kazılıyor; 7 metre yüksekliğinde sur ve 2010\'da bulunan Hitit çivi yazılı tablet en bilinen buluntuları.' },
+    { baslik: 'Sulu Mağara (Keskin)', aciklama: 'Keskin\'de üç katlı, 285 metrelik mağara; içi yıl boyu 18 derece civarında. Yakınındaki Ceritkale Kanyonu\'nda yaklaşık 10 km\'lik doğa yürüyüşü yapılabiliyor.' }
   ];
   function renderGezi(d) {
     var list = items(d), el = $('gezi-icerik');

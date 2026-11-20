@@ -201,6 +201,12 @@
       '<ul class="timeline"><li><b>13. yüzyıl</b>Köprü Anadolu Selçuklu döneminde yapılır.</li>' +
       '<li><b>1402</b>Rivayete göre Timur\'un ordusu Ankara Savaşı\'na giderken köprüden geçer.</li><li><b>16. yüzyıl</b>Yavuz Sultan Selim, Mısır Seferi sırasında köprüyü Mimar Sinan\'a yeniden yaptırır.</li><li><b>1777</b>Köy, kayıtlarda "Çaşnigir Köprüsü" adıyla geçer.</li><li><b>1815</b>Kayıtlardaki adı "Çaşnigir Derbendi" olur.</li><li><b>1972</b>Köprüköy belediye kurularak belde olur.</li><li><b>1989</b>Kapulukaya Barajı\'nın suları yükselir, köprü araç trafiğine kapanır.</li>' +
       '<li><b>2010</b>Köprü restore edilir; bugün yayalara açıktır.</li><li><b>2013</b>Nüfus 2.000\'in altına düşünce belediye kapanır, Köprüköy yeniden köy olur.</li><li><b>2019–2020</b>Kırıkkale Valiliği çalışmalarıyla Çeşnigir Kanyonu turizme kazandırılır: seyir terası, tekne turu, yürüyüş parkuru.</li></ul>' +
+      '<div class="sec-head" style="margin-top:30px"><h2>Çevremizde Gezilecek Yerler</h2></div><ul class="timeline">' +
+      '<li><b>Çeşnigir Kanyonu</b>Valiliğin düzenlediği mesire alanı, iki seyir terası (biri cam zeminli), tekne turu ve 6,5 km yürüyüş-bisiklet yolu.</li>' +
+      '<li><b>Kapulukaya Baraj Gölü</b>Köyün batısındaki göl kıyısı; sazan ve tatlı su levreği.</li>' +
+      '<li><b>Büklükale</b>Karşı kıyıda 5 bin yıllık yerleşim; Japon kazı ekibi 2010\'da Hitit çivi yazılı tablet buldu.</li>' +
+      '<li><b>Haydar Sultan Türbesi</b>Köprüköy\'den Behrek Dağı eteklerine uzanan yürüyüş rotasının sonu; bahçesinde Deliler Kuyusu.</li>' +
+      '<li><b>Sulu Mağara</b>Keskin\'de üç katlı, 285 metrelik mağara; yakınında Ceritkale Kanyonu yürüyüşü.</li></ul>' +
       '</div><aside><div class="box box-pad"><h3>Dernek Bilgileri</h3><ul class="facts">' +
       (d.baskan ? '<li><span>Dernek Başkanı</span>' + esc(d.baskan) + '</li>' : '') +
       '<li><span>Kuruluş</span>2025</li>' +
