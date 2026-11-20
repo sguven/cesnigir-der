@@ -7,6 +7,7 @@
   var MAP = 'https://www.google.com/maps?q=39.5765122,33.4357454';
   var data = null;
   var main = document.getElementById('icerik');
+  var pos = {}, curHash = location.hash, tapped = false;   // sayfaların kaydırma yeri (geri dönünce kaldığı yerden)
 
   function $(id) { return document.getElementById(id); }
   function icon(n) { return '<svg aria-hidden="true"><use href="#i-' + n + '"/></svg>'; }
@@ -87,7 +88,7 @@
   /* ---------- sayfalar ---------- */
   function pageHome() {
     var d = data.dernek, news = byDate(data.duyurular, -1).slice(0, 4), ev = upcoming(45).slice(0, 4);
-    var h = '<section class="hero"><img src="' + B + 'images/banner.jpg" alt="Gün batımında Çeşnigir Köprüsü ve Türk bayrağı, üzerinde Çeşnigir-Der yazısı."></section>' +
+    var h = '<section class="hero"><img src="' + B + 'images/banner.jpg" width="1800" height="675" decoding="async" alt=""Gün batımında Çeşnigir Köprüsü ve Türk bayrağı, üzerinde Çeşnigir-Der yazısı."></section>' +
       '<div class="welcome"><div class="container welcome-in" style="padding:22px 18px"><div><h1>Köprüköy\'e hoş geldiniz</h1>' +
       '<p>Köyümüzden duyurular, vefat ve düğün haberleri, etkinlikler ve fotoğraflar.</p></div>' + contactButtons(d) + '</div></div>';
     var live = C.ytEmbed(d.canli_yayin);
@@ -307,13 +308,19 @@
     else if (page === 'koyumuz' || page === 'gezi') { page = 'hakkimizda'; html = pageAbout(); }
     else if (page === 'iletisim') html = pageContact();
     else { page = ''; html = pageHome(); }
+    var hash = location.hash, back = !tapped && hash !== curHash && pos[hash] > 0;
+    tapped = false; curHash = hash;
     main.innerHTML = html;
+    main.classList.remove('gir'); void main.offsetWidth; main.classList.add('gir');
     var navKey = page === 'duyuru' ? 'duyurular' : page;
     document.querySelectorAll('[data-nav]').forEach(function (a) {
       if (a.getAttribute('data-nav') === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
     closeMenu();
-    window.scrollTo(0, 0);
+    // geri tuşuyla dönülen sayfa kaldığı yerden açılır; bağlantıya dokunulunca en baştan
+    var y = back ? pos[hash] : 0;
+    window.scrollTo(0, y);
+    if (back) requestAnimationFrame(function () { window.scrollTo(0, y); });
     headerPhoto();
     var t = main.querySelector('h1');
     document.title = (page && t ? t.textContent + ' · ' : '') + 'Çeşnigir-Der · Köprüköy';
@@ -325,7 +332,12 @@
     document.body.classList.toggle('hdr-foto', !hero || hero.getBoundingClientRect().bottom <= hdr.getBoundingClientRect().bottom + 2);
   }
 
-  function closeMenu() { $('nav').classList.remove('open'); $('menuBtn').setAttribute('aria-expanded', 'false'); }
+  function setMenu(open) {
+    var b = $('menuBtn');
+    $('nav').classList.toggle('open', open); b.setAttribute('aria-expanded', String(open));
+    b.querySelector('use').setAttribute('href', open ? '#i-x' : '#i-menu'); b.querySelector('span').textContent = open ? 'Kapat' : 'Menü';
+  }
+  function closeMenu() { if ($('nav').classList.contains('open')) setMenu(false); }
 
   function renderChrome() {
     var d = data.dernek, tel = C.telHref(d.telefon);
@@ -351,12 +363,13 @@
   function bind() {
     window.addEventListener('hashchange', route);
     window.addEventListener('scroll', headerPhoto, { passive: true }); window.addEventListener('resize', headerPhoto);
-    $('menuBtn').addEventListener('click', function () {
-      var open = !$('nav').classList.contains('open');
-      $('nav').classList.toggle('open', open);
-      this.setAttribute('aria-expanded', String(open));
-    });
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    window.addEventListener('scroll', function () { pos[curHash] = window.pageYOffset; }, { passive: true });
+    $('menuBtn').addEventListener('click', function () { setMenu(!$('nav').classList.contains('open')); });
     document.addEventListener('click', function (e) {
+      // menü açıkken dışına dokunmak yalnızca menüyü kapatır
+      if ($('nav').classList.contains('open') && !e.target.closest('.header')) { closeMenu(); e.preventDefault(); return; }
+      if (e.target.closest('a[href^="#/"]')) { tapped = true; setTimeout(function () { tapped = false; }, 600); }
       var f = e.target.closest('[data-filter]');
       if (f) { filter = f.getAttribute('data-filter'); main.innerHTML = pageNews(); var b = main.querySelector('[data-filter="' + filter + '"]'); if (b) b.focus(); return; }
       var g = e.target.closest('[data-gal]');

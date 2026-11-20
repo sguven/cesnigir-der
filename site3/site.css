@@ -265,3 +265,34 @@ main:focus{outline:none}
 .check-list{margin:0;padding-left:22px}
 .check-list li{margin:6px 0}
 .nav a{white-space:nowrap}
+
+/* ---------- telefonda akış: dokunma tepkisi, yumuşak geçişler, zıplamayan sayfa ---------- */
+html{-webkit-tap-highlight-color:transparent}
+a,button{touch-action:manipulation}
+.container{padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right))}
+.btn,.menu-btn,.filters button,.news{transition:transform .12s,background-color .15s,border-color .15s}
+.btn:active,.menu-btn:active,.filters button:active{transform:scale(.97)}
+.news:active{transform:scale(.985);border-color:var(--bordo)}
+.nav a:active{background:var(--bordo-soft);color:var(--bordo-dark)}
+.gal button:active img{transform:scale(1.04)}
+/* sayfa değişince içerik yumuşakça gelir */
+#icerik.gir{animation:gir .22s ease-out}
+@keyframes gir{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* fotoğraflar yüklenirken yerleri ayrılı durur, yazılar aşağı kaymaz */
+.hero img{aspect-ratio:8/3}
+.article-img img{background:var(--sand);min-height:160px}
+@media (max-width:640px){
+  .news-img:not(.noimg){aspect-ratio:16/9}
+  .news-img img{height:100%;max-height:none}
+}
+/* açılır menü yumuşakça iner; uzun gelirse kendi içinde kayar */
+@media (max-width:1000px){
+  .nav{display:flex;visibility:hidden;opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .18s,transform .18s,visibility 0s .18s;
+    max-height:calc(100vh - 110px);max-height:calc(100dvh - 110px);overflow-y:auto;overscroll-behavior:contain}
+  .nav.open{visibility:visible;opacity:1;transform:none;pointer-events:auto;transition:opacity .18s,transform .18s}
+}
+@media (prefers-reduced-motion:reduce){
+  #icerik.gir{animation:none}
+  .btn,.menu-btn,.filters button,.news,.nav,.nav.open,.header::before,.header::after{transition:none}
+  .btn:active,.menu-btn:active,.filters button:active,.news:active{transform:none}
+}
