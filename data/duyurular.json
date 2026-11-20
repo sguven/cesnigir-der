@@ -1,6 +1,13 @@
 [
   {
     "tur": "Haber",
+    "tarih": "2026-11-19",
+    "baslik": "serhat deneme",
+    "metin": "serhat deneme",
+    "foto": "images/yuklenen/2026-11-19-214953-1hdic.jpg"
+  },
+  {
+    "tur": "Haber",
     "tarih": "2026-11-07",
     "baslik": "Keskin Belediye Meclisi ilçe için yeni kararlar aldı",
     "metin": "Meclis, ilçenin ihtiyaçlarını ve süren belediye çalışmalarını görüştü; kararların ayrıntısı henüz açıklanmadı.",
