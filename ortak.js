@@ -147,6 +147,36 @@
     return '';
   }
 
+  /* Fotoğrafla paylaşma: telefonda [data-share-photo] taşıyan paylaş düğmesi, telefonun paylaşım ekranını fotoğraf ve yazıyla açar
+     (oradan WhatsApp seçilir). Telefon desteklemiyorsa ya da bir şey ters giderse düğmenin kendi WhatsApp bağlantısı açılır. */
+  var shareFiles = {};
+  function warmShare(src) {
+    if (!shareFiles[src]) shareFiles[src] = fetch(src).then(function (r) { if (!r.ok) throw 0; return r.blob(); })
+      .then(function (b) { return new File([b], 'etkinlik.jpg', { type: b.type || 'image/jpeg' }); });
+    shareFiles[src].catch(function () { delete shareFiles[src]; });
+    return shareFiles[src];
+  }
+  function bindShare() {
+    if (!navigator.share || !navigator.canShare || !window.File || !matchMedia('(pointer: coarse)').matches) return;
+    var warm = function (e) { var a = e.target.closest && e.target.closest('[data-share-photo]'); if (a) warmShare(a.getAttribute('data-share-photo')); };
+    document.addEventListener('touchstart', warm, { passive: true });
+    document.addEventListener('pointerdown', warm, { passive: true });
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('[data-share-photo]');
+      if (!a) return;
+      var href = a.href;
+      e.preventDefault();
+      warmShare(a.getAttribute('data-share-photo')).then(function (file) {
+        var d = { files: [file], text: a.getAttribute('data-share-text') || '' };
+        if (!navigator.canShare(d)) throw 0;
+        return navigator.share(d);
+      }).catch(function (er) {
+        if (er && er.name === 'AbortError') return;   // paylaşım ekranı kapatıldı
+        location.href = href;
+      });
+    });
+  }
+
   function ytFrame(src) {
     return '<iframe src="' + esc(src) + '" title="Köprüköy canlı yayın" loading="lazy" ' +
       'allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen ' +
@@ -164,6 +194,6 @@
     slug: slug, badgeClass: badgeClass, esc: esc, pad: pad, normIso: normIso, parts: parts,
     todayIso: todayIso, addDays: addDays, daysBetween: daysBetween, longDate: longDate, relDate: relDate,
     untilText: untilText, imgSrc: imgSrc, linkUrl: linkUrl, telHref: telHref, waHref: waHref, arr: arr,
-    ytEmbed: ytEmbed, ytFrame: ytFrame
+    ytEmbed: ytEmbed, ytFrame: ytFrame, bindShare: bindShare, warmShare: warmShare
   };
 })();

@@ -333,6 +333,17 @@
     $('calNext').disabled = ym(cal) >= ym(MAX);
   }
 
+  // Etkinliğin kendi adresi (#e-2026-11-29-ali-ayse): paylaşılan bağlantı sayfayı o etkinliğe kaydırır
+  function upId(e) {
+    return 'e-' + e._iso + '-' + (String(e.ad || '').toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+      .replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'etkinlik');
+  }
+  function goToEvent() {
+    if (!/^#e-/.test(location.hash)) return;
+    var id = location.hash.slice(1), el = [].filter.call(document.querySelectorAll('#yaklasan [data-eid]'), function (x) { return x.getAttribute('data-eid') === id; })[0];
+    if (el) el.scrollIntoView({ block: 'center' });
+  }
+
   function drawUpcoming() {
     var today = todayIso();
     var up = village.filter(function (e) { return e._iso && e._iso >= today; })
@@ -340,8 +351,8 @@
       .slice(0, 6);
     $('yaklasan').innerHTML = up.length ? up.map(function (e) {
       var det = [longDate(e._iso), e.saat, e.yer].filter(Boolean).join(' · ');
-      var src = imgSrc(e.foto), text = (e.tur ? e.tur + ': ' : '') + (e.ad || '') + '\n' + det + '\n' + location.href.split('#')[0] + '#takvim';
-      return '<div class="up"><strong>' + esc(e.tur || e.kisa || 'Etkinlik') + '</strong> · ' + esc(e.ad) +
+      var src = imgSrc(e.foto), text = (e.tur ? e.tur + ': ' : '') + (e.ad || '') + '\n' + det + '\n' + location.href.split('#')[0] + '#' + upId(e);
+      return '<div class="up" data-eid="' + esc(upId(e)) + '"><strong>' + esc(e.tur || e.kisa || 'Etkinlik') + '</strong> · ' + esc(e.ad) +
         '<br><span class="small muted">' + esc(det) + '</span>' +
         (src ? '<img class="up-img" src="' + esc(src) + '" alt="' + esc(e.ad) + '" loading="lazy">' : '') +
         '<a class="up-share" href="https://wa.me/?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener">WhatsApp\'ta paylaş</a></div>';
@@ -374,6 +385,7 @@
       });
       drawCalendar();
       drawUpcoming();
+      setTimeout(goToEvent, 300); window.addEventListener('hashchange', goToEvent);
     }).catch(function () {
       $('calGrid').innerHTML = '<p class="muted" style="grid-column:1/-1;padding:12px">Takvim şu anda yüklenemedi. Lütfen sayfayı yenileyin.</p>';
       $('yaklasan').innerHTML = '';
