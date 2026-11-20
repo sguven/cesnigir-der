@@ -43,6 +43,18 @@ main:focus{outline:none}
   .header{background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5)}
   .menu-btn{background:rgba(255,255,255,.55)}
 }
+/* telefonda başlığın arkasında köprü fotoğrafı durur. Ana sayfada büyük fotoğraf kaydırılıp geçince belirir (app.js: hdr-foto),
+   diğer sayfalarda hep oradadır. Üstündeki açık ton yazıyı okunur tutar. */
+@media (max-width:1000px){
+  .header::before,.header::after{content:"";position:absolute;inset:0;z-index:-1;opacity:0;transition:opacity .3s;pointer-events:none}
+  .header::before{background:url(../images/banner.jpg) 35% 96%/130% auto no-repeat #0D1B2E}
+  .header::after{background:linear-gradient(90deg,rgba(255,255,255,.66),rgba(255,255,255,.4) 62%,rgba(255,255,255,.2))}
+  .hdr-foto .header::before,.hdr-foto .header::after{opacity:1}
+  .hdr-foto .header{background:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .hdr-foto .logo b{color:var(--bordo-dark);text-shadow:0 0 6px #fff,0 0 2px #fff}
+  .hdr-foto .logo small{color:var(--ink);text-shadow:0 0 5px #fff,0 0 2px #fff}
+  .hdr-foto .menu-btn{background:rgba(255,255,255,.86)}
+}
 .header-in{display:flex;align-items:center;gap:16px;min-height:78px}
 .logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);min-width:0}
 .logo img{width:54px;height:54px;border-radius:50%;flex:none}
@@ -85,11 +97,6 @@ main:focus{outline:none}
 /* kahraman alan */
 .hero{background:#0D1B2E}
 .hero img{display:block;width:100%;max-height:520px;object-fit:cover;object-position:center}
-/* telefonda (dik): kaydırınca fotoğrafın üst yarısı cam başlığın arkasına girer, köprülü alt yarısı yerinde sabit kalır */
-@media (max-width:700px) and (orientation:portrait){
-  .hero{position:sticky;top:calc(var(--hh,82px) - 18.75vw);z-index:20;box-shadow:0 3px 8px rgba(35,26,20,.22)}
-  .hero img{height:37.5vw;max-height:none}
-}
 .welcome{background:var(--white);border-bottom:1px solid var(--line)}
 .welcome-in{display:flex;align-items:center;justify-content:space-between;gap:16px 28px;flex-wrap:wrap;padding:22px 18px}
 .welcome h1{font-size:clamp(24px,4vw,32px);color:var(--bordo-dark)}

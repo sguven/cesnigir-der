@@ -314,8 +314,15 @@
     });
     closeMenu();
     window.scrollTo(0, 0);
+    headerPhoto();
     var t = main.querySelector('h1');
     document.title = (page && t ? t.textContent + ' · ' : '') + 'Çeşnigir-Der · Köprüköy';
+  }
+
+  // Başlığın arkasındaki köprü fotoğrafı: ana sayfada büyük fotoğraf başlığın altından çıkana kadar bekler (site.css, .hdr-foto)
+  function headerPhoto() {
+    var hero = document.querySelector('.hero'), hdr = document.querySelector('.header');
+    document.body.classList.toggle('hdr-foto', !hero || hero.getBoundingClientRect().bottom <= hdr.getBoundingClientRect().bottom + 2);
   }
 
   function closeMenu() { $('nav').classList.remove('open'); $('menuBtn').setAttribute('aria-expanded', 'false'); }
@@ -343,10 +350,7 @@
 
   function bind() {
     window.addEventListener('hashchange', route);
-    // başlığın yüksekliği: sabit kalan fotoğraf tam altına otursun diye (site.css, .hero)
-    var hdr = document.querySelector('.header');
-    var setHH = function () { document.documentElement.style.setProperty('--hh', hdr.offsetHeight + 'px'); };
-    setHH(); window.addEventListener('resize', setHH); window.addEventListener('load', setHH);
+    window.addEventListener('scroll', headerPhoto, { passive: true }); window.addEventListener('resize', headerPhoto);
     $('menuBtn').addEventListener('click', function () {
       var open = !$('nav').classList.contains('open');
       $('nav').classList.toggle('open', open);
