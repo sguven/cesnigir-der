@@ -226,7 +226,7 @@
     { baslik: 'Yürüyüş ve Bisiklet Yolu', aciklama: 'Kanyon boyunca yaklaşık 6,5 km\'lik yürüyüş ve bisiklet yolu. Daha uzun rota Büklükale\'den başlar, köprüyü geçip Köprüköy\'den Behrek (Böğrek) Dağı eteklerine, Haydar Sultan Türbesi ve Deliler Kuyusu\'na uzanır. Yanınıza su ve atıştırmalık alın.', foto: 'images/kopru-merdiven.jpg', kredi: 'Fotoğraf: Ingeborg Simon, CC BY-SA 3.0 (Wikimedia Commons)' },
     { baslik: 'Kapulukaya Baraj Gölü Kıyısı', aciklama: 'Köyün batısında uzanan göl kıyısı; sazan ve tatlı su levreği avlanır. Sisli sabahlarda vadiyi kaplayan sis görülmeye değer.', foto: 'images/kopru-gol.jpg', kredi: 'Fotoğraf: Ingeborg Simon, CC BY-SA 3.0 (Wikimedia Commons)' },
     { baslik: 'Büklükale Ören Yeri', aciklama: 'Köprünün karşı kıyısında, Karakeçili yakınında 5 bin yıllık yerleşim. Japon arkeolog Kimiyoshi Matsumura başkanlığında 2009\'dan beri kazılıyor; 7 metre yüksekliğinde sur ve 2010\'da bulunan Hitit çivi yazılı tablet en bilinen buluntuları.', foto: 'images/buklukale.jpg', kredi: 'Fotoğraf: Ingeborg Simon, CC BY-SA 3.0 (Wikimedia Commons)' },
-    { baslik: 'Sulu Mağara (Keskin)', aciklama: 'Keskin\'de üç katlı, 285 metrelik mağara; içi yıl boyu 18 derece civarında. Yakınındaki Ceritkale Kanyonu\'nda yaklaşık 10 km\'lik doğa yürüyüşü yapılabiliyor.' }
+    { baslik: 'Sulu Mağara (Keskin)', aciklama: 'Keskin\'de üç katlı, 285 metrelik mağara; içi yıl boyu 18 derece civarında. Yakınındaki Ceritkale Kanyonu\'nda yaklaşık 10 km\'lik doğa yürüyüşü yapılabiliyor.', foto: 'images/sulu-magara.jpg' }
   ];
   function renderGezi(d) {
     var list = items(d), el = $('gezi-icerik');

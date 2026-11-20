@@ -210,6 +210,7 @@
       '<li><b>Sulu Mağara</b>Keskin\'de üç katlı, 285 metrelik mağara; yakınında Ceritkale Kanyonu yürüyüşü.</li></ul>' +
       '</div><aside><div class="box box-pad"><h3>Dernek Bilgileri</h3><ul class="facts">' +
       (d.baskan ? '<li><span>Dernek Başkanı</span>' + esc(d.baskan) + '</li>' : '') +
+      '<li><span>Kuruluş</span>Eylül 2026</li>' +
       '<li><span>Merkez</span>Ankara Caddesi, Çarşı Merkezi</li>' +
       '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li>' +
       (d.telefon ? '<li><span>Telefon</span>' + esc(d.telefon) + '</li>' : '') + '</ul></div>' + kasa + '</aside></div></section>';
