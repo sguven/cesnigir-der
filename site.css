@@ -42,13 +42,13 @@ main:focus{outline:none}
 /* başlığın arkasında köprü fotoğrafı durur (telefonda da bilgisayarda da). Ana sayfada büyük fotoğraf başlığın altına girdikçe
    kaydırmayla birlikte yavaş yavaş belirir (app.js: --hf, 0 ile 1 arası), diğer sayfalarda hep oradadır. Üstündeki açık ton yazıyı okunur tutar. */
 .header::before,.header::after{content:"";position:absolute;inset:0;z-index:-1;opacity:var(--hf,0);pointer-events:none}
-.header::before{background:url(images/kapak.jpg) 50% 88%/cover no-repeat #0D1B2E}
+.header::before{background:url(images/kapak.jpg) 50% 66%/cover no-repeat #0D1B2E}
 .header::after{background:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.56))}
 .logo b{color:var(--bordo-dark);text-shadow:0 0 6px #fff,0 0 2px #fff}
 .logo small{color:var(--ink);text-shadow:0 0 5px #fff,0 0 2px #fff}
 .nav a:not([aria-current="page"]):not(:hover){text-shadow:0 0 6px #fff,0 0 2px #fff}
 @media (max-width:1000px){
-  .header::before{background-position:35% 96%;background-size:130% auto}
+  .header::before{background-position:45% 72%;background-size:150% auto}
   .header::after{background:linear-gradient(90deg,rgba(255,255,255,.66),rgba(255,255,255,.4) 62%,rgba(255,255,255,.2))}
   .nav a:not([aria-current="page"]):not(:hover){text-shadow:none}
   .menu-btn{background:rgba(255,255,255,.86)}
