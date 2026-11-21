@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "tur": "Düğün",
+    "tarih": "2026-11-22",
+    "ad": "Uğur ile Eda'nın düğünü",
+    "saat": "12.00 – 16.00",
+    "yer": "Köprüköy",
+    "foto": "images/yuklenen/2026-11-22-dugun-ugur-eda.jpg"
+  },
+  {
+    "tur": "Düğün",
+    "tarih": "2026-11-28",
+    "ad": "Sunur ile Eren'in düğünü ve nişanı",
+    "saat": "12.00",
+    "yer": "Köprüköy, erkek evi",
+    "foto": "images/yuklenen/2026-11-28-dugun-davetiye.jpg"
+  }
+]
