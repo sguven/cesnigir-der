@@ -23,7 +23,7 @@
       return (x < y ? -1 : x > y ? 1 : 0) * dir;
     });
   }
-  function pid(p) { return (C.normIso(p.tarih) || 'x') + '-' + (C.slug(p.baslik).slice(0, 50) || 'duyuru'); }
+  function pid(p) { return C.shareId('d', p); }
   function excerpt(t, n) {
     t = String(t || '').replace(/\s+/g, ' ').trim();
     return t.length > n ? t.slice(0, n).replace(/\s+\S*$/, '') + '…' : t;
@@ -85,7 +85,11 @@
   /* Paylaşım: WhatsApp ve Facebook düğmeleri. Bağlantı doğrudan o etkinliğe, ilana ya da duyuruya gider (…/?e=…, ?i=…, ?d=…:
      Facebook # işaretinden sonrasını attığı için soru işaretli adres kullanılır; sayfa açılınca openShared() ilgili sayfaya geçer).
      o: { key: 'e'|'i'|'d', id, tur, title, det, photo }  ·  big: ayrıntı sayfasındaki büyük düğmeler */
-  function shareUrl(o) { return location.href.split(/[?#]/)[0] + '?' + o.key + '=' + encodeURIComponent(o.id); }
+  // Fotoğrafı olan kaydın bağlantısı kendi paylaşım sayfasına gider (p/…html): WhatsApp ve Facebook önizlemede o fotoğrafı gösterir.
+  function shareUrl(o) {
+    var base = location.href.split(/[?#]/)[0].replace(/[^\/]*$/, '');
+    return o.photo ? base + C.sharePath(o.key, o.id) : base + '?' + o.key + '=' + encodeURIComponent(o.id);
+  }
   function shareButtons(o, big) {
     var url = shareUrl(o), text = (o.tur ? upper(o.tur) + ': ' : '') + (o.title || '') + (o.det ? '\n' + o.det : '') + '\n' + url;
     var wa = '<a class="' + (big ? 'btn btn-green' : 's-wa') + '" href="https://wa.me/?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener"' +

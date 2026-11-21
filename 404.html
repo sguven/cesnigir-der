@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Çeşnigir-Der</title>
+<script>
+/* Bulunamayan adres ana sayfaya gider. Paylaşım sayfası henüz yazılmamış bir kayıt (…/p/e-….html) ise doğrudan o kayda gider. */
+(function () {
+  var m = /^(.*\/)p\/([dei])-(.+?)(\.html)?$/.exec(location.pathname);
+  if (m) return location.replace(m[1] + '?' + m[2] + '=' + m[3]);
+  var seg = location.pathname.split('/')[1] || '';
+  location.replace(/\.github\.io$/.test(location.hostname) && seg ? '/' + seg + '/' : '/');
+})();
+</script>
+</head>
+<body style="font-family:sans-serif;padding:24px;font-size:20px"><p><a href="/">Çeşnigir-Der ana sayfa</a></p></body>
+</html>

@@ -57,3 +57,10 @@ python3 -m http.server 8000
 ```
 
 Sonra tarayıcıda `http://localhost:8000` adresini açın.
+
+## Paylaşımda fotoğraf
+
+Fotoğrafı olan her duyuru, etkinlik ve ilan için `p/` klasöründe küçük bir paylaşım sayfası tutulur. WhatsApp ve Facebook önizlemedeki
+fotoğrafı ve başlığı bu sayfadan alır. Yönetim paneli kaydı yayınlarken sayfayı kendisi yazar. Kayıtlar panel dışında değiştiyse:
+
+    node araclar/paylasim-sayfalari.js

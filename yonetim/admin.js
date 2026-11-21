@@ -490,6 +490,16 @@
       }).catch(function (e) { failScreen(e, function () { screenForm(name, idx); }); });
   }
 
+  /* Fotoğraflı kaydın paylaşım sayfasını (p/…html) yazar: WhatsApp ve Facebook paylaşımında o fotoğraf çıksın diye.
+     Yazılamazsa kayıt yine yayınlanır; bağlantı çalışır, yalnızca önizlemede fotoğraf çıkmaz. */
+  function writeSharePage(name, item) {
+    var key = C.SHARE_COLS[name], pg = key && C.sharePage(key, item, location.href.split(/[?#]/)[0].replace(/yonetim\/[^\/]*$/, ''));
+    if (!pg) return Promise.resolve();
+    return api('GET', '/contents/' + pg.path + '?ref=' + BRANCH).then(function (r) { return r.sha; }, function () { return null; })
+      .then(function (sha) { return putFile(pg.path, textToB64(pg.html), sha, 'Panel: paylaşım sayfası – ' + (item.baslik || item.ad || '')); })
+      .catch(function () { /* önemli değil */ });
+  }
+
   function clean(v) {
     var o = {};
     Object.keys(v).forEach(function (k) { if (v[k] !== '' && v[k] != null) o[k] = v[k]; });
@@ -497,7 +507,7 @@
   }
 
   function saveItem(name, v, orig) {
-    var col = COLS[name];
+    var col = COLS[name], saved;
     var step = form.photo.b64 ? (busy('Fotoğraf yükleniyor…'), uploadPhoto(form.photo.b64)) : Promise.resolve(form.photo.path);
     step.then(function (path) {
       v.foto = path || '';
@@ -505,6 +515,7 @@
       return updateJson(col.file, function (data) {
         var list = C.arr(data), item = clean(v);
         if (!col.fields.some(function (f) { return f.name === 'foto'; })) delete item.foto;
+        saved = item;
         if (orig) {
           var k = list.findIndex(function (x) { return JSON.stringify(x) === orig; });
           if (k < 0) throw { status: 'gone' };
@@ -512,7 +523,7 @@
         } else list.unshift(item);
         return list;
       }, 'Panel: ' + col.one + (orig ? ' düzenlendi – ' : ' eklendi – ') + (v.baslik || v.ad || ''));
-    }).then(function () {
+    }).then(function () { return saved && writeSharePage(name, saved); }).then(function () {
       busy(false); dirty = false; lastList[name] = null;
       doneScreen(orig ? 'Değişiklik kaydedildi' : 'Yayınlandı', '#/liste/' + name);
     }).catch(function (e) { busy(false); dialog('Kaydedilemedi', errText(e), 'Tamam', { single: true }); });
