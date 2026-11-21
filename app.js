@@ -45,13 +45,6 @@
   function people(d) {
     return ((d.baskan || d.telefon) ? person(d.baskan, d.telefon) : '') + ((d.baskan2 || d.telefon2) ? person(d.baskan2, d.telefon2) : '');
   }
-  function contactButtons(d, wide) {
-    var tel = C.telHref(d.telefon), wa = C.waHref(d.whatsapp || d.telefon), h = '';
-    if (tel) h += '<a class="btn" href="tel:' + esc(tel) + '">' + icon('phone') + 'Derneği Ara</a>';
-    if (wa) h += '<a class="btn btn-green" href="' + esc(wa) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp</a>';
-    return '<div class="btn-row"' + (wide ? '' : '') + '>' + h + '</div>';
-  }
-
   /* ---------- parçalar ---------- */
   function newsCard(p) {
     var src = img(p.foto);
@@ -424,14 +417,13 @@
 
   function pageContact() {
     var d = data.dernek, mail = /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(d.eposta || '') ? d.eposta : '';
-    return band('İletişim', 'Bize telefonla, WhatsApp\'tan ya da dernek binasında ulaşabilirsiniz.') +
+    return band('İletişim', 'Bize telefonla ya da dernek binasında ulaşabilirsiniz.') +
       '<section class="section"><div class="container grid-main"><div class="box"><iframe class="map" title="Çeşnigir-Der haritası" loading="lazy" ' +
       'src="https://www.google.com/maps?q=39.5765122,33.4357454&z=17&output=embed"></iframe></div>' +
-      '<aside><div class="box box-pad"><h3>Bize Ulaşın</h3><ul class="facts" style="margin-bottom:14px">' +
+      '<aside><div class="box box-pad"><h3>Bize Ulaşın</h3><ul class="facts">' +
       peopleRows(d) +
       (mail ? '<li><span>E-posta</span><a href="mailto:' + esc(mail) + '">' + esc(mail) + '</a></li>' : '') +
-      '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li></ul>' +
-      contactButtons(d) + '</div></aside></div></section>';
+      '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li></ul></div></aside></div></section>';
   }
 
   /* ---------- yönlendirme ---------- */
