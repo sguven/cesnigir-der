@@ -12,7 +12,7 @@
 
   /* ---------------- bölümler ---------------- */
   var ORNEK = {
-    'Vefat': ['Örnek: Köyümüzden Ahmet Yılmaz vefat etmiştir', 'Örnek: Cenazesi yarın öğle namazına müteakip köy camiinden kaldırılacaktır. Merhuma Allah\'tan rahmet, ailesine başsağlığı dileriz.'],
+    'Vefat': ['Örnek: Ahmet YILMAZ Hakk\'ın rahmetine kavuşmuştur', 'Örnek: Cenazesi yarın öğle namazına müteakip köy camiinden kaldırılacaktır. Merhuma Allah\'tan rahmet, ailesine başsağlığı dileriz.'],
     'Düğün': ['Örnek: Ali ile Ayşe evleniyor', 'Örnek: Düğünümüz 12 Temmuz Cumartesi günü köy meydanında yapılacaktır. Tüm köylülerimiz davetlidir.'],
     'Nişan': ['Örnek: Mehmet ile Zeynep nişanlanıyor', 'Nişanın yeri, günü ve saati…'],
     'Mevlit': ['Örnek: Merhum Hasan Kaya için mevlit', 'Örnek: Cuma günü ikindi namazından sonra köy camiinde okunacaktır.'],
