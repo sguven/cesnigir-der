@@ -360,18 +360,3 @@ button.cal-day:hover{filter:brightness(.93)}
 .cal-detail .ev{border-top:0}
 /* dik çekilmiş seyir terası fotoğrafında cam teras kartta görünsün */
 .mk img[src*="gezi-seyir-terasi"]{object-position:50% 80%}
-
-/* arşiv belgeleri */
-.doc-card{margin:0 0 16px}
-.doc-date{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:4px}
-.doc-date b{font-family:var(--serif);font-size:22px;color:var(--bordo-dark)}
-.doc-date span{font-size:15px;color:var(--ink2)}
-.doc-kunye{margin:0 0 10px;font-size:15px;color:var(--ink2)}
-.doc-ozet span{font-weight:700}
-.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:12px}
-.doc-grid figure{margin:0}
-.doc-grid img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#fff}
-.doc-grid figcaption{font-size:14px;color:var(--ink2);margin-top:4px}
-img.doc-wide{display:block;width:100%;border-radius:8px;border:1px solid var(--line)}
-.doc-grid figure.full{grid-column:1/-1}
-.doc-grid figure.full img{aspect-ratio:auto;object-fit:contain}

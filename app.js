@@ -335,7 +335,7 @@
       '<li><span>Merkez</span>Ankara Caddesi, Çarşı Merkezi</li>' +
       '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li>' +
       '</ul></div>' + kasa + '</aside></div></section>' +
-      boardsSection(d) + villageSection() + arsivSection() + placesSection();
+      boardsSection(d) + villageSection() + placesSection();
   }
 
   function rows(list) {
@@ -368,12 +368,9 @@
     ['13. yüzyıl', 'Köprü Anadolu Selçukluları döneminde, yanındaki bir hanla birlikte yapılır. Sanat tarihçisi Fügen İlter\'e göre İslam öncesine ait eski bir köprünün temelleri üzerine kurulmuştur. Han bugün ayakta değildir.'],
     ['1402', 'Rivayete göre Timur\'un ordusu Ankara Savaşı\'na giderken köprüden geçer.'],
     ['16. yüzyıl', 'Rivayete göre Yavuz Sultan Selim\'in Mısır Seferi hazırlıkları sırasında köprü elden geçirilir; onarımın Mimar Sinan\'a ait olduğu söylenir.'],
-    ['1609', 'İki padişah emri: Temmuz\'da Ankara Beyi\'ne Çaşnigir köprüsü civarındaki palangalarda eşkıya tahkiki, Kasım\'da Çaşnigir Köprüsü yani Kırkkeçili kalesindeki eşkıyanın temizlenmesi emredilir.'],
     ['Osmanlı dönemi', 'Kayalık ve tehlikeli geçidi korumak için köprü çevresine 50 kadar derbendci (geçit bekçisi) yerleştirilir. Bekçilerin aileleri zamanla bugünkü köyün çekirdeğini oluşturur.'],
-    ['1724', 'Bir padişah emrinde Ankara sancağının sınırı "Çaşnigir" olarak anılır; yolların eşkıyaya karşı korunması istenir.'],
-    ['1777', 'Köy, devlet kayıtlarında "Çaşnigir Köprüsü karyesi" adıyla geçer. Köy ahalisi adına Köprülüzâde Osman Ağa, Rakka\'da iskân edilen Kürt tayfası ve oymaklarının arazi ve bağlara tecavüz, mal gasbı ve adam öldürmesinden şikâyet eder.'],
+    ['1777', 'Köy, devlet kayıtlarında "Çaşnigir Köprüsü" adıyla geçer.'],
     ['1791', 'Çaşnigir Derbendi Ağası Hacı Mehmed Ağa ölür. Yerine oğlu Süleyman atanır, fakat nüfuzlu Cabbarzâde Süleyman Bey ağalığı kendi üzerine aldırır; padişah fermanıyla oğula başka bir görev verilir.'],
-    ['1807', 'Konur kazasındaki Çaşnigir Köprüsü derbendinin muhafızı Hacı Mehmed\'in ölümü üzerine görev Cabbarzâde Süleyman Bey\'e verilir.'],
     ['1815', 'Kayıtlarda köyün adı "Çaşnigir Derbendi" olur. Aynı yıl Köprülü oğullarından Hacı Ali, Hüsrev Şir ve Mehmed Emin\'in halktan fazla para istediği şikâyeti üzerine Kırşehir Mutasarrıfı Vezir Ali Paşa\'ya inceleme emri verilir.'],
     ['1818', 'Derbendi korumakla görevli üç köyün halkı, vergiden muaf oldukları hâlde valilerin vergi istediğini İstanbul\'a şikâyet eder.'],
     ['1822', 'Halka zulmeden derbend ağası Deli Battal yakalanır ve padişah emriyle cezalandırılır.'],
@@ -452,56 +449,6 @@
       '<li>1852\'deki onarım açık eksiltmeyle en ucuz fiyatı veren ustaya verilmişti.</li>' +
       '<li>Gün batımında köprünün sudaki yansıması, Türkiye\'nin dört bir yanından fotoğrafçıları köye getiriyor.</li></ul></div>' +
       '</aside></div></section>';
-  }
-
-  /* Arşiv belgeleri: özetler Devlet Arşivleri kataloğundan aynen alınmıştır */
-  var ARSIV = [
-    { tarih: '25 Temmuz 1609', hicri: '22 Rebiülâhir 1018', kunye: 'BOA, A.{DVNSMHM.d. (Mühimme Defteri) 78 / 504',
-      ozet: 'Ankara Beyi Behram Bey: Çaşnigir köprüsü civarındaki palangalarda eşkıya tahkiki ve gerekse palangaların yıktırılması.',
-      foto: [['1609-mhm78-504-a.jpg', 'Mühimme Defteri 78, hükmün bulunduğu sayfa'], ['1609-mhm78-504-b.jpg', 'Aynı hükmün devamı']] },
-    { tarih: '30 Kasım 1609', hicri: '3 Ramazan 1018', kunye: 'BOA, A.{DVNSMHM.d. (Mühimme Defteri) 78 / 1234',
-      ozet: 'Ankara mollasına ve Çukurcak kadısına: Çukurcak kazası Çaşnigir Köprüsü yani Kırkkeçili kalesindeki eşkıya ve fesat ehlinin temizlenmesi.', foto: [] },
-    { tarih: '23 Mayıs 1724', hicri: '29 Şaban 1136', kunye: 'BOA, A.{DVNSMHM.d. (Mühimme Defteri) 131 / 1456',
-      ozet: 'Anadolu\'nun solkolunda vaki Bolu ve Kastamonu sancaklarından Sivas eyaleti hududuna varınca ve ortakol ile solkol arasında Geyve ve Torbalı taraflarında Ankara sancağının hududu nihayetinde Çaşnigir gerisine varınca vaki olan cadde tarikinin yemin ve yesarında olan kadılara (…): Sefer dolayısıyla Anadolu\'daki pek çok eyalet ve elviye mutasarrıflarının seferde olmalarını fırsat bilen eşkıyanın faaliyete geçmesi beklendiğinden, zikredilen mahallerin muhafaza altına alınarak eşkıyanın ahaliye ve yolculara zarar vermesine müsaade edilmemesi.', foto: [] },
-    { tarih: '29 Ekim 1777', hicri: '27 Ramazan 1191', kunye: 'BOA, C..ADL. (Cevdet Adliye) 38 / 2270, 12 görüntü',
-      ozet: 'Kalecikkeskini kazasına tabi Konor nahiyesinin Çaşnigir Köprüsü karyesindeki arazi ve bağlarına Rakka\'da iskan edilen kürt tayfasından ve oymaklardan adları yazılı şahıslar tarafından tecavüz edilerek malları gasb, katl-i nüfus ve ırzlarına cüret edilmekte olduğundan şikayetle men\'i taaddileri istirhamına dair ahali namına Köprülüzade Osman Ağa imzalı arzuhal ile dört kıta ilam.',
-      foto: [['1777-cadl-38-2270-ozet.jpg', 'Katalogdaki belge özeti'], ['1777-cadl-38-2270-arzuhal.jpg', 'Köprülüzâde Osman Ağa imzalı arzuhal'], ['1777-cadl-38-2270-ilam-1.jpg', 'İlâm'], ['1777-cadl-38-2270-ilam-2.jpg', 'İlâm'], ['1777-cadl-38-2270-ilam-3.jpg', 'İlâm, tarih satırıyla'], ['1777-cadl-38-2270-ilam-4.jpg', 'İlâm, mühürlü'], ['1777-cadl-38-2270-ilam-5.jpg', 'İlâm']] },
-    { tarih: '29 Mayıs 1807', hicri: '21 Rebiülevvel 1222', kunye: 'BOA, AE.SSLM.III (Ali Emiri, III. Selim) 313 / 18217',
-      ozet: 'Kırşehri sancağının Konur kazasında vaki Çaşnigir Köprüsü derbendinin aşair ve kabail eşkıyasından muhafazası için miriden senevi üç yüz elli guruş mal ile muhafız olan Hacı Mehmed\'in ölümü üzerine mahlul vazifenin Cabbarzade Süleyman Bey\'in uhdesine ihalesiyle mahallindeki kaydının terkini ve beratının itası.',
-      foto: [['1807-ae-sslm3-18217-a.jpg', 'Belgenin metni'], ['1807-ae-sslm3-18217-b.jpg', 'Belgenin metni (devam)'], ['1807-ae-sslm3-18217-derkenar.jpg', 'Kenar notu'], ['1807-ae-sslm3-18217-arka.jpg', 'Arka yüz']] }
-  ];
-  var DEFTER = [
-    { tarih: '15 Mart 1839', hicri: '29 Zilhicce 1254', kunye: 'BOA, NFS.d. (Nüfus Defterleri) 3542: Konur kazası müslim nüfus defteri',
-      bilgi: 'Defter "Karye-i Köprü-i Çeşnigir" başlığıyla, yani Köprüköy\'le başlar. Yalnızca erkekler yazılmıştır; her kişinin boyu, sakalı, mesleği, baba adı ve yaşı verilir.',
-      foto: [['1839-nfs-3542-koy-baslik.jpg', 'Defterin Köprüköy ile başlayan ilk sayfası']] },
-    { tarih: '1840–1841', hicri: '1256', kunye: 'BOA, NFS.d. (Nüfus Defterleri) 3543: Kırşehri sancağında Konur kazasının tahrir-i nüfus defteri',
-      bilgi: 'Köy bölümü "Karye-i Köprü-i Çeşnigir" başlığıyla başlar. Köy bölümünde 497 erkek kayıtlıdır.',
-      foto: [['1840-nfs-3543-koy-baslik.jpg', 'Köy bölümünün başladığı sayfa']] },
-    { tarih: '1845', hicri: '1261', kunye: 'BOA, ML.VRD.TMT.d. (Temettuat Defterleri), Çeşnigir Köprüsü karyesi',
-      bilgi: 'Defterin başlığı: "Çeşnigir Köprüsü karyesinde mukim ahalinin emlâk ve arazi ve temettuatlarının miktarını mübeyyin defterdir." Müslüman ahali defterinde 182 hane, ayrı tutulan gayrimüslim reaya defterinde 7 hane yazılıdır. Her hanenin evi, tarlası, bağı, hayvanları ve yıllık kazancı kuruş olarak verilir.',
-      foto: [['1845-temettuat-ilk-sayfa.jpg', 'Müslüman ahali defterinin ilk sayfası'], ['1845-temettuat-gayrimuslim.jpg', 'Gayrimüslim reaya defteri, Çeşnigir Köprüsü bölümü'], ['1845-temettuat-gayrimuslim-son.jpg', 'Gayrimüslim reaya defterinin son sayfası']] }
-  ];
-  function arsivFoto(list) {
-    if (!list.length) return '';
-    return '<div class="doc-grid">' + list.map(function (f) {
-      var src = B + 'images/arsiv/' + f[0];
-      return '<figure' + (/ozet/.test(f[0]) ? ' class="full"' : '') + '><a href="' + src + '" target="_blank" rel="noopener"><img src="' + src + '" alt="' + esc(f[1]) + '" loading="lazy"></a><figcaption>' + esc(f[1]) + '</figcaption></figure>';
-    }).join('') + '</div>';
-  }
-  function arsivKart(x, metin) {
-    return '<article class="box box-pad doc-card"><div class="doc-date"><b>' + esc(x.tarih) + '</b><span>H. ' + esc(x.hicri) + '</span></div>' +
-      '<p class="doc-kunye">' + esc(x.kunye) + '</p>' + metin + arsivFoto(x.foto) + '</article>';
-  }
-  function arsivSection() {
-    return '<section class="section"><div class="container"><div class="sec-head"><h2>Arşiv Belgelerinde Köprüköy</h2></div>' +
-      '<p>Aşağıdaki kayıtlar T.C. Cumhurbaşkanlığı Devlet Arşivleri Başkanlığı Osmanlı Arşivi\'nden alınmıştır. Belge özetleri arşiv kataloğunda yazıldığı gibi aktarılmış, yorum eklenmemiştir. Fotoğraflara dokunarak büyütebilirsiniz.</p>' +
-      '<h3 style="margin-top:22px">Padişah emirleri ve şikâyetler</h3>' +
-      ARSIV.map(function (x) { return arsivKart(x, '<p class="doc-ozet"><span>Katalog özeti:</span> ' + esc(x.ozet) + '</p>'); }).join('') +
-      '<figure class="fig" style="margin-top:10px"><a href="' + B + 'images/arsiv/katalog-casnigir-eskiya.jpg" target="_blank" rel="noopener"><img class="doc-wide" src="' + B + 'images/arsiv/katalog-casnigir-eskiya.jpg" alt="Devlet Arşivleri kataloğunda \'Çaşnigir eşkıya\' araması sonuçları" loading="lazy"></a><figcaption>Arşiv kataloğunda "Çaşnigir eşkıya" araması: 1609, 1724 ve 1807 tarihli kayıtların özetleri.</figcaption></figure>' +
-      '<h3 style="margin-top:22px">Nüfus ve vergi defterleri</h3>' +
-      DEFTER.map(function (x) { return arsivKart(x, '<p>' + esc(x.bilgi) + '</p>'); }).join('') +
-      '<p class="muted small" style="margin-top:16px">Kaynak: Devlet Arşivleri Başkanlığı çevrim içi kataloğu (katalog.devletarsivleri.gov.tr). Miladi tarihler Hicri tarihlerden çevrilmiştir.</p>' +
-      '</div></section>';
   }
 
   var GEZI = [
