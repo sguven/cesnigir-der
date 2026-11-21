@@ -130,6 +130,25 @@ main:focus{outline:none}
 
 /* canlı yayın */
 .live-dot{display:inline-block;width:14px;height:14px;border-radius:50%;background:#D93025;margin-right:10px;vertical-align:middle}
+/* karşılama bandının sağında küçük oynatıcı; dokununca büyür */
+.live-mini{width:300px;max-width:100%;margin-left:auto}
+.live-label{font-weight:700;font-size:16px;color:var(--bordo-dark);margin-bottom:6px}
+.live-label .live-dot{width:11px;height:11px;margin-right:7px;animation:livePulse 1.6s ease-in-out infinite}
+@keyframes livePulse{50%{opacity:.35}}
+.live-frame{position:relative;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(35,26,20,.18)}
+.live-open{position:absolute;inset:0;width:100%;height:100%;border:0;padding:0;margin:0;background:transparent;cursor:zoom-in;display:block}
+.live-open:hover,.live-open:focus-visible{background:rgba(0,0,0,.12)}
+.live-tag{position:absolute;top:8px;left:8px;background:#D93025;color:#fff;font-size:12px;font-weight:700;letter-spacing:.06em;padding:2px 7px;border-radius:4px}
+.live-zoom{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.7);color:#fff;font-size:15px;font-weight:700;padding:5px 10px;border-radius:6px}
+.live-close{display:none}
+/* büyük hâl: karanlık zemin, ortada geniş oynatıcı */
+.live-mini.big::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50}
+.live-mini.big .live-frame{position:fixed;z-index:51;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:6px;overflow:visible;
+  width:min(94vw,calc((100vh - 130px) * 16 / 9));width:min(94vw,calc((100dvh - 130px) * 16 / 9))}
+.live-mini.big .live-close{display:block;position:absolute;right:0;bottom:calc(100% + 10px);background:#fff;color:var(--ink);border:0;border-radius:8px;
+  font-size:18px;font-weight:700;padding:8px 16px;cursor:pointer}
+@media (max-width:640px){ .live-mini{width:240px} }
+@media (prefers-reduced-motion:reduce){ .live-label .live-dot{animation:none} }
 
 /* rozetler */
 .badge{display:inline-block;font-size:15px;font-weight:700;padding:2px 10px;border-radius:4px;background:var(--sand);color:var(--ink);letter-spacing:.02em}

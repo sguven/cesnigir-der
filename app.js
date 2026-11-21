@@ -169,12 +169,16 @@
   /* ---------- sayfalar ---------- */
   function pageHome() {
     var d = data.dernek, news = byDate(data.duyurular, -1).slice(0, 4), ev = upcoming(45).slice(0, 4);
+    // Canlı görüntü: karşılama bandının sağında küçük oynar; dokununca aynı oynatıcı ekranı kaplayacak kadar büyür
+    // (oynatıcı yeniden yüklenmez, yalnızca boyutu değişir). Kapat, karanlık alana dokunmak ya da Esc eski hâline döndürür.
+    var live = C.ytEmbed(d.canli_yayin), liveBox = live ? '<div class="live-mini" id="liveBox">' +
+      '<div class="live-label"><span class="live-dot" aria-hidden="true"></span>Köyden Canlı Görüntü</div>' +
+      '<div class="live-frame">' + C.ytFrame(live) +
+      '<button type="button" class="live-open" id="liveOpen" aria-label="Canlı görüntüyü büyüt"><span class="live-tag">CANLI</span><span class="live-zoom">⤢ Büyüt</span></button>' +
+      '<button type="button" class="live-close" id="liveClose" hidden>✕ Kapat</button></div></div>' : '';
     var h = '<section class="hero"><img src="' + B + 'images/kapak.jpg" width="1584" height="672" decoding="async" alt="Gün batımında Çeşnigir Köprüsü ve Türk bayrağı, üzerinde Çeşnigir-Der yazısı."></section>' +
       '<div class="welcome"><div class="container welcome-in" style="padding:22px 18px"><div><h1>Köprüköy\'e hoş geldiniz</h1>' +
-      '<p>Köyümüzden duyurular, vefat ve düğün haberleri, etkinlikler ve fotoğraflar.</p></div></div></div>';
-    var live = C.ytEmbed(d.canli_yayin);
-    if (live) h += '<section class="section alt"><div class="container" style="max-width:960px"><div class="sec-head"><h2><span class="live-dot" aria-hidden="true"></span>Köyden Canlı Görüntü</h2></div>' +
-      '<div class="box" style="position:relative;aspect-ratio:16/9;background:#000">' + C.ytFrame(live) + '</div></div></section>';
+      '<p>Köyümüzden duyurular, vefat ve düğün haberleri, etkinlikler ve fotoğraflar.</p></div>' + liveBox + '</div></div>';
 
     h += '<section class="section"><div class="container grid-main"><div>' +
       '<div class="sec-head"><h2>Son Duyurular</h2><a href="#/duyurular">Tüm duyurular ›</a></div>' +
@@ -571,8 +575,19 @@
   function closeV() { $('viewer').hidden = true; $('vImg').removeAttribute('src'); document.body.style.overflow = '';
     if (last && last.focus) { try { last.focus(); } catch (e) { /* yok say */ } } }
 
+  /* ---------- canlı görüntü: küçük / büyük ---------- */
+  function liveBig(on) {
+    var box = $('liveBox'); if (!box) return;
+    box.classList.toggle('big', on);
+    $('liveOpen').hidden = on; $('liveClose').hidden = !on;
+    document.body.style.overflow = on ? 'hidden' : '';
+    (on ? $('liveClose') : $('liveOpen')).focus();
+  }
+
   function bind() {
     window.addEventListener('hashchange', route);
+    // sayfadan çıkılırken büyük canlı görüntü açık kaldıysa kaydırma kilidini bırak
+    window.addEventListener('hashchange', function () { if (!document.querySelector('.live-mini.big') && $('viewer').hidden) document.body.style.overflow = ''; });
     C.bindShare();
     window.addEventListener('scroll', headerPhoto, { passive: true }); window.addEventListener('resize', headerPhoto);
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -581,6 +596,9 @@
     document.addEventListener('click', function (e) {
       // menü açıkken dışına dokunmak yalnızca menüyü kapatır
       if ($('nav').classList.contains('open') && !e.target.closest('.header')) { closeMenu(); e.preventDefault(); return; }
+      if (e.target.closest('#liveOpen')) { liveBig(true); return; }
+      // büyükken Kapat'a ya da oynatıcının dışındaki karanlık alana dokunmak küçültür
+      if (e.target.closest('#liveClose') || (e.target.id === 'liveBox' && e.target.classList.contains('big'))) { liveBig(false); return; }
       if (e.target.closest('a[href^="#/"]')) { tapped = true; setTimeout(function () { tapped = false; }, 600); }
       var f = e.target.closest('[data-filter]');
       if (f) { filter = f.getAttribute('data-filter'); main.innerHTML = pageNews(); var b = main.querySelector('[data-filter="' + filter + '"]'); if (b) b.focus(); return; }
@@ -599,6 +617,7 @@
     $('vNext').addEventListener('click', function () { showV(vIdx + 1); });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && $('nav').classList.contains('open')) { closeMenu(); $('menuBtn').focus(); return; }
+      if (e.key === 'Escape' && $('liveBox') && $('liveBox').classList.contains('big')) { liveBig(false); return; }
       if ($('viewer').hidden) return;
       if (e.key === 'Escape') closeV();
       else if (e.key === 'ArrowLeft' && vList.length > 1) showV(vIdx - 1);
