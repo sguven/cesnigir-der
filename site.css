@@ -354,3 +354,5 @@ button.cal-day:hover{filter:brightness(.93)}
 .cal-detail h3{font-size:18px;margin:0;padding:12px 18px 0}
 .cal-detail p{margin:0;padding:12px 18px;font-size:16px}
 .cal-detail .ev{border-top:0}
+/* dik çekilmiş seyir terası fotoğrafında cam teras kartta görünsün */
+.mk img[src*="gezi-seyir-terasi"]{object-position:50% 80%}
