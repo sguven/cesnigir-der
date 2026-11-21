@@ -131,7 +131,7 @@
     var d = data.dernek, news = byDate(data.duyurular, -1).slice(0, 4), ev = upcoming(45).slice(0, 4);
     var h = '<section class="hero"><img src="' + B + 'images/banner.jpg" width="1800" height="675" decoding="async" alt=""Gün batımında Çeşnigir Köprüsü ve Türk bayrağı, üzerinde Çeşnigir-Der yazısı."></section>' +
       '<div class="welcome"><div class="container welcome-in" style="padding:22px 18px"><div><h1>Köprüköy\'e hoş geldiniz</h1>' +
-      '<p>Köyümüzden duyurular, vefat ve düğün haberleri, etkinlikler ve fotoğraflar.</p></div>' + contactButtons(d) + '</div></div>';
+      '<p>Köyümüzden duyurular, vefat ve düğün haberleri, etkinlikler ve fotoğraflar.</p></div></div></div>';
     var live = C.ytEmbed(d.canli_yayin);
     if (live) h += '<section class="section alt"><div class="container" style="max-width:960px"><div class="sec-head"><h2><span class="live-dot" aria-hidden="true"></span>Köyden Canlı Görüntü</h2></div>' +
       '<div class="box" style="position:relative;aspect-ratio:16/9;background:#000">' + C.ytFrame(live) + '</div></div></section>';
