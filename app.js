@@ -38,9 +38,10 @@
     return '<div class="kisi"><b>' + esc(ad || '') + '</b>' +
       (no ? (tel ? '<a href="tel:' + esc(tel) + '">' + esc(no) + '</a>' : '<span>' + esc(no) + '</span>') : '') + '</div>';
   }
-  function peopleRows(d) {
-    return ((d.baskan || d.telefon) ? '<li><span>Dernek Başkanı</span>' + person(d.baskan, d.telefon) + '</li>' : '') +
-      ((d.baskan2 || d.telefon2) ? '<li><span>Başkan Yardımcısı</span>' + person(d.baskan2, d.telefon2) + '</li>' : '');
+  // noTel: yalnız isimler (Hakkımızda); İletişim'de numaralarıyla
+  function peopleRows(d, noTel) {
+    return (d.baskan ? '<li><span>Dernek Başkanı</span>' + person(d.baskan, noTel ? '' : d.telefon) + '</li>' : (!noTel && d.telefon ? '<li><span>Dernek Başkanı</span>' + person('', d.telefon) + '</li>' : '')) +
+      (d.baskan2 ? '<li><span>Başkan Yardımcısı</span>' + person(d.baskan2, noTel ? '' : d.telefon2) + '</li>' : (!noTel && d.telefon2 ? '<li><span>Başkan Yardımcısı</span>' + person('', d.telefon2) + '</li>' : ''));
   }
   function people(d) {
     return ((d.baskan || d.telefon) ? person(d.baskan, d.telefon) : '') + ((d.baskan2 || d.telefon2) ? person(d.baskan2, d.telefon2) : '');
@@ -334,7 +335,7 @@
       '<li>Çeşnigir Köprüsü\'nü ve Köprüköy\'ün tarihini tanıtıyoruz.</li>' +
       '<li>Köyde yaşayanla gurbetteki hemşehrilerimiz arasındaki bağı canlı tutuyoruz.</li></ul>' +
       '</div><aside><div class="box box-pad"><h3>Dernek Bilgileri</h3><ul class="facts">' +
-      peopleRows(d) +
+      peopleRows(d, true) +
       '<li><span>Kuruluş</span>Aralık 2025</li>' +
       '<li><span>Açılış töreni</span>6 Eylül 2026</li>' +
       '<li><span>Merkez</span>Ankara Caddesi, Çarşı Merkezi</li>' +
