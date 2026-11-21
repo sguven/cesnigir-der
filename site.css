@@ -31,10 +31,6 @@ button{font:inherit}
 main:focus{outline:none}
 
 /* üst şerit */
-.topstrip{background:var(--bordo-dark);color:#F3E6DD;font-size:16px}
-.topstrip-in{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:40px;flex-wrap:wrap}
-.topstrip a{color:#fff;font-weight:700;text-decoration:none}
-.topstrip a:hover{text-decoration:underline}
 
 /* başlık ve menü */
 .header{background:var(--white);border-bottom:4px solid var(--bordo);position:sticky;top:0;z-index:30;box-shadow:0 2px 6px rgba(35,26,20,.08)}

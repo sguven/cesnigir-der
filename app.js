@@ -453,7 +453,6 @@
 
   function renderChrome() {
     var d = data.dernek, tel = C.telHref(d.telefon);
-    $('topContact').innerHTML = tel ? 'Bize ulaşın: <a href="tel:' + esc(tel) + '">' + esc(d.telefon) + '</a>' : '';
     var f = '';
     if (d.adres) f += '<div>' + esc(d.adres) + '</div>';
     f += people(d);
