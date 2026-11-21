@@ -171,7 +171,10 @@
   /* ---------- sayfalar ---------- */
   function pageHome() {
     var d = data.dernek, news = byDate(data.duyurular, -1).slice(0, 4), ev = upcoming(45).slice(0, 4);
-    var h = '<section class="hero"><img src="' + B + 'images/banner.jpg" width="1800" height="675" decoding="async" alt=""Gün batımında Çeşnigir Köprüsü ve Türk bayrağı, üzerinde Çeşnigir-Der yazısı."></section>' +
+    // kapak: sessiz, kendiliğinden dönen kısa video; oynatılamazsa aynı karenin fotoğrafı görünür
+    var h = '<section class="hero"><video class="hero-media" autoplay muted loop playsinline preload="auto" width="640" height="360" poster="' + B + 'images/banner-hareketli.jpg" ' +
+      'aria-label="Gün batımında Çeşnigir Köprüsü, üzerinde Çeşnigir-Der yazısı."><source src="' + B + 'images/banner-hareketli.mp4" type="video/mp4">' +
+      '<img src="' + B + 'images/banner-hareketli.jpg" width="640" height="360" alt="Gün batımında Çeşnigir Köprüsü, üzerinde Çeşnigir-Der yazısı."></video></section>' +
       '<div class="welcome"><div class="container welcome-in" style="padding:22px 18px"><div><h1>Köprüköy\'e hoş geldiniz</h1>' +
       '<p>Köyümüzden duyurular, vefat ve düğün haberleri, etkinlikler ve fotoğraflar.</p></div></div></div>';
     var live = C.ytEmbed(d.canli_yayin);
@@ -463,6 +466,8 @@
     var y = back ? pos[hash] : 0;
     window.scrollTo(0, y);
     if (back) requestAnimationFrame(function () { window.scrollTo(0, y); });
+    var hv = main.querySelector('video.hero-media');
+    if (hv) { hv.muted = true; var pl = hv.play(); if (pl && pl.catch) pl.catch(function () {}); }
     headerPhoto();
     var t = main.querySelector('h1');
     document.title = (page && t ? t.textContent + ' · ' : '') + 'Çeşnigir-Der · Köprüköy';

@@ -97,7 +97,7 @@ main:focus{outline:none}
 /* kahraman alan */
 .hero{background:#0D1B2E}
 /* kapak fotoğrafı kırpılmadan, bütün olarak görünür; ekrandan uzun olacaksa küçülür, yanları lacivert kalır */
-.hero img{display:block;width:100%;max-height:calc(100vh - 90px);object-fit:contain;object-position:center}
+.hero img,.hero video{display:block;width:100%;max-height:calc(100vh - 90px);object-fit:contain;object-position:center}
 .welcome{background:var(--white);border-bottom:1px solid var(--line)}
 .welcome-in{display:flex;align-items:center;justify-content:space-between;gap:16px 28px;flex-wrap:wrap;padding:22px 18px}
 .welcome h1{font-size:clamp(24px,4vw,32px);color:var(--bordo-dark)}
@@ -288,7 +288,7 @@ a,button{touch-action:manipulation}
 #icerik.gir{animation:gir .22s ease-out}
 @keyframes gir{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 /* fotoğraflar yüklenirken yerleri ayrılı durur, yazılar aşağı kaymaz */
-.hero img{aspect-ratio:8/3;height:auto}
+.hero img,.hero video{aspect-ratio:16/9;height:auto}
 .article-img img{background:var(--sand);min-height:160px}
 @media (max-width:640px){
   .news-img:not(.noimg){aspect-ratio:16/9}
