@@ -296,7 +296,18 @@
   }
   function redrawPhoto(root) { var b = root.querySelector('.photo-box'); if (b) b.innerHTML = photoInner(); }
 
+  // Vefat seçilince hazır taziye görseli kendiliğinden gelir (başka fotoğraf seçilmediyse); tür değişirse geri alınır.
+  var VEFAT_FOTO = 'images/vefat.jpg';
+  function applyVefatPhoto(root, tur) {
+    var p = form.photo;
+    if (tur === 'Vefat' && !p.path && !p.b64) form.photo = { path: VEFAT_FOTO, b64: '', preview: '' };
+    else if (tur !== 'Vefat' && p.path === VEFAT_FOTO && !p.b64) form.photo = { path: '', b64: '', preview: '' };
+    else return;
+    redrawPhoto(root);
+  }
+
   function applyExamples(root, tur) {
+    applyVefatPhoto(root, tur);
     var ex = ORNEK[tur]; if (!ex) return;
     var b = root.querySelector('#f-baslik'), m = root.querySelector('#f-metin');
     if (b) b.placeholder = ex[0];
