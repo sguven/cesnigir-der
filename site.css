@@ -54,6 +54,8 @@ main:focus{outline:none}
   .menu-btn{background:rgba(255,255,255,.86)}
 }
 .header-in{display:flex;align-items:center;gap:16px;min-height:78px}
+/* uygulama gibi açılan pencerede (Dock'a eklenen site, telefonda ana ekran) başlık pencere çubuğunun altında kalmasın */
+.header{padding-top:env(safe-area-inset-top,0px)}
 .logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);min-width:0}
 .logo img{width:54px;height:54px;border-radius:50%;flex:none}
 .logo b{display:block;font-family:var(--serif);font-size:22px;color:var(--bordo);letter-spacing:.02em;line-height:1.1}
@@ -94,7 +96,8 @@ main:focus{outline:none}
 
 /* kahraman alan */
 .hero{background:#0D1B2E}
-.hero img{display:block;width:100%;max-height:520px;object-fit:cover;object-position:center}
+/* kapak fotoğrafı kırpılmadan, bütün olarak görünür; ekrandan uzun olacaksa küçülür, yanları lacivert kalır */
+.hero img{display:block;width:100%;max-height:calc(100vh - 90px);object-fit:contain;object-position:center}
 .welcome{background:var(--white);border-bottom:1px solid var(--line)}
 .welcome-in{display:flex;align-items:center;justify-content:space-between;gap:16px 28px;flex-wrap:wrap;padding:22px 18px}
 .welcome h1{font-size:clamp(24px,4vw,32px);color:var(--bordo-dark)}
@@ -324,3 +327,30 @@ a,button{touch-action:manipulation}
 .ev-link b::after{content:" ›";color:var(--bordo)}
 .ev-link:hover b,.ev-link:active b{color:var(--bordo)}
 .article .ev-when{font-size:17px}
+
+/* ana sayfa takvimi: köy etkinliği olan gün bordo, resmî ve dinî gün altın çerçeveli; dokununca ayrıntı altta açılır */
+.cal{padding:14px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.cal-head b{font-family:var(--serif);font-size:20px}
+.cal-nav{width:48px;height:48px;border:1px solid var(--line);border-radius:8px;background:var(--white);color:var(--bordo);font-size:28px;line-height:1;cursor:pointer}
+.cal-nav:hover{background:var(--bordo-soft)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center}
+.cal-wd{font-size:14px;font-weight:700;color:var(--ink2);padding-bottom:2px}
+.cal-day{display:flex;align-items:center;justify-content:center;aspect-ratio:1;min-height:40px;border:0;border-radius:8px;background:none;padding:0;
+  font:inherit;font-size:18px;color:var(--ink);font-variant-numeric:tabular-nums}
+button.cal-day{cursor:pointer;font-weight:700}
+.cal-day.today{outline:2px solid var(--ink);outline-offset:-2px}
+.cal-day.resmi{background:var(--sand);box-shadow:inset 0 0 0 2px var(--gold)}
+.cal-day.koy{background:var(--bordo);color:#fff}
+.cal-day.koy.today{outline-color:var(--gold)}
+button.cal-day:hover{filter:brightness(.93)}
+.cal-day.sel{box-shadow:0 0 0 3px var(--white),0 0 0 6px var(--gold)}
+.cal-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-size:15px;color:var(--ink2)}
+.cal-legend span{display:flex;align-items:center;gap:6px}
+.cal-legend i{width:16px;height:16px;border-radius:4px;flex:none}
+.cal-legend i.koy{background:var(--bordo)}
+.cal-legend i.resmi{background:var(--sand);box-shadow:inset 0 0 0 2px var(--gold)}
+.cal-detail{margin:12px -14px -14px;border-top:1px solid var(--line);background:var(--cream)}
+.cal-detail h3{font-size:18px;margin:0;padding:12px 18px 0}
+.cal-detail p{margin:0;padding:12px 18px;font-size:16px}
+.cal-detail .ev{border-top:0}

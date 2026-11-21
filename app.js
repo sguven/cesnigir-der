@@ -126,6 +126,48 @@
     }).join('') + '</div>';
   }
 
+  /* ---------- ana sayfa takvimi ----------
+     Ay görünümü: köy etkinliği olan günler bordo, resmî ve dinî günler altın çerçeveli. Renkli güne dokununca
+     o günün ayrıntısı takvimin altında açılır (evRow: saat, yer, fotoğraf, paylaş düğmeleri). */
+  var calY = null, calM = null, calSel = '';
+  function dayItems(iso) {
+    var p = C.parts(iso), out = [];
+    data.etkinlikler.forEach(function (e) {
+      if (C.normIso(e.tarih) === iso) out.push({ iso: iso, ad: e.ad, tur: e.tur, saat: e.saat, yer: e.yer, foto: e.foto, id: eid(e), koy: true });
+    });
+    (data.resmi.tarihli || []).forEach(function (e) { if (C.normIso(e.tarih) === iso) out.push({ iso: iso, ad: e.ad, koy: false }); });
+    (data.resmi.sabit || []).forEach(function (e) { if (+e.ay === p.m + 1 && +e.gun === p.d) out.push({ iso: iso, ad: e.ad, koy: false }); });
+    return out;
+  }
+  function calendar() {
+    var today = C.todayIso(), t = C.parts(today);
+    if (calY === null) { calY = t.y; calM = t.m; }
+    var n = new Date(calY, calM + 1, 0).getDate(), lead = (new Date(calY, calM, 1).getDay() + 6) % 7;   // hafta pazartesi başlar
+    var h = '<div class="box cal" id="homeCal"><div class="cal-head">' +
+      '<button type="button" class="cal-nav" data-cal-nav="-1" aria-label="Önceki ay">‹</button>' +
+      '<b aria-live="polite">' + C.AY[calM] + ' ' + calY + '</b>' +
+      '<button type="button" class="cal-nav" data-cal-nav="1" aria-label="Sonraki ay">›</button></div><div class="cal-grid">';
+    ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].forEach(function (g) { h += '<span class="cal-wd" aria-hidden="true">' + g + '</span>'; });
+    for (var i = 0; i < lead; i++) h += '<span></span>';
+    for (var d = 1; d <= n; d++) {
+      var iso = calY + '-' + C.pad(calM + 1) + '-' + C.pad(d), it = dayItems(iso), cls = 'cal-day' + (iso === today ? ' today' : '');
+      if (!it.length) { h += '<span class="' + cls + '">' + d + '</span>'; continue; }
+      cls += (it.some(function (x) { return x.koy; }) ? ' koy' : ' resmi') + (iso === calSel ? ' sel' : '');
+      h += '<button type="button" class="' + cls + '" data-cal-day="' + iso + '" aria-pressed="' + (iso === calSel) + '" aria-label="' +
+        esc(C.longDate(iso, true) + ': ' + it.map(function (x) { return x.ad; }).join(', ')) + '">' + d + '</button>';
+    }
+    h += '</div><div class="cal-legend"><span><i class="koy"></i>Köy etkinliği</span><span><i class="resmi"></i>Resmî, dinî gün</span></div>';
+    var sel = calSel ? dayItems(calSel) : [];
+    h += '<div class="cal-detail" aria-live="polite">' + (sel.length ? '<h3>' + esc(C.longDate(calSel, true)) + '</h3>' + sel.map(evRow).join('')
+      : '<p class="muted">Renkli bir güne dokunun, o günün ayrıntısı burada açılır.</p>') + '</div></div>';
+    return h;
+  }
+  function redrawCal(focusSel) {
+    var el = $('homeCal'); if (!el) return;
+    el.outerHTML = calendar();
+    var f = $('homeCal').querySelector(focusSel); if (f) f.focus();
+  }
+
   /* ---------- sayfalar ---------- */
   function pageHome() {
     var d = data.dernek, news = byDate(data.duyurular, -1).slice(0, 4), ev = upcoming(45).slice(0, 4);
@@ -140,8 +182,8 @@
       '<div class="sec-head"><h2>Son Duyurular</h2><a href="#/duyurular">Tüm duyurular ›</a></div>' +
       (news.length ? '<div class="news-list">' + news.map(newsCard).join('') + '</div>' : '<div class="box empty"><b>Henüz duyuru yok</b></div>') +
       '</div><aside>' +
-      '<div class="sec-head"><h2>Yaklaşan Günler</h2></div>' +
-      '<div class="box">' + (ev.length ? ev.map(evRow).join('') : '<div class="empty">Yaklaşan bir gün yok.</div>') + '</div>' +
+      '<div class="sec-head"><h2>Yaklaşan Günler</h2></div>' + calendar() +
+      '<div class="box" style="margin-top:14px">' + (ev.length ? ev.map(evRow).join('') : '<div class="empty">Yaklaşan bir gün yok.</div>') + '</div>' +
       '<p style="margin:10px 0 0"><a href="#/etkinlikler" style="font-weight:700">Tüm takvim ›</a></p>' +
       '</aside></div></section>';
 
@@ -484,6 +526,11 @@
       if (e.target.closest('a[href^="#/"]')) { tapped = true; setTimeout(function () { tapped = false; }, 600); }
       var f = e.target.closest('[data-filter]');
       if (f) { filter = f.getAttribute('data-filter'); main.innerHTML = pageNews(); var b = main.querySelector('[data-filter="' + filter + '"]'); if (b) b.focus(); return; }
+      var cn = e.target.closest('[data-cal-nav]');
+      if (cn) { var dir = +cn.getAttribute('data-cal-nav'), dt = new Date(calY, calM + dir, 1); calY = dt.getFullYear(); calM = dt.getMonth();
+        redrawCal('[data-cal-nav="' + dir + '"]'); return; }
+      var cd = e.target.closest('[data-cal-day]');
+      if (cd) { var ci = cd.getAttribute('data-cal-day'); calSel = calSel === ci ? '' : ci; redrawCal('[data-cal-day="' + ci + '"]'); return; }
       var g = e.target.closest('[data-gal]');
       if (g) { openV(data.galeri.map(function (x) { return { src: img(x.foto), cap: x.aciklama }; }), +g.getAttribute('data-gal')); return; }
       var ph = e.target.closest('[data-photo]');
