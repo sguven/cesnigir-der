@@ -369,35 +369,56 @@
     return '<figure class="fig"><img src="' + B + 'images/' + file + '" alt="' + alt + '" loading="lazy"><figcaption>' + cap + '</figcaption></figure>';
   }
 
+  /* Tarihçe kaynakları: [ad, adres] bağlantılı, düz yazı bağlantısız (arşiv künyesi, basılı kitap) */
+  var K = {
+    pehl: ['Pehlivanlı, Yedi Kıta 2012', 'https://pusulagazetesi.net/kose-yazilari/osmanlilarda_yol_emniyeti-1242'],
+    kosan: ['O. Zengin Koşan, "Antik Çağ\'da Kızılırmak", 2021', 'https://dergipark.org.tr/en/download/article-file/1673482'],
+    gg: 'J. Garstang ve O. R. Gurney, The Geography of the Hittite Empire, 1959',
+    vikiKoy: ['Vikipedi, Köprüköy (Keskin)', 'https://tr.wikipedia.org/wiki/K%C3%B6pr%C3%BC,_Keskin'],
+    wikiKopru: ['Wikipedia, Çeşnigir Bridge', 'https://en.wikipedia.org/wiki/%C3%87e%C5%9Fnigir_Bridge'],
+    wikiKoy: ['Wikipedia, Köprüköy, Keskin', 'https://en.wikipedia.org/wiki/K%C3%B6pr%C3%BCk%C3%B6y,_Keskin'],
+    kure: ['KÜRE Ansiklopedi, Çeşnigir Köprüsü', 'https://kureansiklopedi.com/tr/detay/cesnigir-koprusu-7f5c9'],
+    kkTanitim: ['Kırıkkale Turizm ve Tanıtım Portalı', 'https://www.kirikkale.com.tr/mekan/cesnigir'],
+    deprem: ['Yeni Ankara, 1938 depremi', 'https://www.yeniankara.com.tr/turkiye-haberleri/ankarada-binalari-catlatan-keskini-yikan-deprem-19-nisan-1938in-kayitlara-gecen-agir-bilancosu-188563'],
+    tekne: ['Türkiye Gazetesi', 'https://www.turkiyegazetesi.com.tr/gundem/bakan-kurumdan-tarihi-bolgede-tekne-turu-717166'],
+    acilis: ['İl Gazetesi', 'https://www.ilgazetesi.com.tr/koprukoy-cesnigir-der-kapilarini-aciyor-6-eylul-pazar-gunu-buyuk-acilis-toreni-var-334738h.htm']
+  };
+  function srcHtml(list) {
+    if (!list || !list.length) return '';
+    return '<small class="t-src">Kaynak: ' + list.map(function (k) {
+      return typeof k === 'string' ? esc(k) : '<a href="' + esc(k[1]) + '" target="_blank" rel="noopener">' + esc(k[0]) + '</a>';
+    }).join(' · ') + '</small>';
+  }
+
   var TARIH = [
-    ['Rivayet: MÖ 6. yüzyıl', 'Bazı yazarlar, Herodot\'un anlattığı Lidya Kralı Kroisos\'un Kızılırmak\'ı geçişini bu noktayla ilişkilendirir. Ancak Herodot köprüyü görmemiştir; bunu destekleyen bir belge yoktur.'],
-    ['13. yüzyıl', 'Köprü Anadolu Selçukluları döneminde, yanındaki bir hanla birlikte yapılır. Sanat tarihçisi Fügen İlter\'e göre İslam öncesine ait eski bir köprünün temelleri üzerine kurulmuştur. Han bugün ayakta değildir.'],
-    ['1402', 'Rivayete göre Timur\'un ordusu Ankara Savaşı\'na giderken köprüden geçer.'],
-    ['16. yüzyıl', 'Rivayete göre Yavuz Sultan Selim\'in Mısır Seferi hazırlıkları sırasında köprü elden geçirilir; onarımın Mimar Sinan\'a ait olduğu söylenir.'],
-    ['1609', 'İki padişah emri: Temmuz\'da Ankara Beyi\'ne Çaşnigir köprüsü civarındaki palangalarda eşkıya tahkiki, Kasım\'da Çaşnigir Köprüsü yani Kırkkeçili kalesindeki eşkıyanın temizlenmesi emredilir.'],
-    ['Osmanlı dönemi', 'Kayalık ve tehlikeli geçidi korumak için köprü çevresine 50 kadar derbendci (geçit bekçisi) yerleştirilir. Bekçilerin aileleri zamanla bugünkü köyün çekirdeğini oluşturur.'],
-    ['1724', 'Bir padişah emrinde Ankara sancağının sınırı "Çaşnigir" olarak anılır; yolların eşkıyaya karşı korunması istenir.'],
-    ['1777', 'Köy, devlet kayıtlarında "Çaşnigir Köprüsü karyesi" adıyla geçer. Köy ahalisi adına Köprülüzâde Osman Ağa, Rakka\'da iskân edilen Kürt tayfası ve oymaklarının arazi ve bağlara tecavüz, mal gasbı ve adam öldürmesinden şikâyet eder.'],
-    ['1791', 'Çaşnigir Derbendi Ağası Hacı Mehmed Ağa ölür. Yerine oğlu Süleyman atanır, fakat nüfuzlu Cabbarzâde Süleyman Bey ağalığı kendi üzerine aldırır; padişah fermanıyla oğula başka bir görev verilir.'],
-    ['1807', 'Konur kazasındaki Çaşnigir Köprüsü derbendinin muhafızı Hacı Mehmed\'in ölümü üzerine görev Cabbarzâde Süleyman Bey\'e verilir.'],
-    ['1815', 'Kayıtlarda köyün adı "Çaşnigir Derbendi" olur. Aynı yıl Köprülü oğullarından Hacı Ali, Hüsrev Şir ve Mehmed Emin\'in halktan fazla para istediği şikâyeti üzerine Kırşehir Mutasarrıfı Vezir Ali Paşa\'ya inceleme emri verilir.'],
-    ['1818', 'Derbendi korumakla görevli üç köyün halkı, vergiden muaf oldukları hâlde valilerin vergi istediğini İstanbul\'a şikâyet eder.'],
-    ['1822', 'Halka zulmeden derbend ağası Deli Battal yakalanır ve padişah emriyle cezalandırılır.'],
-    ['1831', 'Derbendin vergi muafiyeti kaldırılır, köprünün korunması Gümüşkân madeni yöneticilerine verilir.'],
-    ['1836', 'Çaşnigir Köprüsü köyündeki caminin hatibi vefat eder, yerine yenisi atanır. Bu kayıt köyde o yıllarda bir cami olduğunu gösterir.'],
-    ['1840–1845', 'Vergi defterlerine göre köyde 182 Müslüman ve 7 Rum hanesi vardır; nüfus 900\'ün üzerindedir.'],
-    ['1852', 'Köprü harap olur. Vakfı olmadığından 5.900 kuruşluk onarım masrafı devletin bayındırlık gelirlerinden karşılanır. Bu yazışmada köprü "Sultan Murad Han\'ın yaptırdığı Çaşnigir Köprüsü" diye anılır.'],
-    ['1892', 'Köprüden geçen Fransız gezgin Comte de Cholet, sol kıyıda köprüyü bekler gibi duran taştan bir aslan heykeli görür. Heykel bugün yerinde değildir.'],
-    ['1936', 'Avusturyalı araştırmacı K. Ritter köprüyü iki kez inceler ve bugünkü hâliyle Osmanlı yapısı olduğunu yazar.'],
-    ['19 Nisan 1938', 'Kırşehir–Keskin depremi bölgeyi sarsar. Depremi inceleyen bilim heyeti Köprüköy çevresinde de çalışır.'],
-    ['29 Şubat 1972', 'Köprüköy\'de belediye kurulur, köy belde olur.'],
-    ['1970\'ler', 'Köprünün üst döşemesi betonla kaplanır.'],
-    ['1979–1989', 'Kızılırmak üzerinde Kapulukaya Barajı yapılır. 1989\'da sular yükselince köprü araç trafiğine kapanır, yakınına yeni karayolu köprüsü yapılır.'],
-    ['2010', 'Karayolları 4. Bölge Müdürlüğü köprüyü restore eder; beton kaldırılır, üstü yeniden taşla döşenir. Köprü bugün yayalara açıktır.'],
-    ['2013', 'Nüfus 2.000\'in altına düşünce belediye kapanır, Köprüköy yeniden köy olur.'],
-    ['2019–2020', 'Kırıkkale Valiliği çalışmalarıyla Çeşnigir Kanyonu seyir terasları, yürüyüş yolları ve tekne turlarıyla turizme açılır.'],
-    ['Aralık 2025', 'Köprüköy Çeşnigir Kültür Sosyal Yardımlaşma ve Dayanışma Derneği kurulur.'],
-    ['6 Eylül 2026', 'Dernek merkezi Ankara Caddesi Çarşı Merkezi\'nde törenle açılır.']
+    ['Rivayet: MÖ 6. yüzyıl', 'Herodot, Lidya Kralı Kroisos\'un Kızılırmak\'ı orada bulunan köprülerden geçtiğini yazar, ama yer adı vermez. Tarihçi Olcay Zengin Koşan (2021), O\'Grady\'ye (2002) dayanarak bu geçişin bugünkü köprünün yerinde bulunmuş daha eski bir köprüden olmuş olabileceğini öne sürer. Garstang ve Gurney (1959) da köprünün altında Roma dönemi ve daha eski köprülerden kalma taşlar gördüklerini yazar. Ancak Herodot köprüyü görmemiştir; geçişin burada olduğunu kesinleştiren bir belge yoktur.', [K.kosan, K.gg, K.pehl]],
+    ['13. yüzyıl', 'Köprü Anadolu Selçukluları döneminde, yanındaki bir hanla birlikte yapılır. Sanat tarihçisi Fügen İlter\'e göre İslam öncesine ait eski bir köprünün temelleri üzerine kurulmuştur. Han bugün ayakta değildir.', [K.pehl, K.kure]],
+    ['1402', 'Rivayete göre Timur\'un ordusu Ankara Savaşı\'na giderken köprüden geçer.', [K.wikiKopru, K.kure]],
+    ['16. yüzyıl', 'Rivayete göre Yavuz Sultan Selim\'in Mısır Seferi hazırlıkları sırasında köprü elden geçirilir; onarımın Mimar Sinan\'a ait olduğu söylenir.', [K.kure, K.kkTanitim]],
+    ['1609', 'İki padişah emri: Temmuz\'da Ankara Beyi\'ne Çaşnigir köprüsü civarındaki palangalarda eşkıya tahkiki, Kasım\'da Çaşnigir Köprüsü yani Kırkkeçili kalesindeki eşkıyanın temizlenmesi emredilir.', ['BOA, Mühimme Defteri 78/504 ve 78/1234']],
+    ['Osmanlı dönemi', 'Kayalık ve tehlikeli geçidi korumak için köprü çevresine 50 kadar derbendci (geçit bekçisi) yerleştirilir. Bekçilerin aileleri zamanla bugünkü köyün çekirdeğini oluşturur.', [K.pehl]],
+    ['1724', 'Bir padişah emrinde Ankara sancağının sınırı "Çaşnigir" olarak anılır; yolların eşkıyaya karşı korunması istenir.', ['BOA, Mühimme Defteri 131/1456']],
+    ['1777', 'Köy, devlet kayıtlarında "Çaşnigir Köprüsü karyesi" adıyla geçer. Köy ahalisi adına Köprülüzâde Osman Ağa, Rakka\'da iskân edilen Kürt tayfası ve oymaklarının arazi ve bağlara tecavüz, mal gasbı ve adam öldürmesinden şikâyet eder.', ['BOA, Cevdet Adliye 38/2270', K.vikiKoy]],
+    ['1791', 'Çaşnigir Derbendi Ağası Hacı Mehmed Ağa ölür. Yerine oğlu Süleyman atanır, fakat nüfuzlu Cabbarzâde Süleyman Bey ağalığı kendi üzerine aldırır; padişah fermanıyla oğula başka bir görev verilir.', [K.pehl]],
+    ['1807', 'Konur kazasındaki Çaşnigir Köprüsü derbendinin muhafızı Hacı Mehmed\'in ölümü üzerine görev Cabbarzâde Süleyman Bey\'e verilir.', ['BOA, Ali Emiri III. Selim 313/18217']],
+    ['1815', 'Kayıtlarda köyün adı "Çaşnigir Derbendi" olur. Aynı yıl Köprülü oğullarından Hacı Ali, Hüsrev Şir ve Mehmed Emin\'in halktan fazla para istediği şikâyeti üzerine Kırşehir Mutasarrıfı Vezir Ali Paşa\'ya inceleme emri verilir.', [K.pehl, K.vikiKoy]],
+    ['1818', 'Derbendi korumakla görevli üç köyün halkı, vergiden muaf oldukları hâlde valilerin vergi istediğini İstanbul\'a şikâyet eder.', [K.pehl]],
+    ['1822', 'Halka zulmeden derbend ağası Deli Battal yakalanır ve padişah emriyle cezalandırılır.', [K.pehl]],
+    ['1831', 'Derbendin vergi muafiyeti kaldırılır, köprünün korunması Gümüşkân madeni yöneticilerine verilir.', [K.pehl]],
+    ['1836', 'Çaşnigir Köprüsü köyündeki caminin hatibi vefat eder, yerine yenisi atanır. Bu kayıt köyde o yıllarda bir cami olduğunu gösterir.', [K.pehl]],
+    ['1840–1845', 'Vergi defterlerine göre köyde 182 Müslüman ve 7 Rum hanesi vardır; nüfus 900\'ün üzerindedir.', [K.pehl, 'BOA, Nüfus Defteri 3543 ve 1845 Temettuat Defteri']],
+    ['1852', 'Köprü harap olur. Vakfı olmadığından 5.900 kuruşluk onarım masrafı devletin bayındırlık gelirlerinden karşılanır. Bu yazışmada köprü "Sultan Murad Han\'ın yaptırdığı Çaşnigir Köprüsü" diye anılır.', [K.pehl]],
+    ['1892', 'Köprüden geçen Fransız gezgin Comte de Cholet, sol kıyıda köprüyü bekler gibi duran taştan bir aslan heykeli görür. Heykel bugün yerinde değildir.', [K.pehl, 'Cevdet Çulpan, Türk Taş Köprüleri']],
+    ['1936', 'Avusturyalı araştırmacı K. Ritter köprüyü iki kez inceler ve bugünkü hâliyle Osmanlı yapısı olduğunu yazar.', [K.pehl]],
+    ['19 Nisan 1938', 'Kırşehir–Keskin depremi bölgeyi sarsar. Depremi inceleyen bilim heyeti Köprüköy çevresinde de çalışır.', [K.deprem]],
+    ['29 Şubat 1972', 'Köprüköy\'de belediye kurulur, köy belde olur.', [K.vikiKoy, K.wikiKoy]],
+    ['1970\'ler', 'Köprünün üst döşemesi betonla kaplanır.', []],
+    ['1979–1989', 'Kızılırmak üzerinde Kapulukaya Barajı yapılır. 1989\'da sular yükselince köprü araç trafiğine kapanır, yakınına yeni karayolu köprüsü yapılır.', [K.wikiKopru, K.wikiKoy]],
+    ['2010', 'Karayolları 4. Bölge Müdürlüğü köprüyü restore eder; beton kaldırılır, üstü yeniden taşla döşenir. Köprü bugün yayalara açıktır.', [K.wikiKopru, K.kure]],
+    ['2013', 'Nüfus 2.000\'in altına düşünce belediye kapanır, Köprüköy yeniden köy olur.', [K.vikiKoy, K.wikiKoy]],
+    ['2019–2020', 'Kırıkkale Valiliği çalışmalarıyla Çeşnigir Kanyonu seyir terasları, yürüyüş yolları ve tekne turlarıyla turizme açılır.', [K.kure, K.tekne]],
+    ['Aralık 2025', 'Köprüköy Çeşnigir Kültür Sosyal Yardımlaşma ve Dayanışma Derneği kurulur.', ['Dernek kayıtları']],
+    ['6 Eylül 2026', 'Dernek merkezi Ankara Caddesi Çarşı Merkezi\'nde törenle açılır.', [K.acilis]]
   ];
 
   function villageSection() {
@@ -433,7 +454,7 @@
       para('Zamanla düzen bozuldu. Arşiv belgelerinde halktan fazla para isteyen ağalar, vergi muafiyetine rağmen vergi talep eden valiler ve halka zulmettiği için 1822\'de cezalandırılan Deli Battal adlı bir ağa geçer. 1831\'de derbendin muafiyeti kaldırıldı; Tanzimat\'tan sonra yol güvenliğini önce zaptiye, sonra jandarma üstlendi. Derbendden geriye bugün yalnızca köprü kaldı; han ve caminin izi yoktur.') +
 
       '<div class="sec-head" style="margin-top:30px"><h2>Tarihçe</h2></div>' +
-      '<ul class="timeline">' + TARIH.map(function (t) { return '<li><b>' + t[0] + '</b>' + t[1] + '</li>'; }).join('') + '</ul>' +
+      '<ul class="timeline">' + TARIH.map(function (t) { return '<li><b>' + t[0] + '</b>' + t[1] + srcHtml(t[2]) + '</li>'; }).join('') + '</ul>' +
 
       '<div class="pair" style="margin-top:28px"><div class="box box-pad"><h3>Nüfusun seyri</h3>' +
       rows([['1840\'lar', 'yaklaşık 945 (vergi defterlerinden tahmin)'], ['1985', '3.020'], ['1990', '2.914'], ['2000', '3.836'], ['2010', '1.638'], ['2013', '1.023'], ['2020', '604'], ['2024', '720']]) + '</div>' +
