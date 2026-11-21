@@ -208,14 +208,19 @@
     return new Promise(function (resolve, reject) {
       var url = URL.createObjectURL(file), img = new Image();
       img.onload = function () {
-        var max = 1600, w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, max / Math.max(w, h));
-        var cv = document.createElement('canvas');
-        cv.width = Math.round(w * k); cv.height = Math.round(h * k);
-        var ctx = cv.getContext('2d');
-        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
-        ctx.drawImage(img, 0, 0, cv.width, cv.height);
+        // WhatsApp, paylaşım önizlemesinde ~300 KB'tan büyük fotoğrafı göstermiyor: 250 KB altına inene kadar küçült
+        var LIMIT = 250 * 1024, w = img.naturalWidth, h = img.naturalHeight, dataUrl = '';
+        var steps = [[1600, 0.82], [1400, 0.78], [1280, 0.74], [1100, 0.7], [960, 0.66], [800, 0.62]];
+        for (var i = 0; i < steps.length; i++) {
+          var k = Math.min(1, steps[i][0] / Math.max(w, h)), cv = document.createElement('canvas');
+          cv.width = Math.round(w * k); cv.height = Math.round(h * k);
+          var ctx = cv.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+          ctx.drawImage(img, 0, 0, cv.width, cv.height);
+          dataUrl = cv.toDataURL('image/jpeg', steps[i][1]);
+          if ((dataUrl.length - 23) * 3 / 4 <= LIMIT) break;
+        }
         URL.revokeObjectURL(url);
-        var dataUrl = cv.toDataURL('image/jpeg', 0.82);
         resolve({ preview: dataUrl, b64: dataUrl.split(',')[1] });
       };
       img.onerror = function () { URL.revokeObjectURL(url); reject({ status: 'photo' }); };

@@ -88,7 +88,8 @@
   // Fotoğrafı olan kaydın bağlantısı kendi paylaşım sayfasına gider (p/…html): WhatsApp ve Facebook önizlemede o fotoğrafı gösterir.
   function shareUrl(o) {
     var base = location.href.split(/[?#]/)[0].replace(/[^\/]*$/, '');
-    return o.photo ? base + C.sharePath(o.key, o.id) : base + '?' + o.key + '=' + encodeURIComponent(o.id);
+    // ?v=…: fotoğraf değişince adres de değişir; WhatsApp/Facebook eski (fotoğrafsız) önizlemeyi önbellekten göstermez
+    return o.photo ? base + C.sharePath(o.key, o.id) + '?v=' + C.shareVer(o.photo) : base + '?' + o.key + '=' + encodeURIComponent(o.id);
   }
   function shareButtons(o, big) {
     var url = shareUrl(o), text = (o.tur ? upper(o.tur) + ': ' : '') + (o.title || '') + (o.det ? '\n' + o.det : '') + '\n' + url;

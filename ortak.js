@@ -193,6 +193,11 @@
     return (normIso(x.tarih) || 'x') + '-' + (slug(t).slice(0, 50) || { d: 'duyuru', e: 'etkinlik', i: 'ilan' }[key]);
   }
   function sharePath(key, id) { return 'p/' + key + '-' + id + '.html'; }
+  function shareVer(src) {
+    var h = 0, t = String(src || '').split('/').pop();
+    for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0;
+    return h.toString(36).slice(0, 6);
+  }
   function shareShort(t, n) {
     t = String(t || '').replace(/\s+/g, ' ').trim();
     return t.length > n ? t.slice(0, n).replace(/\s+\S*$/, '') + '…' : t;
@@ -228,7 +233,7 @@
     DUYURU_TURLERI: DUYURU_TURLERI, ETKINLIK_TURLERI: ETKINLIK_TURLERI, PAZAR_TURLERI: PAZAR_TURLERI,
     slug: slug, badgeClass: badgeClass, esc: esc, pad: pad, normIso: normIso, parts: parts,
     todayIso: todayIso, addDays: addDays, daysBetween: daysBetween, longDate: longDate, relDate: relDate,
-    SHARE_COLS: SHARE_COLS, shareId: shareId, sharePath: sharePath, sharePage: sharePage,
+    SHARE_COLS: SHARE_COLS, shareId: shareId, sharePath: sharePath, shareVer: shareVer, sharePage: sharePage,
     untilText: untilText, imgSrc: imgSrc, linkUrl: linkUrl, telHref: telHref, waHref: waHref, arr: arr,
     ytEmbed: ytEmbed, ytFrame: ytFrame, bindShare: bindShare, warmShare: warmShare
   };
