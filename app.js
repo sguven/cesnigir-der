@@ -4,7 +4,7 @@
 (function () {
   'use strict';
   var C = window.CD, esc = C.esc, B = '';
-  var MAP = 'https://www.google.com/maps?q=39.5765122,33.4357454';
+  var MAP = 'https://maps.app.goo.gl/WZUFDn7iB7aiHGTf8';
   var data = null;
   var main = document.getElementById('icerik');
   var pos = {}, curHash = location.hash, tapped = false;   // sayfaların kaydırma yeri (geri dönünce kaldığı yerden)
@@ -423,7 +423,8 @@
       '<aside><div class="box box-pad"><h3>Bize Ulaşın</h3><ul class="facts">' +
       peopleRows(d) +
       (mail ? '<li><span>E-posta</span><a href="mailto:' + esc(mail) + '">' + esc(mail) + '</a></li>' : '') +
-      '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li></ul></div></aside></div></section>';
+      '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li>' +
+      '<li><span>Konum</span><a href="' + MAP + '" target="_blank" rel="noopener">Haritada aç</a></li></ul></div></aside></div></section>';
   }
 
   /* ---------- yönlendirme ---------- */
