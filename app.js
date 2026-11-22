@@ -169,7 +169,7 @@
 
   /* ---------- sayfalar ---------- */
   function pageHome() {
-    var d = data.dernek, news = byDate(data.duyurular, -1).slice(0, 4), ev = upcoming(45).slice(0, 4);
+    var d = data.dernek, news = data.duyurular.slice().slice(0, 4), ev = upcoming(45).slice(0, 4);
     // Canlı görüntü: karşılama bandının sağında küçük oynar; dokununca aynı oynatıcı ekranı kaplayacak kadar büyür
     // (oynatıcı yeniden yüklenmez, yalnızca boyutu değişir). Kapat, karanlık alana dokunmak ya da Esc eski hâline döndürür.
     var live = C.ytEmbed(d.canli_yayin), liveBox = live ? '<div class="live-mini" id="liveBox">' +
@@ -204,7 +204,7 @@
 
   var filter = 'Tümü';
   function pageNews() {
-    var all = byDate(data.duyurular, -1);
+    var all = data.duyurular.slice();
     var types = ['Tümü'].concat(C.DUYURU_TURLERI.filter(function (t) { return all.some(function (p) { return p.tur === t; }); }));
     if (types.indexOf(filter) < 0) filter = 'Tümü';
     var list = filter === 'Tümü' ? all : all.filter(function (p) { return p.tur === filter; });
