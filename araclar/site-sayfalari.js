@@ -1,6 +1,6 @@
 /* Arama motorları (Google, Bing, Yandex) ve paylaşım önizlemeleri için sitenin gerçek adresli sayfalarını üretir:
 
-     hakkimizda/  duyurular/  etkinlikler/  fotograflar/  iletisim/     her bölümün kendi sayfası
+     gezilecek-yerler/  hakkimizda/  duyurular/  etkinlikler/  fotograflar/  iletisim/     her bölümün kendi sayfası
      p/d-….html                                                        her duyuru ve haberin kendi sayfası
      p/e-….html                                                        her köy etkinliğinin kendi sayfası
      p/i-….html                                                        fotoğraflı pazar ilanlarının paylaşım sayfası (aramaya kapalı)
@@ -21,10 +21,11 @@ var { chromium } = require('playwright');
 var SITE = 'https://' + fs.readFileSync(path.join(root, 'CNAME'), 'utf8').trim() + '/';
 var ORG = 'Köprüköy Çeşnigir Kültür Sosyal Yardımlaşma ve Dayanışma Derneği';
 var PAGES = {
-  hakkimizda: 'Köprüköy (Keskin, Kırıkkale) ve Çeşnigir Köprüsü: köyün tarihi, gezilecek yerler, Çeşnigir Kanyonu ve Çeşnigir-Der derneği hakkında bilgiler.',
+  'gezilecek-yerler': 'Kırıkkale Keskin\'deki Köprüköy\'de gezilecek yerler: tarihi Çeşnigir Köprüsü, Çeşnigir Kanyonu mesire alanı, cam seyir terası, tekne turu, yürüyüş yolu, Büklükale ve Sulu Mağara. Ankara\'dan günübirlik, yaklaşık 113 km.',
+  hakkimizda: 'Köprüköy (Keskin, Kırıkkale) ve Çeşnigir Köprüsü: köyün ve köprünün kaynaklı tarihçesi, köy bilgileri ve Çeşnigir-Der derneği hakkında bilgiler.',
   duyurular: 'Köprüköy, Keskin ve Kırıkkale\'den güncel haberler, duyurular, vefat ve düğün ilanları. Çeşnigir-Der derneğinin haber sayfası.',
   etkinlikler: 'Köprüköy etkinlik takvimi: düğünler, mevlitler, toplantılar, resmî bayramlar ve dinî günler.',
-  fotograflar: 'Köprüköy, Çeşnigir Köprüsü ve Kızılırmak kıyısından fotoğraflar.',
+  fotograflar: 'Köprüköy (Keskin, Kırıkkale) fotoğrafları: Çeşnigir-Der dernek binası, köy meydanı, açılış töreni ve köyden kareler.',
   iletisim: 'Çeşnigir-Der iletişim bilgileri: dernek başkanı, yönetim kurulu, adres ve Köprüköy\'ün haritadaki konumu.'
 };
 var MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
@@ -83,7 +84,10 @@ function build(dom, o) {
     var out = await pg.evaluate(function () {
       document.getElementById('icerik').classList.remove('gir');
       document.body.removeAttribute('style'); document.documentElement.removeAttribute('style');
-      return { html: document.documentElement.outerHTML, title: document.title, h1: (document.querySelector('#icerik h1') || {}).textContent || '' };
+      var imgs = [].map.call(document.querySelectorAll('#icerik img[alt]:not([alt=""])'), function (i) { return { src: i.getAttribute('src'), alt: i.getAttribute('alt') }; });
+      var places = [].map.call(document.querySelectorAll('#icerik .cards article'), function (a) {
+        return { name: a.querySelector('h3').textContent, description: a.querySelector('p').textContent, image: a.querySelector('img').getAttribute('src') }; });
+      return { html: document.documentElement.outerHTML, title: document.title, h1: (document.querySelector('#icerik h1') || {}).textContent || '', imgs: imgs, places: places };
     });
     await pg.close();
     return out;
@@ -94,6 +98,13 @@ function build(dom, o) {
     fs.writeFileSync(f, html);
   }
 
+  // sitemap'e giren fotoğraflar: sitenin kendi fotoğrafları (logo hariç), her biri bir kez
+  function pics(list) {
+    var seen = {};
+    return (list || []).map(function (i) { return abs(i.src); }).filter(function (u) {
+      if (!u || u.indexOf(SITE) !== 0 || /logo/.test(u) || seen[u]) return false; seen[u] = 1; return true; });
+  }
+
   var duyurular = read('duyurular'), etkinlikler = read('etkinlikler'), pazar = read('pazar');
   var urls = [], n = 0;
   var newest = duyurular.map(function (x) { return C.normIso(x.tarih); }).filter(Boolean).sort().pop() || '';
@@ -101,9 +112,15 @@ function build(dom, o) {
 
   // bölüm sayfaları
   for (var name of Object.keys(PAGES)) {
-    var s = await snap(name);
-    write(name + '/index.html', build(s.html, { route: name, url: SITE + name + '/', title: s.title, desc: PAGES[name] }));
-    urls.push({ loc: SITE + name + '/', lastmod: name === 'duyurular' ? newest : '' });
+    var s = await snap(name), extra = null;
+    // gezilecek yerler: her yer arama motorlarına ayrı bir gezi noktası olarak tanıtılır (dernek bilgisi de sayfada kalır)
+    if (name === 'gezilecek-yerler') extra = { '@context': 'https://schema.org', '@type': 'ItemList', name: s.h1, itemListElement: s.places.map(function (p, i) {
+      return { '@type': 'ListItem', position: i + 1, item: { '@type': 'TouristAttraction', name: p.name, description: p.description, image: abs(p.image),
+        address: { '@type': 'PostalAddress', addressLocality: 'Keskin', addressRegion: 'Kırıkkale', addressCountry: 'TR' } } }; }) };
+    var page = build(s.html, { route: name, url: SITE + name + '/', title: s.title, desc: PAGES[name] });
+    if (extra) page = page.replace('</head>', ld(extra) + '</head>');
+    write(name + '/index.html', page);
+    urls.push({ loc: SITE + name + '/', lastmod: name === 'duyurular' ? newest : '', imgs: pics(s.imgs) });
     n++;
   }
 
@@ -142,7 +159,8 @@ function build(dom, o) {
   await browser.close();
   server.close();
 
-  write('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    urls.map(function (u) { return '<url><loc>' + esc(u.loc) + '</loc>' + (u.lastmod ? '<lastmod>' + u.lastmod + '</lastmod>' : '') + '</url>'; }).join('\n') + '\n</urlset>\n');
+  write('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n' +
+    urls.map(function (u) { return '<url><loc>' + esc(u.loc) + '</loc>' + (u.lastmod ? '<lastmod>' + u.lastmod + '</lastmod>' : '') +
+      (u.imgs || []).map(function (i) { return '<image:image><image:loc>' + esc(i) + '</image:loc></image:image>'; }).join('') + '</url>'; }).join('\n') + '\n</urlset>\n');
   console.log(n + ' sayfa yazıldı, sitemap.xml: ' + urls.length + ' adres → ' + SITE);
 })().catch(function (err) { console.error(err); process.exit(1); });

@@ -382,3 +382,6 @@ button.cal-day:hover{filter:brightness(.93)}
 .cal-detail .ev{border-top:0}
 /* dik çekilmiş seyir terası fotoğrafında cam teras kartta görünsün */
 .mk img[src*="gezi-seyir-terasi"]{object-position:50% 80%}
+
+/* Menüde 8 başlık var: orta genişlikte derneğin uzun adı menüyle üst üste binmesin */
+@media (min-width:1001px) and (max-width:1240px){ .logo small{display:none} .nav a{padding:0 9px;font-size:16px} }

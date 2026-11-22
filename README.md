@@ -63,9 +63,9 @@ Sonra tarayıcıda `http://localhost:8000` adresini açın.
 Her bölümün ve her kaydın gerçek bir adresi vardır; arama motorları içeriği bu sayfalardan okur, WhatsApp ve Facebook da önizlemedeki
 fotoğrafı ve başlığı buradan alır:
 
-- `hakkimizda/`, `duyurular/`, `etkinlikler/`, `fotograflar/`, `iletisim/`: bölüm sayfaları
+- `gezilecek-yerler/`, `hakkimizda/`, `duyurular/`, `etkinlikler/`, `fotograflar/`, `iletisim/`: bölüm sayfaları
 - `p/d-….html` duyuru ve haberler, `p/e-….html` etkinlikler (aramaya açık); `p/i-….html` pazar ilanları (telefon içerdiği için aramaya kapalı)
-- `sitemap.xml` sayfa listesi, `robots.txt` bu listeyi arama motorlarına gösterir
+- `sitemap.xml` sayfa ve fotoğraf listesi, `robots.txt` bu listeyi arama motorlarına gösterir
 
 Bu dosyalar elle düzenlenmez; hepsini şu komut üretir (içerik, `index.html`, `app.js` ya da `site.css` değişince çalıştırın):
 
