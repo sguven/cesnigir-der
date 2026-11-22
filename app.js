@@ -385,7 +385,11 @@
     kkTanitim: ['Kırıkkale Turizm ve Tanıtım Portalı', 'https://www.kirikkale.com.tr/mekan/cesnigir'],
     deprem: ['Yeni Ankara, 1938 depremi', 'https://www.yeniankara.com.tr/turkiye-haberleri/ankarada-binalari-catlatan-keskini-yikan-deprem-19-nisan-1938in-kayitlara-gecen-agir-bilancosu-188563'],
     tekne: ['Türkiye Gazetesi', 'https://www.turkiyegazetesi.com.tr/gundem/bakan-kurumdan-tarihi-bolgede-tekne-turu-717166'],
-    acilis: ['İl Gazetesi', 'https://www.ilgazetesi.com.tr/koprukoy-cesnigir-der-kapilarini-aciyor-6-eylul-pazar-gunu-buyuk-acilis-toreni-var-334738h.htm']
+    acilis: ['İl Gazetesi', 'https://www.ilgazetesi.com.tr/koprukoy-cesnigir-der-kapilarini-aciyor-6-eylul-pazar-gunu-buyuk-acilis-toreni-var-334738h.htm'],
+    ataAns: ['Atatürk Ansiklopedisi, Mustafa Kemal Paşa\'nın Ankara\'ya Gelişi', 'https://ataturkansiklopedisi.gov.tr/detay/385/Mustafa-Kemal-Pa%C5%9Fa%E2%80%99n%C4%B1n-Ankara%E2%80%99ya-Geli%C5%9Fi-(27-Aral%C4%B1k-1919)'],
+    atam: ['G. Çaykıran, ATAM Dergisi', 'https://atamdergi.gov.tr/tam-metin/1101/tur'],
+    vikiBala: ['Vikipedi, Balâ', 'https://tr.wikipedia.org/wiki/Bal%C3%A2'],
+    kardes: ['Sırrı Kardeş, Heyet-i Temsiliye ve Mustafa Kemal Kırşehir\'de (1950), aktaran Adnan Yılmaz', 'https://www.adnanyilmaz.com.tr/2020/01/28/100-yilinda-samsundan-kirsehire-gelen-mustafa-kemal-pasa/']
   };
   function srcHtml(list) {
     if (!list || !list.length) return '';
@@ -413,6 +417,7 @@
     ['1840–1845', 'Vergi defterlerine göre köyde 182 Müslüman ve 7 Rum hanesi vardır; nüfus 900\'ün üzerindedir.', [K.pehl, 'BOA, Nüfus Defteri 3543 ve 1845 Temettuat Defteri']],
     ['1852', 'Köprü harap olur. Vakfı olmadığından 5.900 kuruşluk onarım masrafı devletin bayındırlık gelirlerinden karşılanır. Bu yazışmada köprü "Sultan Murad Han\'ın yaptırdığı Çaşnigir Köprüsü" diye anılır.', [K.pehl]],
     ['1892', 'Köprüden geçen Fransız gezgin Comte de Cholet, sol kıyıda köprüyü bekler gibi duran taştan bir aslan heykeli görür. Heykel bugün yerinde değildir.', [K.pehl, 'Cevdet Çulpan, Türk Taş Köprüleri']],
+    ['26 Aralık 1919', 'Mustafa Kemal Paşa ve Heyet-i Temsiliye, Sivas\'tan Ankara\'ya giderken Kaman\'dan sonra Keskinli süvarilerin korumasında İğdebeli–Köprüköy yolunu kullanır, Kızılırmak\'ı geçip Bala\'ya, geceyi geçirdikleri Beynam köyüne varır. Ertesi gün Ankara\'ya girerler.', [K.vikiBala, K.ataAns, K.kardes]],
     ['1936', 'Avusturyalı araştırmacı K. Ritter köprüyü iki kez inceler ve bugünkü hâliyle Osmanlı yapısı olduğunu yazar.', [K.pehl]],
     ['19 Nisan 1938', 'Kırşehir–Keskin depremi bölgeyi sarsar. Depremi inceleyen bilim heyeti Köprüköy çevresinde de çalışır.', [K.deprem]],
     ['29 Şubat 1972', 'Köprüköy\'de belediye kurulur, köy belde olur.', [K.vikiKoy, K.wikiKoy]],
@@ -455,6 +460,21 @@
       para('<b>Derbend</b>, Farsça "geçit tutmak" demektir. Osmanlı devleti, bugünkü jandarma ve polisin olmadığı dönemlerde, eşkıyanın sık görüldüğü tehlikeli geçitleri civar köylerin halkına korutur; karşılığında onları bazı vergilerden muaf tutardı. Bekçiler yolcuların canına ve malına zarar gelmeyeceğine söz verir, bir şey olursa zararı öderlerdi. Başlarındaki kişiye <b>derbend ağası</b> denirdi.') +
       para('Çaşnigir Köprüsü, Kırşehir Sancağı\'nın Konur Kazası\'nda, bu düzenin Anadolu\'daki önemli noktalarından biriydi. 17. yüzyıl sonunda başka yerlerde bekçiler dağılırken, burada 19. yüzyılın ortasında hâlâ kalabalık bir nüfus yaşıyordu: 1845 vergi defterine göre köyde 182 Müslüman hane, 1840 defterine göre de 7 Rum hanesi vardı. Hane başına beş kişi sayılırsa nüfus 945 civarındadır.') +
       para('Zamanla düzen bozuldu. Arşiv belgelerinde halktan fazla para isteyen ağalar, vergi muafiyetine rağmen vergi talep eden valiler ve halka zulmettiği için 1822\'de cezalandırılan Deli Battal adlı bir ağa geçer. 1831\'de derbendin muafiyeti kaldırıldı; Tanzimat\'tan sonra yol güvenliğini önce zaptiye, sonra jandarma üstlendi. Derbendden geriye bugün yalnızca köprü kaldı; han ve caminin izi yoktur.') +
+
+      '<div class="sec-head" style="margin-top:30px"><h2>Atatürk köyümüzden geçti</h2></div>' +
+      '<figure class="fig"><img src="' + B + 'images/ataturk-yol-haritasi.jpg" alt="Harita: Mustafa Kemal Paşa\'nın 18-27 Aralık 1919\'da Sivas\'tan Kayseri, Mucur, Hacıbektaş, Kırşehir, Kaman, Köprüköy, Bala ve Beynam üzerinden Ankara\'ya yolculuğu." loading="lazy" style="aspect-ratio:auto;object-fit:contain">' +
+      '<figcaption>Sivas\'tan Ankara\'ya yolculuk, 18–27 Aralık 1919. Konumlar yaklaşıktır. <a href="' + B + 'images/ataturk-yol-haritasi.jpg" target="_blank" rel="noopener">Haritayı büyüt</a></figcaption></figure>' +
+      para('Mustafa Kemal Paşa ve Heyet-i Temsiliye, 18 Aralık 1919\'da Sivas\'tan Ankara\'ya doğru yola çıktı. Kayseri, Mucur, Hacıbektaş ve Kırşehir\'den sonra 25 Aralık gecesini Kaman\'da geçirdiler. Ertesi gün, 26 Aralık Cuma, heyet Keskinli süvarilerin korumasında <b>İğdebeli–Köprüköy yolunu</b> kullanarak Kızılırmak\'ı geçti ve Bala\'ya ulaştı. Geceyi Beynam köyünde geçiren heyet, 27 Aralık 1919\'da Ankara\'ya girdi.') +
+      para('Kaman\'da Paşa\'yı ağırlayan Ali Çavuş\'un yeğeni Mehmet Bektaş\'ın anlattığına göre, Paşa yolda nerede kalabileceğini sorunca Ali Çavuş, <i>"Köprü köyünde Hacı Ali Ağa\'nın odasında kalırsınız"</i> demiştir. Irmağın muhtemelen köyümüzdeki Çeşnigir Köprüsü\'nden geçildiği düşünülmektedir; kaynaklar köprünün adını ayrıca anmaz.') +
+      '<div class="pair">' +
+      '<figure class="fig"><img src="' + B + 'images/ataturk-karsilama-1919.jpg" alt="Kalpaklı ve paltolu kalabalık arasında yürüyen Mustafa Kemal Paşa ve heyet, eski bir arşiv fotoğrafı." loading="lazy" style="aspect-ratio:auto"><figcaption>Millî Mücadele yıllarından bir karşılama. Arşiv fotoğrafı.</figcaption></figure>' +
+      '<figure class="fig"><img src="' + B + 'images/ataturk-karsilama-tablo.jpg" alt="Davul zurna ve kalabalık bir halkın heyeti karşıladığı renkli bir tablo." loading="lazy" style="aspect-ratio:auto"><figcaption>Heyetin halk tarafından karşılanışını canlandıran bir tablo.</figcaption></figure>' +
+      '</div>' +
+      '<div class="box box-pad"><h3>Yolculuk gün gün</h3>' +
+      rows([['18 Aralık', 'Sivas\'tan hareket'], ['19–21 Aralık', 'Kayseri'], ['21 Aralık', 'Mucur'], ['22 Aralık', 'Hacıbektaş'], ['23 Aralık', 'Yeniden Mucur'], ['24 Aralık', 'Kırşehir'], ['25 Aralık', 'Kaman'],
+        ['26 Aralık', '<b>Köprüköy</b>, Bala; gece Beynam köyü'], ['27 Aralık', 'Ankara']]) +
+      '</div>' +
+      '<p class="muted small" style="margin-top:14px">' + srcHtml([K.vikiBala, K.ataAns, K.atam, K.kardes]).replace('<small class="t-src">', '').replace('</small>', '') + '</p>' +
 
       '<div class="sec-head" style="margin-top:30px"><h2>Tarihçe</h2></div>' +
       '<ul class="timeline">' + TARIH.map(function (t) { return '<li><b>' + t[0] + '</b>' + t[1] + srcHtml(t[2]) + '</li>'; }).join('') + '</ul>' +
