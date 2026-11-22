@@ -52,7 +52,7 @@ Her kodun dosyası (`d/k3f9xa.html`) önizleme başlığını ve fotoğrafını 
 Dosyaları panel kaydederken ve gece görevi (`node araclar/site-sayfalari.js`) yazar; eski kodlar silinmez.
 Dosyası henüz yazılmamış bir kod açılırsa `404.html` kaydı bulup ona gider.
 
-Telefonda "WhatsApp'ta paylaş": Android'de paylaşım ekranı fotoğraf ve yazıyla birlikte açılır. iPhone'da bu ekran fotoğrafla yazıyı birlikte alınca fotoğrafı düşürdüğü için (Safari hatası) yalnız fotoğraf gönderilir; yazı ve bağlantı panoya kopyalanır, ekrandaki not WhatsApp'ta fotoğrafın altına yapıştırmayı söyler. Önizleme fotoğrafları 300 KB'ı geçmemeli (WhatsApp sınırı); fotoğrafı olmayan kayıtlarda `images/kapak-paylasim.jpg` kullanılır.
+Telefonda "WhatsApp'ta paylaş": Android'de paylaşım ekranı fotoğraf ve yazıyla birlikte açılır. iPhone'da WhatsApp paylaşım ekranından tek mesajda ikisini birden almadığı için doğrudan WhatsApp açılır: başlık, bilgiler ve bağlantı tek mesajda gider, fotoğraf bağlantının önizlemesinde çıkar (kısa bağlantı sayfasındaki og:image; boyutu da yazılır). Önizleme fotoğrafları 300 KB'ı geçmemeli (WhatsApp sınırı); fotoğrafı olmayan kayıtlarda `images/kapak-paylasim.jpg` kullanılır.
 
 ## Sürüm eki
 

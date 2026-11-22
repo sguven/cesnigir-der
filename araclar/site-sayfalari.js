@@ -37,6 +37,23 @@ function short(t, n) { t = String(t || '').replace(/\s+/g, ' ').trim(); return t
 function read(name) { return C.arr(JSON.parse(fs.readFileSync(path.join(root, 'data', name + '.json'), 'utf8'))); }
 function ld(o) { return '<script type="application/ld+json">' + JSON.stringify(o).replace(/</g, '\\u003c') + '</script>\n'; }
 function abs(p) { return C.imgSrc(p, SITE); }
+// Sitedeki JPEG/PNG fotoğrafın boyutu (paylaşım önizlemesinde og:image:width/height için); okunamazsa null
+function dims(p) {
+  try {
+    var f = path.join(root, String(p || (p === '' ? '' : '')).replace(/^\/+/, '').split('?')[0]);
+    if (!p || /^[a-z]+:/i.test(p) || !fs.existsSync(f)) return null;
+    var b = fs.readFileSync(f);
+    if (b[0] === 0x89 && b[1] === 0x50) return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
+    if (b[0] !== 0xff || b[1] !== 0xd8) return null;
+    for (var i = 2; i < b.length - 9;) {
+      if (b[i] !== 0xff) { i++; continue; }
+      var m = b[i + 1], len = b.readUInt16BE(i + 2);
+      if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) return { w: b.readUInt16BE(i + 7), h: b.readUInt16BE(i + 5) };
+      i += 2 + len;
+    }
+  } catch (e) { /* boyutsuz yazılır */ }
+  return null;
+}
 
 // Üretilen sayfa bir alt klasörde durduğu için sayfadaki bütün göreli adreslerin başına ../ gelir
 function deepen(html) {
@@ -158,11 +175,11 @@ function build(dom, o) {
   for (var d of duyurular) await item('d', 'duyuru', d);
   for (var e of etkinlikler) await item('e', 'etkinlik', e);
   // pazar ilanları (telefon numarası içerir): yalnızca paylaşım önizlemesi, aramaya kapalı
-  pazar.forEach(function (x) { var pg = C.sharePage('i', x, SITE); if (pg) { write(pg.path, pg.html); n++; } });
+  pazar.forEach(function (x) { var pg = C.sharePage('i', x, SITE, dims(x.foto)); if (pg) { write(pg.path, pg.html); n++; } });
   // kısa paylaşım bağlantıları (d/…, e/…, i/…): eskiler silinmez, daha önce paylaşılan bağlantılar çalışmaya devam eder
   var kisa = 0;
   [['d', duyurular], ['e', etkinlikler], ['i', pazar]].forEach(function (g) {
-    g[1].forEach(function (x) { var pg = C.shortPage(g[0], x, SITE); write(pg.path, pg.html); kisa++; });
+    g[1].forEach(function (x) { var pg = C.shortPage(g[0], x, SITE, dims(x.foto || 'images/kapak-paylasim.jpg')); write(pg.path, pg.html); kisa++; });
   });
   console.log(kisa + ' kısa bağlantı yazıldı');
 

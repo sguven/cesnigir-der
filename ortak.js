@@ -156,59 +156,28 @@
     shareFiles[src].catch(function () { delete shareFiles[src]; });
     return shareFiles[src];
   }
-  /* iPhone/iPad (Safari ve iOS'taki tüm tarayıcılar): paylaşım ekranına fotoğraf ve yazı birlikte verilince fotoğraf düşüyor
-     (WebKit hatası 251500), WhatsApp'a yalnız yazı gidiyor. Bu yüzden iOS'ta paylaşım ekranına yalnız fotoğraf verilir;
-     yazı (başlık, bilgi ve bağlantı) panoya kopyalanır ve ekranda "fotoğrafın altına yapıştırın" notu çıkar. */
+  /* iPhone/iPad: WhatsApp paylaşım ekranından tek mesajda hem fotoğraf hem yazı almıyor (birini düşürüyor). Bu yüzden iOS'ta
+     düğmenin kendi WhatsApp bağlantısı açılır: tek mesajda başlık, bilgiler ve bağlantı gider; fotoğrafı WhatsApp bağlantının
+     önizlemesinde gösterir (paylaşım sayfasındaki og:image). Android'de fotoğraf ve yazı paylaşım ekranıyla birlikte gider. */
   function isIOS() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }
-  function copyText(t) {
-    try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).catch(copyOld); return; } } catch (e) { /* eski yol */ }
-    copyOld();
-    function copyOld() {
-      try {
-        var ta = document.createElement('textarea');
-        ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;font-size:16px';
-        document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length); document.execCommand('copy'); ta.remove();
-      } catch (e) { /* olmadıysa da paylaşım sürer */ }
-    }
-  }
-  var noteTimer;
-  function shareNote(html) {
-    var n = document.getElementById('paylas-not');
-    if (!n) {
-      n = document.createElement('div');
-      n.id = 'paylas-not'; n.setAttribute('role', 'status');
-      n.style.cssText = 'position:fixed;left:12px;right:12px;bottom:16px;z-index:9999;background:#1f2a1c;color:#fff;border-radius:14px;' +
-        'padding:16px 18px;font-size:18px;line-height:1.4;box-shadow:0 6px 24px rgba(0,0,0,.35);text-align:center';
-      n.addEventListener('click', function () { n.hidden = true; });
-      document.body.appendChild(n);
-    }
-    n.innerHTML = html; n.hidden = false;
-    clearTimeout(noteTimer); noteTimer = setTimeout(function () { n.hidden = true; }, 15000);
-  }
   function bindShare() {
-    if (!navigator.share || !navigator.canShare || !window.File || !matchMedia('(pointer: coarse)').matches) return;
-    var ios = isIOS();
+    if (!navigator.share || !navigator.canShare || !window.File || !matchMedia('(pointer: coarse)').matches || isIOS()) return;
     var warm = function (e) { var a = e.target.closest && e.target.closest('[data-share-photo]'); if (a) warmShare(a.getAttribute('data-share-photo')); };
     document.addEventListener('touchstart', warm, { passive: true });
     document.addEventListener('pointerdown', warm, { passive: true });
     document.addEventListener('click', function (e) {
       var a = e.target.closest && e.target.closest('[data-share-photo]');
       if (!a) return;
-      var href = a.href, text = a.getAttribute('data-share-text') || '';
+      var href = a.href;
       e.preventDefault();
-      if (ios) {
-        copyText(text);
-        shareNote('<b>Yazı ve bağlantı kopyalandı.</b><br>WhatsApp\'ta kişiyi seçin, fotoğrafın altındaki <b>yazı kutusuna</b> basılı tutup <b>Yapıştır</b>\'a dokunun.');
-      }
       warmShare(a.getAttribute('data-share-photo')).then(function (file) {
-        var d = ios ? { files: [file] } : { files: [file], text: text };
+        var d = { files: [file], text: a.getAttribute('data-share-text') || '' };
         if (!navigator.canShare(d)) throw 0;
         return navigator.share(d);
       }).catch(function (er) {
         if (er && er.name === 'AbortError') return;   // paylaşım ekranı kapatıldı
-        var n = document.getElementById('paylas-not'); if (n) n.hidden = true;
         location.href = href;
       });
     });
@@ -239,8 +208,17 @@
     t = String(t || '').replace(/\s+/g, ' ').trim();
     return t.length > n ? t.slice(0, n).replace(/\s+\S*$/, '') + '…' : t;
   }
+  /* Önizleme fotoğrafının etiketleri. WhatsApp ve Facebook için adres, tür ve (biliniyorsa) boyut da yazılır:
+     boyut yazılınca Facebook fotoğrafı ilk paylaşımda da gösterir. dims: { w, h } ya da boş. */
+  function ogImage(foto, dims) {
+    var t = /\.png(\?|$)/i.test(foto) ? 'image/png' : /\.webp(\?|$)/i.test(foto) ? 'image/webp' : 'image/jpeg';
+    return '<meta property="og:image" content="' + esc(foto) + '">\n' +
+      (/^https:/i.test(foto) ? '<meta property="og:image:secure_url" content="' + esc(foto) + '">\n' : '') +
+      '<meta property="og:image:type" content="' + t + '">\n' +
+      (dims && dims.w && dims.h ? '<meta property="og:image:width" content="' + dims.w + '">\n<meta property="og:image:height" content="' + dims.h + '">\n' : '');
+  }
   // base: sitenin tam adresi, sonunda / ile (https://…/cesnigir-der/). Fotoğrafı olmayan kayıt için null döner.
-  function sharePage(key, x, base) {
+  function sharePage(key, x, base, dims) {
     var foto = imgSrc(x.foto, base);
     if (!foto) return null;
     var id = shareId(key, x), tur = x.tur ? String(x.tur).toLocaleUpperCase('tr') + ': ' : '';
@@ -255,7 +233,7 @@
       '<meta property="og:title" content="' + esc(title) + '">\n' +
       '<meta property="og:description" content="' + esc(det || 'Çeşnigir-Der · Köprüköy') + '">\n' +
       '<meta property="og:type" content="article">\n<meta property="og:site_name" content="Çeşnigir-Der">\n' +
-      '<meta property="og:image" content="' + esc(foto) + '">\n<meta name="twitter:card" content="summary_large_image">\n' +
+      ogImage(foto, dims) + '<meta name="twitter:card" content="summary_large_image">\n' +
       '<script>location.replace(' + JSON.stringify(to).replace(/</g, '\\u003c') + ');</script>\n</head>\n' +
       '<body style="font-family:sans-serif;padding:24px;font-size:20px">\n<p><a href="' + esc(to) + '">' + esc(title) + '</a></p>\n</body>\n</html>\n' };
   }
@@ -272,7 +250,7 @@
   }
   function shortPath(key, x) { return key + '/' + shortCode(key, shareId(key, x), x.foto) + '.html'; }
   // base: sitenin tam adresi, sonunda / ile. Fotoğrafı olmayan kayıtta önizlemede sitenin kapak fotoğrafı çıkar.
-  function shortPage(key, x, base) {
+  function shortPage(key, x, base, dims) {
     var id = shareId(key, x), tur = x.tur ? String(x.tur).toLocaleUpperCase('tr') + ': ' : '';
     var title = tur + (key === 'e' ? x.ad : x.baslik || ''), det;
     if (key === 'e') det = [longDate(x.tarih, true), x.saat, x.yer].filter(Boolean).join(' · ');
@@ -280,13 +258,15 @@
     else det = shareShort(x.metin, 180);
     // kapak.jpg 350 KB; WhatsApp ~300 KB üstünü önizlemede göstermediği için küçük kopyası kullanılır
     var foto = imgSrc(x.foto, base) || base + 'images/kapak-paylasim.jpg', to = '../?' + key + '=' + encodeURIComponent(id);
+    var self = base + key + '/' + shortCode(key, id, x.foto);
     return { path: shortPath(key, x), html: '<!doctype html>\n<html lang="tr">\n<head>\n<meta charset="utf-8">\n' +
       '<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="robots" content="noindex">\n' +
       '<title>' + esc(title) + ' · Çeşnigir-Der</title>\n' +
       '<meta property="og:title" content="' + esc(title) + '">\n' +
       '<meta property="og:description" content="' + esc(det || 'Çeşnigir-Der · Köprüköy') + '">\n' +
+      '<meta property="og:url" content="' + esc(self) + '">\n' +
       '<meta property="og:type" content="article">\n<meta property="og:site_name" content="Çeşnigir-Der">\n' +
-      '<meta property="og:image" content="' + esc(foto) + '">\n<meta name="twitter:card" content="summary_large_image">\n' +
+      ogImage(foto, dims) + '<meta name="twitter:card" content="summary_large_image">\n' +
       '<script>location.replace(' + JSON.stringify(to).replace(/</g, '\\u003c') + ');</script>\n</head>\n' +
       '<body style="font-family:sans-serif;padding:24px;font-size:20px">\n<p><a href="' + esc(to) + '">' + esc(title) + '</a></p>\n</body>\n</html>\n' };
   }
