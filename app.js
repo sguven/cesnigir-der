@@ -1,6 +1,30 @@
 /* Çeşnigir-Der · Tasarım 3
    Sayfalar: Ana Sayfa, Duyurular (ve ayrıntı), Etkinlikler, Fotoğraflar, Market, Hakkımızda, İletişim.
    İçerik data/ klasöründen okunur; yönetim panelinden değişir. */
+
+/* Ziyaretçi sayacı (GoatCounter): istatistikler https://cesnifirder.goatcounter.com
+   Yalnız gerçek adreste (cesnigirder.org) sayar; bilgisayarda denerken saymaz. Panel (yonetim/) sayılmaz. */
+(function () {
+  if (!/(^|\.)cesnigirder\.org$/.test(location.hostname)) return;
+  // Site sayfaları #/duyuru/… gibi adreslerle açılıyor; sayaçta her kayıt ayrı görünsün
+  function yol() { return location.pathname + (location.hash.indexOf('#/') === 0 ? location.hash : ''); }
+  // Kısa paylaşım bağlantısından (/d/…, /e/…, /i/…) gelen ziyareti ayrıca belirt
+  var kaynak = /\/\/(www\.)?cesnigirder\.org\/[dei]\//.test(document.referrer) ? 'Paylaşılan bağlantı (WhatsApp/Facebook)' : undefined;
+  window.goatcounter = { path: yol, referrer: kaynak };
+  var son = yol();
+  window.addEventListener('hashchange', function () {
+    var p = yol();
+    if (p === son || !window.goatcounter.count) return;
+    son = p;
+    window.goatcounter.count({ path: p, referrer: location.origin + '/' });
+  });
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://gc.zgo.at/count.js';
+  s.setAttribute('data-goatcounter', 'https://cesnifirder.goatcounter.com/count');
+  document.head.appendChild(s);
+})();
+
 (function () {
   'use strict';
   var C = window.CD, esc = C.esc;

@@ -89,3 +89,9 @@ Her gece bir zamanlanmış görev Köprüköy, Keskin, Kırıkkale ve Ankara'dan
     python3 araclar/haber-gorseli.py <ad> <tema> "<ETİKET>" "<alt satır>"
 
 Görsel `images/gorsel-<ad>.jpg` olarak kaydedilir. Temalar ve renkleri dosyanın başında yazılı (yol, tarim, belge, ev, su, elektrik, saglik, egitim, kultur, hava, duyuru).
+
+## Ziyaretçi istatistikleri
+
+Sayaç GoatCounter ile çalışır: https://cesnifirder.goatcounter.com (giriş Serhat'ın hesabıyla).
+Kod `app.js` dosyasının başında; yalnız cesnigirder.org adresinde sayar, yönetim paneli sayılmaz.
+Kısa paylaşım bağlantısından gelenler "Paylaşılan bağlantı (WhatsApp/Facebook)" kaynağıyla görünür.
