@@ -175,8 +175,7 @@
 
   /* ---------- sayfalar ---------- */
   function pageHome() {
-    var d = data.dernek, news = data.duyurular.filter(function (p) { return !isTarih(p); }).slice(0, 4), ev = upcoming(45).slice(0, 4);
-    var tarih = data.duyurular.filter(isTarih).slice(0, 3);
+    var d = data.dernek, news = data.duyurular.slice(0, 4), ev = upcoming(45).slice(0, 4);
     // Canlı görüntü: karşılama bandının sağında küçük oynar; dokununca aynı oynatıcı ekranı kaplayacak kadar büyür
     // (oynatıcı yeniden yüklenmez, yalnızca boyutu değişir). Kapat, karanlık alana dokunmak ya da Esc eski hâline döndürür.
     var live = C.ytEmbed(d.canli_yayin), liveBox = live ? '<div class="live-mini" id="liveBox">' +
@@ -197,10 +196,6 @@
       '<div class="box" style="margin-top:14px">' + (ev.length ? ev.map(evRow).join('') : '<div class="empty">Yaklaşan bir gün yok.</div>') + '</div>' +
       '<p style="margin:10px 0 0"><a href="#/etkinlikler" style="font-weight:700">Tüm takvim ›</a></p>' +
       '</aside></div></section>';
-
-    if (tarih.length) h += '<section class="section tarih-band"><div class="container"><div class="sec-head"><div><h2>Köyümüzün Tarihinden</h2>' +
-      '<p>Köprüköy\'ün geçmişinden kaynaklı yazılar</p></div><a href="#/duyurular" data-tarih="1">Tüm tarih yazıları ›</a></div>' +
-      '<div class="news-list">' + tarih.map(newsCard).join('') + '</div></div></section>';
 
     var g = data.galeri.slice(0, 6);
     if (g.length) h += '<section class="section alt"><div class="container"><div class="sec-head"><h2>Fotoğraflardan</h2><a href="#/fotograflar">Tüm fotoğraflar (' + data.galeri.length + ') ›</a></div>' +

@@ -38,7 +38,7 @@ Anahtar yalnızca o telefonun tarayıcısında saklanır. Telefon kaybolursa Git
 | `index.html`, `site.css`, `app.js` | Site |
 | `style.css`, `ortak.js` | Site ve panelin ortak görünümü ve yardımcıları |
 | `yonetim/` | Yönetim paneli |
-| `data/duyurular.json` | Duyurular, vefat/düğün ilanları, haberler (sitede dosyadaki sırayla görünür: en son eklenen en üstte) |
+| `data/duyurular.json` | Duyurular, vefat/düğün ilanları, haberler ve "Tarihten" yazıları (sitede dosyadaki sırayla görünür: en son eklenen en üstte). Tarihten yazılarında `olay_tarihi` kartta yayın tarihinin yerine gösterilir; `fotolar` ek fotoğraflardır (`ust: true` olan kapağın altında çıkar) |
 | `data/etkinlikler.json` | Takvimdeki köy etkinlikleri |
 | `data/resmi-gunler.json` | Resmî bayramlar ve dinî günler (2026-2027) |
 | `data/galeri.json` | Fotoğraflar |
