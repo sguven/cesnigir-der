@@ -175,9 +175,10 @@
     // Canlı görüntü: karşılama bandının sağında küçük oynar; dokununca aynı oynatıcı ekranı kaplayacak kadar büyür
     // (oynatıcı yeniden yüklenmez, yalnızca boyutu değişir). Kapat, karanlık alana dokunmak ya da Esc eski hâline döndürür.
     var live = C.ytEmbed(d.canli_yayin), liveBox = live ? '<div class="live-mini" id="liveBox">' +
-      '<div class="live-label"><span class="live-dot" aria-hidden="true"></span>Köyden Canlı Görüntü</div>' +
+      '<div class="live-label"><span class="live-dot" aria-hidden="true"></span>Köyden Canlı Görüntü' +
+      (d.canli_not ? ' <span class="live-soon">' + esc(d.canli_not) + '</span>' : '') + '</div>' +
       '<div class="live-frame">' + C.ytFrame(live) +
-      '<button type="button" class="live-open" id="liveOpen" aria-label="Canlı görüntüyü büyüt"><span class="live-tag">CANLI</span><span class="live-zoom">⤢ Büyüt</span></button>' +
+      '<button type="button" class="live-open" id="liveOpen" aria-label="Görüntüyü büyüt">' + (d.canli_not ? '' : '<span class="live-tag">CANLI</span>') + '<span class="live-zoom">⤢ Büyüt</span></button>' +
       '<button type="button" class="live-close" id="liveClose" hidden>✕ Kapat</button></div></div>' : '';
     var h = '<section class="hero"><img src="' + B + 'images/kapak.jpg" width="1584" height="672" decoding="async" alt="Gün batımında Çeşnigir Köprüsü ve Türk bayrağı, üzerinde Çeşnigir-Der yazısı."></section>' +
       '<div class="welcome"><div class="container welcome-in" style="padding:22px 18px"><div><h1>Köprüköy\'e hoş geldiniz</h1>' +

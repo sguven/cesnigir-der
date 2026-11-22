@@ -79,6 +79,8 @@
     { name: 'denetim_kurulu', label: 'Denetim kurulu', type: 'textarea', placeholder: 'Hasan Çelik\nVeli Şahin\nOsman Kurt' },
     { name: 'canli_yayin', label: 'YouTube canlı yayın adresi', type: 'url', placeholder: 'https://www.youtube.com/live/…', group: 'Canlı Yayın',
       groupHelp: 'YouTube\'daki canlı yayının adresini yapıştırın. Sitenin ana sayfasında "Köyden Canlı Görüntü" olarak oynar. Boş bırakırsanız görünmez.' },
+    { name: 'canli_not', label: 'Canlı yayın notu', type: 'text', placeholder: 'Örnek: Yakında',
+      help: 'Canlı yayın henüz başlamadıysa buraya "Yakında" yazın: başlığın yanında görünür, videodaki CANLI etiketi kalkar. Canlı yayın başlayınca boş bırakın.' },
     { name: 'kasa_donem', label: 'Kasa durumu: hangi ay?', type: 'text', placeholder: 'Örnek: Kasım 2026', group: 'Kasa Durumu', groupHelp: 'Doldurursanız sitede "Kasa Durumu" kutusu çıkar. Boş bırakırsanız görünmez.' },
     { name: 'gelir', label: 'Bu ayki gelir (TL)', type: 'text', inputmode: 'numeric' },
     { name: 'gider', label: 'Bu ayki gider (TL)', type: 'text', inputmode: 'numeric' },
