@@ -814,12 +814,30 @@
     if (last && last.focus) { try { last.focus(); } catch (e) { /* yok say */ } } }
 
   /* ---------- canlı görüntü: küçük / büyük ---------- */
+  // Telefon/tablette (Android gibi destekleyen tarayıcılarda) gerçek tam ekrana geçer ve yatay çevirmeyi dener;
+  // desteklemeyen tarayıcılarda (ör. iPhone) karartmalı büyük görünüm kullanılır.
+  function fsEl() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
   function liveBig(on) {
     var box = $('liveBox'); if (!box) return;
+    var fr = box.querySelector('.live-frame');
+    if (!on && fsEl()) { try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) { /* yok say */ } }
     box.classList.toggle('big', on);
     $('liveOpen').hidden = on; $('liveClose').hidden = !on;
     document.body.style.overflow = on ? 'hidden' : '';
     (on ? $('liveClose') : $('liveOpen')).focus();
+    var req = fr && (fr.requestFullscreen || fr.webkitRequestFullscreen);
+    if (on && req && window.matchMedia('(max-width:900px)').matches) {
+      try {
+        var pr = req.call(fr);
+        var lock = function () { try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(function () {}); } catch (e) { /* yok say */ } };
+        if (pr && pr.then) pr.then(lock, function () {}); else lock();
+      } catch (e) { /* tam ekran olmazsa büyük görünüm yeter */ }
+    }
+  }
+  function liveFsChange() {
+    if (fsEl()) return;
+    try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) { /* yok say */ }
+    var box = $('liveBox'); if (box && box.classList.contains('big')) liveBig(false);
   }
 
   function bind() {
@@ -827,6 +845,7 @@
     // sayfadan çıkılırken büyük canlı görüntü açık kaldıysa kaydırma kilidini bırak
     window.addEventListener('hashchange', function () { if (!document.querySelector('.live-mini.big') && $('viewer').hidden) document.body.style.overflow = ''; });
     C.bindShare();
+    document.addEventListener('fullscreenchange', liveFsChange); document.addEventListener('webkitfullscreenchange', liveFsChange);
     window.addEventListener('scroll', headerPhoto, { passive: true }); window.addEventListener('resize', headerPhoto);
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     window.addEventListener('scroll', function () { pos[curHash] = window.pageYOffset; }, { passive: true });
