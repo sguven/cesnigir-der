@@ -179,7 +179,7 @@
       '<div class="live-frame">' + C.ytFrame(live) +
       '<button type="button" class="live-open" id="liveOpen" aria-label="Görüntüyü büyüt">' + (d.canli_not ? '' : '<span class="live-tag">CANLI</span>') + '<span class="live-zoom">⤢ Büyüt</span></button>' +
       '<button type="button" class="live-close" id="liveClose" hidden>✕ Kapat</button></div></div>' : '';
-    var h = '<section class="hero"><img src="' + B + 'images/kapak.jpg" width="1584" height="672" decoding="async" alt="Gün batımında Çeşnigir Köprüsü ve Türk bayrağı, üzerinde Çeşnigir-Der yazısı."></section>' +
+    var h = '<section class="hero"><img src="' + B + 'images/kapak.jpg?v=2" width="1926" height="817" decoding="async" alt="Gün batımında Çeşnigir Köprüsü ve Türk bayrağı, üzerinde Çeşnigir-Der yazısı."></section>' +
       '<div class="welcome"><div class="container welcome-in" style="padding:22px 18px"><div><h1>Köprüköy\'e hoş geldiniz</h1>' +
       '<p>Köyümüzden duyurular, vefat ve düğün haberleri, etkinlikler ve fotoğraflar.</p></div>' + liveBox + '</div></div>';
 
