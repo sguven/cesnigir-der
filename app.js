@@ -224,17 +224,22 @@
     if (!p) return band('Duyuru bulunamadı') + '<section class="section"><div class="container"><p>Bu duyuru kaldırılmış olabilir.</p><a class="btn" href="#/duyurular">Tüm duyurular</a></div></section>';
     var src = img(p.foto), link = C.linkUrl(p.link);
     var paras = String(p.metin || '').split(/\n\s*\n|\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+    // ek fotoğraflar: "ust" işaretliler kapağın hemen altında, diğerleri yazının sonunda
+    function ekFoto(ust) {
+      return (p.fotolar || []).filter(function (f) { return !!f.ust === ust; }).map(function (f) {
+        var s = img(f.foto);
+        return s ? '<figure class="fig"><button type="button" class="article-img" style="margin-bottom:6px" data-photo="' + esc(s) + '" data-cap="' + esc(f.aciklama || p.baslik) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(s) + '" alt="' + esc(f.aciklama || p.baslik) + '"' + (ust ? '' : ' loading="lazy"') + ' style="aspect-ratio:auto;object-fit:contain"></button>' +
+          (f.aciklama ? '<figcaption>' + esc(f.aciklama) + '</figcaption>' : '') + '</figure>' : '';
+      }).join('');
+    }
     return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/duyurular">Duyurular</a></div></div></div>' +
       '<section class="section"><div class="container"><article class="article">' +
       '<div class="news-meta">' + (p.tur ? '<span class="' + C.badgeClass(p.tur) + '">' + esc(p.tur) + '</span>' : '') + '<span>' + esc(C.longDate(p.tarih, true)) + '</span></div>' +
       '<h1>' + esc(p.baslik) + '</h1>' +
       (src ? '<button type="button" class="article-img" data-photo="' + esc(src) + '" data-cap="' + esc(p.baslik) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(src) + '" alt="' + esc(p.foto_aciklama || p.baslik) + '"></button>' : '') +
+      ekFoto(true) +
       '<div class="article-text">' + paras.map(function (s) { return '<p>' + esc(s) + '</p>'; }).join('') + '</div>' +
-      (p.fotolar || []).map(function (f) {
-        var s = img(f.foto);
-        return s ? '<figure class="fig"><button type="button" class="article-img" style="margin-bottom:6px" data-photo="' + esc(s) + '" data-cap="' + esc(f.aciklama || p.baslik) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(s) + '" alt="' + esc(f.aciklama || p.baslik) + '" loading="lazy" style="aspect-ratio:auto;object-fit:contain"></button>' +
-          (f.aciklama ? '<figcaption>' + esc(f.aciklama) + '</figcaption>' : '') + '</figure>' : '';
-      }).join('') +
+      ekFoto(false) +
       (p.kaynak ? '<p class="muted small">Kaynak: ' + esc(p.kaynak) + '</p>' : '') +
       '<div class="btn-row">' + shareButtons({ key: 'd', id: id, tur: p.tur, title: p.baslik, photo: src }, true) +
       (link ? '<a class="btn btn-light" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + icon('link') + 'Haberin kaynağı</a>' : '') +
