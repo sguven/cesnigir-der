@@ -16,20 +16,37 @@ Eski `site3/` adresi ana adrese yönlendirir, daha önce paylaşılan bağlantı
 
 **Yönetim paneli:** https://cesnigirder.org/yonetim/
 
-- Panel değişiklikleri doğrudan bu depodaki `data/` dosyalarına kaydeder. Site 1-2 dakika içinde güncellenir.
-- Telefondan yüklenen fotoğraflar otomatik küçültülür (en fazla 1600 piksel) ve `images/yuklenen/` klasörüne gider.
-- Panel, her telefona bir kez girilen bir GitHub erişim anahtarıyla çalışır (aşağıya bakın).
+- Panel sitenin kendisidir, düzenleme modunda: yönetici siteyi ziyaretçi gibi gezer. Her duyurunun, etkinliğin, market ilanının ve
+  fotoğrafın yanında **Düzenle** / **Sil**, her bölümün başında **Yeni … ekle** düğmesi vardır; sağ alttaki **Ekle** düğmesi de her yerden açılır.
+  Hakkımızda, İletişim ve ana sayfadaki kutuların (dernek bilgileri, kurullar, kasa, canlı görüntü) köşesindeki **Düzenle** yalnız o kutunun bilgilerini açar.
+- Geçmiş etkinlikler sitede görünmez; düzenleme modunda Etkinlikler sayfasının sonunda listelenir.
+- Değişiklikler doğrudan bu depodaki `data/` dosyalarına kaydedilir ve sayfada hemen görünür; ziyaretçilere 1-2 dakika içinde yansır.
+- Telefondan yüklenen fotoğraflar otomatik küçültülür (en fazla 1600 piksel, 250 KB altı) ve `images/yuklenen/` klasörüne gider.
+- Kod: `yonetim/index.html` (sitenin iskeleti), `yonetim/duzen.js`, `yonetim/duzen.css`. `app.js`, `window.CD_EDIT` varsa düzenleme düğmelerinin
+  yerlerini işaretler (`data-ek`, `data-ed`); ziyaretçi sitesinde bu işaretler hiç yazılmaz.
 
 **Yedek:** Pages CMS (https://app.pagescms.org) aynı dosyaları düzenleyebilir. Ayarı `.pages.yml` içinde.
 
-## Panel için giriş anahtarı
+## Panel için giriş
+
+Panel bir GitHub erişim anahtarıyla çalışır. Anahtar yöneticiye **giriş bağlantısı** olarak verilir:
+
+    https://cesnigirder.org/yonetim/?k=ANAHTAR
+
+Bağlantıya dokunan doğrudan girer. Anahtar adres çubuğunda durduğu için bu sayfa ana ekrana ya da yer imlerine eklenince anahtar da onunla gider;
+tarayıcı belleği silinse bile bir daha sorulmaz. (Eskiden anahtar yalnız tarayıcı belleğinde duruyordu. iPhone Safari bu belleği bir hafta
+girilmeyen sitelerde, gizli sekmede ve WhatsApp/Facebook içinden açılan tarayıcıda kapanınca siliyordu: anahtarın her girişte yeniden
+istenmesinin sebebi buydu.) Panelde üstteki **Giriş** düğmesinden bağlantı kopyalanabilir ya da çıkış yapılabilir.
+
+Anahtar oluşturmak:
 
 1. GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token
-2. Repository access: **Only select repositories** → `sguven/cesnigir-der`
-3. Permissions → Repository permissions → **Contents: Read and write** (başka izin gerekmez)
-4. Oluşan anahtarı panelin "Giriş anahtarı" kutusuna bir kez yapıştırın.
+2. Expiration: en uzun süreyi seçin (süresi dolunca panel "süresi dolmuş" der, yeni bağlantı gerekir)
+3. Repository access: **Only select repositories** → `sguven/cesnigir-der`
+4. Permissions → Repository permissions → **Contents: Read and write** (başka izin gerekmez)
 
-Anahtar yalnızca o telefonun tarayıcısında saklanır. Telefon kaybolursa GitHub'dan anahtarı silmeniz yeterli; panel o telefonda çalışmayı bırakır.
+Bağlantı anahtarı taşır: yalnızca yöneticiye gönderin. Telefon kaybolursa ya da bağlantı başkasına gittiyse GitHub'dan anahtarı silmeniz yeterli;
+panel sayfası adres çubuğundaki anahtarı başka sitelere göndermez (`referrer` kapalı).
 
 ## Dosyalar
 
@@ -37,7 +54,7 @@ Anahtar yalnızca o telefonun tarayıcısında saklanır. Telefon kaybolursa Git
 |---|---|
 | `index.html`, `site.css`, `app.js` | Site |
 | `style.css`, `ortak.js` | Site ve panelin ortak görünümü ve yardımcıları |
-| `yonetim/` | Yönetim paneli |
+| `yonetim/` | Yönetim paneli (sitenin düzenleme modu) |
 | `data/duyurular.json` | Duyurular, vefat/düğün ilanları, haberler ve "Tarihten" yazıları (sitede dosyadaki sırayla görünür: en son eklenen en üstte). Tarihten yazılarında `olay_tarihi` kartta yayın tarihinin yerine gösterilir; `fotolar` ek fotoğraflardır (`ust: true` olan kapağın altında çıkar) |
 | `data/etkinlikler.json` | Takvimdeki köy etkinlikleri |
 | `data/resmi-gunler.json` | Resmî bayramlar ve dinî günler (2026-2027) |
