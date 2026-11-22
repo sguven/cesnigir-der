@@ -494,7 +494,7 @@
       '<p class="muted small" style="margin:10px 0 0">Kaynak: 1840\'lar için BOA nüfus ve temettuat defterleri; 1985–2000 için <a href="https://tr.wikipedia.org/wiki/K%C3%B6pr%C3%BC,_Keskin" target="_blank" rel="noopener">Vikipedi, Köprüköy (Keskin)</a>; 2007 sonrası <a href="https://www.nufusune.com/35416-kirikkale-keskin-koprukoy-koy-nufusu" target="_blank" rel="noopener">TÜİK Adrese Dayalı Nüfus Kayıt Sistemi</a> (31 Aralık 2025 sonuçları)</p></div>' +
       '<div class="box box-pad"><h3>Belde dönemi belediye başkanları</h3>' +
       rows([['1972', 'Hacı Erbek (ilk başkan)'], ['1973', 'Mehmet Güven'], ['1977', 'M. Dede Köprülü'], ['1984', 'Şerafettin Güven'], ['1989', 'Şerafettin Güven'], ['1994', 'Muzaffer Büken'], ['1999', 'Selahattin Güven'], ['2004', 'Oğuzhan Köprülü'], ['2009', 'Hasan Taşpınar']]) +
-      '<p class="muted small" style="margin:10px 0 0">Kaynak: Vikipedi, Köprüköy (Keskin); Hacı Erbek için oğlu Serdar Erbek\'in anlatımı</p></div></div>' +
+      '<p class="muted small" style="margin:10px 0 0">Kaynak: Vikipedi, Köprüköy (Keskin)</p></div></div>' +
 
       '<div class="box box-pad" style="margin-top:24px"><h3>Türküde Köprüköy</h3>' +
       '<p style="margin:0">Kızılırmak türkülerinden "Nettin Kızılırmak Allı Gelini"nde anlatılan olayın köyümüzde yaşandığı aktarılır. Hikâyeye göre karşı köye götürülen gelin alayı köprüden geçerken köprü yıkılır, gelin ve alaydan pek çok kişi ırmağa kapılır. Ardından Kızılırmak\'a sitem eden ağıtlar yakılır.</p></div>' +
