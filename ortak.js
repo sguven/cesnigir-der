@@ -157,27 +157,58 @@
     return shareFiles[src];
   }
   /* iPhone/iPad (Safari ve iOS'taki tüm tarayıcılar): paylaşım ekranına fotoğraf ve yazı birlikte verilince fotoğraf düşüyor
-     (WebKit hatası 251500), WhatsApp'a yalnız yazı gidiyor. Bu yüzden iOS'ta düğmenin kendi WhatsApp bağlantısı açılır:
-     WhatsApp bağlantının önizlemesini (kaydın fotoğrafı, başlığı) paylaşım sayfasından alıp mesajda gösterir. */
+     (WebKit hatası 251500), WhatsApp'a yalnız yazı gidiyor. Bu yüzden iOS'ta paylaşım ekranına yalnız fotoğraf verilir;
+     yazı (başlık, bilgi ve bağlantı) panoya kopyalanır ve ekranda "fotoğrafın altına yapıştırın" notu çıkar. */
   function isIOS() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }
+  function copyText(t) {
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).catch(copyOld); return; } } catch (e) { /* eski yol */ }
+    copyOld();
+    function copyOld() {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;font-size:16px';
+        document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length); document.execCommand('copy'); ta.remove();
+      } catch (e) { /* olmadıysa da paylaşım sürer */ }
+    }
+  }
+  var noteTimer;
+  function shareNote(html) {
+    var n = document.getElementById('paylas-not');
+    if (!n) {
+      n = document.createElement('div');
+      n.id = 'paylas-not'; n.setAttribute('role', 'status');
+      n.style.cssText = 'position:fixed;left:12px;right:12px;bottom:16px;z-index:9999;background:#1f2a1c;color:#fff;border-radius:14px;' +
+        'padding:16px 18px;font-size:18px;line-height:1.4;box-shadow:0 6px 24px rgba(0,0,0,.35);text-align:center';
+      n.addEventListener('click', function () { n.hidden = true; });
+      document.body.appendChild(n);
+    }
+    n.innerHTML = html; n.hidden = false;
+    clearTimeout(noteTimer); noteTimer = setTimeout(function () { n.hidden = true; }, 15000);
+  }
   function bindShare() {
-    if (!navigator.share || !navigator.canShare || !window.File || !matchMedia('(pointer: coarse)').matches || isIOS()) return;
+    if (!navigator.share || !navigator.canShare || !window.File || !matchMedia('(pointer: coarse)').matches) return;
+    var ios = isIOS();
     var warm = function (e) { var a = e.target.closest && e.target.closest('[data-share-photo]'); if (a) warmShare(a.getAttribute('data-share-photo')); };
     document.addEventListener('touchstart', warm, { passive: true });
     document.addEventListener('pointerdown', warm, { passive: true });
     document.addEventListener('click', function (e) {
       var a = e.target.closest && e.target.closest('[data-share-photo]');
       if (!a) return;
-      var href = a.href;
+      var href = a.href, text = a.getAttribute('data-share-text') || '';
       e.preventDefault();
+      if (ios) {
+        copyText(text);
+        shareNote('<b>Yazı ve bağlantı kopyalandı.</b><br>WhatsApp\'ta kişiyi seçin, fotoğrafın altındaki <b>yazı kutusuna</b> basılı tutup <b>Yapıştır</b>\'a dokunun.');
+      }
       warmShare(a.getAttribute('data-share-photo')).then(function (file) {
-        var d = { files: [file], text: a.getAttribute('data-share-text') || '' };
+        var d = ios ? { files: [file] } : { files: [file], text: text };
         if (!navigator.canShare(d)) throw 0;
         return navigator.share(d);
       }).catch(function (er) {
         if (er && er.name === 'AbortError') return;   // paylaşım ekranı kapatıldı
+        var n = document.getElementById('paylas-not'); if (n) n.hidden = true;
         location.href = href;
       });
     });
