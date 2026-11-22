@@ -538,6 +538,13 @@
       return updateJson(col.file, function (data) {
         var list = C.arr(data), item = clean(v);
         if (!col.fields.some(function (f) { return f.name === 'foto'; })) delete item.foto;
+        // panelde alanı olmayan bilgiler (ek fotoğraflar, kaynak, bağlantı) düzenlemede kaybolmasın
+        if (orig) {
+          var eski = JSON.parse(orig);
+          Object.keys(eski).forEach(function (k) {
+            if (!(k in item) && !col.fields.some(function (f) { return f.name === k; })) item[k] = eski[k];
+          });
+        }
         saved = item;
         if (orig) {
           var k = list.findIndex(function (x) { return JSON.stringify(x) === orig; });

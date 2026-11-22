@@ -230,6 +230,11 @@
       '<h1>' + esc(p.baslik) + '</h1>' +
       (src ? '<button type="button" class="article-img" data-photo="' + esc(src) + '" data-cap="' + esc(p.baslik) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(src) + '" alt="' + esc(p.foto_aciklama || p.baslik) + '"></button>' : '') +
       '<div class="article-text">' + paras.map(function (s) { return '<p>' + esc(s) + '</p>'; }).join('') + '</div>' +
+      (p.fotolar || []).map(function (f) {
+        var s = img(f.foto);
+        return s ? '<figure class="fig"><button type="button" class="article-img" style="margin-bottom:6px" data-photo="' + esc(s) + '" data-cap="' + esc(f.aciklama || p.baslik) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(s) + '" alt="' + esc(f.aciklama || p.baslik) + '" loading="lazy" style="aspect-ratio:auto;object-fit:contain"></button>' +
+          (f.aciklama ? '<figcaption>' + esc(f.aciklama) + '</figcaption>' : '') + '</figure>' : '';
+      }).join('') +
       (p.kaynak ? '<p class="muted small">Kaynak: ' + esc(p.kaynak) + '</p>' : '') +
       '<div class="btn-row">' + shareButtons({ key: 'd', id: id, tur: p.tur, title: p.baslik, photo: src }, true) +
       (link ? '<a class="btn btn-light" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + icon('link') + 'Haberin kaynağı</a>' : '') +
@@ -417,7 +422,7 @@
     ['1840–1845', 'Vergi defterlerine göre köyde 182 Müslüman ve 7 Rum hanesi vardır; nüfus 900\'ün üzerindedir.', [K.pehl, 'BOA, Nüfus Defteri 3543 ve 1845 Temettuat Defteri']],
     ['1852', 'Köprü harap olur. Vakfı olmadığından 5.900 kuruşluk onarım masrafı devletin bayındırlık gelirlerinden karşılanır. Bu yazışmada köprü "Sultan Murad Han\'ın yaptırdığı Çaşnigir Köprüsü" diye anılır.', [K.pehl]],
     ['1892', 'Köprüden geçen Fransız gezgin Comte de Cholet, sol kıyıda köprüyü bekler gibi duran taştan bir aslan heykeli görür. Heykel bugün yerinde değildir.', [K.pehl, 'Cevdet Çulpan, Türk Taş Köprüleri']],
-    ['26 Aralık 1919', 'Mustafa Kemal Paşa ve Heyet-i Temsiliye, Sivas\'tan Ankara\'ya giderken Kaman\'dan sonra Keskinli süvarilerin korumasında İğdebeli–Köprüköy yolunu kullanır, Kızılırmak\'ı geçip Bala\'ya, geceyi geçirdikleri Beynam köyüne varır. Ertesi gün Ankara\'ya girerler.', [K.vikiBala, K.ataAns, K.kardes]],
+    ['26 Aralık 1919', 'Mustafa Kemal Paşa ve Heyet-i Temsiliye, Sivas\'tan Ankara\'ya giderken Kaman\'dan sonra Keskinli süvarilerin korumasında İğdebeli–Köprüköy yolunu kullanır, Kızılırmak\'ı geçip Bala\'ya, geceyi geçirdikleri Beynam köyüne varır. Ertesi gün Ankara\'ya girerler.', [K.vikiBala, K.ataAns, K.kardes], [['ataturk-karsilama-1919.jpg', 'Mustafa Kemal Paşa ve heyetin karşılanışı, arşiv fotoğrafı'], ['ataturk-yol-haritasi.jpg', 'Sivas–Ankara yolculuğunun haritası; Köprüköy 26 Aralık']]],
     ['1936', 'Avusturyalı araştırmacı K. Ritter köprüyü iki kez inceler ve bugünkü hâliyle Osmanlı yapısı olduğunu yazar.', [K.pehl]],
     ['19 Nisan 1938', 'Kırşehir–Keskin depremi bölgeyi sarsar. Depremi inceleyen bilim heyeti Köprüköy çevresinde de çalışır.', [K.deprem]],
     ['29 Şubat 1972', 'Köprüköy\'de belediye kurulur, köy belde olur.', [K.vikiKoy, K.wikiKoy]],
@@ -477,7 +482,12 @@
       '<p class="muted small" style="margin-top:14px">' + srcHtml([K.vikiBala, K.ataAns, K.atam, K.kardes]).replace('<small class="t-src">', '').replace('</small>', '') + '</p>' +
 
       '<div class="sec-head" style="margin-top:30px"><h2>Tarihçe</h2></div>' +
-      '<ul class="timeline">' + TARIH.map(function (t) { return '<li><b>' + t[0] + '</b>' + t[1] + srcHtml(t[2]) + '</li>'; }).join('') + '</ul>' +
+      '<ul class="timeline">' + TARIH.map(function (t) {
+        var foto = (t[3] || []).map(function (f) {
+          return '<a class="t-foto" href="' + B + 'images/' + f[0] + '" target="_blank" rel="noopener"><img src="' + B + 'images/' + f[0] + '" alt="' + esc(f[1]) + '" loading="lazy"><span>' + esc(f[1]) + '</span></a>';
+        }).join('');
+        return '<li><b>' + t[0] + '</b>' + t[1] + (foto ? '<span class="t-fotos">' + foto + '</span>' : '') + srcHtml(t[2]) + '</li>';
+      }).join('') + '</ul>' +
 
       '<div class="pair" style="margin-top:28px"><div class="box box-pad"><h3>Nüfusun seyri</h3>' +
       rows([['1840\'lar', 'yaklaşık 945 (vergi defterlerinden tahmin)'], ['1985', '3.020'], ['1990', '2.914'], ['2000', '3.836'], ['2010', '1.638'], ['2013', '1.023'], ['2020', '604'], ['2024', '720'], ['2025', '662']]) +
