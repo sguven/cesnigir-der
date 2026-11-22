@@ -1,9 +1,9 @@
 # Çeşnigir-Der web sitesi
 
 Köprüköy Çeşnigir Kültür Sosyal Yardımlaşma ve Dayanışma Derneği'nin sitesi.
-Adres: https://sguven.github.io/cesnigir-der/
+Adres: https://cesnigir.org/ (alan adı GoDaddy'den; eski https://sguven.github.io/cesnigir-der/ adresi buraya yönlenir)
 
-Sade, telefon öncelikli bir statik site. Sunucu veya veritabanı yok; GitHub Pages ile yayınlanır.
+Sade, telefon öncelikli bir statik site. Alan adı ayarı kökteki `CNAME` dosyasında. Sunucu veya veritabanı yok; GitHub Pages ile yayınlanır.
 
 ## Tasarım
 
@@ -14,7 +14,7 @@ Eski `site3/` adresi ana adrese yönlendirir, daha önce paylaşılan bağlantı
 
 ## İçerik nasıl değişir?
 
-**Yönetim paneli:** https://sguven.github.io/cesnigir-der/yonetim/
+**Yönetim paneli:** https://cesnigir.org/yonetim/
 
 - Panel değişiklikleri doğrudan bu depodaki `data/` dosyalarına kaydeder. Site 1-2 dakika içinde güncellenir.
 - Telefondan yüklenen fotoğraflar otomatik küçültülür (en fazla 1600 piksel) ve `images/yuklenen/` klasörüne gider.
