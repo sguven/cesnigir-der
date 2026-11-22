@@ -107,7 +107,15 @@ sayfası yazar; kaydın aramaya açık tam sayfası o gece üretilir.
 ## Bölge haberleri ve kapak görselleri
 
 Her gece bir zamanlanmış görev Köprüköy, Keskin, Kırıkkale ve Ankara'dan köylüyü ilgilendiren yeni haber ve duyuruları `data/duyurular.json`'a ekler
-(her birinde `kaynak` ve `link` alanı olur). Gazete fotoğrafları kullanılmaz; kapak görseli sitenin tarzında üretilir:
+(her birinde `kaynak` ve `link` alanı olur).
+
+**Haberin kendi fotoğrafı:** kayda `"foto_indir": true` yazılırsa (isteğe bağlı `"foto_url"` ile doğrudan fotoğraf adresi; yoksa haber sayfasındaki
+og:image alınır) GitHub Actions'taki **Haber fotoğrafları** iş akışı (`.github/workflows/haber-fotolari.yml`, `araclar/haber-foto-indir.py`)
+fotoğrafı indirir, küçültür (en fazla 1200 piksel, 250 KB altı), `images/haber/` klasörüne kaydeder, kaydın `foto` alanını ona çevirir,
+`foto_aciklama`ya "Fotoğraf: <kaynak>" yazar ve paylaşım sayfalarını yeniden üretip yayınlar (2-4 dakika). İndirilemezse eski kapak görseli kalır.
+Elle çalıştırmak: GitHub → Actions → Haber fotoğrafları → Run workflow.
+
+**Yedek kapak görseli** (her habere önce bu konur, fotoğraf indirilemezse o kalır) sitenin tarzında üretilir:
 
     python3 araclar/haber-gorseli.py <ad> <tema> "<ETİKET>" "<alt satır>"
 
