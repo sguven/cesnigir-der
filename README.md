@@ -38,6 +38,10 @@ tarayıcı belleği silinse bile bir daha sorulmaz. (Eskiden anahtar yalnız tar
 girilmeyen sitelerde, gizli sekmede ve WhatsApp/Facebook içinden açılan tarayıcıda kapanınca siliyordu: anahtarın her girişte yeniden
 istenmesinin sebebi buydu.) Panelde üstteki **Giriş** düğmesinden bağlantı kopyalanabilir ya da çıkış yapılabilir.
 
+Birden fazla yönetici için her kişiye ayrı bağlantı verin; sonuna adını ekleyin: `…/yonetim/?k=ANAHTAR&ad=Sedat`.
+Ad, GitHub'daki değişiklik kaydına yazılır ("Panel (Sedat): duyuru eklendi"). En iyisi her kişiye ayrı anahtar oluşturmaktır
+(GitHub'da anahtarın adına kişinin adını yazın): biri bırakınca yalnız onun anahtarı silinir, diğerleri çalışmaya devam eder.
+
 Anahtar oluşturmak:
 
 1. GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token

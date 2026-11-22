@@ -128,16 +128,27 @@
   function el(html) { var t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
 
   /* ---------------- giriş anahtarı ---------------- */
-  function urlKey() { try { return (new URLSearchParams(location.search).get('k') || '').trim(); } catch (e) { return ''; } }
+  function param(n) { try { return new URLSearchParams(location.search).get(n) || ''; } catch (e) { return ''; } }
+  function cleanKey(k) { return String(k || '').replace(/\s+/g, ''); }   // WhatsApp'tan kopyalarken araya giren boşluk ve satır sonları
+  function urlKey() { return cleanKey(param('k')); }
+  /* Her yöneticinin kendi bağlantısı olabilir: …/yonetim/?k=ANAHTAR&ad=Sedat. Ad, GitHub'daki değişiklik kaydına yazılır
+     ("Panel (Sedat): duyuru eklendi"), böylece kimin neyi değiştirdiği görünür. */
+  var AD = 'cesnigir_yonetim_ad';
+  function who() {
+    var a = param('ad').trim();
+    if (a) { try { localStorage.setItem(AD, a); } catch (e) { /* yok say */ } return a; }
+    try { return localStorage.getItem(AD) || ''; } catch (e) { return ''; }
+  }
   var memKey = '';
   function storedKey() { try { return localStorage.getItem(KEY) || memKey; } catch (e) { return memKey; } }
   function getKey() { return urlKey() || storedKey(); }
   function storeKey(k) { memKey = k; try { if (k) localStorage.setItem(KEY, k); else localStorage.removeItem(KEY); } catch (e) { /* bellekte kalır */ } }
   // Anahtar adres çubuğuna yazılır: bu sayfa ana ekrana ya da yer imine eklenince anahtar da onunla gider
   function keyInUrl(k) {
-    try { history.replaceState(null, '', location.pathname + (k ? '?k=' + encodeURIComponent(k) : '') + location.hash); } catch (e) { /* yok say */ }
+    var a = who();
+    try { history.replaceState(null, '', location.pathname + (k ? '?k=' + encodeURIComponent(k) + (a ? '&ad=' + encodeURIComponent(a) : '') : '') + location.hash); } catch (e) { /* yok say */ }
   }
-  function loginLink(k) { return location.href.split(/[?#]/)[0] + '?k=' + encodeURIComponent(k); }
+  function loginLink(k) { var a = who(); return location.href.split(/[?#]/)[0] + '?k=' + encodeURIComponent(k) + (a ? '&ad=' + encodeURIComponent(a) : ''); }
 
   /* ---------------- GitHub ---------------- */
   function api(method, path, body, key) {
@@ -179,7 +190,8 @@
     });
   }
   function putFile(path, b64, sha, message) {
-    var body = { message: message, content: b64, branch: BRANCH };
+    var a = who();
+    var body = { message: a ? message.replace(/^Panel: /, 'Panel (' + a + '): ') : message, content: b64, branch: BRANCH };
     if (sha) body.sha = sha;
     return api('PUT', '/contents/' + path, body);
   }
@@ -752,7 +764,7 @@
       '<p class="small" style="margin-top:22px"><a href="../">‹ Siteye dön</a></p></div>';
     var inp = $('edKey'), err = s.querySelector('.ed-err');
     $('edKeyOk').onclick = function () {
-      var k = inp.value.trim().replace(/^.*[?&]k=/, '');   // bağlantının tamamı yapıştırılırsa da olur
+      var k = cleanKey(inp.value).replace(/^.*[?&]k=/, '').replace(/[&#].*$/, '');   // bağlantının tamamı yapıştırılırsa da olur
       try { k = decodeURIComponent(k); } catch (e) { /* olduğu gibi */ }
       if (!k) { err.textContent = 'Anahtarı yapıştırın.'; err.hidden = false; inp.focus(); return; }
       busy('Kontrol ediliyor…');
@@ -761,11 +773,20 @@
         location.reload();
       }).catch(function (e) {
         busy(false);
-        err.textContent = e.status === 'net' ? errText(e) : e.status === 403 ? errText(e) : 'Bu anahtar çalışmadı. Doğru kopyaladığınızdan emin olun.';
+        err.textContent = keyErr(e, k);
         err.hidden = false;
       });
     };
     inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') $('edKeyOk').click(); });
+  }
+  // Giriş olmadıysa sebebi açıkça yazılır (Serhat'a iletilebilsin diye hata kodu da)
+  function keyErr(e, k) {
+    var s = e && e.status;
+    if (s === 'net') return errText(e);
+    if (k && !/^(github_pat_|ghp_)/.test(k)) return 'Bu bir giriş anahtarı değil gibi görünüyor: anahtar "github_pat_" ile başlar. Tamamını kopyaladığınızdan emin olun.';
+    if (s === 401) return 'GitHub bu anahtarı tanımadı: eksik kopyalanmış, silinmiş ya da süresi dolmuş olabilir. (Hata 401)';
+    if (s === 403 || s === 404) return 'Anahtar geçerli ama siteyi değiştirme izni yok. GitHub\'da anahtarda "Only select repositories → cesnigir-der" ve "Contents: Read and write" seçili olmalı. (Hata ' + s + ')';
+    return 'Bu anahtar çalışmadı. (Hata ' + s + ')';
   }
   function checkKey(k) {
     return api('GET', '', null, k).then(function (r) {
@@ -778,7 +799,7 @@
   function chrome() {
     document.body.insertAdjacentHTML('afterbegin',
       '<div class="ed-ribbon"><div class="container ed-ribbon-in">' +
-      '<span class="ed-mode">' + icon('edit') + '<b>Düzenleme modu</b><span class="ed-hint">Değiştirmek istediğiniz şeyin yanındaki düğmeye dokunun.</span></span>' +
+      '<span class="ed-mode">' + icon('edit') + '<b>Düzenleme modu' + (who() ? ' · ' + esc(who()) : '') + '</b><span class="ed-hint">Değiştirmek istediğiniz şeyin yanındaki düğmeye dokunun.</span></span>' +
       '<span class="ed-ribbon-btns"><a href="../" target="_blank" rel="noopener">' + icon('eye') + '<span class="ed-long">Ziyaretçi gibi gör</span><span class="ed-short">Siteyi gör</span></a>' +
       '<button type="button" id="edMenuBtn" aria-expanded="false">' + icon('key') + 'Giriş</button></span></div>' +
       '<div class="container ed-menu" id="edMenu" hidden>' +
@@ -850,6 +871,6 @@
   chrome();
   if (!getKey()) document.documentElement.classList.add('ed-out');
   else checkKey(getKey()).catch(function (e) {
-    if (e && (e.status === 401 || e.status === 403)) showLogin(errText(e));
+    if (e && e.status !== 'net') showLogin(keyErr(e, getKey()));
   });
 })();
