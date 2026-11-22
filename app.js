@@ -3,7 +3,9 @@
    İçerik data/ klasöründen okunur; yönetim panelinden değişir. */
 (function () {
   'use strict';
-  var C = window.CD, esc = C.esc, B = '';
+  var C = window.CD, esc = C.esc;
+  // B: sitenin köküne giden yol. Ana adreste boş; arama motorları için üretilen sayfalarda (hakkimizda/, p/…html) '../'.
+  var B = window.CD_BASE || '';
   var MAP = 'https://maps.app.goo.gl/WZUFDn7iB7aiHGTf8';
   var data = null;
   var main = document.getElementById('icerik');
@@ -88,7 +90,7 @@
      o: { key: 'e'|'i'|'d', id, tur, title, det, photo }  ·  big: ayrıntı sayfasındaki büyük düğmeler */
   // Fotoğrafı olan kaydın bağlantısı kendi paylaşım sayfasına gider (p/…html): WhatsApp ve Facebook önizlemede o fotoğrafı gösterir.
   function shareUrl(o) {
-    var base = location.href.split(/[?#]/)[0].replace(/[^\/]*$/, '');
+    var base = new URL(B || './', location.href.split(/[?#]/)[0]).href;
     // ?v=…: fotoğraf değişince adres de değişir; WhatsApp/Facebook eski (fotoğrafsız) önizlemeyi önbellekten göstermez
     return o.photo ? base + C.sharePath(o.key, o.id) + '?v=' + C.shareVer(o.photo) : base + '?' + o.key + '=' + encodeURIComponent(o.id);
   }
@@ -519,8 +521,33 @@
   }
 
   /* ---------- yönlendirme ---------- */
+  /* Arama motorları için her sayfanın gerçek bir adresi vardır (hakkimizda/, duyurular/, p/d-…html; araclar/site-sayfalari.js üretir).
+     Sayfadaki #/… bağlantıları bu adresleri gösterir (data-h asıl hedefi tutar); dokununca sayfa yenilenmeden geçilir. */
+  var REAL = { hakkimizda: 1, duyurular: 1, etkinlikler: 1, fotograflar: 1, iletisim: 1 };
+  function realHref(hash) {
+    var r = hash.replace(/^#\/?/, ''), p = r.split('/');
+    if (!r) return B || './';
+    if (p.length === 1 && REAL[r]) return B + r + '/';
+    if (p.length === 2 && (p[0] === 'duyuru' || p[0] === 'etkinlik') && /^[a-z0-9-]+$/.test(p[1])) return B + 'p/' + p[0].charAt(0) + '-' + p[1] + '.html';
+    return '';
+  }
+  function realLinks(root) {
+    root.querySelectorAll('a[href^="#/"]').forEach(function (a) {
+      var h = a.getAttribute('href'), r = realHref(h);
+      if (r) { a.setAttribute('data-h', h); a.setAttribute('href', r); }
+    });
+  }
+  var TITLES = {
+    '': 'Çeşnigir-Der · Köprüköy Çeşnigir Derneği (Keskin, Kırıkkale)',
+    hakkimizda: 'Köprüköy ve Çeşnigir Köprüsü: tarihçe, gezilecek yerler · Çeşnigir-Der',
+    duyurular: 'Köprüköy, Keskin ve Kırıkkale haberleri ve duyurular · Çeşnigir-Der',
+    etkinlikler: 'Köprüköy etkinlik takvimi: düğün, mevlit ve özel günler · Çeşnigir-Der',
+    fotograflar: 'Köprüköy ve Çeşnigir Köprüsü fotoğrafları · Çeşnigir-Der',
+    iletisim: 'İletişim · Çeşnigir-Der, Köprüköy (Keskin, Kırıkkale)'
+  };
   function route() {
-    var h = location.hash.replace(/^#\/?/, ''), p = h.split('/'), html;
+    // adreste #/… yoksa üretilmiş sayfanın kendi içeriği (CD_ROUTE) açılır
+    var h = location.hash.indexOf('#/') === 0 ? location.hash.replace(/^#\/?/, '') : (window.CD_ROUTE || ''), p = h.split('/'), html;
     var page = p[0] || '';
     if (page === 'duyuru') html = pageArticle(decodeURIComponent(p.slice(1).join('/')));
     else if (page === 'duyurular') html = pageNews();
@@ -536,6 +563,7 @@
     var hash = location.hash, back = !tapped && hash !== curHash && pos[hash] > 0;
     tapped = false; curHash = hash;
     main.innerHTML = html;
+    realLinks(main);
     main.classList.remove('gir'); void main.offsetWidth; main.classList.add('gir');
     var navKey = page === 'duyuru' ? 'duyurular' : page === 'etkinlik' ? 'etkinlikler' : page === 'ilan' ? 'pazar' : page;
     if (page === 'etkinlik' || page === 'ilan' || page === 'duyuru') { var sp = main.querySelector('[data-share-photo]'); if (sp) C.warmShare(sp.getAttribute('data-share-photo')); }
@@ -549,7 +577,7 @@
     if (back) requestAnimationFrame(function () { window.scrollTo(0, y); });
     headerPhoto();
     var t = main.querySelector('h1');
-    document.title = (page && t ? t.textContent + ' · ' : '') + 'Çeşnigir-Der · Köprüköy';
+    document.title = TITLES[page] || (t ? t.textContent + ' · Çeşnigir-Der, Köprüköy' : TITLES['']);
   }
 
   // Başlığın arkasındaki köprü fotoğrafı: ana sayfada büyük fotoğraf başlığın altına girdikçe, kaydırmayla aynı hızda belirir
@@ -622,8 +650,15 @@
       // büyükken Kapat'a ya da oynatıcının dışındaki karanlık alana dokunmak küçültür
       if (e.target.closest('#liveClose') || (e.target.id === 'liveBox' && e.target.classList.contains('big'))) { liveBig(false); return; }
       if (e.target.closest('a[href^="#/"]')) { tapped = true; setTimeout(function () { tapped = false; }, 600); }
+      var dh = e.target.closest('a[data-h]');
+      if (dh && !e.button && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+        e.preventDefault(); tapped = true; setTimeout(function () { tapped = false; }, 600);
+        var to = dh.getAttribute('data-h');
+        if (location.hash === to) route(); else location.hash = to;
+        return;
+      }
       var f = e.target.closest('[data-filter]');
-      if (f) { filter = f.getAttribute('data-filter'); main.innerHTML = pageNews(); var b = main.querySelector('[data-filter="' + filter + '"]'); if (b) b.focus(); return; }
+      if (f) { filter = f.getAttribute('data-filter'); main.innerHTML = pageNews(); realLinks(main); var b = main.querySelector('[data-filter="' + filter + '"]'); if (b) b.focus(); return; }
       var cn = e.target.closest('[data-cal-nav]');
       if (cn) { var dir = +cn.getAttribute('data-cal-nav'), dt = new Date(calY, calM + dir, 1); calY = dt.getFullYear(); calM = dt.getMonth();
         redrawCal('[data-cal-nav="' + dir + '"]'); return; }
@@ -674,6 +709,7 @@
         dernek: r[5] && typeof r[5] === 'object' && !Array.isArray(r[5]) ? r[5] : {}
       };
       renderChrome();
+      realLinks(document);
       route();
     });
 })();

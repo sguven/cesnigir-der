@@ -58,12 +58,21 @@ python3 -m http.server 8000
 
 Sonra tarayıcıda `http://localhost:8000` adresini açın.
 
-## Paylaşımda fotoğraf
+## Arama motorları (Google) ve paylaşım sayfaları
 
-Fotoğrafı olan her duyuru, etkinlik ve ilan için `p/` klasöründe küçük bir paylaşım sayfası tutulur. WhatsApp ve Facebook önizlemedeki
-fotoğrafı ve başlığı bu sayfadan alır. Yönetim paneli kaydı yayınlarken sayfayı kendisi yazar. Kayıtlar panel dışında değiştiyse:
+Her bölümün ve her kaydın gerçek bir adresi vardır; arama motorları içeriği bu sayfalardan okur, WhatsApp ve Facebook da önizlemedeki
+fotoğrafı ve başlığı buradan alır:
 
-    node araclar/paylasim-sayfalari.js
+- `hakkimizda/`, `duyurular/`, `etkinlikler/`, `fotograflar/`, `iletisim/`: bölüm sayfaları
+- `p/d-….html` duyuru ve haberler, `p/e-….html` etkinlikler (aramaya açık); `p/i-….html` pazar ilanları (telefon içerdiği için aramaya kapalı)
+- `sitemap.xml` sayfa listesi, `robots.txt` bu listeyi arama motorlarına gösterir
+
+Bu dosyalar elle düzenlenmez; hepsini şu komut üretir (içerik, `index.html`, `app.js` ya da `site.css` değişince çalıştırın):
+
+    node araclar/site-sayfalari.js
+
+Gece çalışan bölge haberleri görevi komutu her gece çalıştırır. Yönetim paneli yeni bir kaydı yayınlarken yalnızca basit bir paylaşım
+sayfası yazar; kaydın aramaya açık tam sayfası o gece üretilir.
 
 ## Bölge haberleri ve kapak görselleri
 
