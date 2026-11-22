@@ -156,8 +156,14 @@
     shareFiles[src].catch(function () { delete shareFiles[src]; });
     return shareFiles[src];
   }
+  /* iPhone/iPad (Safari ve iOS'taki tüm tarayıcılar): paylaşım ekranına fotoğraf ve yazı birlikte verilince fotoğraf düşüyor
+     (WebKit hatası 251500), WhatsApp'a yalnız yazı gidiyor. Bu yüzden iOS'ta düğmenin kendi WhatsApp bağlantısı açılır:
+     WhatsApp bağlantının önizlemesini (kaydın fotoğrafı, başlığı) paylaşım sayfasından alıp mesajda gösterir. */
+  function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
   function bindShare() {
-    if (!navigator.share || !navigator.canShare || !window.File || !matchMedia('(pointer: coarse)').matches) return;
+    if (!navigator.share || !navigator.canShare || !window.File || !matchMedia('(pointer: coarse)').matches || isIOS()) return;
     var warm = function (e) { var a = e.target.closest && e.target.closest('[data-share-photo]'); if (a) warmShare(a.getAttribute('data-share-photo')); };
     document.addEventListener('touchstart', warm, { passive: true });
     document.addEventListener('pointerdown', warm, { passive: true });
@@ -241,7 +247,8 @@
     if (key === 'e') det = [longDate(x.tarih, true), x.saat, x.yer].filter(Boolean).join(' · ');
     else if (key === 'i') det = [x.fiyat ? x.fiyat + ' ₺' : '', shareShort(x.aciklama, 150)].filter(Boolean).join(' · ');
     else det = shareShort(x.metin, 180);
-    var foto = imgSrc(x.foto, base) || base + 'images/kapak.jpg', to = '../?' + key + '=' + encodeURIComponent(id);
+    // kapak.jpg 350 KB; WhatsApp ~300 KB üstünü önizlemede göstermediği için küçük kopyası kullanılır
+    var foto = imgSrc(x.foto, base) || base + 'images/kapak-paylasim.jpg', to = '../?' + key + '=' + encodeURIComponent(id);
     return { path: shortPath(key, x), html: '<!doctype html>\n<html lang="tr">\n<head>\n<meta charset="utf-8">\n' +
       '<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="robots" content="noindex">\n' +
       '<title>' + esc(title) + ' · Çeşnigir-Der</title>\n' +

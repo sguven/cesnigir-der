@@ -52,7 +52,7 @@ function build(dom, o) {
   h = setMeta(h, 'property', 'og:title', o.ogTitle || o.title);
   h = setMeta(h, 'property', 'og:description', o.ogDesc || o.desc);
   h = setMeta(h, 'property', 'og:type', o.type || 'website');
-  h = setMeta(h, 'property', 'og:image', o.image || SITE + 'images/kapak.jpg');
+  h = setMeta(h, 'property', 'og:image', o.image || SITE + 'images/kapak-paylasim.jpg');
   h = h.replace(/<link rel="canonical"[^>]*>\n?/, '').replace(/<meta property="og:url"[^>]*>\n?/, '');
   // kayıt sayfası kendi yapılandırılmış verisini taşır; bölüm sayfalarında derneğin bilgisi kalır
   if (o.ld) h = h.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\n?/g, '');
@@ -91,6 +91,9 @@ function build(dom, o) {
       return { html: document.documentElement.outerHTML, title: document.title, h1: (document.querySelector('#icerik h1') || {}).textContent || '', imgs: imgs, places: places };
     });
     await pg.close();
+    // paylaş düğmelerindeki adresler yerel deneme sunucusuyla (127.0.0.1) üretiliyor: gerçek site adresine çevir
+    var esc1 = origin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    out.html = out.html.replace(new RegExp(esc1, 'g'), SITE).replace(new RegExp(encodeURIComponent(origin).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), encodeURIComponent(SITE));
     return out;
   }
   function write(rel, html) {
