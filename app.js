@@ -456,7 +456,8 @@
       '<ul class="timeline">' + TARIH.map(function (t) { return '<li><b>' + t[0] + '</b>' + t[1] + srcHtml(t[2]) + '</li>'; }).join('') + '</ul>' +
 
       '<div class="pair" style="margin-top:28px"><div class="box box-pad"><h3>Nüfusun seyri</h3>' +
-      rows([['1840\'lar', 'yaklaşık 945 (vergi defterlerinden tahmin)'], ['1985', '3.020'], ['1990', '2.914'], ['2000', '3.836'], ['2010', '1.638'], ['2013', '1.023'], ['2020', '604'], ['2024', '720']]) + '</div>' +
+      rows([['1840\'lar', 'yaklaşık 945 (vergi defterlerinden tahmin)'], ['1985', '3.020'], ['1990', '2.914'], ['2000', '3.836'], ['2010', '1.638'], ['2013', '1.023'], ['2020', '604'], ['2024', '720'], ['2025', '662']]) +
+      '<p class="muted small" style="margin:10px 0 0">Kaynak: 1840\'lar için BOA nüfus ve temettuat defterleri; 1985–2000 için <a href="https://tr.wikipedia.org/wiki/K%C3%B6pr%C3%BC,_Keskin" target="_blank" rel="noopener">Vikipedi, Köprüköy (Keskin)</a>; 2007 sonrası <a href="https://www.nufusune.com/35416-kirikkale-keskin-koprukoy-koy-nufusu" target="_blank" rel="noopener">TÜİK Adrese Dayalı Nüfus Kayıt Sistemi</a> (31 Aralık 2025 sonuçları)</p></div>' +
       '<div class="box box-pad"><h3>Belde dönemi belediye başkanları</h3>' +
       rows([['1972', 'Hacı Erbek (ilk başkan)'], ['1973', 'Mehmet Güven'], ['1977', 'M. Dede Köprülü'], ['1984', 'Şerafettin Güven'], ['1989', 'Şerafettin Güven'], ['1994', 'Muzaffer Büken'], ['1999', 'Selahattin Güven'], ['2004', 'Oğuzhan Köprülü'], ['2009', 'Hasan Taşpınar']]) +
       '<p class="muted small" style="margin:10px 0 0">Kaynak: Vikipedi, Köprüköy (Keskin); Hacı Erbek için oğlu Serdar Erbek\'in anlatımı</p></div></div>' +
@@ -470,7 +471,7 @@
       '<a href="https://www.yeniankara.com.tr/turkiye-haberleri/ankarada-binalari-catlatan-keskini-yikan-deprem-19-nisan-1938in-kayitlara-gecen-agir-bilancosu-188563" target="_blank" rel="noopener">Yeni Ankara (1938 depremi)</a> · <a href="https://www.timeturk.com/kultur/turkulere-hikayelere-konu-olan-kizilirmak/haber-1780026" target="_blank" rel="noopener">Timeturk</a></p>' +
 
       '</div><aside><div class="box box-pad"><h3>Köy Bilgileri</h3>' +
-      rows([['Konum', 'Kapulukaya Baraj Gölü\'nün doğu kıyısı'], ['Uzaklık', 'Keskin 25 km, Kırıkkale 37 km, Ankara yaklaşık 113 km'], ['Rakım', '803 m'], ['Nüfus', '720 (2024)'],
+      rows([['Konum', 'Kapulukaya Baraj Gölü\'nün doğu kıyısı'], ['Uzaklık', 'Keskin 25 km, Kırıkkale 37 km, Ankara yaklaşık 113 km'], ['Rakım', '803 m'], ['Nüfus', '662 (2025, TÜİK)'],
         ['Geçim', 'Buğday, arpa, patates, nohut, fasulye, ayçiçeği, pancar; hayvancılık; tatlı su levreği ve sazan balıkçılığı'], ['Yönetim', 'Muhtar ve ihtiyar heyeti'], ['Posta kodu', '71860']]) +
       '</div><div class="box box-pad" style="margin-top:20px"><h3>Biliyor muydunuz?</h3><ul class="check-list">' +
       '<li>Köprü, Ankara–Kırşehir eski yolunun 100. kilometresindeydi ve "Köprüköy Köprüsü" diye de anılırdı.</li>' +
