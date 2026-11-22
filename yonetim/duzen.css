@@ -30,7 +30,7 @@ body{padding-bottom:96px}
 html.ed-out .ed-ribbon,html.ed-out .ed-dock{display:none}
 
 /* düzenle / sil düğmeleri */
-.ed-bar{display:flex;gap:8px;margin-top:10px}
+.ed-bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .ed-bar.big{margin:0 0 18px;padding:12px;border-radius:10px;background:#FBF3E3;border:2px dashed #D9B66A}
 .ed-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px;padding:0 16px;border-radius:8px;
   border:2px solid var(--bordo);background:#fff;color:var(--bordo);font-weight:700;font-size:17px;cursor:pointer;flex:1 1 0}
