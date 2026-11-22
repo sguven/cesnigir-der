@@ -4,6 +4,7 @@
      p/d-….html                                                        her duyuru ve haberin kendi sayfası
      p/e-….html                                                        her köy etkinliğinin kendi sayfası
      p/i-….html                                                        fotoğraflı pazar ilanlarının paylaşım sayfası (aramaya kapalı)
+     d/…html  e/…html  i/…html                                         kısa paylaşım bağlantıları (cesnigirder.org/d/k3f9xa)
      sitemap.xml                                                       arama motorlarına sayfa listesi
 
    Her sayfa, sitenin o bölümünün hazır (içeriği yazılı) hâlidir: arama motoru metni doğrudan okur, ziyaretçi için site aynen çalışır.
@@ -155,6 +156,12 @@ function build(dom, o) {
   for (var e of etkinlikler) await item('e', 'etkinlik', e);
   // pazar ilanları (telefon numarası içerir): yalnızca paylaşım önizlemesi, aramaya kapalı
   pazar.forEach(function (x) { var pg = C.sharePage('i', x, SITE); if (pg) { write(pg.path, pg.html); n++; } });
+  // kısa paylaşım bağlantıları (d/…, e/…, i/…): eskiler silinmez, daha önce paylaşılan bağlantılar çalışmaya devam eder
+  var kisa = 0;
+  [['d', duyurular], ['e', etkinlikler], ['i', pazar]].forEach(function (g) {
+    g[1].forEach(function (x) { var pg = C.shortPage(g[0], x, SITE); write(pg.path, pg.html); kisa++; });
+  });
+  console.log(kisa + ' kısa bağlantı yazıldı');
 
   await browser.close();
   server.close();

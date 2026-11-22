@@ -223,6 +223,36 @@
       '<body style="font-family:sans-serif;padding:24px;font-size:20px">\n<p><a href="' + esc(to) + '">' + esc(title) + '</a></p>\n</body>\n</html>\n' };
   }
 
+  /* Kısa paylaşım bağlantısı: cesnigirder.org/d/k3f9xa gibi. Her duyuru (d), etkinlik (e) ve ilan (i) için 6 harflik bir kod,
+     kodun dosyası (d/k3f9xa.html) önizleme bilgisini (başlık, açıklama, fotoğraf) taşır ve açanı doğrudan o kayda götürür.
+     Kod, kaydın adresinden ve fotoğrafının adından hesaplanır: fotoğraf değişince kod da değişir, WhatsApp/Facebook eski önizlemeyi göstermez.
+     Dosyayı yönetim paneli kaydederken, araclar/site-sayfalari.js ise topluca yazar; dosyası henüz yazılmamış kodu 404.html kayda çevirir. */
+  function shortCode(key, id, photo) {
+    var s = key + ':' + id + '|' + String(photo || '').split('/').pop(), h = 2166136261;
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    var c = (h % 2176782336).toString(36);               // 36^6: her zaman 6 haneye sığar
+    return ('000000' + c).slice(-6);
+  }
+  function shortPath(key, x) { return key + '/' + shortCode(key, shareId(key, x), x.foto) + '.html'; }
+  // base: sitenin tam adresi, sonunda / ile. Fotoğrafı olmayan kayıtta önizlemede sitenin kapak fotoğrafı çıkar.
+  function shortPage(key, x, base) {
+    var id = shareId(key, x), tur = x.tur ? String(x.tur).toLocaleUpperCase('tr') + ': ' : '';
+    var title = tur + (key === 'e' ? x.ad : x.baslik || ''), det;
+    if (key === 'e') det = [longDate(x.tarih, true), x.saat, x.yer].filter(Boolean).join(' · ');
+    else if (key === 'i') det = [x.fiyat ? x.fiyat + ' ₺' : '', shareShort(x.aciklama, 150)].filter(Boolean).join(' · ');
+    else det = shareShort(x.metin, 180);
+    var foto = imgSrc(x.foto, base) || base + 'images/kapak.jpg', to = '../?' + key + '=' + encodeURIComponent(id);
+    return { path: shortPath(key, x), html: '<!doctype html>\n<html lang="tr">\n<head>\n<meta charset="utf-8">\n' +
+      '<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="robots" content="noindex">\n' +
+      '<title>' + esc(title) + ' · Çeşnigir-Der</title>\n' +
+      '<meta property="og:title" content="' + esc(title) + '">\n' +
+      '<meta property="og:description" content="' + esc(det || 'Çeşnigir-Der · Köprüköy') + '">\n' +
+      '<meta property="og:type" content="article">\n<meta property="og:site_name" content="Çeşnigir-Der">\n' +
+      '<meta property="og:image" content="' + esc(foto) + '">\n<meta name="twitter:card" content="summary_large_image">\n' +
+      '<script>location.replace(' + JSON.stringify(to).replace(/</g, '\\u003c') + ');</script>\n</head>\n' +
+      '<body style="font-family:sans-serif;padding:24px;font-size:20px">\n<p><a href="' + esc(to) + '">' + esc(title) + '</a></p>\n</body>\n</html>\n' };
+  }
+
   function arr(d) {
     var a = Array.isArray(d) ? d : (d && Array.isArray(d.items) ? d.items : []);
     return a.filter(function (x) { return x && typeof x === 'object'; });
@@ -234,6 +264,7 @@
     slug: slug, badgeClass: badgeClass, esc: esc, pad: pad, normIso: normIso, parts: parts,
     todayIso: todayIso, addDays: addDays, daysBetween: daysBetween, longDate: longDate, relDate: relDate,
     SHARE_COLS: SHARE_COLS, shareId: shareId, sharePath: sharePath, shareVer: shareVer, sharePage: sharePage,
+    shortCode: shortCode, shortPath: shortPath, shortPage: shortPage,
     untilText: untilText, imgSrc: imgSrc, linkUrl: linkUrl, telHref: telHref, waHref: waHref, arr: arr,
     ytEmbed: ytEmbed, ytFrame: ytFrame, bindShare: bindShare, warmShare: warmShare
   };

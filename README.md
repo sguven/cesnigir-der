@@ -45,6 +45,13 @@ Anahtar yalnızca o telefonun tarayıcısında saklanır. Telefon kaybolursa Git
 | `data/pazar.json` | Pazar ve yardımlaşma ilanları |
 | `data/dernek.json` | Hakkımızda, başkan, yönetim ve denetim kurulu, iletişim, kasa durumu |
 
+## Kısa paylaşım bağlantıları
+
+WhatsApp ve Facebook'ta paylaşılan bağlantı kısadır: `https://cesnigirder.org/d/k3f9xa` (duyuru), `/e/…` (etkinlik), `/i/…` (pazar ilanı).
+Her kodun dosyası (`d/k3f9xa.html`) önizleme başlığını ve fotoğrafını taşır, açanı doğrudan kayda götürür.
+Dosyaları panel kaydederken ve gece görevi (`node araclar/site-sayfalari.js`) yazar; eski kodlar silinmez.
+Dosyası henüz yazılmamış bir kod açılırsa `404.html` kaydı bulup ona gider.
+
 ## Sürüm eki
 
 Sayfalardaki `site.css?v=…`, `app.js?v=…` gibi ekler, yeni sürüm yayınlanınca telefonda eski dosyanın kalmamasını sağlar.

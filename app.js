@@ -88,11 +88,10 @@
   /* Paylaşım: WhatsApp ve Facebook düğmeleri. Bağlantı doğrudan o etkinliğe, ilana ya da duyuruya gider (…/?e=…, ?i=…, ?d=…:
      Facebook # işaretinden sonrasını attığı için soru işaretli adres kullanılır; sayfa açılınca openShared() ilgili sayfaya geçer).
      o: { key: 'e'|'i'|'d', id, tur, title, det, photo }  ·  big: ayrıntı sayfasındaki büyük düğmeler */
-  // Fotoğrafı olan kaydın bağlantısı kendi paylaşım sayfasına gider (p/…html): WhatsApp ve Facebook önizlemede o fotoğrafı gösterir.
+  // Kısa bağlantı (…/d/k3f9xa): kodu kaydın adresinden ve fotoğrafından hesaplanır (bkz. ortak.js shortCode)
   function shareUrl(o) {
     var base = new URL(B || './', location.href.split(/[?#]/)[0]).href;
-    // ?v=…: fotoğraf değişince adres de değişir; WhatsApp/Facebook eski (fotoğrafsız) önizlemeyi önbellekten göstermez
-    return o.photo ? base + C.sharePath(o.key, o.id) + '?v=' + C.shareVer(o.photo) : base + '?' + o.key + '=' + encodeURIComponent(o.id);
+    return base + o.key + '/' + C.shortCode(o.key, o.id, o.photo);
   }
   function shareButtons(o, big) {
     var url = shareUrl(o), text = (o.tur ? upper(o.tur) + ': ' : '') + (o.title || '') + (o.det ? '\n' + o.det : '') + '\n' + url;

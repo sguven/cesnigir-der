@@ -510,12 +510,17 @@
 
   /* Fotoğraflı kaydın paylaşım sayfasını (p/…html) yazar: WhatsApp ve Facebook paylaşımında o fotoğraf çıksın diye.
      Yazılamazsa kayıt yine yayınlanır; bağlantı çalışır, yalnızca önizlemede fotoğraf çıkmaz. */
+  // Ardından kısa bağlantının dosyasını (d/…html, e/…html, i/…html) yazar; yazılamazsa kısa bağlantı 404.html üzerinden yine kayda gider.
   function writeSharePage(name, item) {
-    var key = C.SHARE_COLS[name], pg = key && C.sharePage(key, item, location.href.split(/[?#]/)[0].replace(/yonetim\/[^\/]*$/, ''));
-    if (!pg) return Promise.resolve();
-    return api('GET', '/contents/' + pg.path + '?ref=' + BRANCH).then(function (r) { return r.sha; }, function () { return null; })
-      .then(function (sha) { return putFile(pg.path, textToB64(pg.html), sha, 'Panel: paylaşım sayfası – ' + (item.baslik || item.ad || '')); })
-      .catch(function () { /* önemli değil */ });
+    var key = C.SHARE_COLS[name], base = location.href.split(/[?#]/)[0].replace(/yonetim\/[^\/]*$/, '');
+    if (!key) return Promise.resolve();
+    function put(pg) {
+      if (!pg) return Promise.resolve();
+      return api('GET', '/contents/' + pg.path + '?ref=' + BRANCH).then(function (r) { return r.sha; }, function () { return null; })
+        .then(function (sha) { return putFile(pg.path, textToB64(pg.html), sha, 'Panel: paylaşım sayfası – ' + (item.baslik || item.ad || '')); })
+        .catch(function () { /* önemli değil */ });
+    }
+    return put(C.sharePage(key, item, base)).then(function () { return put(C.shortPage(key, item, base)); });
   }
 
   function clean(v) {
