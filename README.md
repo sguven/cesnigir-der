@@ -64,3 +64,12 @@ Fotoğrafı olan her duyuru, etkinlik ve ilan için `p/` klasöründe küçük b
 fotoğrafı ve başlığı bu sayfadan alır. Yönetim paneli kaydı yayınlarken sayfayı kendisi yazar. Kayıtlar panel dışında değiştiyse:
 
     node araclar/paylasim-sayfalari.js
+
+## Bölge haberleri ve kapak görselleri
+
+Her gece bir zamanlanmış görev Köprüköy, Keskin, Kırıkkale ve Ankara'dan köylüyü ilgilendiren yeni haber ve duyuruları `data/duyurular.json`'a ekler
+(her birinde `kaynak` ve `link` alanı olur). Gazete fotoğrafları kullanılmaz; kapak görseli sitenin tarzında üretilir:
+
+    python3 araclar/haber-gorseli.py <ad> <tema> "<ETİKET>" "<alt satır>"
+
+Görsel `images/gorsel-<ad>.jpg` olarak kaydedilir. Temalar ve renkleri dosyanın başında yazılı (yol, tarim, belge, ev, su, elektrik, saglik, egitim, kultur, hava, duyuru).
