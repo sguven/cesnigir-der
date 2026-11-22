@@ -399,3 +399,23 @@ button.cal-day:hover{filter:brightness(.93)}
 
 /* Menüde 8 başlık var: orta genişlikte derneğin uzun adı menüyle üst üste binmesin */
 @media (min-width:1001px) and (max-width:1240px){ .logo small{display:none} .nav a{padding:0 9px;font-size:16px} }
+
+/* Köprüköy hava durumu (ana sayfa, sağ sütun) */
+.wx{padding:16px 16px 10px;margin-bottom:22px;background:linear-gradient(180deg,#FFFDF8,#fff)}
+.wx-load{color:var(--ink2);font-size:16px;padding:18px 0;text-align:center}
+.wx-now{display:flex;align-items:center;gap:12px}
+.wx-ic{width:34px;height:34px;flex:none}
+.wx-ic.big{width:72px;height:72px}
+.wx-main{display:flex;flex-direction:column;line-height:1.15}
+.wx-place{font-size:15px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.04em}
+.wx-t{font-family:var(--serif);font-size:44px;color:var(--bordo-dark);line-height:1.05}
+.wx-desc{font-size:18px;font-weight:700}
+.wx-more{margin:10px 0 12px;font-size:16px;color:var(--ink2)}
+.wx-days{list-style:none;margin:0;padding:10px 0 0;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);gap:4px;text-align:center}
+.wx-days li{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:15px}
+.wx-day{font-weight:700}
+.wx-mm{white-space:nowrap;color:var(--ink2)}
+.wx-mm b{color:var(--ink)}
+.wx-rain{font-size:13px;color:#2C6FB7;font-weight:700;min-height:18px}
+.wx-src{margin:8px 0 0;font-size:13px;color:var(--ink2);text-align:right}
+.wx-src a{color:var(--ink2)}

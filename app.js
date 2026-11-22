@@ -164,6 +164,80 @@
   /* ---------- ana sayfa takvimi ----------
      Ay görünümü: köy etkinliği olan günler bordo, resmî ve dinî günler altın çerçeveli. Renkli güne dokununca
      o günün ayrıntısı takvimin altında açılır (evRow: saat, yer, fotoğraf, paylaş düğmeleri). */
+  /* ---------- Köprüköy hava durumu ----------
+     Open-Meteo (ücretsiz, anahtarsız): şu anki hava ve önümüzdeki günler. Ana sayfanın sağ sütununda, takvimin üstünde.
+     Sonuç 20 dakika tarayıcıda saklanır; alınamazsa kutu görünmez. */
+  var WX_URL = 'https://api.open-meteo.com/v1/forecast?latitude=39.5765&longitude=33.4357' +
+    '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,relative_humidity_2m,is_day' +
+    '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe%2FIstanbul&forecast_days=5';
+  var WX_KEY = 'cesnigir_hava', wx = null, wxFail = false, wxLoading = false;
+  function wxKind(c, day) {
+    if (c <= 1) return day === 0 ? 'moon' : 'sun';
+    if (c === 2) return 'part';
+    if (c === 3) return 'cloud';
+    if (c === 45 || c === 48) return 'fog';
+    if ((c >= 71 && c <= 77) || c === 85 || c === 86) return 'snow';
+    if (c >= 95) return 'storm';
+    return 'rain';
+  }
+  var WX_TEXT = { 0: 'Açık', 1: 'Çoğunlukla açık', 2: 'Parçalı bulutlu', 3: 'Kapalı', 45: 'Sisli', 48: 'Kırağılı sis',
+    51: 'Hafif çisenti', 53: 'Çisenti', 55: 'Yoğun çisenti', 56: 'Donan çisenti', 57: 'Donan çisenti',
+    61: 'Hafif yağmurlu', 63: 'Yağmurlu', 65: 'Kuvvetli yağmur', 66: 'Donan yağmur', 67: 'Donan yağmur',
+    71: 'Hafif kar yağışlı', 73: 'Kar yağışlı', 75: 'Yoğun kar', 77: 'Kar taneleri',
+    80: 'Hafif sağanak', 81: 'Sağanak yağışlı', 82: 'Kuvvetli sağanak', 85: 'Kar sağanağı', 86: 'Yoğun kar sağanağı',
+    95: 'Gök gürültülü fırtına', 96: 'Dolulu fırtına', 99: 'Dolulu fırtına' };
+  function wxIcon(k, big) {
+    var sun = '<circle cx="24" cy="24" r="8" fill="#E9A21B"/><g stroke="#E9A21B" stroke-width="3" stroke-linecap="round"><path d="M24 6v5M24 37v5M6 24h5M37 24h5M11.3 11.3l3.5 3.5M33.2 33.2l3.5 3.5M11.3 36.7l3.5-3.5M33.2 14.8l3.5-3.5"/></g>';
+    var cloud = function (x, y, f) { return '<path transform="translate(' + x + ' ' + y + ')" d="M12 34h22a8 8 0 0 0 0-16 11 11 0 0 0-21-2A9 9 0 0 0 12 34Z" fill="' + f + '" stroke="#8A7E72" stroke-width="2"/>'; };
+    var drops = '<g stroke="#2C6FB7" stroke-width="3" stroke-linecap="round"><path d="M17 38l-2 5M25 38l-2 5M33 38l-2 5"/></g>';
+    var g = {
+      sun: sun,
+      moon: '<path d="M30 8a15 15 0 1 0 10 25A13 13 0 0 1 30 8Z" fill="#C9B26B"/>',
+      part: '<g transform="translate(-6 -6) scale(.8)">' + sun + '</g>' + cloud(2, 2, '#fff'),
+      cloud: cloud(0, -2, '#E7E1D8'),
+      fog: cloud(0, -6, '#E7E1D8') + '<g stroke="#8A7E72" stroke-width="3" stroke-linecap="round"><path d="M10 36h28M14 42h22"/></g>',
+      rain: cloud(0, -6, '#DCE3EA') + drops,
+      snow: cloud(0, -6, '#EEF2F6') + '<g fill="#5B8CC9"><circle cx="16" cy="40" r="2.4"/><circle cx="24" cy="43" r="2.4"/><circle cx="32" cy="40" r="2.4"/></g>',
+      storm: cloud(0, -6, '#C9CDD3') + '<path d="M25 30l-6 9h6l-3 8 9-11h-6l3-6Z" fill="#E9A21B"/>'
+    };
+    return '<svg class="wx-ic' + (big ? ' big' : '') + '" viewBox="0 0 48 48" aria-hidden="true">' + (g[k] || g.cloud) + '</svg>';
+  }
+  function wxBox() {
+    if (wxFail) return '';
+    if (!wx) return '<div class="box wx" id="wxBox"><div class="wx-load">Köprüköy\'de hava durumu yükleniyor…</div></div>';
+    var c = wx.current || {}, d = wx.daily || {}, code = +c.weather_code, days = '';
+    (d.time || []).slice(0, 5).forEach(function (t, i) {
+      var p = C.parts(t), rain = d.precipitation_probability_max && d.precipitation_probability_max[i];
+      days += '<li><span class="wx-day">' + (i === 0 ? 'Bugün' : C.GUN[p.wd].slice(0, 3)) + '</span>' + wxIcon(wxKind(+d.weather_code[i], 1)) +
+        '<span class="wx-mm"><b>' + Math.round(d.temperature_2m_max[i]) + '°</b> ' + Math.round(d.temperature_2m_min[i]) + '°</span>' +
+        (rain >= 20 ? '<span class="wx-rain">%' + rain + '</span>' : '<span class="wx-rain"></span>') + '</li>';
+    });
+    var t = new Date(wx.at || Date.now());
+    return '<div class="box wx" id="wxBox"><div class="wx-now">' + wxIcon(wxKind(code, c.is_day), true) +
+      '<div class="wx-main"><span class="wx-place">Köprüköy\'de hava</span><b class="wx-t">' + Math.round(c.temperature_2m) + '°</b>' +
+      '<span class="wx-desc">' + esc(WX_TEXT[code] || '') + '</span></div></div>' +
+      '<p class="wx-more">Hissedilen ' + Math.round(c.apparent_temperature) + '° · Rüzgâr ' + Math.round(c.wind_speed_10m) + ' km/sa · Nem %' + Math.round(c.relative_humidity_2m) + '</p>' +
+      '<ul class="wx-days" aria-label="Önümüzdeki günler">' + days + '</ul>' +
+      '<p class="wx-src">Güncelleme ' + C.pad(t.getHours()) + ':' + C.pad(t.getMinutes()) + ' · <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a></p></div>';
+  }
+  function loadWeather() {
+    if (wxLoading) return;
+    try { var c = JSON.parse(localStorage.getItem(WX_KEY) || 'null'); if (c && c.at && Date.now() - c.at < 20 * 60000 && c.current) { wx = c; return; } } catch (e) { /* yok say */ }
+    wxLoading = true;
+    fetch(WX_URL).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+      if (!j || !j.current || !j.daily) throw 0;
+      j.at = Date.now(); wx = j; wxFail = false;
+      try { localStorage.setItem(WX_KEY, JSON.stringify(j)); } catch (e) { /* yok say */ }
+    }).catch(function () { if (!wx) wxFail = true; }).then(function () {
+      wxLoading = false;
+      var el = $('wxBox'); if (el) { var h = wxBox(); if (h) el.outerHTML = h; else el.remove(); }
+    });
+  }
+  // sayfa uzun süre açık kalırsa (telefon ana ekranında) geri gelince hava yenilenir
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && wx && Date.now() - wx.at > 20 * 60000 && $('wxBox')) { try { localStorage.removeItem(WX_KEY); } catch (e) { /* yok say */ } loadWeather(); }
+  });
+
   var calY = null, calM = null, calSel = '';
   function dayItems(iso) {
     var p = C.parts(iso), out = [];
@@ -221,7 +295,7 @@
     h += '<section class="section"><div class="container grid-main"><div>' +
       '<div class="sec-head"' + ed('ekle:duyurular') + '><h2>Son Duyurular</h2><a href="#/duyurular">Tüm duyurular ›</a></div>' +
       (news.length ? '<div class="news-list">' + news.map(newsCard).join('') + '</div>' : '<div class="box empty"><b>Henüz duyuru yok</b></div>') +
-      '</div><aside>' +
+      '</div><aside>' + wxBox() +
       '<div class="sec-head"' + ed('ekle:etkinlikler') + '><h2>Yaklaşan Günler</h2></div>' + calendar() +
       '<div class="box" style="margin-top:14px">' + (ev.length ? ev.map(evRow).join('') : '<div class="empty">Yaklaşan bir gün yok.</div>') + '</div>' +
       '<p style="margin:10px 0 0"><a href="#/etkinlikler" style="font-weight:700">Tüm takvim ›</a></p>' +
@@ -672,7 +746,7 @@
     else if (page === 'koyumuz') { page = 'hakkimizda'; html = pageAbout(); }
     else if (page === 'gezilecek-yerler' || page === 'gezi') { page = 'gezilecek-yerler'; html = pageGezi(); }
     else if (page === 'iletisim') html = pageContact();
-    else { page = ''; html = pageHome(); }
+    else { page = ''; loadWeather(); html = pageHome(); }
     var hash = location.hash, back = !tapped && hash !== curHash && pos[hash] > 0;
     tapped = false; curHash = hash;
     main.innerHTML = html;
