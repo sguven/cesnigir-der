@@ -26,6 +26,11 @@
     });
   }
   function pid(p) { return C.shareId('d', p); }
+  function isTarih(p) { return p.tur === 'Tarihten'; }
+  // Tarihten yazılarda öne çıkan tarih olayın tarihidir; yayın tarihi ikinci planda kalır
+  function dateSpan(p, uzun) {
+    return isTarih(p) && p.olay_tarihi ? '<span class="olay">' + esc(p.olay_tarihi) + '</span>' : '<span>' + esc(C.longDate(p.tarih, uzun)) + '</span>';
+  }
   function excerpt(t, n) {
     t = String(t || '').replace(/\s+/g, ' ').trim();
     return t.length > n ? t.slice(0, n).replace(/\s+\S*$/, '') + '…' : t;
@@ -51,10 +56,10 @@
   /* ---------- parçalar ---------- */
   function newsCard(p) {
     var src = img(p.foto);
-    return '<a class="news" href="#/duyuru/' + esc(pid(p)) + '">' +
+    return '<a class="news' + (isTarih(p) ? ' tarih' : '') + '" href="#/duyuru/' + esc(pid(p)) + '">' +
       '<div class="news-img' + (src ? '' : ' noimg') + '">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy">' : '<img class="ph" src="' + B + 'images/logo-160.png" alt="">') + '</div>' +
       '<div class="news-body"><div class="news-meta">' + (p.tur ? '<span class="' + C.badgeClass(p.tur) + '">' + esc(p.tur) + '</span>' : '') +
-      '<span>' + esc(C.longDate(p.tarih)) + '</span></div>' +
+      dateSpan(p) + '</div>' +
       '<h3>' + esc(p.baslik) + '</h3>' + (p.metin ? '<p>' + esc(excerpt(p.metin, 150)) + '</p>' : '') +
       '<span class="read">Devamını oku ›</span></div></a>';
   }
@@ -170,7 +175,8 @@
 
   /* ---------- sayfalar ---------- */
   function pageHome() {
-    var d = data.dernek, news = data.duyurular.slice().slice(0, 4), ev = upcoming(45).slice(0, 4);
+    var d = data.dernek, news = data.duyurular.filter(function (p) { return !isTarih(p); }).slice(0, 4), ev = upcoming(45).slice(0, 4);
+    var tarih = data.duyurular.filter(isTarih).slice(0, 3);
     // Canlı görüntü: karşılama bandının sağında küçük oynar; dokununca aynı oynatıcı ekranı kaplayacak kadar büyür
     // (oynatıcı yeniden yüklenmez, yalnızca boyutu değişir). Kapat, karanlık alana dokunmak ya da Esc eski hâline döndürür.
     var live = C.ytEmbed(d.canli_yayin), liveBox = live ? '<div class="live-mini" id="liveBox">' +
@@ -192,6 +198,10 @@
       '<p style="margin:10px 0 0"><a href="#/etkinlikler" style="font-weight:700">Tüm takvim ›</a></p>' +
       '</aside></div></section>';
 
+    if (tarih.length) h += '<section class="section tarih-band"><div class="container"><div class="sec-head"><div><h2>Köyümüzün Tarihinden</h2>' +
+      '<p>Köprüköy\'ün geçmişinden kaynaklı yazılar</p></div><a href="#/duyurular" data-tarih="1">Tüm tarih yazıları ›</a></div>' +
+      '<div class="news-list">' + tarih.map(newsCard).join('') + '</div></div></section>';
+
     var g = data.galeri.slice(0, 6);
     if (g.length) h += '<section class="section alt"><div class="container"><div class="sec-head"><h2>Fotoğraflardan</h2><a href="#/fotograflar">Tüm fotoğraflar (' + data.galeri.length + ') ›</a></div>' +
       galleryGrid(g, 'strip') + '</div></section>';
@@ -210,7 +220,7 @@
     var types = ['Tümü'].concat(C.DUYURU_TURLERI.filter(function (t) { return all.some(function (p) { return p.tur === t; }); }));
     if (types.indexOf(filter) < 0) filter = 'Tümü';
     var list = filter === 'Tümü' ? all : all.filter(function (p) { return p.tur === filter; });
-    return band('Duyurular', 'Vefat, düğün ve toplantı ilanları ile köyümüzden haberler.') +
+    return band('Duyurular', 'Vefat, düğün ve toplantı ilanları, köyümüzden haberler ve köyümüzün tarihinden yazılar.') +
       '<section class="section"><div class="container">' +
       (types.length > 2 ? '<div class="filters" role="group" aria-label="Duyuru türü">' + types.map(function (t) {
         return '<button type="button" data-filter="' + esc(t) + '" aria-pressed="' + (t === filter) + '">' + esc(t) + '</button>';
@@ -220,7 +230,7 @@
   }
 
   function pageArticle(id) {
-    var p = data.duyurular.filter(function (x) { return pid(x) === id; })[0];
+    var p = data.duyurular.filter(function (x) { return pid(x) === id || x.eski_id === id; })[0];
     if (!p) return band('Duyuru bulunamadı') + '<section class="section"><div class="container"><p>Bu duyuru kaldırılmış olabilir.</p><a class="btn" href="#/duyurular">Tüm duyurular</a></div></section>';
     var src = img(p.foto), link = C.linkUrl(p.link);
     var paras = String(p.metin || '').split(/\n\s*\n|\n/).map(function (s) { return s.trim(); }).filter(Boolean);
@@ -234,7 +244,7 @@
     }
     return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/duyurular">Duyurular</a></div></div></div>' +
       '<section class="section"><div class="container"><article class="article">' +
-      '<div class="news-meta">' + (p.tur ? '<span class="' + C.badgeClass(p.tur) + '">' + esc(p.tur) + '</span>' : '') + '<span>' + esc(C.longDate(p.tarih, true)) + '</span></div>' +
+      '<div class="news-meta">' + (p.tur ? '<span class="' + C.badgeClass(p.tur) + '">' + esc(p.tur) + '</span>' : '') + (isTarih(p) && p.olay_tarihi ? '<span class="olay">' + esc(p.olay_tarihi) + '</span><span>Paylaşıldı: ' + esc(C.longDate(p.tarih)) + '</span>' : '<span>' + esc(C.longDate(p.tarih, true)) + '</span>') + '</div>' +
       '<h1>' + esc(p.baslik) + '</h1>' +
       (src ? '<button type="button" class="article-img" data-photo="' + esc(src) + '" data-cap="' + esc(p.baslik) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(src) + '" alt="' + esc(p.foto_aciklama || p.baslik) + '"></button>' : '') +
       ekFoto(true) +
@@ -487,6 +497,12 @@
       '<p class="muted small" style="margin-top:14px">' + srcHtml([K.vikiBala, K.ataAns, K.atam, K.kardes]).replace('<small class="t-src">', '').replace('</small>', '') + '</p>' +
 
       '<div class="sec-head" style="margin-top:30px"><h2>Tarihçe</h2></div>' +
+      (function () {
+        var t = data.duyurular.filter(isTarih);
+        return t.length ? '<div class="box box-pad" style="margin-bottom:18px;background:#FBF5E8;border-color:#D9C49A"><h3>Tarihten yazılar</h3><ul class="tarih-links">' +
+          t.map(function (p) { return '<li><a href="#/duyuru/' + esc(pid(p)) + '">' + esc(p.baslik) + '</a>' + (p.olay_tarihi ? '<span>' + esc(p.olay_tarihi) + '</span>' : '') + '</li>'; }).join('') +
+          '</ul></div>' : '';
+      })() +
       '<ul class="timeline">' + TARIH.map(function (t) {
         var foto = (t[3] || []).map(function (f) {
           return '<a class="t-foto" href="' + B + 'images/' + f[0] + '" target="_blank" rel="noopener"><img src="' + B + 'images/' + f[0] + '" alt="' + esc(f[1]) + '" loading="lazy"><span>' + esc(f[1]) + '</span></a>';
@@ -721,6 +737,7 @@
       // büyükken Kapat'a ya da oynatıcının dışındaki karanlık alana dokunmak küçültür
       if (e.target.closest('#liveClose') || (e.target.id === 'liveBox' && e.target.classList.contains('big'))) { liveBig(false); return; }
       if (e.target.closest('a[href^="#/"]')) { tapped = true; setTimeout(function () { tapped = false; }, 600); }
+      if (e.target.closest('[data-tarih]')) filter = 'Tarihten';
       var dh = e.target.closest('a[data-h]');
       if (dh && !e.button && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
         e.preventDefault(); tapped = true; setTimeout(function () { tapped = false; }, 600);

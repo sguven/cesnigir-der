@@ -18,7 +18,8 @@
     'Mevlit': ['Örnek: Merhum Hasan Kaya için mevlit', 'Örnek: Cuma günü ikindi namazından sonra köy camiinde okunacaktır.'],
     'Toplantı': ['Örnek: Dernek genel kurul toplantısı', 'Toplantının yeri, saati ve konuşulacak konular…'],
     'Duyuru': ['Örnek: Köy yolu bakım çalışması', 'Duyurunun ayrıntıları…'],
-    'Haber': ['Haberin başlığı', 'Haberin kısa özeti…']
+    'Haber': ['Haberin başlığı', 'Haberin kısa özeti…'],
+    'Tarihten': ['Örnek: Köprümüzün 1852 onarımı', 'Ne oldu, ne zaman oldu, nereden biliyoruz? Kaynağını aşağıya yazın.']
   };
 
   var COLS = {
@@ -31,6 +32,7 @@
         { name: 'baslik', label: 'Başlık', type: 'text', required: true },
         { name: 'metin', label: 'Açıklama', type: 'textarea' },
         { name: 'foto', label: 'Fotoğraf', type: 'photo', help: 'İsterseniz bir fotoğraf ekleyin.' },
+        { name: 'olay_tarihi', label: 'Olayın tarihi (Tarihten yazıları için)', type: 'text', extra: true, placeholder: 'Örnek: 26 Aralık 1919' },
         { name: 'kaynak', label: 'Haberin kaynağı', type: 'text', extra: true, placeholder: 'Örnek: Kırıkkale Haber' },
         { name: 'link', label: 'Haberin internet adresi', type: 'url', extra: true, placeholder: 'https://…' }
       ],

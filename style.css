@@ -75,6 +75,7 @@ h1,h2,h3{margin:0;line-height:1.25}
 .b-toplanti{background:var(--blue-soft);color:var(--blue-dark)}
 .b-duyuru{background:#FEF3C7;color:#78350F}
 .b-haber{background:#E4E6EB;color:#1C1E21}
+.b-tarihten{background:#5A1F12;color:#F3D79A}
 .b-satilik{background:#E6F4EA;color:#14532D}
 .b-araniyor{background:var(--blue-soft);color:var(--blue-dark)}
 .b-yardim{background:#FEF3C7;color:#78350F}

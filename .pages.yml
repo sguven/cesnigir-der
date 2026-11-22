@@ -14,11 +14,12 @@ content:
     format: json
     list: true
     fields:
-      - { name: tur, label: Tür, type: select, options: { values: [Vefat, Düğün, Nişan, Mevlit, Toplantı, Duyuru, Haber] } }
+      - { name: tur, label: Tür, type: select, options: { values: [Vefat, Düğün, Nişan, Mevlit, Toplantı, Duyuru, Haber, Tarihten] } }
       - { name: tarih, label: Tarih, type: date, required: true, options: { format: yyyy-MM-dd } }
       - { name: baslik, label: Başlık, type: string, required: true }
       - { name: metin, label: Açıklama, type: text }
       - { name: foto, label: Fotoğraf, type: image }
+      - { name: olay_tarihi, label: Olayın tarihi (Tarihten yazıları için), type: string }
       - { name: kaynak, label: Haberin kaynağı, type: string }
       - { name: link, label: Haberin adresi, type: string }
 

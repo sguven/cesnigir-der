@@ -159,6 +159,7 @@ main:focus{outline:none}
 .b-toplanti{background:#E7F0FD;color:#0E4A9C}
 .b-duyuru{background:#FEF3C7;color:#78350F}
 .b-haber{background:var(--sand);color:var(--ink)}
+.b-tarihten{background:#5A1F12;color:#F3D79A}
 .b-satilik{background:#E6F4EA;color:#14532D}
 .b-araniyor{background:#E7F0FD;color:#0E4A9C}
 .b-yardim{background:#FEF3C7;color:#78350F}
@@ -175,6 +176,16 @@ main:focus{outline:none}
 .news-img img.ph{width:90px;height:90px;min-height:0;object-fit:contain;border-radius:50%}
 .news-body{padding:16px 18px}
 .news-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:16px;color:var(--ink2);margin-bottom:6px}
+/* Tarihten yazılar: güncel haberlerden ayrı, eski kâğıt tonunda */
+.news.tarih{background:#FBF5E8;border-color:#D9C49A;border-left:6px solid var(--gold)}
+.olay{font-family:var(--serif);font-weight:700;color:var(--bordo-dark)}
+.tarih-band{background:#F3E9D4;border-top:1px solid #D9C49A;border-bottom:1px solid #D9C49A}
+.tarih-band .sec-head p{margin:4px 0 0;color:var(--ink2);font-size:17px}
+.tarih-links{list-style:none;margin:0 0 6px;padding:0}
+.tarih-links li{padding:10px 0;border-top:1px solid var(--line)}
+.tarih-links li:first-child{border-top:0}
+.tarih-links a{font-weight:700}
+.tarih-links span{display:block;font-size:15px;color:var(--ink2)}
 .news-body h3{font-size:21px;margin-bottom:6px}
 .news-body p{margin:0;color:var(--ink2)}
 .read{display:inline-block;margin-top:8px;font-weight:700;color:var(--bordo)}
