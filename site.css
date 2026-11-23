@@ -505,3 +505,34 @@ button.cal-day:hover{filter:brightness(.93)}
   border:2px solid #fff;color:#fff;text-decoration:none;font-weight:800;font-size:17px}
 .viewer-com svg{width:20px;height:20px}
 .viewer-com:hover{background:rgba(255,255,255,.15);color:#fff}
+
+/* ---------- Kullanım kolaylığı (Kasım 2026): daha az kaydırma, bölümlere daha kısa yol ---------- */
+/* Kısayollar: menü "Menü" düğmesinin arkasındayken (telefon, tablet) ana sayfanın başında altı bölüme tek dokunuş */
+.quick{display:none;background:var(--white);border-bottom:1px solid var(--line)}
+.quick-in{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding-top:14px;padding-bottom:16px}
+.quick a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:84px;padding:10px 4px;border:1px solid var(--line);border-radius:10px;
+  background:var(--cream);color:var(--bordo-dark);text-decoration:none;font-weight:700;font-size:16px;line-height:1.2;text-align:center;transition:transform .12s,background-color .15s,border-color .15s}
+.quick a svg{width:30px;height:30px;flex:none;color:var(--bordo)}
+.quick a:hover,.quick a:active{background:var(--bordo-soft);border-color:var(--bordo)}
+.quick a:active{transform:scale(.97)}
+@media (max-width:1180px){ .quick{display:block} }
+@media (min-width:700px) and (max-width:1180px){ .quick-in{grid-template-columns:repeat(6,minmax(0,1fr))} }
+@media (max-width:350px){ .quick a{font-size:15px} }
+/* telefonda haber kartının özeti iki satır: aynı ekrana daha çok haber sığar, başlık öne çıkar */
+@media (max-width:640px){
+  .news-body p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+  .news-body{padding:14px 16px}
+}
+/* Paylaş düğmeleri dar yerde de yan yana durur (alt alta iki satır yerine tek satır) */
+.share{grid-template-columns:repeat(2,minmax(0,1fr))}
+/* Duyurular: "Daha fazla göster" */
+.more{margin:18px 0 0;text-align:center}
+.more .btn{width:100%;max-width:420px}
+/* Yukarı çık: uzun sayfalarda sağ altta belirir */
+.to-top{position:fixed;z-index:25;right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:6px;
+  min-height:50px;padding:0 16px 0 12px;border:2px solid var(--bordo);border-radius:99px;background:var(--white);color:var(--bordo);font-weight:700;font-size:17px;cursor:pointer;
+  box-shadow:0 3px 12px rgba(35,26,20,.25)}
+.to-top svg{width:22px;height:22px}
+.to-top:hover{background:var(--bordo-soft)}
+.to-top:active{transform:scale(.97)}
+@media print{ .to-top,.quick{display:none!important} }

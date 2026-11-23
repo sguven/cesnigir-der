@@ -101,6 +101,7 @@ function build(dom, o) {
     await pg.waitForFunction(function () { var m = document.getElementById('icerik'); return m && !m.querySelector('.loading'); });
     var out = await pg.evaluate(function () {
       document.getElementById('icerik').classList.remove('gir');
+      var tt = document.getElementById('toTop'); if (tt) tt.remove();   // "Yukarı" düğmesini app.js her açılışta kendi ekler
       document.body.removeAttribute('style'); document.documentElement.removeAttribute('style');
       var imgs = [].map.call(document.querySelectorAll('#icerik img[alt]:not([alt=""])'), function (i) { return { src: i.getAttribute('src'), alt: i.getAttribute('alt') }; });
       var places = [].map.call(document.querySelectorAll('#icerik .cards article'), function (a) {

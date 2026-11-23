@@ -145,13 +145,15 @@
       '<img src="' + esc(src) + '" alt="' + esc(e.ad) + '" loading="lazy"></button>' : '') + shareButtons(evShare(e, det));
   }
 
-  function evRow(e) {
+  // sade: ana sayfadaki kısa listede fotoğraf ve paylaş düğmeleri çıkmaz (etkinliğin sayfasında ve takvimde günü seçince görünür)
+  function evRowSade(e) { return evRow(e, 0, true); }
+  function evRow(e, _i, sade) {
     var p = C.parts(e.iso), until = C.untilText(e.iso), det = [e.saat, e.yer].filter(Boolean).join(' · ');
     return '<div class="ev' + (e.koy ? ' koy' : ' official') + '"' + (e.koy ? ek('etkinlikler', e.ix) + ' data-yc="etkinlik:' + esc(e.id) + '"' : '') + '><div class="ev-date" aria-hidden="true"><span>' + C.AY_KISA[p.m] + '</span><b>' + p.d +
       '</b><small>' + C.GUN[p.wd] + '</small></div><div class="ev-info">' + (until ? '<div class="ev-when">' + esc(until) + '</div>' : '') +
       (e.tur ? '<span class="' + C.badgeClass(e.tur) + '">' + esc(e.tur) + '</span> ' : '') +
       (e.koy ? '<a class="ev-link" href="#/etkinlik/' + esc(e.id) + '"><b>' + esc(e.ad) + '</b></a>' : '<b>' + esc(e.ad) + '</b>') +
-      '<div class="muted">' + esc(C.longDate(e.iso, true)) + (det ? ' · ' + esc(det) : '') + '</div>' + evExtras(e, det) + '</div></div>';
+      '<div class="muted">' + esc(C.longDate(e.iso, true)) + (det ? ' · ' + esc(det) : '') + '</div>' + (sade === true ? '' : evExtras(e, det)) + '</div></div>';
   }
 
   function galleryGrid(list, cls) {
@@ -267,7 +269,7 @@
     }
     h += '</div><div class="cal-legend"><span><i class="koy"></i>Köy etkinliği</span><span><i class="resmi"></i>Resmî, dinî gün</span></div>';
     var sel = calSel ? dayItems(calSel) : [];
-    h += '<div class="cal-detail" aria-live="polite">' + (sel.length ? '<h3>' + esc(C.longDate(calSel, true)) + '</h3>' + sel.map(evRow).join('')
+    h += '<div class="cal-detail" aria-live="polite">' + (sel.length ? '<h3>' + esc(C.longDate(calSel, true)) + '</h3>' + sel.map(function (x) { return evRow(x); }).join('')
       : '<p class="muted">Renkli bir güne dokunun, o günün ayrıntısı burada açılır.</p>') + '</div></div>';
     return h;
   }
@@ -275,6 +277,23 @@
     var el = $('homeCal'); if (!el) return;
     el.outerHTML = calendar();
     var f = $('homeCal').querySelector(focusSel); if (f) f.focus();
+  }
+
+  /* Kısayollar: telefonda menü "Menü" düğmesinin arkasında kaldığı için ana sayfanın başında bölümlere tek dokunuşla geçilir
+     (site.css: yalnız menünün kapalı olduğu genişlikte görünür). */
+  var QI = {
+    duyurular: '<path d="M4 10v4h3l6 4V6L7 10H4Z"/><path d="M16.5 9a4 4 0 0 1 0 6"/>',
+    etkinlikler: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>',
+    meydan: '<path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h5"/>',
+    fotograflar: '<rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/>',
+    pazar: '<path d="M4 9h16l-1 11H5L4 9Z"/><path d="M8 9a4 4 0 0 1 8 0"/>',
+    'gezilecek-yerler': '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>'
+  };
+  function quickLinks() {
+    var L = [['duyurular', 'Duyurular'], ['etkinlikler', 'Etkinlikler'], ['meydan', 'Köy Meydanı'], ['fotograflar', 'Fotoğraflar'], ['pazar', 'Market'], ['gezilecek-yerler', 'Gezilecek Yerler']];
+    return '<nav class="quick" aria-label="Kısayollar"><div class="container quick-in">' + L.map(function (x) {
+      return '<a href="#/' + x[0] + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + QI[x[0]] + '</svg><span>' + x[1] + '</span></a>';
+    }).join('') + '</div></nav>';
   }
 
   /* ---------- sayfalar ---------- */
@@ -290,7 +309,7 @@
       '<button type="button" class="live-close" id="liveClose" hidden>✕ Kapat</button></div></div>' : '';
     var h = '<section class="hero"><img src="' + B + 'images/kapak.jpg?v=2" width="1926" height="817" decoding="async" alt="Gün batımında Çeşnigir Köprüsü ve Türk bayrağı, üzerinde Çeşnigir-Der yazısı."></section>' +
       '<div class="welcome"><div class="container welcome-in" style="padding:22px 18px"><div><h1>Köprüköy\'e hoş geldiniz</h1>' +
-      '<p>Köyümüzden duyurular, vefat ve düğün haberleri, etkinlikler ve fotoğraflar.</p></div>' + (liveBox || (E ? '<div' + ed('dernek:canli') + '></div>' : '')) + '</div></div>';
+      '<p>Köyümüzden duyurular, vefat ve düğün haberleri, etkinlikler ve fotoğraflar.</p></div>' + (liveBox || (E ? '<div' + ed('dernek:canli') + '></div>' : '')) + '</div></div>' + quickLinks();
 
     h += '<section class="section"><div class="container grid-main"><div>' +
       '<div class="sec-head"' + ed('ekle:duyurular') + '><h2>Son Duyurular</h2><a href="#/duyurular">Tüm duyurular ›</a></div>' +
@@ -299,7 +318,7 @@
       '<a class="btn" href="#/meydan">' + icon('chat') + 'Köy Meydanı\'na git</a></div>' +
       '</div><aside>' + wxBox() +
       '<div class="sec-head"' + ed('ekle:etkinlikler') + '><h2>Yaklaşan Günler</h2></div>' + calendar() +
-      '<div class="box" style="margin-top:14px">' + (ev.length ? ev.map(evRow).join('') : '<div class="empty">Yaklaşan bir gün yok.</div>') + '</div>' +
+      '<div class="box" style="margin-top:14px">' + (ev.length ? ev.map(evRowSade).join('') : '<div class="empty">Yaklaşan bir gün yok.</div>') + '</div>' +
       '<p style="margin:10px 0 0"><a href="#/etkinlikler" style="font-weight:700">Tüm takvim ›</a></p>' +
       '</aside></div></section>';
 
@@ -315,18 +334,22 @@
     return h;
   }
 
-  var filter = 'Tümü';
+  var filter = 'Tümü', NEWS_STEP = 8, newsShown = NEWS_STEP;
   function pageNews() {
     var all = data.duyurular.slice();
     var types = ['Tümü'].concat(C.DUYURU_TURLERI.filter(function (t) { return all.some(function (p) { return p.tur === t; }); }));
     if (types.indexOf(filter) < 0) filter = 'Tümü';
     var list = filter === 'Tümü' ? all : all.filter(function (p) { return p.tur === filter; });
+    // uzun liste telefonda bitmeyen bir sayfa olmasın: önce son 8 kayıt, gerisi düğmeyle açılır (düzenleme modunda hepsi görünür)
+    var total = list.length, rest = (E || navigator.webdriver) ? 0 : Math.max(0, total - newsShown);   // navigator.webdriver: arama motoru sayfalarını üreten araç (site-sayfalari.js) bütün listeyi yazar
+    if (rest) list = list.slice(0, newsShown);
     return band('Duyurular', 'Vefat, düğün ve toplantı ilanları, köyümüzden haberler ve köyümüzün tarihinden yazılar.') +
       '<section class="section"><div class="container"' + ed('ekle:duyurular') + '>' +
       (types.length > 2 ? '<div class="filters" role="group" aria-label="Duyuru türü">' + types.map(function (t) {
         return '<button type="button" data-filter="' + esc(t) + '" aria-pressed="' + (t === filter) + '">' + esc(t) + '</button>';
       }).join('') + '</div>' : '') +
       (list.length ? '<div class="news-list">' + list.map(newsCard).join('') + '</div>' : '<div class="box empty"><b>Henüz duyuru yok</b>Yeni duyurular burada görünecek.</div>') +
+      (rest ? '<p class="more"><button type="button" class="btn btn-light" data-more>Daha fazla göster (' + rest + ' duyuru daha)</button></p>' : '') +
       '</div></section>';
   }
 
@@ -359,8 +382,15 @@
       '</article></div></section>';
   }
 
+  var evFilter = 'Tümü';
   function pageEvents() {
-    var list = upcoming(365), h = '', cur = '';
+    var all = upcoming(365), h = '', cur = '';
+    var koyVar = all.some(function (e) { return e.koy; }), resmiVar = all.some(function (e) { return !e.koy; });
+    if (!(koyVar && resmiVar)) evFilter = 'Tümü';
+    var list = evFilter === 'Tümü' ? all : all.filter(function (e) { return (evFilter === 'Köy etkinlikleri') === !!e.koy; });
+    var chips = koyVar && resmiVar ? '<div class="filters" role="group" aria-label="Gün türü">' + ['Tümü', 'Köy etkinlikleri', 'Resmî ve dinî günler'].map(function (t) {
+      return '<button type="button" data-evf="' + t + '" aria-pressed="' + (t === evFilter) + '">' + t + '</button>';
+    }).join('') + '</div>' : '';
     list.forEach(function (e) {
       var p = C.parts(e.iso), key = C.AY[p.m] + ' ' + p.y;
       if (key !== cur) { if (cur) h += '</div>'; h += '<h2 class="month">' + esc(key) + '</h2><div class="box">'; cur = key; }
@@ -368,7 +398,7 @@
     });
     if (cur) h += '</div>';
     return band('Etkinlikler', 'Düğün, nişan, mevlit, toplantılar ve resmî günler.') +
-      '<section class="section"><div class="container" style="max-width:860px"' + ed('ekle:etkinlikler') + '>' + (h || '<div class="box empty"><b>Yaklaşan bir gün yok</b></div>') + '</div></section>';
+      '<section class="section"><div class="container" style="max-width:860px"' + ed('ekle:etkinlikler') + '>' + chips + (h || '<div class="box empty"><b>Yaklaşan bir gün yok</b></div>') + '</div></section>';
   }
 
   // Tek etkinliğin sayfası: paylaşılan bağlantı buraya gelir (geçmiş etkinlikler de açılır)
@@ -1102,6 +1132,14 @@
     window.addEventListener('scroll', headerPhoto, { passive: true }); window.addEventListener('resize', headerPhoto);
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     window.addEventListener('scroll', function () { pos[curHash] = window.pageYOffset; }, { passive: true });
+    if (!E) {
+      if (!$('toTop')) document.body.insertAdjacentHTML('beforeend', '<button type="button" id="toTop" class="to-top" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 15 7-7 7 7"/></svg>Yukarı</button>');
+      var ttTick = false;
+      window.addEventListener('scroll', function () {
+        if (ttTick) return; ttTick = true;
+        requestAnimationFrame(function () { ttTick = false; $('toTop').hidden = window.pageYOffset < 1200; });
+      }, { passive: true });
+    }
     $('menuBtn').addEventListener('click', function () { setMenu(!$('nav').classList.contains('open')); });
     document.addEventListener('click', function (e) {
       // menü açıkken dışına dokunmak yalnızca menüyü kapatır
@@ -1119,7 +1157,13 @@
         return;
       }
       var f = e.target.closest('[data-filter]');
-      if (f) { filter = f.getAttribute('data-filter'); main.innerHTML = pageNews(); realLinks(main); var b = main.querySelector('[data-filter="' + filter + '"]'); if (b) b.focus(); return; }
+      if (e.target.closest('[data-more]')) { var seen = newsShown; newsShown += NEWS_STEP; main.innerHTML = pageNews(); realLinks(main); yBadges();
+        var nx = main.querySelectorAll('.news')[seen]; if (nx) nx.focus({ preventScroll: true }); return; }
+      var ef = e.target.closest('[data-evf]');
+      if (ef) { evFilter = ef.getAttribute('data-evf'); main.innerHTML = pageEvents(); realLinks(main); if (E) E.after('etkinlikler'); yBadges();
+        var eb = main.querySelector('[data-evf="' + evFilter + '"]'); if (eb) eb.focus(); return; }
+      if (e.target.closest('#toTop')) { window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth' }); main.focus({ preventScroll: true }); return; }
+      if (f) { filter = f.getAttribute('data-filter'); newsShown = NEWS_STEP; main.innerHTML = pageNews(); realLinks(main); yBadges(); var b = main.querySelector('[data-filter="' + filter + '"]'); if (b) b.focus(); return; }
       var cn = e.target.closest('[data-cal-nav]');
       if (cn) { var dir = +cn.getAttribute('data-cal-nav'), dt = new Date(calY, calM + dir, 1); calY = dt.getFullYear(); calM = dt.getMonth();
         redrawCal('[data-cal-nav="' + dir + '"]'); return; }
