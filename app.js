@@ -86,7 +86,7 @@
   /* ---------- parçalar ---------- */
   function newsCard(p) {
     var src = img(p.foto);
-    return '<a class="news' + (isTarih(p) ? ' tarih' : '') + '" href="#/duyuru/' + esc(pid(p)) + '"' + ek('duyurular', data.duyurular.indexOf(p)) + '>' +
+    return '<a class="news' + (isTarih(p) ? ' tarih' : '') + '" href="#/duyuru/' + esc(pid(p)) + '" data-yc="duyuru:' + esc(pid(p)) + '"' + ek('duyurular', data.duyurular.indexOf(p)) + '>' +
       '<div class="news-img' + (src ? '' : ' noimg') + '">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy">' : '<img class="ph" src="' + B + 'images/logo-160.png" alt="">') + '</div>' +
       '<div class="news-body"><div class="news-meta">' + (p.tur ? '<span class="' + C.badgeClass(p.tur) + '">' + esc(p.tur) + '</span>' : '') +
       dateSpan(p) + '</div>' +
@@ -147,7 +147,7 @@
 
   function evRow(e) {
     var p = C.parts(e.iso), until = C.untilText(e.iso), det = [e.saat, e.yer].filter(Boolean).join(' · ');
-    return '<div class="ev' + (e.koy ? ' koy' : ' official') + '"' + (e.koy ? ek('etkinlikler', e.ix) : '') + '><div class="ev-date" aria-hidden="true"><span>' + C.AY_KISA[p.m] + '</span><b>' + p.d +
+    return '<div class="ev' + (e.koy ? ' koy' : ' official') + '"' + (e.koy ? ek('etkinlikler', e.ix) + ' data-yc="etkinlik:' + esc(e.id) + '"' : '') + '><div class="ev-date" aria-hidden="true"><span>' + C.AY_KISA[p.m] + '</span><b>' + p.d +
       '</b><small>' + C.GUN[p.wd] + '</small></div><div class="ev-info">' + (until ? '<div class="ev-when">' + esc(until) + '</div>' : '') +
       (e.tur ? '<span class="' + C.badgeClass(e.tur) + '">' + esc(e.tur) + '</span> ' : '') +
       (e.koy ? '<a class="ev-link" href="#/etkinlik/' + esc(e.id) + '"><b>' + esc(e.ad) + '</b></a>' : '<b>' + esc(e.ad) + '</b>') +
@@ -157,7 +157,7 @@
   function galleryGrid(list, cls) {
     return '<div class="gal ' + (cls || '') + '"' + ed('galeri') + '>' + list.map(function (x) {
       var i = data.galeri.indexOf(x);
-      return '<button type="button" data-gal="' + i + '" aria-label="Fotoğrafı büyüt: ' + esc(x.aciklama) + '"><img src="' + esc(img(x.foto)) + '" alt="' + esc((x.aciklama || 'Fotoğraf') + ' Köprüköy, Keskin (Kırıkkale).') + '" loading="lazy"></button>';
+      return '<button type="button" data-gal="' + i + '" data-yc="foto:' + esc(fKey(x)) + '" aria-label="Fotoğrafı büyüt: ' + esc(x.aciklama) + '"><img src="' + esc(img(x.foto)) + '" alt="' + esc((x.aciklama || 'Fotoğraf') + ' Köprüköy, Keskin (Kırıkkale).') + '" loading="lazy"></button>';
     }).join('') + '</div>';
   }
 
@@ -355,6 +355,7 @@
       '<div class="btn-row">' + shareButtons({ key: 'd', id: id, tur: p.tur, title: p.baslik, photo: src }, true) +
       (link ? '<a class="btn btn-light" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + icon('link') + 'Haberin kaynağı</a>' : '') +
       '<a class="btn btn-light" href="#/duyurular">‹ Tüm duyurular</a></div>' +
+      yBox('duyuru', pid(p), p.baslik, p.tur) +
       '</article></div></section>';
   }
 
@@ -385,11 +386,12 @@
       (e.saat ? '<li><span>Saat</span>' + esc(e.saat) + '</li>' : '') + (e.yer ? '<li><span>Yer</span>' + esc(e.yer) + '</li>' : '') + '</ul></div>' +
       (src ? '<button type="button" class="article-img" data-photo="' + esc(src) + '" data-cap="' + esc(e.ad) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(src) + '" alt="' + esc(e.ad) + '"></button>' : '') +
       '<div class="btn-row">' + shareButtons(evShare(e, det), true) + '<a class="btn btn-light" href="#/etkinlikler">‹ Tüm etkinlikler</a></div>' +
+      yBox('etkinlik', id, e.ad, e.tur) +
       '</article></div></section>';
   }
 
   function pagePhotos() {
-    return band('Fotoğraflar', 'Büyütmek için fotoğrafa dokunun.') + '<section class="section"><div class="container"' + ed('ekle:galeri') + '>' +
+    return band('Fotoğraflar', 'Büyütmek için fotoğrafa dokunun; altındaki "Yorumlar" düğmesiyle yorum yazabilirsiniz.') + '<section class="section"><div class="container"' + ed('ekle:galeri') + '>' +
       (data.galeri.length ? galleryGrid(data.galeri) : '<div class="box empty"><b>Henüz fotoğraf yok</b></div>') + '</div></section>';
   }
 
@@ -729,17 +731,17 @@
     return '<div class="share"><span>Paylaş:</span><a class="s-wa" href="https://wa.me/?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp</a>' +
       '<a class="s-fb" href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '" target="_blank" rel="noopener">' + icon('fb') + 'Facebook</a></div>';
   }
-  function mForm(tur, konuId) {
-    var yeni = tur === 'konu';
+  function mForm(tur, konuId, yk) {
+    var yeni = tur === 'konu', L = tur === 'yorum' ? YL[yk] || YL.yorum : null;
     return '<form class="m-form" data-m-form="' + tur + '"' + (konuId ? ' data-konu="' + konuId + '"' : '') + ' novalidate>' +
-      (yeni ? '' : '<h3 class="m-form-h">Cevap yazın</h3>') +
+      (yeni ? '' : '<h3 class="m-form-h">' + (L ? L.h : 'Cevap yazın') + '</h3>') +
       '<label class="m-l">Adınız ve soyadınız<input name="ad" autocomplete="name" maxlength="60" value="' + esc(mAd()) + '"></label>' +
       (yeni ? '<label class="m-l">Ne hakkında?<select name="kategori">' + C.MEYDAN.kategoriler.map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label>' +
         '<label class="m-l">Başlık<input name="baslik" maxlength="120" placeholder="Örnek: Eski düğünlerimizden bir hatıra"></label>' : '') +
-      '<label class="m-l">' + (yeni ? 'Yazınız' : 'Cevabınız') + '<textarea name="metin" rows="' + (yeni ? 6 : 4) + '" maxlength="' + (yeni ? 4000 : 2000) + '"></textarea></label>' +
+      '<label class="m-l">' + (yeni ? 'Yazınız' : L ? L.l : 'Cevabınız') + '<textarea name="metin" rows="' + (yeni ? 6 : 4) + '" maxlength="' + (yeni ? 4000 : 2000) + '"></textarea></label>' +
       '<label class="m-hp" aria-hidden="true">Web sitesi<input name="web" tabindex="-1" autocomplete="off"></label>' +
       '<p class="m-err" role="alert" hidden></p>' +
-      '<button type="submit" class="btn">' + icon(yeni ? 'pen' : 'chat') + (yeni ? 'Gönder' : 'Cevabı gönder') + '</button>' +
+      '<button type="submit" class="btn">' + icon(yeni ? 'pen' : 'chat') + (yeni ? 'Gönder' : L ? L.b : 'Cevabı gönder') + '</button>' +
       '<p class="muted small m-note">Yazdıklarınız dernek yönetimi onayladıktan sonra sitede görünür.</p></form>';
   }
   function mFail() {
@@ -824,9 +826,9 @@
   }
 
   function mThanks(tur) {
-    return '<div class="m-thanks" role="status"><b>Teşekkürler, ' + (tur === 'konu' ? 'yazınız' : 'cevabınız') + ' alındı.</b>' +
+    return '<div class="m-thanks" role="status"><b>Teşekkürler, ' + ({ konu: 'yazınız', cevap: 'cevabınız', yorum: 'mesajınız' }[tur]) + ' alındı.</b>' +
       '<p>Dernek yönetimi onayladıktan sonra burada görünecek.</p>' +
-      '<button type="button" class="btn btn-light" data-m-again="' + tur + '">' + (tur === 'konu' ? 'Bir yazı daha yaz' : 'Bir cevap daha yaz') + '</button></div>';
+      '<button type="button" class="btn btn-light" data-m-again="' + tur + '">' + ({ konu: 'Bir yazı daha yaz', cevap: 'Bir cevap daha yaz', yorum: 'Bir mesaj daha yaz' }[tur]) + '</button></div>';
   }
   document.addEventListener('submit', function (e) {
     var f = e.target.closest && e.target.closest('form[data-m-form]');
@@ -837,15 +839,18 @@
     function hata(t, n) { err.textContent = t; err.hidden = false; if (n && f.elements[n]) f.elements[n].focus(); }
     if (v.ad.length < 3) return hata('Lütfen adınızı ve soyadınızı yazın.', 'ad');
     if (tur === 'konu' && v.baslik.length < 3) return hata('Lütfen yazınıza bir başlık yazın.', 'baslik');
-    if (v.metin.length < 2) return hata(tur === 'konu' ? 'Lütfen yazınızı yazın.' : 'Lütfen cevabınızı yazın.', 'metin');
+    if (v.metin.length < 2) return hata(tur === 'konu' ? 'Lütfen yazınızı yazın.' : tur === 'cevap' ? 'Lütfen cevabınızı yazın.' : 'Lütfen mesajınızı yazın.', 'metin');
     err.hidden = true;
     mAdKaydet(v.ad);
     var label = btn.innerHTML;
     btn.disabled = true; btn.textContent = 'Gönderiliyor…';
     var done = function () { var t = document.createElement('div'); t.innerHTML = mThanks(tur); f.parentNode.replaceChild(t.firstChild, f); };
     if (v.web) { done(); return; }   // yalnız otomatik programların doldurduğu gizli alan
-    var body = tur === 'konu' ? { ad: v.ad, kategori: v.kategori, baslik: v.baslik, metin: v.metin } : { ad: v.ad, metin: v.metin, konu_id: +f.getAttribute('data-konu') };
-    C.sb(tur === 'konu' ? '/forum_konular' : '/forum_cevaplar', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: body })
+    var ys = f.closest('.y-sec');
+    var body = tur === 'konu' ? { ad: v.ad, kategori: v.kategori, baslik: v.baslik, metin: v.metin } :
+      tur === 'yorum' ? { ad: v.ad, metin: v.metin, hedef_tur: ys.getAttribute('data-y'), hedef: ys.getAttribute('data-yh'), hedef_baslik: (ys.getAttribute('data-yb') || '').slice(0, 200) } :
+      { ad: v.ad, metin: v.metin, konu_id: +f.getAttribute('data-konu') };
+    C.sb({ konu: '/forum_konular', cevap: '/forum_cevaplar', yorum: '/yorumlar' }[tur], { method: 'POST', headers: { Prefer: 'return=minimal' }, body: body })
       .then(done).catch(function (er) {
         btn.disabled = false; btn.innerHTML = label;
         hata(er && er.status === 'net' ? 'İnternet bağlantısı yok gibi görünüyor. Bağlantınızı kontrol edip tekrar deneyin.' :
@@ -862,12 +867,81 @@
     }
     var a = e.target.closest('[data-m-again]');
     if (a) {
-      var tur = a.getAttribute('data-m-again'), konu = main.querySelector('[data-m-konu]');
-      var t = document.createElement('div'); t.innerHTML = mForm(tur, tur === 'cevap' && konu ? konu.getAttribute('data-m-konu') : null);
+      var tur = a.getAttribute('data-m-again'), konu = main.querySelector('[data-m-konu]'), ys = a.closest('.y-sec');
+      var t = document.createElement('div'); t.innerHTML = mForm(tur, tur === 'cevap' && konu ? konu.getAttribute('data-m-konu') : null, ys ? ys.getAttribute('data-yk') : null);
       var f = t.firstChild; a.parentNode.parentNode.replaceChild(f, a.parentNode);
       var inp = f.elements[tur === 'konu' ? 'baslik' : 'metin']; if (inp) inp.focus();
     }
   });
+
+  /* ---------- Yorumlar: haberlere (duyurular), etkinliklere ve fotoğraflara ----------
+     Köy Meydanı ile aynı düzen: yorumlar Supabase'de (yorumlar tablosu), her yorum önce onaya düşer.
+     Vefat ilanında "Başsağlığı dilekleri", düğün ve nişanda "Tebrik ve dilekler" olarak görünür.
+     Fotoğrafın kendi sayfası var (#/foto/<dosya adı>): büyük fotoğraf, önceki/sonraki ve yorumlar. */
+  var YL = {
+    yorum: { t: 'Yorumlar', h: 'Yorum yazın', l: 'Yorumunuz', b: 'Yorumu gönder', bos: 'Henüz yorum yok. İlk yorumu siz yazın.' },
+    vefat: { t: 'Başsağlığı dilekleri', h: 'Başsağlığı dileyin', l: 'Mesajınız', b: 'Gönder', bos: 'Henüz mesaj yok.' },
+    tebrik: { t: 'Tebrik ve dilekler', h: 'Tebrik edin', l: 'Mesajınız', b: 'Gönder', bos: 'Henüz mesaj yok. İlk tebriği siz yazın.' }
+  };
+  function yKind(tur) { return tur === 'Vefat' ? 'vefat' : tur === 'Düğün' || tur === 'Nişan' ? 'tebrik' : 'yorum'; }
+  // Fotoğrafın kimliği: dosya adı (images/galeri/kopru-gunbatimi.jpg -> kopru-gunbatimi)
+  function fKey(x) { return String(x.foto || '').split('?')[0].split('/').pop().replace(/\.[a-z0-9]+$/i, ''); }
+  function yBox(tur, hedef, baslik, kayitTuru) {
+    var k = yKind(kayitTuru), L = YL[k];
+    return '<section class="y-sec" data-y="' + tur + '" data-yh="' + esc(hedef) + '" data-yb="' + esc(baslik || '') + '" data-yk="' + k + '">' +
+      '<h2 class="m-rep-h">' + esc(L.t) + '</h2><div class="y-list"><p class="muted">Yükleniyor…</p></div><div class="y-pend"></div>' +
+      '<div class="box box-pad">' + mForm('yorum', null, k) + '</div></section>';
+  }
+  function yItem(c) { return '<div class="m-rep" data-y-id="' + c.id + '">' + mBy(c) + '<div class="m-rep-text">' + mParas(c.metin) + '</div></div>'; }
+  function yLoad(page) {
+    var s = main.querySelector('.y-sec');
+    if (!s) return;
+    var seq = ++mSeq, L = YL[s.getAttribute('data-yk')] || YL.yorum;
+    C.sb('/yorumlar?hedef_tur=eq.' + s.getAttribute('data-y') + '&hedef=eq.' + encodeURIComponent(s.getAttribute('data-yh')) + '&select=id,ad,metin,created_at&order=created_at.asc&limit=500')
+      .then(function (r) {
+        if (seq !== mSeq || !s.isConnected) return;
+        r = C.arr(r);
+        s.querySelector('.y-list').innerHTML = r.length ? '<div class="m-reps">' + r.map(yItem).join('') + '</div>' : '<p class="muted">' + esc(L.bos) + '</p>';
+        s.querySelector('.m-rep-h').textContent = L.t + (r.length ? ' (' + r.length + ')' : '');
+        mDrawn(page);
+      }, function () { if (s.isConnected) s.querySelector('.y-list').innerHTML = ''; });
+  }
+  // Kartlardaki yorum sayısı (duyuru, etkinlik, fotoğraf): yayındaki bütün yorumların yalnız hedefleri okunur, iki dakika saklanır
+  var yCount = null, yCountT = 0, yCountP = null;
+  function yCounts() {
+    if (yCount && Date.now() - yCountT < 120000) return Promise.resolve(yCount);
+    if (!yCountP) yCountP = C.sb('/yorumlar?select=hedef_tur,hedef&limit=10000').then(function (r) {
+      var c = {}; C.arr(r).forEach(function (y) { var k = y.hedef_tur + ':' + y.hedef; c[k] = (c[k] || 0) + 1; });
+      yCount = c; yCountT = Date.now(); yCountP = null; return c;
+    }, function (e) { yCountP = null; throw e; });
+    return yCountP;
+  }
+  function yBadges() {
+    if (!main.querySelector('[data-yc]')) return;
+    yCounts().then(function (c) {
+      main.querySelectorAll('[data-yc]').forEach(function (el) {
+        var n = c[el.getAttribute('data-yc')];
+        if (!n || el.querySelector('.y-n')) return;
+        var b = '<span class="y-n" title="' + n + ' yorum">' + icon('chat') + n + '</span>';
+        var at = el.classList.contains('news') ? el.querySelector('.news-meta') : el.classList.contains('ev') ? el.querySelector('.ev-info .muted') : el;
+        if (at) at.insertAdjacentHTML('beforeend', b);
+      });
+    }).catch(function () { /* sayı görünmez, o kadar */ });
+  }
+  function pagePhoto(key) {
+    var list = data.galeri, i = -1;
+    list.some(function (x, j) { if (fKey(x) === key) { i = j; return true; } return false; });
+    if (i < 0) return band('Fotoğraf bulunamadı') + '<section class="section"><div class="container"><p>Bu fotoğraf kaldırılmış olabilir.</p><a class="btn" href="#/fotograflar">Tüm fotoğraflar</a></div></section>';
+    var x = list[i], n = list.length, prev = list[(i - 1 + n) % n], next = list[(i + 1) % n], cap = x.aciklama || '';
+    return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/fotograflar">Fotoğraflar</a></div></div></div>' +
+      '<section class="section"><div class="container"><article class="article">' +
+      '<button type="button" class="article-img" data-gal="' + i + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(img(x.foto)) + '" alt="' + esc(cap || 'Fotoğraf') + '" style="aspect-ratio:auto;object-fit:contain"></button>' +
+      (cap ? '<h1 class="f-cap">' + esc(cap) + '</h1>' : '<h1 class="f-cap">Fotoğraf ' + (i + 1) + ' / ' + n + '</h1>') +
+      (n > 1 ? '<div class="btn-row"><a class="btn btn-light" href="#/foto/' + encodeURIComponent(fKey(prev)) + '">‹ Önceki fotoğraf</a>' +
+        '<a class="btn btn-light" href="#/foto/' + encodeURIComponent(fKey(next)) + '">Sonraki fotoğraf ›</a></div>' : '') +
+      yBox('foto', key, cap || 'Fotoğraf') +
+      '<p style="margin-top:24px"><a class="btn btn-light" href="#/fotograflar">‹ Tüm fotoğraflar</a></p></article></div></section>';
+  }
 
   /* ---------- yönlendirme ---------- */
   /* Arama motorları için her sayfanın gerçek bir adresi vardır (hakkimizda/, duyurular/, p/d-…html; araclar/site-sayfalari.js üretir).
@@ -913,6 +987,7 @@
     else if (page === 'gezilecek-yerler' || page === 'gezi') { page = 'gezilecek-yerler'; html = pageGezi(); }
     else if (page === 'iletisim') html = pageContact();
     else if (page === 'meydan') html = pageForum();
+    else if (page === 'foto') html = pagePhoto(decodeURIComponent(p.slice(1).join('/')));
     else if (page === 'konu') html = pageTopic(decodeURIComponent(p.slice(1).join('/')));
     else { page = ''; loadWeather(); html = pageHome(); }
     var hash = location.hash, back = !tapped && hash !== curHash && pos[hash] > 0;
@@ -920,7 +995,7 @@
     main.innerHTML = html;
     realLinks(main);
     main.classList.remove('gir'); void main.offsetWidth; main.classList.add('gir');
-    var navKey = page === 'duyuru' ? 'duyurular' : page === 'etkinlik' ? 'etkinlikler' : page === 'ilan' ? 'pazar' : page === 'konu' ? 'meydan' : page;
+    var navKey = page === 'duyuru' ? 'duyurular' : page === 'etkinlik' ? 'etkinlikler' : page === 'ilan' ? 'pazar' : page === 'konu' ? 'meydan' : page === 'foto' ? 'fotograflar' : page;
     if (page === 'etkinlik' || page === 'ilan' || page === 'duyuru') { var sp = main.querySelector('[data-share-photo]'); if (sp) C.warmShare(sp.getAttribute('data-share-photo')); }
     document.querySelectorAll('[data-nav]').forEach(function (a) {
       if (a.getAttribute('data-nav') === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
@@ -934,6 +1009,7 @@
     var t = main.querySelector('h1');
     document.title = TITLES[page] || (t ? t.textContent + ' · Çeşnigir-Der, Köprüköy' : TITLES['']);
     if (E) E.after(page);
+    yLoad(page); yBadges();
   }
 
   // Başlığın arkasındaki köprü fotoğrafı: ana sayfada büyük fotoğraf başlığın altına girdikçe, kaydırmayla aynı hızda belirir
@@ -977,7 +1053,16 @@
   function openV(list, i) { vList = list; last = document.activeElement; $('viewer').hidden = false; document.body.style.overflow = 'hidden';
     $('vPrev').hidden = $('vNext').hidden = list.length < 2; showV(i); $('vClose').focus(); }
   function showV(i) { var n = vList.length; vIdx = (i + n) % n; var x = vList[vIdx];
-    $('vImg').src = x.src; $('vImg').alt = x.cap || ''; $('vCap').textContent = x.cap || ''; $('vCount').textContent = n > 1 ? (vIdx + 1) + ' / ' + n : ''; }
+    $('vImg').src = x.src; $('vImg').alt = x.cap || ''; $('vCap').textContent = x.cap || ''; $('vCount').textContent = n > 1 ? (vIdx + 1) + ' / ' + n : '';
+    // galerideki fotoğrafta "Yorumlar" düğmesi: fotoğrafın sayfasını açar (yorumlar orada)
+    var vc = $('vCom');
+    if (!vc) { $('vClose').insertAdjacentHTML('beforebegin', '<a id="vCom" class="viewer-com" href="#/">' + icon('chat') + '<span></span></a>'); vc = $('vCom'); }
+    vc.hidden = !x.key || (location.hash === '#/foto/' + encodeURIComponent(x.key));
+    if (x.key) {
+      vc.setAttribute('href', '#/foto/' + encodeURIComponent(x.key));
+      var cnt = yCount && yCount['foto:' + x.key];
+      vc.querySelector('span').textContent = cnt ? 'Yorumlar (' + cnt + ')' : 'Yorum yaz';
+    } }
   function closeV() { $('viewer').hidden = true; $('vImg').removeAttribute('src'); document.body.style.overflow = '';
     if (last && last.focus) { try { last.focus(); } catch (e) { /* yok say */ } } }
 
@@ -1041,7 +1126,8 @@
       var cd = e.target.closest('[data-cal-day]');
       if (cd) { var ci = cd.getAttribute('data-cal-day'); calSel = calSel === ci ? '' : ci; redrawCal('[data-cal-day="' + ci + '"]'); return; }
       var g = e.target.closest('[data-gal]');
-      if (g) { openV(data.galeri.map(function (x) { return { src: img(x.foto), cap: x.aciklama }; }), +g.getAttribute('data-gal')); return; }
+      if (g) { openV(data.galeri.map(function (x) { return { src: img(x.foto), cap: x.aciklama, key: fKey(x) }; }), +g.getAttribute('data-gal')); return; }
+      if (e.target.closest('#vCom')) { closeV(); return; }
       var ph = e.target.closest('[data-photo]');
       if (ph) openV([{ src: ph.getAttribute('data-photo'), cap: ph.getAttribute('data-cap') }], 0);
     });
@@ -1055,7 +1141,7 @@
       if (e.key === 'Escape') closeV();
       else if (e.key === 'ArrowLeft' && vList.length > 1) showV(vIdx - 1);
       else if (e.key === 'ArrowRight' && vList.length > 1) showV(vIdx + 1);
-      else if (e.key === 'Tab') { var fs = [$('vClose'), $('vPrev'), $('vNext')].filter(function (b) { return !b.hidden; });
+      else if (e.key === 'Tab') { var fs = [$('vCom'), $('vClose'), $('vPrev'), $('vNext')].filter(function (b) { return b && !b.hidden; });
         var k = fs.indexOf(document.activeElement); e.preventDefault(); fs[(k + (e.shiftKey ? fs.length - 1 : 1)) % fs.length].focus(); }
     });
     var sx = null, st = $('vImg').parentNode;

@@ -1,9 +1,9 @@
--- Köy Meydanı (forum) · Supabase veritabanı kurulumu
+-- Köy Meydanı (forum) ve yorumlar (haber, etkinlik, fotoğraf) · Supabase veritabanı kurulumu
 -- Supabase → SQL Editor'de bir kez çalıştırılır. Tekrar çalıştırmak zararsızdır (var olanı bozmaz).
 --
 -- Kurallar:
---  * Ziyaretçi yalnız yayındaki yazıları ve cevapları okuyabilir.
---  * Ziyaretçi yazı/cevap gönderebilir; gönderilen her şey "bekliyor" olarak kaydedilir, siteye çıkmaz.
+--  * Ziyaretçi yalnız yayındaki yazıları, cevapları ve yorumları okuyabilir.
+--  * Ziyaretçi yazı/cevap/yorum gönderebilir; gönderilen her şey "bekliyor" olarak kaydedilir, siteye çıkmaz.
 --  * Onaylama, silme, sabitleme yalnız yönetim panelinden yapılır: panel, yöneticinin GitHub giriş anahtarını
 --    gönderir; veritabanı anahtarı GitHub'a sorar (sguven/cesnigir-der deposuna yazma izni var mı?).
 --    Anahtarın kendisi saklanmaz; yalnız özeti (sha256) bir saatlik onay için tutulur.
@@ -34,17 +34,35 @@ create table if not exists public.forum_cevaplar (
   created_at timestamptz not null default now()
 );
 
+-- Haberlere (duyurular), etkinliklere ve fotoğraflara yazılan yorumlar.
+-- hedef: sitedeki kaydın kimliği (duyuru ve etkinlikte adresindeki kimlik, fotoğrafta dosya adı); hedef_baslik panelde gösterilir.
+create table if not exists public.yorumlar (
+  id bigint generated always as identity primary key,
+  hedef_tur text not null check (hedef_tur in ('duyuru', 'etkinlik', 'foto')),
+  hedef text not null check (char_length(hedef) between 1 and 200),
+  hedef_baslik text check (char_length(hedef_baslik) <= 200),
+  metin text not null check (char_length(btrim(metin)) between 1 and 2000),
+  ad text not null check (char_length(btrim(ad)) between 3 and 60),
+  durum text not null default 'bekliyor' check (durum in ('bekliyor', 'yayinda')),
+  created_at timestamptz not null default now()
+);
+create index if not exists yorumlar_hedef on public.yorumlar (hedef_tur, hedef, created_at);
+
 create index if not exists forum_konular_akis on public.forum_konular (durum, sabit desc, son_hareket desc);
 create index if not exists forum_cevaplar_konu on public.forum_cevaplar (konu_id, created_at);
 
 alter table public.forum_konular enable row level security;
 alter table public.forum_cevaplar enable row level security;
+alter table public.yorumlar enable row level security;
 
 -- Yetkiler: ziyaretçi okur ve yalnız izin verilen sütunları yazar (durum, sabit, tarih gibi alanlara dokunamaz)
 revoke all on public.forum_konular, public.forum_cevaplar from anon, authenticated;
 grant select on public.forum_konular, public.forum_cevaplar to anon, authenticated;
 grant insert (kategori, baslik, metin, ad) on public.forum_konular to anon, authenticated;
 grant insert (konu_id, metin, ad) on public.forum_cevaplar to anon, authenticated;
+revoke all on public.yorumlar from anon, authenticated;
+grant select on public.yorumlar to anon, authenticated;
+grant insert (hedef_tur, hedef, hedef_baslik, metin, ad) on public.yorumlar to anon, authenticated;
 
 drop policy if exists "yayindakiler okunur" on public.forum_konular;
 create policy "yayindakiler okunur" on public.forum_konular for select to anon, authenticated using (durum = 'yayinda');
@@ -59,12 +77,18 @@ create policy "cevap onaya gonderilir" on public.forum_cevaplar for insert to an
   with check (durum = 'bekliyor'
     and exists (select 1 from public.forum_konular k where k.id = konu_id and k.durum = 'yayinda'));
 
+drop policy if exists "yayindakiler okunur" on public.yorumlar;
+create policy "yayindakiler okunur" on public.yorumlar for select to anon, authenticated using (durum = 'yayinda');
+drop policy if exists "yorum onaya gonderilir" on public.yorumlar;
+create policy "yorum onaya gonderilir" on public.yorumlar for insert to anon, authenticated with check (durum = 'bekliyor');
+
 -- Sel koruması: 10 dakikada onay bekleyen 40'tan fazla gönderi olursa yeni gönderi kabul edilmez
 create or replace function public.forum_sel_kontrol() returns trigger
 language plpgsql security definer set search_path = '' as $$
 begin
   if (select count(*) from public.forum_konular where durum = 'bekliyor' and created_at > now() - interval '10 minutes')
-   + (select count(*) from public.forum_cevaplar where durum = 'bekliyor' and created_at > now() - interval '10 minutes') >= 40 then
+   + (select count(*) from public.forum_cevaplar where durum = 'bekliyor' and created_at > now() - interval '10 minutes')
+   + (select count(*) from public.yorumlar where durum = 'bekliyor' and created_at > now() - interval '10 minutes') >= 40 then
     raise exception 'Şu anda çok fazla yazı gönderildi. Lütfen biraz sonra tekrar deneyin.';
   end if;
   new.ad := btrim(new.ad);
@@ -75,6 +99,8 @@ drop trigger if exists forum_konu_sel on public.forum_konular;
 create trigger forum_konu_sel before insert on public.forum_konular for each row execute function public.forum_sel_kontrol();
 drop trigger if exists forum_cevap_sel on public.forum_cevaplar;
 create trigger forum_cevap_sel before insert on public.forum_cevaplar for each row execute function public.forum_sel_kontrol();
+drop trigger if exists yorum_sel on public.yorumlar;
+create trigger yorum_sel before insert on public.yorumlar for each row execute function public.forum_sel_kontrol();
 
 -- Yazının cevap sayısı (yalnız yayındaki cevaplar)
 create or replace function public.forum_cevap_say() returns trigger
@@ -124,7 +150,7 @@ begin
 end $$;
 revoke all on function public.forum_yetki(text) from public, anon, authenticated;
 
--- Panel: onay bekleyenler
+-- Panel: onay bekleyenler (yazılar, cevaplar, yorumlar)
 create or replace function public.forum_bekleyenler(anahtar text) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 begin
@@ -134,7 +160,9 @@ begin
                            from public.forum_konular k where k.durum = 'bekliyor'), '[]'::jsonb),
     'cevaplar', coalesce((select jsonb_agg(to_jsonb(c) || jsonb_build_object('konu_baslik', k.baslik) order by c.created_at)
                            from public.forum_cevaplar c join public.forum_konular k on k.id = c.konu_id
-                           where c.durum = 'bekliyor'), '[]'::jsonb));
+                           where c.durum = 'bekliyor'), '[]'::jsonb),
+    'yorumlar', coalesce((select jsonb_agg(to_jsonb(y) order by y.created_at)
+                           from public.yorumlar y where y.durum = 'bekliyor'), '[]'::jsonb));
 end $$;
 
 -- Panel: onayla / sil / sabitle
@@ -153,6 +181,10 @@ begin
       -- yeni cevap gelen yazı akışta yukarı çıkar
       update public.forum_konular set son_hareket = now() where id = (select konu_id from public.forum_cevaplar where id = kayit);
     elsif islem = 'sil' then delete from public.forum_cevaplar where id = kayit;
+    else raise exception 'bilinmeyen işlem'; end if;
+  elsif tur = 'yorum' then
+    if islem = 'onayla' then update public.yorumlar set durum = 'yayinda' where id = kayit;
+    elsif islem = 'sil' then delete from public.yorumlar where id = kayit;
     else raise exception 'bilinmeyen işlem'; end if;
   else
     raise exception 'bilinmeyen tür';

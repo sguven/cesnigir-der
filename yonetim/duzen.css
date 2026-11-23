@@ -189,3 +189,10 @@ details.ed-extra[open] summary{margin-bottom:12px}
 .ed-m-text{white-space:pre-wrap;color:var(--ink);margin-bottom:4px}
 .ed-btn.green{background:var(--green);border-color:var(--green);color:#fff}
 .ed-btn.green:hover{background:#085E40}
+.ed-pill{background:#D93025!important;color:#fff!important;border-radius:99px;padding:0 14px!important;font-weight:700;text-decoration:none}
+.ed-pill b{margin-left:4px}
+@media (max-width:640px){
+  .ed-ribbon-btns a,.ed-ribbon-btns button{white-space:nowrap}
+  .ed-mode b{overflow:hidden;text-overflow:ellipsis}
+  .ed-ribbon-in:has(.ed-pill:not([hidden])) .ed-ribbon-btns a,.ed-ribbon-in:has(.ed-pill:not([hidden])) .ed-ribbon-btns button{padding:0 8px}
+}

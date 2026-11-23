@@ -4,7 +4,7 @@ Köprüköy Çeşnigir Kültür Sosyal Yardımlaşma ve Dayanışma Derneği'nin
 Adres: https://cesnigirder.org/ (alan adı GoDaddy'den; eski https://sguven.github.io/cesnigir-der/ adresi buraya yönlenir)
 
 Sade, telefon öncelikli bir statik site. Alan adı ayarı kökteki `CNAME` dosyasında. GitHub Pages ile yayınlanır; sunucu yok.
-Tek veritabanı Köy Meydanı (forum) içindir: Supabase'de durur (aşağıda).
+Tek veritabanı Köy Meydanı (forum) ve yorumlar içindir: Supabase'de durur (aşağıda).
 
 ## Tasarım
 
@@ -66,7 +66,7 @@ panel sayfası adres çubuğundaki anahtarı başka sitelere göndermez (`referr
 | `data/galeri.json` | Fotoğraflar |
 | `data/pazar.json` | Pazar ve yardımlaşma ilanları |
 | `data/dernek.json` | Hakkımızda, başkan, yönetim ve denetim kurulu, iletişim, kasa durumu |
-| `araclar/supabase-meydan.sql` | Köy Meydanı veritabanı (Supabase) kurulumu |
+| `araclar/supabase-meydan.sql` | Köy Meydanı ve yorumlar veritabanı (Supabase) kurulumu |
 
 ## Köy Meydanı (forum)
 
@@ -84,6 +84,18 @@ birbirlerinin yazısına cevap yazar. Konular: Genel Sohbet, Hatıralar, Gurbett
 - Sitedeki bağlantı bilgisi (herkese açık "publishable" anahtar) `ortak.js` içinde `MEYDAN`. Supabase'in **secret** anahtarı hiçbir yere yazılmaz.
 - Paylaşılan bağlantı `https://cesnigirder.org/?m=12` yazının sayfasını açar.
 - Kod: `app.js` (Köy Meydanı bölümü), panel tarafı `yonetim/duzen.js` (Köy Meydanı: onay).
+
+## Yorumlar (haberler, etkinlikler, fotoğraflar)
+
+Her duyurunun/haberin, etkinliğin ve fotoğrafın sayfasının altında yorum bölümü vardır; ziyaretçi adını ve soyadını yazarak yorum bırakır.
+Vefat ilanlarında bölümün adı **Başsağlığı dilekleri**, düğün ve nişanda **Tebrik ve dilekler**dir.
+
+- Fotoğrafların kendi sayfası var: `#/foto/<dosya adı>` (örnek `#/foto/galeri-01`). Galeride fotoğrafı büyütünce üstteki **Yorumlar** düğmesi oraya götürür.
+- Yorumu olan haber kartlarında, etkinliklerde ve galeri fotoğraflarında küçük bir yorum sayısı görünür.
+- Yorumlar da önce onaya düşer. Panelde üst şeritte kırmızı **Onay bekleyen** sayısı çıkar; ana sayfanın en üstündeki "Onay bekleyenler"
+  kutusunda Köy Meydanı yazıları, cevaplar ve bütün yorumlar birlikte listelenir (her kaydın kendi sayfasında da o kayda gelenler görünür).
+- Yorumlar `yorumlar` tablosunda; kaydın kimliğiyle (duyuru ve etkinlikte adresindeki kimlik, fotoğrafta dosya adı) bağlanır.
+  Bir duyurunun başlığı ya da tarihi değişirse adresi de değişir; eski yorumları o kayıtta görünmez olur (silinmez).
 
 ## Kısa paylaşım bağlantıları
 

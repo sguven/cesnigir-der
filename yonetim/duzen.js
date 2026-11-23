@@ -324,10 +324,11 @@
     box.querySelectorAll('[data-ek]').forEach(function (t) { (t.querySelector('.ev-info') || t).appendChild(itemBar('etkinlikler', +t.getAttribute('data-ix'))); });
   }
 
-  /* ---------------- Köy Meydanı: onay ----------------
-     Ziyaretçilerin yazıları ve cevapları onaya düşer. Onay bekleyenler Köy Meydanı sayfasının en üstünde (cevaplar ayrıca
-     kendi yazısının sayfasında) "Onayla" / "Sil" düğmeleriyle görünür; menüdeki Köy Meydanı'nın yanında sayısı yazar.
-     Yayındaki yazılarda "En üste sabitle" ve "Sil", cevaplarda "Sil" vardır.
+  /* ---------------- Köy Meydanı ve yorumlar: onay ----------------
+     Ziyaretçilerin yazıları, cevapları ve haber/etkinlik/fotoğraf yorumları onaya düşer. Hepsi ana sayfanın en üstünde
+     "Onay bekleyenler" kutusunda "Onayla" / "Sil" düğmeleriyle görünür; üst şeritte sayısı yazar ("Onay bekleyen: 3").
+     Ayrıca Köy Meydanı sayfasında forum yazıları, her kaydın kendi sayfasında da o kayda gelenler görünür.
+     Yayındaki yazılarda "En üste sabitle" ve "Sil", cevaplarda ve yorumlarda "Sil" vardır.
      Yetki: giriş anahtarı veritabanına gönderilir, veritabanı GitHub'a sorar (araclar/supabase-meydan.sql: forum_yetki). */
   var mPend = null, mPendT = 0, mPendP = null;
   function mRpc(fn, body) { body.anahtar = getKey(); return C.sb('/rpc/' + fn, { method: 'POST', body: body }); }
@@ -335,28 +336,36 @@
     if (!force && mPend && Date.now() - mPendT < 15000) return Promise.resolve(mPend);
     if (mPendP) return mPendP;
     mPendP = mRpc('forum_bekleyenler', {}).then(function (r) {
-      mPend = { konular: C.arr(r && r.konular), cevaplar: C.arr(r && r.cevaplar) }; mPendT = Date.now(); mBadge(); return mPend;
+      mPend = { konular: C.arr(r && r.konular), cevaplar: C.arr(r && r.cevaplar), yorumlar: C.arr(r && r.yorumlar) }; mPendT = Date.now(); mBadge(); return mPend;
     }).then(function (x) { mPendP = null; return x; }, function (e) { mPendP = null; throw e; });
     return mPendP;
   }
   function mBadge() {
     var a = document.querySelector('.nav [data-nav="meydan"]'), n = mPend ? mPend.konular.length + mPend.cevaplar.length : 0;
+    var all = mPend ? n + mPend.yorumlar.length : 0, pill = $('edPendPill');
+    if (pill) { pill.hidden = !all; pill.querySelector('b').textContent = all; }
     if (!a) return;
     var b = a.querySelector('.ed-count');
     if (!n) { if (b) b.remove(); return; }
     if (!b) { b = el('<span class="ed-count"></span>'); a.appendChild(b); }
     b.textContent = n; b.title = n + ' yazı onay bekliyor';
   }
-  function mPendItem(x, tur) {
+  var Y_TUR = { duyuru: ['Haber yorumu', 'duyuru'], etkinlik: ['Etkinlik yorumu', 'etkinlik'], foto: ['Fotoğraf yorumu', 'foto'] };
+  function mPendItem(x, tur, link) {
+    var yt = tur === 'yorum' ? Y_TUR[x.hedef_tur] || ['Yorum', ''] : null;
+    var where = tur === 'konu' ? '' : tur === 'cevap' ? (x.konu_baslik ? 'Köy Meydanı: "' + x.konu_baslik + '" yazısına cevap' : '') : (x.hedef_baslik ? '"' + x.hedef_baslik + '"' : '');
+    var href = tur === 'cevap' ? '#/konu/' + x.konu_id : yt && yt[1] ? '#/' + yt[1] + '/' + encodeURIComponent(x.hedef) : '';
     return '<div class="ed-m-item">' +
-      '<div class="news-meta"><span class="badge">' + esc(tur === 'konu' ? x.kategori : 'Cevap') + '</span><span>' + esc(C.zaman(x.created_at)) + '</span></div>' +
-      (tur === 'konu' ? '<h3>' + esc(x.baslik) + '</h3>' : x.konu_baslik ? '<p class="small muted" style="margin:0 0 6px">"' + esc(x.konu_baslik) + '" yazısına cevap</p>' : '') +
+      '<div class="news-meta"><span class="badge">' + esc(tur === 'konu' ? 'Köy Meydanı · ' + x.kategori : tur === 'cevap' ? 'Köy Meydanı · Cevap' : yt[0]) + '</span><span>' + esc(C.zaman(x.created_at)) + '</span></div>' +
+      (tur === 'konu' ? '<h3>' + esc(x.baslik) + '</h3>' : where ? '<p class="small muted" style="margin:0 0 6px">' + esc(where) +
+        (link && href ? ' · <a href="' + href + '">Sayfasını aç</a>' : '') + '</p>' : '') +
       '<p class="ed-m-by"><b>' + esc(x.ad) + '</b></p><div class="ed-m-text">' + esc(x.metin) + '</div>' +
       '<div class="ed-bar"><button type="button" class="ed-btn green" data-fm="onayla" data-tur="' + tur + '" data-id="' + x.id + '">' + icon('check') + 'Onayla, yayınla</button>' +
       '<button type="button" class="ed-btn red" data-fm="sil" data-tur="' + tur + '" data-id="' + x.id + '">' + icon('trash') + 'Sil</button></div></div>';
   }
+  var mScroll = false;
   function mAdmin(page) {
-    if (!getKey() || (page !== 'meydan' && page !== 'konu')) return;
+    if (!getKey()) return;
     var main = $('icerik');
     main.querySelectorAll('[data-m-konu]:not([data-m-ed])').forEach(function (t) {
       t.setAttribute('data-m-ed', '');
@@ -368,17 +377,39 @@
       t.setAttribute('data-m-ed', '');
       t.appendChild(el('<div class="ed-bar"><button type="button" class="ed-btn red" data-fm="sil" data-tur="cevap" data-id="' + t.getAttribute('data-m-cevap') + '">' + icon('trash') + 'Cevabı sil</button></div>'));
     });
+    main.querySelectorAll('[data-y-id]:not([data-m-ed])').forEach(function (t) {
+      t.setAttribute('data-m-ed', '');
+      t.appendChild(el('<div class="ed-bar"><button type="button" class="ed-btn red" data-fm="sil" data-tur="yorum" data-id="' + t.getAttribute('data-y-id') + '">' + icon('trash') + 'Yorumu sil</button></div>'));
+    });
+    var ys = main.querySelector('.y-sec');
+    if (page !== '' && page !== 'meydan' && page !== 'konu' && !ys) return;
     mPendLoad().then(function (p) {
-      var host = page === 'meydan' ? main.querySelector('.m-main') : $('mPend');
-      if (!host) return;
       var konu = main.querySelector('[data-m-konu]'), kid = konu ? +konu.getAttribute('data-m-konu') : 0;
-      var konular = page === 'meydan' ? p.konular : [], cevaplar = page === 'meydan' ? p.cevaplar : p.cevaplar.filter(function (c) { return c.konu_id === kid; });
-      var n = konular.length + cevaplar.length, old = $('edMPend');
+      var host = null, konular = [], cevaplar = [], yorumlar = [];
+      if (page === '') { konular = p.konular; cevaplar = p.cevaplar; yorumlar = p.yorumlar; }
+      else if (page === 'meydan') { host = main.querySelector('.m-main'); konular = p.konular; cevaplar = p.cevaplar; }
+      else if (page === 'konu') { host = $('mPend'); cevaplar = p.cevaplar.filter(function (c) { return c.konu_id === kid; }); }
+      else if (ys) {
+        host = ys.querySelector('.y-pend');
+        yorumlar = p.yorumlar.filter(function (y) { return y.hedef_tur === ys.getAttribute('data-y') && y.hedef === ys.getAttribute('data-yh'); });
+      }
+      var n = konular.length + cevaplar.length + yorumlar.length, old = $('edMPend'), oldW = $('edMPendWrap');
       if (old) old.remove();
-      if (!n && page === 'konu') return;
+      if (oldW) oldW.remove();
+      if (page === '') {
+        if (!n) return;
+        var sec = main.querySelector('.section');
+        if (!sec) return;
+        host = el('<div class="container" id="edMPendWrap" style="padding-top:22px"></div>');
+        sec.parentNode.insertBefore(host, sec);
+      }
+      if (!host || (!n && page !== 'meydan')) return;
+      var home = page === '';
       host.insertBefore(el('<div id="edMPend" class="ed-m-pend"><h2>' + (n ? 'Onay bekleyenler (' + n + ')' : 'Onay bekleyen yazı yok') + '</h2>' +
         (n ? '<p class="small muted">Bunları yalnız siz görüyorsunuz. Onaylarsanız sitede görünür; uygun değilse silin.</p>' : '<p class="small muted">Yeni yazı ve cevaplar gelince burada görünecek.</p>') +
-        konular.map(function (k) { return mPendItem(k, 'konu'); }).join('') + cevaplar.map(function (c) { return mPendItem(c, 'cevap'); }).join('') + '</div>'), host.firstChild);
+        konular.map(function (k) { return mPendItem(k, 'konu', home); }).join('') + cevaplar.map(function (c) { return mPendItem(c, 'cevap', home); }).join('') +
+        yorumlar.map(function (y) { return mPendItem(y, 'yorum', home); }).join('') + '</div>'), host.firstChild);
+      if (home && mScroll) { mScroll = false; $('edMPend').scrollIntoView({ block: 'start', behavior: 'smooth' }); }
     }).catch(function () {
       var host = page === 'meydan' ? main.querySelector('.m-main') : null;
       if (host && !$('edMPend')) host.insertBefore(el('<div id="edMPend" class="ed-m-pend"><h2>Onay bekleyenler açılamadı</h2><p class="small muted">İnternet bağlantınızı kontrol edip sayfayı yenileyin. Sorun sürerse Serhat\'a haber verin.</p></div>'), host.firstChild);
@@ -391,13 +422,13 @@
     e.preventDefault(); e.stopPropagation();
     var islem = b.getAttribute('data-fm'), tur = b.getAttribute('data-tur'), id = +b.getAttribute('data-id');
     var ask = islem !== 'sil' ? Promise.resolve(true) :
-      dialog('Silinsin mi?', tur === 'konu' ? 'Bu yazı ve altındaki bütün cevaplar silinecek. Geri alınamaz.' : 'Bu cevap silinecek. Geri alınamaz.', 'Evet, sil', { danger: true });
+      dialog('Silinsin mi?', tur === 'konu' ? 'Bu yazı ve altındaki bütün cevaplar silinecek. Geri alınamaz.' : tur === 'cevap' ? 'Bu cevap silinecek. Geri alınamaz.' : 'Bu yorum silinecek. Geri alınamaz.', 'Evet, sil', { danger: true });
     ask.then(function (ok) {
       if (!ok) return;
       busy(islem === 'onayla' ? 'Yayınlanıyor…' : islem === 'sil' ? 'Siliniyor…' : 'Kaydediliyor…');
       mRpc('forum_islem', { tur: tur, kayit: id, islem: islem }).then(function () {
         busy(false);
-        toast(islem === 'onayla' ? 'Yayınlandı' : islem === 'sil' ? 'Silindi' : 'Kaydedildi', islem === 'onayla' ? 'Artık Köy Meydanı\'nda herkes görüyor.' : '');
+        toast(islem === 'onayla' ? 'Yayınlandı' : islem === 'sil' ? 'Silindi' : 'Kaydedildi', islem === 'onayla' ? 'Artık sitede herkes görüyor.' : '');
         mPendT = 0;
         if (islem === 'sil' && tur === 'konu' && curPage() === 'konu') location.hash = '#/meydan'; else rerender();
       }).catch(function (er) {
@@ -886,7 +917,7 @@
     document.body.insertAdjacentHTML('afterbegin',
       '<div class="ed-ribbon"><div class="container ed-ribbon-in">' +
       '<span class="ed-mode">' + icon('edit') + '<b>Düzenleme modu' + (who() ? ' · ' + esc(who()) : '') + '</b><span class="ed-hint">Değiştirmek istediğiniz şeyin yanındaki düğmeye dokunun.</span></span>' +
-      '<span class="ed-ribbon-btns"><a href="../" target="_blank" rel="noopener">' + icon('eye') + '<span class="ed-long">Ziyaretçi gibi gör</span><span class="ed-short">Siteyi gör</span></a>' +
+      '<span class="ed-ribbon-btns"><a href="#/" id="edPendPill" class="ed-pill" hidden><span class="ed-long">Onay bekleyen:</span><span class="ed-short">Onay</span><b>0</b></a><a href="../" target="_blank" rel="noopener">' + icon('eye') + '<span class="ed-long">Ziyaretçi gibi gör</span><span class="ed-short">Siteyi gör</span></a>' +
       '<button type="button" id="edMenuBtn" aria-expanded="false">' + icon('key') + 'Giriş</button></span></div>' +
       '<div class="container ed-menu" id="edMenu" hidden>' +
       '<p class="small">Bu telefonda giriş açık. Giriş bağlantısını ana ekrana eklerseniz bir daha anahtar sorulmaz.</p>' +
@@ -905,6 +936,10 @@
       '<button type="button" id="edAskYes" class="btn btn-wide"></button><button type="button" id="edAskNo" class="btn btn-light btn-wide">Vazgeç</button></div></div></div>');
 
     $('edAdd').onclick = openChooser;
+    $('edPendPill').onclick = function (e) {
+      if (curPage() === '' && $('edMPend')) { e.preventDefault(); $('edMPend').scrollIntoView({ block: 'start', behavior: 'smooth' }); return; }
+      mScroll = true;
+    };
     $('edMenuBtn').onclick = function () {
       var m = $('edMenu'), open = m.hidden; m.hidden = !open; this.setAttribute('aria-expanded', String(open));
     };

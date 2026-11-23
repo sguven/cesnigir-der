@@ -491,3 +491,17 @@ button.cal-day:hover{filter:brightness(.93)}
 /* Menüde 9 başlık var (Köy Meydanı eklendi). Hepsi yan yana yalnız geniş ekranda sığar (1181 piksel ve üstü);
    daha dar ekranda telefondaki gibi "Menü" düğmesi çıkar. Başlıklar biraz sıkı: derneğin adı eskisi kadar yer bulsun. */
 @media (min-width:1181px){ .nav{gap:0} .nav a{padding:0 9px;font-size:16.5px} .logo b{white-space:nowrap} }
+
+/* Yorumlar: haber, etkinlik ve fotoğraf sayfalarında (Köy Meydanı'nın cevaplarıyla aynı görünüm) */
+.y-sec{margin-top:30px;border-top:1px solid var(--line);padding-top:6px}
+.y-list>p{margin:0 0 20px}
+.y-n{display:inline-flex;align-items:center;gap:4px;font-size:15px;font-weight:700;color:var(--bordo)}
+.y-n svg{width:18px;height:18px}
+.ev .muted .y-n{margin-left:10px}
+.gal button{position:relative}
+.gal .y-n{position:absolute;right:6px;bottom:6px;padding:2px 8px;border-radius:99px;background:rgba(255,255,255,.92);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.f-cap{font-size:clamp(22px,4vw,28px);margin:4px 0 16px}
+.viewer-com{display:flex;align-items:center;gap:6px;min-height:50px;padding:0 16px;margin-left:auto;margin-right:10px;border-radius:99px;
+  border:2px solid #fff;color:#fff;text-decoration:none;font-weight:800;font-size:17px}
+.viewer-com svg{width:20px;height:20px}
+.viewer-com:hover{background:rgba(255,255,255,.15);color:#fff}
