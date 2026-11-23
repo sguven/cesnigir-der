@@ -47,7 +47,7 @@ main:focus{outline:none}
 .logo b{color:var(--bordo-dark);text-shadow:0 0 6px #fff,0 0 2px #fff}
 .logo small{color:var(--ink);text-shadow:0 0 5px #fff,0 0 2px #fff}
 .nav a:not([aria-current="page"]):not(:hover){text-shadow:0 0 6px #fff,0 0 2px #fff}
-@media (max-width:1000px){
+@media (max-width:1180px){
   .header::before{background-position:45% 72%;background-size:150% auto}
   .header::after{background:linear-gradient(90deg,rgba(255,255,255,.66),rgba(255,255,255,.4) 62%,rgba(255,255,255,.2))}
   .nav a:not([aria-current="page"]):not(:hover){text-shadow:none}
@@ -68,7 +68,7 @@ main:focus{outline:none}
   background:var(--white);color:var(--bordo);font-weight:700;font-size:18px;cursor:pointer}
 .menu-btn svg{width:24px;height:24px}
 
-@media (max-width:1000px){
+@media (max-width:1180px){
   .menu-btn{display:flex}
   .nav{display:none;position:absolute;left:0;right:0;top:100%;background:var(--white);flex-direction:column;gap:0;
     border-bottom:4px solid var(--bordo);box-shadow:0 10px 20px rgba(35,26,20,.15);padding:6px 0}
@@ -357,7 +357,7 @@ a,button{touch-action:manipulation}
   .news-img img{height:100%;max-height:none}
 }
 /* açılır menü yumuşakça iner; uzun gelirse kendi içinde kayar */
-@media (max-width:1000px){
+@media (max-width:1180px){
   .nav{display:flex;visibility:hidden;opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .18s,transform .18s,visibility 0s .18s;
     max-height:calc(100vh - 110px);max-height:calc(100dvh - 110px);overflow-y:auto;overscroll-behavior:contain}
   .nav.open{visibility:visible;opacity:1;transform:none;pointer-events:auto;transition:opacity .18s,transform .18s}
@@ -419,8 +419,6 @@ button.cal-day:hover{filter:brightness(.93)}
 /* dik çekilmiş seyir terası fotoğrafında cam teras kartta görünsün */
 .mk img[src*="gezi-seyir-terasi"]{object-position:50% 80%}
 
-/* Menüde 8 başlık var: orta genişlikte derneğin uzun adı menüyle üst üste binmesin */
-@media (min-width:1001px) and (max-width:1240px){ .logo small{display:none} .nav a{padding:0 9px;font-size:16px} }
 
 /* Köprüköy hava durumu (ana sayfa, sağ sütun) */
 .wx{padding:16px 16px 10px;margin-bottom:22px;background:linear-gradient(180deg,#FFFDF8,#fff)}
@@ -441,3 +439,55 @@ button.cal-day:hover{filter:brightness(.93)}
 .wx-rain{font-size:13px;color:#2C6FB7;font-weight:700;min-height:18px}
 .wx-src{margin:8px 0 0;font-size:13px;color:var(--ink2);text-align:right}
 .wx-src a{color:var(--ink2)}
+
+/* Köy Meydanı (forum): köylülerin yazıları ve cevapları */
+.m-wrap{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:900px){ .m-wrap{grid-template-columns:minmax(0,1fr)} }
+.m-new{margin-bottom:20px}
+.m-new>summary{list-style:none;cursor:pointer;width:100%;font-size:20px;min-height:58px}
+.m-new>summary::-webkit-details-marker{display:none}
+.m-new[open]>summary{border-radius:8px 8px 0 0}
+.m-new>.box{border-top:0;border-radius:0 0 10px 10px}
+.m-form{display:flex;flex-direction:column;gap:14px}
+.m-form-h{font-size:21px;margin:0}
+.m-l{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:18px}
+.m-l input,.m-l select,.m-l textarea{font:inherit;font-weight:400;font-size:19px;padding:12px 14px;border:2px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:100%;min-height:52px}
+.m-l textarea{resize:vertical;line-height:1.5}
+.m-l input:focus,.m-l select:focus,.m-l textarea:focus{border-color:var(--bordo);outline:none;box-shadow:0 0 0 3px var(--bordo-soft)}
+.m-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.m-err{margin:0;padding:10px 14px;border-radius:8px;background:#FDECEA;color:#B42318;font-weight:700}
+.m-note{margin:0}
+.m-form .btn{width:100%;font-size:20px}
+.m-thanks b{display:block;font-size:21px;color:var(--green)}
+.m-thanks p{margin:6px 0 14px}
+.m-list{display:flex;flex-direction:column;gap:14px}
+.m-card{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.m-card.pin{border-left:6px solid var(--gold);background:#FFFCF5}
+.m-card h3{font-size:21px;margin:2px 0 10px}
+.m-pinned{background:var(--gold);color:#fff}
+.m-by{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:17px;line-height:1.3}
+.m-by>span{display:flex;flex-direction:column}
+.m-av{width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex:none}
+.m-time{color:var(--ink2);font-size:15px}
+.m-ex{margin:0 0 6px;color:var(--ink2)}
+.m-replies{display:inline-flex;align-items:center;gap:8px;min-height:46px;font-weight:700;text-decoration:none}
+.m-replies svg{width:22px;height:22px;flex:none}
+.m-rules h3{font-size:20px}
+.m-rules ul{margin:0;padding-left:20px;font-size:17px}
+.m-rules li{margin-bottom:6px}
+.m-art h1{margin-bottom:14px}
+.m-rep-sec{margin-top:30px;border-top:1px solid var(--line);padding-top:6px}
+.m-rep-h{font-size:24px;margin:18px 0 14px}
+.m-reps{display:flex;flex-direction:column;gap:12px;margin-bottom:22px}
+#mReps>p{margin:0 0 20px}
+.m-rep{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.m-rep-text p{margin:0 0 8px}
+.m-rep-text p:last-child{margin:0}
+.m-cta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;padding:18px 20px;margin-top:18px;background:var(--bordo-soft);border-color:#E7C9BE}
+.m-cta>div{flex:1 1 260px}
+.m-cta h3{margin:0 0 4px}
+.m-cta p{margin:0;color:var(--ink2)}
+.m-cta .btn{flex:0 0 auto}
+/* Menüde 9 başlık var (Köy Meydanı eklendi). Hepsi yan yana yalnız geniş ekranda sığar (1181 piksel ve üstü);
+   daha dar ekranda telefondaki gibi "Menü" düğmesi çıkar. Başlıklar biraz sıkı: derneğin adı eskisi kadar yer bulsun. */
+@media (min-width:1181px){ .nav{gap:0} .nav a{padding:0 9px;font-size:16.5px} .logo b{white-space:nowrap} }

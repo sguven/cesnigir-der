@@ -119,7 +119,8 @@
     eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
     out: '<path d="M10 4H5v16h5"/><path d="m15 8 4 4-4 4M19 12H9"/>',
     x: '<path d="M6 6l12 12M18 6 6 18"/>',
-    key: '<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M15 8l2 2"/>'
+    key: '<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M15 8l2 2"/>',
+    pin: '<path d="M9 3h6l-1 6 4 3v2H6v-2l4-3-1-6Z"/><path d="M12 14v7"/>'
   };
   function icon(n) {
     return '<svg class="ed-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[n] || '') + '</svg>';
@@ -305,6 +306,7 @@
       t.appendChild(b);
     });
     if (page === 'etkinlikler') pastEvents(main);
+    mAdmin(page);
   }
 
   // Geçmiş etkinlikler sitede görünmez; düzenleme modunda sayfanın sonunda listelenir (düzeltmek ya da silmek için)
@@ -321,6 +323,90 @@
     var c = main.querySelector('.section .container'); if (c) c.appendChild(box);
     box.querySelectorAll('[data-ek]').forEach(function (t) { (t.querySelector('.ev-info') || t).appendChild(itemBar('etkinlikler', +t.getAttribute('data-ix'))); });
   }
+
+  /* ---------------- Köy Meydanı: onay ----------------
+     Ziyaretçilerin yazıları ve cevapları onaya düşer. Onay bekleyenler Köy Meydanı sayfasının en üstünde (cevaplar ayrıca
+     kendi yazısının sayfasında) "Onayla" / "Sil" düğmeleriyle görünür; menüdeki Köy Meydanı'nın yanında sayısı yazar.
+     Yayındaki yazılarda "En üste sabitle" ve "Sil", cevaplarda "Sil" vardır.
+     Yetki: giriş anahtarı veritabanına gönderilir, veritabanı GitHub'a sorar (araclar/supabase-meydan.sql: forum_yetki). */
+  var mPend = null, mPendT = 0, mPendP = null;
+  function mRpc(fn, body) { body.anahtar = getKey(); return C.sb('/rpc/' + fn, { method: 'POST', body: body }); }
+  function mPendLoad(force) {
+    if (!force && mPend && Date.now() - mPendT < 15000) return Promise.resolve(mPend);
+    if (mPendP) return mPendP;
+    mPendP = mRpc('forum_bekleyenler', {}).then(function (r) {
+      mPend = { konular: C.arr(r && r.konular), cevaplar: C.arr(r && r.cevaplar) }; mPendT = Date.now(); mBadge(); return mPend;
+    }).then(function (x) { mPendP = null; return x; }, function (e) { mPendP = null; throw e; });
+    return mPendP;
+  }
+  function mBadge() {
+    var a = document.querySelector('.nav [data-nav="meydan"]'), n = mPend ? mPend.konular.length + mPend.cevaplar.length : 0;
+    if (!a) return;
+    var b = a.querySelector('.ed-count');
+    if (!n) { if (b) b.remove(); return; }
+    if (!b) { b = el('<span class="ed-count"></span>'); a.appendChild(b); }
+    b.textContent = n; b.title = n + ' yazı onay bekliyor';
+  }
+  function mPendItem(x, tur) {
+    return '<div class="ed-m-item">' +
+      '<div class="news-meta"><span class="badge">' + esc(tur === 'konu' ? x.kategori : 'Cevap') + '</span><span>' + esc(C.zaman(x.created_at)) + '</span></div>' +
+      (tur === 'konu' ? '<h3>' + esc(x.baslik) + '</h3>' : x.konu_baslik ? '<p class="small muted" style="margin:0 0 6px">"' + esc(x.konu_baslik) + '" yazısına cevap</p>' : '') +
+      '<p class="ed-m-by"><b>' + esc(x.ad) + '</b></p><div class="ed-m-text">' + esc(x.metin) + '</div>' +
+      '<div class="ed-bar"><button type="button" class="ed-btn green" data-fm="onayla" data-tur="' + tur + '" data-id="' + x.id + '">' + icon('check') + 'Onayla, yayınla</button>' +
+      '<button type="button" class="ed-btn red" data-fm="sil" data-tur="' + tur + '" data-id="' + x.id + '">' + icon('trash') + 'Sil</button></div></div>';
+  }
+  function mAdmin(page) {
+    if (!getKey() || (page !== 'meydan' && page !== 'konu')) return;
+    var main = $('icerik');
+    main.querySelectorAll('[data-m-konu]:not([data-m-ed])').forEach(function (t) {
+      t.setAttribute('data-m-ed', '');
+      var id = t.getAttribute('data-m-konu'), pin = t.hasAttribute('data-sabit');
+      t.appendChild(el('<div class="ed-bar"><button type="button" class="ed-btn" data-fm="sabitle" data-tur="konu" data-id="' + id + '">' + icon('pin') +
+        (pin ? 'Sabitlemeyi kaldır' : 'En üste sabitle') + '</button><button type="button" class="ed-btn red" data-fm="sil" data-tur="konu" data-id="' + id + '">' + icon('trash') + 'Yazıyı sil</button></div>'));
+    });
+    main.querySelectorAll('[data-m-cevap]:not([data-m-ed])').forEach(function (t) {
+      t.setAttribute('data-m-ed', '');
+      t.appendChild(el('<div class="ed-bar"><button type="button" class="ed-btn red" data-fm="sil" data-tur="cevap" data-id="' + t.getAttribute('data-m-cevap') + '">' + icon('trash') + 'Cevabı sil</button></div>'));
+    });
+    mPendLoad().then(function (p) {
+      var host = page === 'meydan' ? main.querySelector('.m-main') : $('mPend');
+      if (!host) return;
+      var konu = main.querySelector('[data-m-konu]'), kid = konu ? +konu.getAttribute('data-m-konu') : 0;
+      var konular = page === 'meydan' ? p.konular : [], cevaplar = page === 'meydan' ? p.cevaplar : p.cevaplar.filter(function (c) { return c.konu_id === kid; });
+      var n = konular.length + cevaplar.length, old = $('edMPend');
+      if (old) old.remove();
+      if (!n && page === 'konu') return;
+      host.insertBefore(el('<div id="edMPend" class="ed-m-pend"><h2>' + (n ? 'Onay bekleyenler (' + n + ')' : 'Onay bekleyen yazı yok') + '</h2>' +
+        (n ? '<p class="small muted">Bunları yalnız siz görüyorsunuz. Onaylarsanız sitede görünür; uygun değilse silin.</p>' : '<p class="small muted">Yeni yazı ve cevaplar gelince burada görünecek.</p>') +
+        konular.map(function (k) { return mPendItem(k, 'konu'); }).join('') + cevaplar.map(function (c) { return mPendItem(c, 'cevap'); }).join('') + '</div>'), host.firstChild);
+    }).catch(function () {
+      var host = page === 'meydan' ? main.querySelector('.m-main') : null;
+      if (host && !$('edMPend')) host.insertBefore(el('<div id="edMPend" class="ed-m-pend"><h2>Onay bekleyenler açılamadı</h2><p class="small muted">İnternet bağlantınızı kontrol edip sayfayı yenileyin. Sorun sürerse Serhat\'a haber verin.</p></div>'), host.firstChild);
+    });
+  }
+  document.addEventListener('meydan:ciz', function (e) { if (site) mAdmin(e.detail && e.detail.sayfa); });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-fm]');
+    if (!b || !site) return;
+    e.preventDefault(); e.stopPropagation();
+    var islem = b.getAttribute('data-fm'), tur = b.getAttribute('data-tur'), id = +b.getAttribute('data-id');
+    var ask = islem !== 'sil' ? Promise.resolve(true) :
+      dialog('Silinsin mi?', tur === 'konu' ? 'Bu yazı ve altındaki bütün cevaplar silinecek. Geri alınamaz.' : 'Bu cevap silinecek. Geri alınamaz.', 'Evet, sil', { danger: true });
+    ask.then(function (ok) {
+      if (!ok) return;
+      busy(islem === 'onayla' ? 'Yayınlanıyor…' : islem === 'sil' ? 'Siliniyor…' : 'Kaydediliyor…');
+      mRpc('forum_islem', { tur: tur, kayit: id, islem: islem }).then(function () {
+        busy(false);
+        toast(islem === 'onayla' ? 'Yayınlandı' : islem === 'sil' ? 'Silindi' : 'Kaydedildi', islem === 'onayla' ? 'Artık Köy Meydanı\'nda herkes görüyor.' : '');
+        mPendT = 0;
+        if (islem === 'sil' && tur === 'konu' && curPage() === 'konu') location.hash = '#/meydan'; else rerender();
+      }).catch(function (er) {
+        busy(false);
+        dialog('Yapılamadı', er && er.status === 'net' ? errText(er) : er && er.status === 401 ? 'Yetkiniz doğrulanamadı. Giriş bağlantınızla yeniden girin; sorun sürerse Serhat\'a haber verin.' :
+          'Bir sorun çıktı. Biraz sonra tekrar deneyin.', 'Tamam', { single: true });
+      });
+    });
+  }, true);
 
   /* ---------------- pencereler ---------------- */
   function busy(text) {
@@ -866,6 +952,7 @@
       // anahtar geçerli: belleğe de yaz; adres çubuğunda yoksa ekle (ana ekrana eklenen sayfa anahtarı taşısın)
       storeKey(getKey());
       if (!urlKey()) keyInUrl(getKey());
+      mPendLoad(true).catch(function () { /* menüde sayı görünmez, o kadar */ });
     }
   };
   chrome();

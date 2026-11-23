@@ -271,6 +271,42 @@
       '<body style="font-family:sans-serif;padding:24px;font-size:20px">\n<p><a href="' + esc(to) + '">' + esc(title) + '</a></p>\n</body>\n</html>\n' };
   }
 
+  /* Köy Meydanı (forum): yazılar Supabase'de durur (kurulum: araclar/supabase-meydan.sql).
+     Bu anahtar herkese açık "publishable" anahtardır; neyin okunup yazılabileceğini veritabanındaki kurallar belirler. */
+  var MEYDAN = {
+    url: 'https://hdztvyindbhhpveukvox.supabase.co/rest/v1',
+    key: 'sb_publishable_Ory-OQ3Xxt8Fzf8oq_P8BA_p3Loet-w',
+    kategoriler: ['Genel Sohbet', 'Hatıralar', 'Gurbettekiler', 'Soru-Cevap']
+  };
+  // Supabase isteği: hata olursa { status, message } fırlatır
+  function sb(path, opt) {
+    opt = opt || {};
+    var h = { apikey: MEYDAN.key, 'Content-Type': 'application/json' };
+    Object.keys(opt.headers || {}).forEach(function (k) { h[k] = opt.headers[k]; });
+    return fetch(MEYDAN.url + path, { method: opt.method || 'GET', headers: h, body: opt.body ? JSON.stringify(opt.body) : undefined, cache: 'no-store' })
+      .catch(function () { throw { status: 'net' }; })
+      .then(function (r) {
+        return r.text().then(function (t) {
+          var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) { /* boş */ }
+          if (!r.ok) throw { status: r.status, message: j && j.message };
+          return j;
+        });
+      });
+  }
+  // Yazının zamanı: "Az önce", "25 dakika önce", "Bugün 14:05", "Dün 09:30", "3 gün önce", yoksa tarih
+  function zaman(ts) {
+    var d = new Date(ts);
+    if (isNaN(d)) return '';
+    var dk = Math.round((Date.now() - d) / 60000), saat = pad(d.getHours()) + ':' + pad(d.getMinutes());
+    var iso = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), gun = daysBetween(iso, todayIso());
+    if (dk < 2) return 'Az önce';
+    if (dk < 60) return dk + ' dakika önce';
+    if (gun === 0) return 'Bugün ' + saat;
+    if (gun === 1) return 'Dün ' + saat;
+    if (gun > 1 && gun < 7) return gun + ' gün önce';
+    return longDate(iso);
+  }
+
   function arr(d) {
     var a = Array.isArray(d) ? d : (d && Array.isArray(d.items) ? d.items : []);
     return a.filter(function (x) { return x && typeof x === 'object'; });
@@ -284,6 +320,7 @@
     SHARE_COLS: SHARE_COLS, shareId: shareId, sharePath: sharePath, shareVer: shareVer, sharePage: sharePage,
     shortCode: shortCode, shortPath: shortPath, shortPage: shortPage,
     untilText: untilText, imgSrc: imgSrc, linkUrl: linkUrl, telHref: telHref, waHref: waHref, arr: arr,
-    ytEmbed: ytEmbed, ytFrame: ytFrame, bindShare: bindShare, warmShare: warmShare
+    ytEmbed: ytEmbed, ytFrame: ytFrame, bindShare: bindShare, warmShare: warmShare,
+    MEYDAN: MEYDAN, sb: sb, zaman: zaman
   };
 })();

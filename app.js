@@ -1,5 +1,5 @@
 /* Çeşnigir-Der · Tasarım 3
-   Sayfalar: Ana Sayfa, Duyurular (ve ayrıntı), Etkinlikler, Fotoğraflar, Market, Hakkımızda, İletişim.
+   Sayfalar: Ana Sayfa, Duyurular (ve ayrıntı), Etkinlikler, Köy Meydanı (forum), Fotoğraflar, Market, Hakkımızda, İletişim.
    İçerik data/ klasöründen okunur; yönetim panelinden değişir. */
 
 /* Ziyaretçi sayacı (GoatCounter): istatistikler https://cesnifirder.goatcounter.com
@@ -295,6 +295,8 @@
     h += '<section class="section"><div class="container grid-main"><div>' +
       '<div class="sec-head"' + ed('ekle:duyurular') + '><h2>Son Duyurular</h2><a href="#/duyurular">Tüm duyurular ›</a></div>' +
       (news.length ? '<div class="news-list">' + news.map(newsCard).join('') + '</div>' : '<div class="box empty"><b>Henüz duyuru yok</b></div>') +
+      '<div class="box m-cta"><div><h3>Köy Meydanı</h3><p>Hatıranızı, sorunuzu, gurbetten selamınızı paylaşın; köylülerimizle sohbet edin.</p></div>' +
+      '<a class="btn" href="#/meydan">' + icon('chat') + 'Köy Meydanı\'na git</a></div>' +
       '</div><aside>' + wxBox() +
       '<div class="sec-head"' + ed('ekle:etkinlikler') + '><h2>Yaklaşan Günler</h2></div>' + calendar() +
       '<div class="box" style="margin-top:14px">' + (ev.length ? ev.map(evRow).join('') : '<div class="empty">Yaklaşan bir gün yok.</div>') + '</div>' +
@@ -704,6 +706,169 @@
       '<li><span>Konum</span><a href="' + MAP + '" target="_blank" rel="noopener">Haritada aç</a></li></ul></div></aside></div></section>';
   }
 
+  /* ---------- Köy Meydanı (forum) ----------
+     Köylülerin yazı paylaşıp birbirine cevap yazdığı bölüm. Yazılar Supabase'de durur (C.sb, kurulum: araclar/supabase-meydan.sql).
+     Gönderilen her yazı ve cevap önce onaya düşer; yönetim panelinde onaylanınca burada görünür (yonetim/duzen.js).
+     Liste ve yazı sayfası önce bellekteki son listeyle çizilir (geri dönünce kaldığı yerden açılsın), sonra yenisi gelir. */
+  var M_AD = 'cd_meydan_ad', mKat = 'Tümü', mSeq = 0, mCache = null;
+  function mAd() { try { return localStorage.getItem(M_AD) || ''; } catch (e) { return ''; } }
+  function mAdKaydet(a) { try { localStorage.setItem(M_AD, a); } catch (e) { /* yok say */ } }
+  function mParas(t) {
+    return String(t || '').split(/\n+/).map(function (s) { return s.trim(); }).filter(Boolean).map(function (s) { return '<p>' + esc(s) + '</p>'; }).join('');
+  }
+  var AV_RENK = ['#7A2E1C', '#0B7A54', '#8A5A12', '#1F5F8B', '#6B4C8A', '#9A3B53'];
+  function mAvatar(ad) {
+    var w = String(ad || '').trim().split(/\s+/).filter(Boolean), ini = w.slice(0, 2).map(function (s) { return s.charAt(0); }).join('').toLocaleUpperCase('tr'), h = 0;
+    for (var i = 0; i < (ad || '').length; i++) h = (h * 31 + ad.charCodeAt(i)) % 997;
+    return '<span class="m-av" style="background:' + AV_RENK[h % AV_RENK.length] + '" aria-hidden="true">' + esc(ini || '?') + '</span>';
+  }
+  function mBy(x) { return '<p class="m-by">' + mAvatar(x.ad) + '<span><b>' + esc(x.ad) + '</b><span class="m-time">' + esc(C.zaman(x.created_at)) + '</span></span></p>'; }
+  // Paylaşılan bağlantı …/?m=12 yazının sayfasını açar (openShared)
+  function mShare(k) {
+    var url = new URL(B || './', location.href.split(/[?#]/)[0]).href + '?m=' + k.id, text = 'KÖY MEYDANI: ' + k.baslik + '\n' + url;
+    return '<div class="share"><span>Paylaş:</span><a class="s-wa" href="https://wa.me/?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp</a>' +
+      '<a class="s-fb" href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '" target="_blank" rel="noopener">' + icon('fb') + 'Facebook</a></div>';
+  }
+  function mForm(tur, konuId) {
+    var yeni = tur === 'konu';
+    return '<form class="m-form" data-m-form="' + tur + '"' + (konuId ? ' data-konu="' + konuId + '"' : '') + ' novalidate>' +
+      (yeni ? '' : '<h3 class="m-form-h">Cevap yazın</h3>') +
+      '<label class="m-l">Adınız ve soyadınız<input name="ad" autocomplete="name" maxlength="60" value="' + esc(mAd()) + '"></label>' +
+      (yeni ? '<label class="m-l">Ne hakkında?<select name="kategori">' + C.MEYDAN.kategoriler.map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label>' +
+        '<label class="m-l">Başlık<input name="baslik" maxlength="120" placeholder="Örnek: Eski düğünlerimizden bir hatıra"></label>' : '') +
+      '<label class="m-l">' + (yeni ? 'Yazınız' : 'Cevabınız') + '<textarea name="metin" rows="' + (yeni ? 6 : 4) + '" maxlength="' + (yeni ? 4000 : 2000) + '"></textarea></label>' +
+      '<label class="m-hp" aria-hidden="true">Web sitesi<input name="web" tabindex="-1" autocomplete="off"></label>' +
+      '<p class="m-err" role="alert" hidden></p>' +
+      '<button type="submit" class="btn">' + icon(yeni ? 'pen' : 'chat') + (yeni ? 'Gönder' : 'Cevabı gönder') + '</button>' +
+      '<p class="muted small m-note">Yazdıklarınız dernek yönetimi onayladıktan sonra sitede görünür.</p></form>';
+  }
+  function mFail() {
+    return '<div class="box empty"><b>Yazılar şu anda açılamadı</b>İnternet bağlantınızı kontrol edip sayfayı yenileyin.</div>';
+  }
+
+  function mCard(k) {
+    return '<article class="m-card' + (k.sabit ? ' pin' : '') + '" data-m-konu="' + k.id + '"' + (k.sabit ? ' data-sabit="1"' : '') + '>' +
+      '<div class="news-meta">' + (k.sabit ? '<span class="badge m-pinned">Sabit</span>' : '') + '<span class="badge">' + esc(k.kategori) + '</span></div>' +
+      '<h3><a class="ev-link" href="#/konu/' + k.id + '"><b>' + esc(k.baslik) + '</b></a></h3>' + mBy(k) +
+      '<p class="m-ex">' + esc(excerpt(k.metin, 220)) + '</p>' +
+      '<a class="m-replies" href="#/konu/' + k.id + '">' + icon('chat') + (k.cevap_sayisi ? k.cevap_sayisi + ' cevap · Oku ve cevap yaz' : 'Devamını oku ve cevap yaz') + '</a></article>';
+  }
+  function mListHtml() {
+    if (!mCache) return '<p class="loading">Yazılar yükleniyor…</p>';
+    var list = mKat === 'Tümü' ? mCache : mCache.filter(function (k) { return k.kategori === mKat; });
+    return list.length ? '<div class="m-list">' + list.map(mCard).join('') + '</div>' :
+      '<div class="box empty"><b>' + (mCache.length ? 'Bu başlıkta henüz yazı yok' : 'Henüz yazı yok') + '</b>İlk yazıyı siz paylaşın.</div>';
+  }
+  function mDrawn(sayfa) { realLinks(main); document.dispatchEvent(new CustomEvent('meydan:ciz', { detail: { sayfa: sayfa } })); }
+  function pageForum() {
+    var seq = ++mSeq;
+    setTimeout(function () {
+      C.sb('/forum_konular?select=id,kategori,baslik,metin,ad,sabit,cevap_sayisi,son_hareket,created_at&order=sabit.desc,son_hareket.desc&limit=300')
+        .then(function (r) { mCache = C.arr(r); }, function () { if (!mCache) mCache = false; })
+        .then(function () {
+          var b = $('mList'); if (seq !== mSeq || !b) return;
+          b.innerHTML = mCache === false ? mFail() : mListHtml();
+          mDrawn('meydan');
+        });
+    }, 0);
+    var kats = ['Tümü'].concat(C.MEYDAN.kategoriler);
+    return band('Köy Meydanı', 'Hatıranızı, sorunuzu, gurbetten selamınızı paylaşın; köylülerimizle sohbet edin.') +
+      '<section class="section"><div class="container m-wrap"><div class="m-main">' +
+      '<details class="m-new"><summary class="btn">' + icon('pen') + 'Yeni yazı paylaş</summary><div class="box box-pad">' + mForm('konu') + '</div></details>' +
+      '<div class="filters" role="group" aria-label="Yazıların konusu">' + kats.map(function (t) {
+        return '<button type="button" data-m-kat="' + esc(t) + '" aria-pressed="' + (t === mKat) + '">' + esc(t) + '</button>';
+      }).join('') + '</div>' +
+      '<div id="mList">' + (mCache === false ? '<p class="loading">Yazılar yükleniyor…</p>' : mListHtml()) + '</div></div>' +
+      '<aside class="m-side"><div class="box box-pad m-rules"><h3>Meydanın kuralları</h3><ul>' +
+      '<li>Adınızı ve soyadınızı yazın.</li><li>Saygılı bir dil kullanın; kırıcı söz, siyaset ve kavga yok.</li>' +
+      '<li>Telefon, adres gibi kişisel bilgileri paylaşmayın.</li><li>Her yazı ve cevap, dernek yönetimi onayladıktan sonra yayınlanır.</li></ul>' +
+      '<p class="small muted" style="margin:10px 0 0">Satılık ve aranan şeyler için <a href="#/pazar">Market</a> sayfasına bakın.</p></div></aside>' +
+      '</div></section>';
+  }
+
+  function mReply(c) { return '<div class="m-rep" data-m-cevap="' + c.id + '">' + mBy(c) + '<div class="m-rep-text">' + mParas(c.metin) + '</div></div>'; }
+  function mTopicHtml(k) {
+    return '<article class="m-art" data-m-konu="' + k.id + '"' + (k.sabit ? ' data-sabit="1"' : '') + '>' +
+      '<div class="news-meta">' + (k.sabit ? '<span class="badge m-pinned">Sabit</span>' : '') + '<span class="badge">' + esc(k.kategori) + '</span></div>' +
+      '<h1>' + esc(k.baslik) + '</h1>' + mBy(k) + '<div class="article-text">' + mParas(k.metin) + '</div>' + mShare(k) + '</article>' +
+      '<section class="m-rep-sec"><h2 class="m-rep-h">Cevaplar</h2><div id="mReps"><p class="muted">Cevaplar yükleniyor…</p></div><div id="mPend"></div>' +
+      '<div class="box box-pad">' + mForm('cevap', k.id) + '</div></section>' +
+      '<p style="margin-top:24px"><a class="btn btn-light" href="#/meydan">‹ Köy Meydanı</a></p>';
+  }
+  function pageTopic(id) {
+    var seq = ++mSeq, k = /^\d+$/.test(id) && mCache ? mCache.filter(function (x) { return String(x.id) === id; })[0] : null;
+    var gone = band('Yazı bulunamadı') + '<section class="section"><div class="container"><p>Bu yazı kaldırılmış ya da henüz onaylanmamış olabilir.</p><a class="btn" href="#/meydan">Köy Meydanı</a></div></section>';
+    if (!/^\d+$/.test(id)) return gone;
+    setTimeout(function () {
+      Promise.all([
+        k ? Promise.resolve([k]) : C.sb('/forum_konular?id=eq.' + id + '&select=id,kategori,baslik,metin,ad,sabit,cevap_sayisi,son_hareket,created_at'),
+        C.sb('/forum_cevaplar?konu_id=eq.' + id + '&select=id,metin,ad,created_at&order=created_at.asc&limit=500')
+      ]).then(function (r) {
+        if (seq !== mSeq) return;
+        var x = C.arr(r[0])[0], box = $('mTopic');
+        if (!box) return;
+        if (!x) { main.innerHTML = gone; realLinks(main); return; }
+        if (!box.querySelector('[data-m-konu]')) { box.innerHTML = mTopicHtml(x); document.title = x.baslik + ' · Köy Meydanı · Çeşnigir-Der'; }
+        var reps = C.arr(r[1]);
+        $('mReps').innerHTML = reps.length ? '<div class="m-reps">' + reps.map(mReply).join('') + '</div>' : '<p class="muted">Henüz cevap yok. İlk cevabı siz yazın.</p>';
+        box.querySelector('.m-rep-h').textContent = reps.length ? 'Cevaplar (' + reps.length + ')' : 'Cevaplar';
+        mDrawn('konu');
+      }).catch(function () {
+        var box = $('mTopic'); if (seq !== mSeq || !box) return;
+        if (box.querySelector('#mReps')) $('mReps').innerHTML = '<p class="muted">Cevaplar şu anda açılamadı. Sayfayı yenileyin.</p>';
+        else box.innerHTML = mFail();
+      });
+    }, 0);
+    return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/meydan">Köy Meydanı</a></div></div></div>' +
+      '<section class="section"><div class="container"><div class="article m-topic" id="mTopic">' + (k ? mTopicHtml(k) : '<p class="loading">Yükleniyor…</p>') + '</div></div></section>';
+  }
+
+  function mThanks(tur) {
+    return '<div class="m-thanks" role="status"><b>Teşekkürler, ' + (tur === 'konu' ? 'yazınız' : 'cevabınız') + ' alındı.</b>' +
+      '<p>Dernek yönetimi onayladıktan sonra burada görünecek.</p>' +
+      '<button type="button" class="btn btn-light" data-m-again="' + tur + '">' + (tur === 'konu' ? 'Bir yazı daha yaz' : 'Bir cevap daha yaz') + '</button></div>';
+  }
+  document.addEventListener('submit', function (e) {
+    var f = e.target.closest && e.target.closest('form[data-m-form]');
+    if (!f) return;
+    e.preventDefault();
+    var tur = f.getAttribute('data-m-form'), v = {}, err = f.querySelector('.m-err'), btn = f.querySelector('button[type=submit]');
+    ['ad', 'kategori', 'baslik', 'metin', 'web'].forEach(function (n) { if (f.elements[n]) v[n] = f.elements[n].value.trim(); });
+    function hata(t, n) { err.textContent = t; err.hidden = false; if (n && f.elements[n]) f.elements[n].focus(); }
+    if (v.ad.length < 3) return hata('Lütfen adınızı ve soyadınızı yazın.', 'ad');
+    if (tur === 'konu' && v.baslik.length < 3) return hata('Lütfen yazınıza bir başlık yazın.', 'baslik');
+    if (v.metin.length < 2) return hata(tur === 'konu' ? 'Lütfen yazınızı yazın.' : 'Lütfen cevabınızı yazın.', 'metin');
+    err.hidden = true;
+    mAdKaydet(v.ad);
+    var label = btn.innerHTML;
+    btn.disabled = true; btn.textContent = 'Gönderiliyor…';
+    var done = function () { var t = document.createElement('div'); t.innerHTML = mThanks(tur); f.parentNode.replaceChild(t.firstChild, f); };
+    if (v.web) { done(); return; }   // yalnız otomatik programların doldurduğu gizli alan
+    var body = tur === 'konu' ? { ad: v.ad, kategori: v.kategori, baslik: v.baslik, metin: v.metin } : { ad: v.ad, metin: v.metin, konu_id: +f.getAttribute('data-konu') };
+    C.sb(tur === 'konu' ? '/forum_konular' : '/forum_cevaplar', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: body })
+      .then(done).catch(function (er) {
+        btn.disabled = false; btn.innerHTML = label;
+        hata(er && er.status === 'net' ? 'İnternet bağlantısı yok gibi görünüyor. Bağlantınızı kontrol edip tekrar deneyin.' :
+          er && /çok fazla/.test(er.message || '') ? er.message : 'Gönderilemedi. Lütfen biraz sonra tekrar deneyin.');
+      });
+  });
+  document.addEventListener('click', function (e) {
+    var k = e.target.closest('[data-m-kat]');
+    if (k) {
+      mKat = k.getAttribute('data-m-kat');
+      main.querySelectorAll('[data-m-kat]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === k)); });
+      var l = $('mList'); if (l && mCache) { l.innerHTML = mListHtml(); mDrawn('meydan'); }
+      return;
+    }
+    var a = e.target.closest('[data-m-again]');
+    if (a) {
+      var tur = a.getAttribute('data-m-again'), konu = main.querySelector('[data-m-konu]');
+      var t = document.createElement('div'); t.innerHTML = mForm(tur, tur === 'cevap' && konu ? konu.getAttribute('data-m-konu') : null);
+      var f = t.firstChild; a.parentNode.parentNode.replaceChild(f, a.parentNode);
+      var inp = f.elements[tur === 'konu' ? 'baslik' : 'metin']; if (inp) inp.focus();
+    }
+  });
+
   /* ---------- yönlendirme ---------- */
   /* Arama motorları için her sayfanın gerçek bir adresi vardır (hakkimizda/, duyurular/, p/d-…html; araclar/site-sayfalari.js üretir).
      Sayfadaki #/… bağlantıları bu adresleri gösterir (data-h asıl hedefi tutar); dokununca sayfa yenilenmeden geçilir. */
@@ -729,7 +894,8 @@
     duyurular: 'Köprüköy, Keskin ve Kırıkkale haberleri ve duyurular · Çeşnigir-Der',
     etkinlikler: 'Köprüköy etkinlik takvimi: düğün, mevlit ve özel günler · Çeşnigir-Der',
     fotograflar: 'Köprüköy ve Çeşnigir Köprüsü fotoğrafları · Çeşnigir-Der',
-    iletisim: 'İletişim · Çeşnigir-Der, Köprüköy (Keskin, Kırıkkale)'
+    iletisim: 'İletişim · Çeşnigir-Der, Köprüköy (Keskin, Kırıkkale)',
+    meydan: 'Köy Meydanı: Köprüköylülerin sohbet ve hatıra köşesi · Çeşnigir-Der'
   };
   function route() {
     // adreste #/… yoksa üretilmiş sayfanın kendi içeriği (CD_ROUTE) açılır
@@ -746,13 +912,15 @@
     else if (page === 'koyumuz') { page = 'hakkimizda'; html = pageAbout(); }
     else if (page === 'gezilecek-yerler' || page === 'gezi') { page = 'gezilecek-yerler'; html = pageGezi(); }
     else if (page === 'iletisim') html = pageContact();
+    else if (page === 'meydan') html = pageForum();
+    else if (page === 'konu') html = pageTopic(decodeURIComponent(p.slice(1).join('/')));
     else { page = ''; loadWeather(); html = pageHome(); }
     var hash = location.hash, back = !tapped && hash !== curHash && pos[hash] > 0;
     tapped = false; curHash = hash;
     main.innerHTML = html;
     realLinks(main);
     main.classList.remove('gir'); void main.offsetWidth; main.classList.add('gir');
-    var navKey = page === 'duyuru' ? 'duyurular' : page === 'etkinlik' ? 'etkinlikler' : page === 'ilan' ? 'pazar' : page;
+    var navKey = page === 'duyuru' ? 'duyurular' : page === 'etkinlik' ? 'etkinlikler' : page === 'ilan' ? 'pazar' : page === 'konu' ? 'meydan' : page;
     if (page === 'etkinlik' || page === 'ilan' || page === 'duyuru') { var sp = main.querySelector('[data-share-photo]'); if (sp) C.warmShare(sp.getAttribute('data-share-photo')); }
     document.querySelectorAll('[data-nav]').forEach(function (a) {
       if (a.getAttribute('data-nav') === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
@@ -899,7 +1067,7 @@
   // Paylaşılan bağlantı (?e=…, ?i=…, ?d=…) ilgili sayfayı açar; adres çubuğu sade adrese döner
   (function openShared() {
     var q; try { q = new URLSearchParams(location.search); } catch (e) { return; }
-    var map = { e: 'etkinlik', i: 'ilan', d: 'duyuru' };
+    var map = { e: 'etkinlik', i: 'ilan', d: 'duyuru', m: 'konu' };
     Object.keys(map).some(function (k) {
       var v = q.get(k); if (!v) return false;
       history.replaceState(null, '', location.pathname + '#/' + map[k] + '/' + encodeURIComponent(v));
