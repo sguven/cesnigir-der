@@ -1,26 +1,6 @@
 [
   {
     "tur": "Haber",
-    "tarih": "2026-09-01",
-    "baslik": "Derneğimiz açılış öncesi davet ziyaretleri yaptı",
-    "metin": "Derneğimiz Çeşnigir-Der, 6 Eylül 2026'daki açılış töreni öncesinde Kırıkkale'de bir dizi ziyaret gerçekleştirdi. Yönetim kurulu üyeleri, Araştırmacı Yazar Murat Çavuşoğlu ile birlikte Kalehaber.net'i ziyaret ederek açılış programına davet etti. Samimi geçen görüşmede derneğin kuruluş amacı ve önümüzdeki dönemde yapılması planlanan çalışmalar konuşuldu.\n\nHeyet, ziyaretler kapsamında SAMDER Başkanı Erol Tombak'ı ve CNR Organizasyon'un sahibi Murat Caner'i de ziyaret ederek onları Köprüköy'deki açılışa davet etti.\n\nDernek yönetimi, Köprüköy'ün kültürel değerlerini yaşatmak, hemşehriler arasındaki bağları güçlendirmek ve dayanışmayı artırmak için çalışacağını belirtti. Davette, birlik ve beraberlik mesajıyla tüm Köprüköylüler ve Kırıkkale halkı açılış gününe çağrıldı.",
-    "foto": "images/haber/cesnigir-der-acilis-ziyareti-kalehaber.jpg",
-    "foto_aciklama": "Dernek heyeti Kalehaber.net ziyaretinde (fotoğraf: Kalehaber.net)",
-    "fotolar": [
-      {
-        "foto": "images/haber/cesnigir-der-acilis-ziyareti-2.jpg",
-        "aciklama": "Açılış öncesi ziyaretlerden (fotoğraf: Kalehaber.net)"
-      },
-      {
-        "foto": "images/haber/cesnigir-der-acilis-ziyareti-cnr.jpg",
-        "aciklama": "CNR Organizasyon ziyareti (fotoğraf: Kalehaber.net)"
-      }
-    ],
-    "kaynak": "Kale Haber",
-    "link": "https://www.kalehaber.net/cesnigir-der-kapilarini-aciyor"
-  },
-  {
-    "tur": "Haber",
     "tarih": "2026-11-22",
     "baslik": "Keskin'in tarihi ve doğası animasyon filmiyle tanıtıldı",
     "metin": "Kırıkkale Tanıtım Derneği, Keskin ilçesini anlatan üç boyutlu yeni bir animasyon filmi hazırladı. Filmde ilçenin tarihi, kültürü ve doğal güzellikleri anlatılıyor; izleyiciye Keloğlan karakteri ile Çağlar Yumuşak rehberlik ediyor.\n\nSosyal medyada paylaşılan video ilgiyle karşılandı. Dernek, kentin değerlerini tanıtan çalışmalarını sürdüreceğini bildirdi.\n\nKeskin'i gurbetteki hemşehrilerimize ve gençlerimize tanıtmak için paylaşılabilecek güzel bir çalışma.",
@@ -183,5 +163,25 @@
     "foto": "",
     "kaynak": "İl Gazetesi",
     "link": "https://www.ilgazetesi.com.tr/koprukoy-cesnigir-der-kapilarini-aciyor-6-eylul-pazar-gunu-buyuk-acilis-toreni-var-334738h.htm"
+  },
+  {
+    "tur": "Haber",
+    "tarih": "2026-09-01",
+    "baslik": "Derneğimiz açılış öncesi davet ziyaretleri yaptı",
+    "metin": "Derneğimiz Çeşnigir-Der, 6 Eylül 2026'daki açılış töreni öncesinde Kırıkkale'de bir dizi ziyaret gerçekleştirdi. Yönetim kurulu üyeleri, Araştırmacı Yazar Murat Çavuşoğlu ile birlikte Kalehaber.net'i ziyaret ederek açılış programına davet etti. Samimi geçen görüşmede derneğin kuruluş amacı ve önümüzdeki dönemde yapılması planlanan çalışmalar konuşuldu.\n\nHeyet, ziyaretler kapsamında SAMDER Başkanı Erol Tombak'ı ve CNR Organizasyon'un sahibi Murat Caner'i de ziyaret ederek onları Köprüköy'deki açılışa davet etti.\n\nDernek yönetimi, Köprüköy'ün kültürel değerlerini yaşatmak, hemşehriler arasındaki bağları güçlendirmek ve dayanışmayı artırmak için çalışacağını belirtti. Davette, birlik ve beraberlik mesajıyla tüm Köprüköylüler ve Kırıkkale halkı açılış gününe çağrıldı.",
+    "foto": "images/haber/cesnigir-der-acilis-ziyareti-kalehaber.jpg",
+    "foto_aciklama": "Dernek heyeti Kalehaber.net ziyaretinde (fotoğraf: Kalehaber.net)",
+    "fotolar": [
+      {
+        "foto": "images/haber/cesnigir-der-acilis-ziyareti-2.jpg",
+        "aciklama": "Açılış öncesi ziyaretlerden (fotoğraf: Kalehaber.net)"
+      },
+      {
+        "foto": "images/haber/cesnigir-der-acilis-ziyareti-cnr.jpg",
+        "aciklama": "CNR Organizasyon ziyareti (fotoğraf: Kalehaber.net)"
+      }
+    ],
+    "kaynak": "Kale Haber",
+    "link": "https://www.kalehaber.net/cesnigir-der-kapilarini-aciyor"
   }
 ]
