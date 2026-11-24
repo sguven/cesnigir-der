@@ -210,8 +210,8 @@
   }
   function errText(e) {
     var s = e && e.status;
-    if (s === 401) return 'Giriş anahtarının süresi dolmuş ya da anahtar silinmiş. Serhat\'tan yeni bir giriş bağlantısı isteyin.';
-    if (s === 403 || s === 404) return 'Bu anahtarın siteyi değiştirme izni yok. Serhat\'a haber verin.';
+    if (s === 401) return 'Giriş kodunun süresi dolmuş ya da kod silinmiş. Lütfen yeni giriş kodunu girin.';
+    if (s === 403 || s === 404) return 'Bu giriş kodunun siteyi değiştirme izni yok. Site yöneticisine haber verin.';
     if (s === 409 || s === 422) return 'Aynı anda başka bir değişiklik yapıldı. Lütfen tekrar deneyin.';
     if (s === 'net') return 'İnternet bağlantısı yok gibi görünüyor. Bağlantınızı kontrol edip tekrar deneyin.';
     if (s === 'photo') return 'Bu fotoğraf açılamadı. Başka bir fotoğraf deneyin.';
@@ -412,7 +412,7 @@
       if (home && mScroll) { mScroll = false; $('edMPend').scrollIntoView({ block: 'start', behavior: 'smooth' }); }
     }).catch(function () {
       var host = page === 'meydan' ? main.querySelector('.m-main') : null;
-      if (host && !$('edMPend')) host.insertBefore(el('<div id="edMPend" class="ed-m-pend"><h2>Onay bekleyenler açılamadı</h2><p class="small muted">İnternet bağlantınızı kontrol edip sayfayı yenileyin. Sorun sürerse Serhat\'a haber verin.</p></div>'), host.firstChild);
+      if (host && !$('edMPend')) host.insertBefore(el('<div id="edMPend" class="ed-m-pend"><h2>Onay bekleyenler açılamadı</h2><p class="small muted">İnternet bağlantınızı kontrol edip sayfayı yenileyin. Sorun sürerse site yöneticisine haber verin.</p></div>'), host.firstChild);
     });
   }
   document.addEventListener('meydan:ciz', function (e) { if (site) mAdmin(e.detail && e.detail.sayfa); });
@@ -433,7 +433,7 @@
         if (islem === 'sil' && tur === 'konu' && curPage() === 'konu') location.hash = '#/meydan'; else rerender();
       }).catch(function (er) {
         busy(false);
-        dialog('Yapılamadı', er && er.status === 'net' ? errText(er) : er && er.status === 401 ? 'Yetkiniz doğrulanamadı. Giriş bağlantınızla yeniden girin; sorun sürerse Serhat\'a haber verin.' :
+        dialog('Yapılamadı', er && er.status === 'net' ? errText(er) : er && er.status === 401 ? 'Yetkiniz doğrulanamadı. Giriş bağlantınızla yeniden girin; sorun sürerse site yöneticisine haber verin.' :
           'Bir sorun çıktı. Biraz sonra tekrar deneyin.', 'Tamam', { single: true });
       });
     });
@@ -482,7 +482,7 @@
   }
   function fail(title, e) {
     return dialog(title, errText(e), e && e.status === 401 ? 'Yeniden giriş yap' : 'Tamam', { single: e && e.status !== 401 }).then(function (ok) {
-      if (ok && e && e.status === 401) { closeSheet(true); showLogin('Giriş anahtarının süresi dolmuş. Serhat\'tan yeni bir giriş bağlantısı isteyin.'); }
+      if (ok && e && e.status === 401) { closeSheet(true); showLogin('Giriş kodunun süresi dolmuş. Lütfen yeni giriş kodunu girin.'); }
       if (e && e.status === 'gone') return 'gone';
     });
   }
@@ -873,17 +873,16 @@
     s.innerHTML = '<div class="ed-login-box"><img src="../images/logo-160.png" alt="" width="84" height="84">' +
       '<h1>Yönetici Girişi</h1>' +
       (msg ? '<p class="ed-login-msg">' + icon('warn') + '<span>' + esc(msg) + '</span></p>' : '') +
-      '<p class="muted">En kolayı: Serhat\'ın WhatsApp\'tan gönderdiği <b>giriş bağlantısına</b> dokunun. Siteyi bu bağlantıyla açtığınızda her seferinde kendiliğinden girersiniz.</p>' +
-      '<details class="ed-login-more"' + (msg ? '' : '') + '><summary>' + icon('key') + 'Giriş anahtarını elle yapıştır</summary>' +
-      '<div class="ed-field"><label class="ed-label" for="edKey">Giriş anahtarı</label>' +
-      '<input id="edKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…"><span class="ed-err" hidden></span></div>' +
-      '<button type="button" class="btn btn-wide" id="edKeyOk">Giriş Yap</button></details>' +
+      '<p class="muted">Lütfen giriş kodunu girin.</p>' +
+      '<div class="ed-login-form"><div class="ed-field"><label class="ed-label" for="edKey">Giriş kodu</label>' +
+      '<input id="edKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"><span class="ed-err" hidden></span></div>' +
+      '<button type="button" class="btn btn-wide" id="edKeyOk">Giriş Yap</button></div>' +
       '<p class="small" style="margin-top:22px"><a href="../">‹ Siteye dön</a></p></div>';
     var inp = $('edKey'), err = s.querySelector('.ed-err');
     $('edKeyOk').onclick = function () {
       var k = cleanKey(inp.value).replace(/^.*[?&]k=/, '').replace(/[&#].*$/, '');   // bağlantının tamamı yapıştırılırsa da olur
       try { k = decodeURIComponent(k); } catch (e) { /* olduğu gibi */ }
-      if (!k) { err.textContent = 'Anahtarı yapıştırın.'; err.hidden = false; inp.focus(); return; }
+      if (!k) { err.textContent = 'Lütfen giriş kodunu girin.'; err.hidden = false; inp.focus(); return; }
       busy('Kontrol ediliyor…');
       checkKey(k).then(function () {
         storeKey(k); keyInUrl(k);
@@ -900,10 +899,10 @@
   function keyErr(e, k) {
     var s = e && e.status;
     if (s === 'net') return errText(e);
-    if (k && !/^(github_pat_|ghp_)/.test(k)) return 'Bu bir giriş anahtarı değil gibi görünüyor: anahtar "github_pat_" ile başlar. Tamamını kopyaladığınızdan emin olun.';
-    if (s === 401) return 'GitHub bu anahtarı tanımadı: eksik kopyalanmış, silinmiş ya da süresi dolmuş olabilir. (Hata 401)';
+    if (k && !/^(github_pat_|ghp_)/.test(k)) return 'Bu geçerli bir giriş kodu değil gibi görünüyor. Kodun tamamını girdiğinizden emin olun.';
+    if (s === 401) return 'Giriş kodu tanınmadı: eksik girilmiş, silinmiş ya da süresi dolmuş olabilir. (Hata 401)';
     if (s === 403 || s === 404) return 'Anahtar geçerli ama siteyi değiştirme izni yok. GitHub\'da anahtarda "Only select repositories → cesnigir-der" ve "Contents: Read and write" seçili olmalı. (Hata ' + s + ')';
-    return 'Bu anahtar çalışmadı. (Hata ' + s + ')';
+    return 'Bu giriş kodu çalışmadı. (Hata ' + s + ')';
   }
   function checkKey(k) {
     return api('GET', '', null, k).then(function (r) {
@@ -920,7 +919,7 @@
       '<span class="ed-ribbon-btns"><a href="#/" id="edPendPill" class="ed-pill" hidden><span class="ed-long">Onay bekleyen:</span><span class="ed-short">Onay</span><b>0</b></a><a href="../" target="_blank" rel="noopener">' + icon('eye') + '<span class="ed-long">Ziyaretçi gibi gör</span><span class="ed-short">Siteyi gör</span></a>' +
       '<button type="button" id="edMenuBtn" aria-expanded="false">' + icon('key') + 'Giriş</button></span></div>' +
       '<div class="container ed-menu" id="edMenu" hidden>' +
-      '<p class="small">Bu telefonda giriş açık. Giriş bağlantısını ana ekrana eklerseniz bir daha anahtar sorulmaz.</p>' +
+      '<p class="small">Bu telefonda giriş açık. Bu sayfayı ana ekrana eklerseniz giriş kodu bir daha sorulmaz.</p>' +
       '<div class="ed-row"><button type="button" class="btn btn-light" id="edCopy">Giriş bağlantısını kopyala</button>' +
       '<button type="button" class="btn btn-light ed-redline" id="edLogout">' + icon('out') + 'Bu telefondan çıkış yap</button></div>' +
       '<p class="small muted" id="edCopyNote" hidden>Kopyalandı. Bu bağlantıyı yalnızca yönetici olacak kişiye gönderin: bağlantıya sahip olan herkes siteyi değiştirebilir.</p></div></div>');
@@ -983,7 +982,7 @@
     ready: function (s) {
       site = s;
       if (!getKey()) { showLogin(''); return; }
-      if (authBad) { showLogin('Giriş anahtarının süresi dolmuş ya da anahtar silinmiş. Serhat\'tan yeni bir giriş bağlantısı isteyin.'); return; }
+      if (authBad) { showLogin('Giriş kodunun süresi dolmuş ya da kod silinmiş. Lütfen yeni giriş kodunu girin.'); return; }
       // anahtar geçerli: belleğe de yaz; adres çubuğunda yoksa ekle (ana ekrana eklenen sayfa anahtarı taşısın)
       storeKey(getKey());
       if (!urlKey()) keyInUrl(getKey());

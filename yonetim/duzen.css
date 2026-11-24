@@ -177,6 +177,8 @@ details.ed-extra[open] summary{margin-bottom:12px}
 .ed-login-more summary{display:flex;align-items:center;gap:8px;cursor:pointer;min-height:48px;font-weight:700;color:var(--bordo)}
 .ed-login-more[open] summary{margin-bottom:10px}
 .ed-login-more .btn{min-height:58px;font-size:20px}
+.ed-login-form{text-align:left;margin-top:16px}
+.ed-login-form .btn{min-height:58px;font-size:20px}
 .ed-menu .ed-row .btn{flex:1 1 220px;min-height:50px;font-size:17px}
 
 /* Köy Meydanı: onay bekleyenler, menüdeki sayı */
