@@ -81,6 +81,10 @@ birbirlerinin yazısına cevap yazar. Konular: Genel Sohbet, Hatıralar, Gurbett
 - Veritabanı kurulumu ve kuralları: `araclar/supabase-meydan.sql` (Supabase → SQL Editor'de çalıştırılır; tekrar çalıştırmak zararsızdır).
   Ziyaretçi yalnız yayındakileri okur ve yalnız "bekliyor" olarak yazabilir. Onay, silme ve sabitleme için panel yöneticinin GitHub giriş
   anahtarını veritabanına gönderir; veritabanı GitHub'a bu anahtarın siteye yazma izni olup olmadığını sorar. Anahtar saklanmaz.
+- **Fotoğraf:** yazıya ve cevaba en çok 4 fotoğraf eklenebilir. Fotoğraf telefonda küçültülür (uzun kenar 1600, JPEG), Supabase deposundaki
+  herkese açık `meydan` kovasına yüklenir; tabloda yalnız dosya yolu durur (`fotolar` sütunu). Onay bekleyenler kutusunda fotoğraflar da görünür.
+  Yazı silinince dosyası depoda kalır (sitede görünmez); yer açmak gerekirse Supabase → Storage → meydan'dan elle silinir (ücretsiz plan 1 GB).
+  Kurulum çalıştırılmadıysa (sütun yoksa) site fotoğraf düğmesini gizler, bölüm fotoğrafsız çalışır.
 - Sitedeki bağlantı bilgisi (herkese açık "publishable" anahtar) `ortak.js` içinde `MEYDAN`. Supabase'in **secret** anahtarı hiçbir yere yazılmaz.
 - Paylaşılan bağlantı `https://cesnigirder.org/?m=12` yazının sayfasını açar.
 - Kod: `app.js` (Köy Meydanı bölümü), panel tarafı `yonetim/duzen.js` (Köy Meydanı: onay).

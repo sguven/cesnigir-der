@@ -741,7 +741,10 @@
   /* ---------- Köy Meydanı (forum) ----------
      Köylülerin yazı paylaşıp birbirine cevap yazdığı bölüm. Yazılar Supabase'de durur (C.sb, kurulum: araclar/supabase-meydan.sql).
      Gönderilen her yazı ve cevap önce onaya düşer; yönetim panelinde onaylanınca burada görünür (yonetim/duzen.js).
-     Liste ve yazı sayfası önce bellekteki son listeyle çizilir (geri dönünce kaldığı yerden açılsın), sonra yenisi gelir. */
+     Liste ve yazı sayfası önce bellekteki son listeyle çizilir (geri dönünce kaldığı yerden açılsın), sonra yenisi gelir.
+     Yazıya ve cevaba fotoğraf eklenebilir (en çok C.MEYDAN.fotoEnCok): fotoğraf telefonda küçültülür, Supabase deposuna yüklenir,
+     yazıyla birlikte yalnız dosya yolu kaydedilir. Veritabanında fotoğraf sütunu henüz yoksa (kurulum çalıştırılmadıysa)
+     bölüm fotoğrafsız çalışmaya devam eder (mSel). */
   var M_AD = 'cd_meydan_ad', mKat = 'Tümü', mSeq = 0, mCache = null;
   function mAd() { try { return localStorage.getItem(M_AD) || ''; } catch (e) { return ''; } }
   function mAdKaydet(a) { try { localStorage.setItem(M_AD, a); } catch (e) { /* yok say */ } }
@@ -761,6 +764,61 @@
     return '<div class="share"><span>Paylaş:</span><a class="s-wa" href="https://wa.me/?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp</a>' +
       '<a class="s-fb" href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '" target="_blank" rel="noopener">' + icon('fb') + 'Facebook</a></div>';
   }
+  // Okuma: "fotolar" sütunu henüz yoksa aynı istek sütunsuz yinelenir ve fotoğraf ekleme düğmesi gizlenir
+  function mSel(path) {
+    var sade = path.replace(',fotolar', '');
+    if (C.MEYDAN.fotoYok) return C.sb(sade);
+    return C.sb(path).catch(function (e) {
+      if (e && e.status === 400 && sade !== path) { C.MEYDAN.fotoYok = true; return C.sb(sade); }
+      throw e;
+    });
+  }
+  var KAMERA = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/></svg>';
+  function mFotoAlan() {
+    return '<div class="m-foto"' + (C.MEYDAN.fotoYok ? ' hidden' : '') + '><div class="m-foto-list" aria-live="polite"></div>' +
+      '<label class="btn btn-light m-foto-btn">' + KAMERA + '<span>Fotoğraf ekle</span><input type="file" class="m-file" accept="image/*" multiple></label>' +
+      '<p class="muted small m-note">İsterseniz en fazla ' + C.MEYDAN.fotoEnCok + ' fotoğraf ekleyebilirsiniz.</p></div>';
+  }
+  function mFotoCiz(f) {
+    var a = f._fotos || [], list = f.querySelector('.m-foto-list'), btn = f.querySelector('.m-foto-btn');
+    list.innerHTML = a.map(function (x, i) {
+      return '<div class="m-foto-kutu"><img src="' + x.url + '" alt="Eklenen fotoğraf ' + (i + 1) + '"><button type="button" data-mf-sil="' + i + '" aria-label="Fotoğraf ' + (i + 1) + ' kaldır">' + icon('x') + 'Kaldır</button></div>';
+    }).join('');
+    btn.hidden = a.length >= C.MEYDAN.fotoEnCok;
+    btn.querySelector('span').textContent = a.length ? 'Bir fotoğraf daha ekle' : 'Fotoğraf ekle';
+  }
+  // Fotoğrafı uzun kenarı 1600 nokta olacak biçimde küçültür (telefon fotoğrafı 5-10 MB'tan 300-400 KB'a iner)
+  function mKucult(file) {
+    return new Promise(function (ok, no) {
+      var u = URL.createObjectURL(file), im = new Image();
+      im.onload = function () {
+        var w = im.naturalWidth, h = im.naturalHeight, o = Math.min(1, 1600 / Math.max(w, h)), c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(w * o)); c.height = Math.max(1, Math.round(h * o));
+        var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(im, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(u);
+        c.toBlob(function (b) { if (b) ok({ blob: b, url: URL.createObjectURL(b) }); else no(); }, 'image/jpeg', 0.82);
+      };
+      im.onerror = function () { URL.revokeObjectURL(u); no(); };
+      im.src = u;
+    });
+  }
+  document.addEventListener('change', function (e) {
+    var inp = e.target;
+    if (!inp.classList || !inp.classList.contains('m-file')) return;
+    var f = inp.closest('form'), err = f.querySelector('.m-err'), a = f._fotos = f._fotos || [], lbl = f.querySelector('.m-foto-btn span');
+    var files = Array.prototype.slice.call(inp.files || []).filter(function (x) { return /^image\//.test(x.type) || /\.(jpe?g|png|webp|heic|heif)$/i.test(x.name); });
+    var bos = C.MEYDAN.fotoEnCok - a.length, fazla = files.length > bos, bozuk = 0;
+    inp.value = '';
+    if (!files.length) return;
+    err.hidden = true; lbl.textContent = 'Fotoğraf hazırlanıyor…';
+    files.slice(0, bos).reduce(function (p, file) {
+      return p.then(function () { return mKucult(file).then(function (x) { a.push(x); }, function () { bozuk++; }); });
+    }, Promise.resolve()).then(function () {
+      mFotoCiz(f);
+      if (bozuk) { err.textContent = bozuk > 1 ? 'Bazı fotoğraflar açılamadı. Başka fotoğraf seçin.' : 'Bu fotoğraf açılamadı. Başka bir fotoğraf seçin.'; err.hidden = false; }
+      else if (fazla) { err.textContent = 'En fazla ' + C.MEYDAN.fotoEnCok + ' fotoğraf eklenebilir; ilk ' + C.MEYDAN.fotoEnCok + ' tanesi alındı.'; err.hidden = false; }
+    });
+  });
   function mForm(tur, konuId, yk) {
     var yeni = tur === 'konu', L = tur === 'yorum' ? YL[yk] || YL.yorum : null;
     return '<form class="m-form" data-m-form="' + tur + '"' + (konuId ? ' data-konu="' + konuId + '"' : '') + ' novalidate>' +
@@ -769,6 +827,7 @@
       (yeni ? '<label class="m-l">Ne hakkında?<select name="kategori">' + C.MEYDAN.kategoriler.map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label>' +
         '<label class="m-l">Başlık<input name="baslik" maxlength="120" placeholder="Örnek: Eski düğünlerimizden bir hatıra"></label>' : '') +
       '<label class="m-l">' + (yeni ? 'Yazınız' : L ? L.l : 'Cevabınız') + '<textarea name="metin" rows="' + (yeni ? 6 : 4) + '" maxlength="' + (yeni ? 4000 : 2000) + '"></textarea></label>' +
+      (L ? '' : mFotoAlan()) +
       '<label class="m-hp" aria-hidden="true">Web sitesi<input name="web" tabindex="-1" autocomplete="off"></label>' +
       '<p class="m-err" role="alert" hidden></p>' +
       '<button type="submit" class="btn">' + icon(yeni ? 'pen' : 'chat') + (yeni ? 'Gönder' : L ? L.b : 'Cevabı gönder') + '</button>' +
@@ -782,7 +841,7 @@
     return '<article class="m-card' + (k.sabit ? ' pin' : '') + '" data-m-konu="' + k.id + '"' + (k.sabit ? ' data-sabit="1"' : '') + '>' +
       '<div class="news-meta">' + (k.sabit ? '<span class="badge m-pinned">Sabit</span>' : '') + '<span class="badge">' + esc(k.kategori) + '</span></div>' +
       '<h3><a class="ev-link" href="#/konu/' + k.id + '"><b>' + esc(k.baslik) + '</b></a></h3>' + mBy(k) +
-      '<p class="m-ex">' + esc(excerpt(k.metin, 220)) + '</p>' +
+      '<p class="m-ex">' + esc(excerpt(k.metin, 220)) + '</p>' + C.fotolarHtml(k, 3) +
       '<a class="m-replies" href="#/konu/' + k.id + '">' + icon('chat') + (k.cevap_sayisi ? k.cevap_sayisi + ' cevap · Oku ve cevap yaz' : 'Devamını oku ve cevap yaz') + '</a></article>';
   }
   function mListHtml() {
@@ -791,11 +850,12 @@
     return list.length ? '<div class="m-list">' + list.map(mCard).join('') + '</div>' :
       '<div class="box empty"><b>' + (mCache.length ? 'Bu başlıkta henüz yazı yok' : 'Henüz yazı yok') + '</b>İlk yazıyı siz paylaşın.</div>';
   }
-  function mDrawn(sayfa) { realLinks(main); document.dispatchEvent(new CustomEvent('meydan:ciz', { detail: { sayfa: sayfa } })); }
+  function mDrawn(sayfa) { realLinks(main);
+    if (C.MEYDAN.fotoYok) main.querySelectorAll('.m-foto').forEach(function (x) { x.hidden = true; }); document.dispatchEvent(new CustomEvent('meydan:ciz', { detail: { sayfa: sayfa } })); }
   function pageForum() {
     var seq = ++mSeq;
     setTimeout(function () {
-      C.sb('/forum_konular?select=id,kategori,baslik,metin,ad,sabit,cevap_sayisi,son_hareket,created_at&order=sabit.desc,son_hareket.desc&limit=300')
+      mSel('/forum_konular?select=id,kategori,baslik,metin,ad,sabit,cevap_sayisi,son_hareket,created_at,fotolar&order=sabit.desc,son_hareket.desc&limit=300')
         .then(function (r) { mCache = C.arr(r); }, function () { if (!mCache) mCache = false; })
         .then(function () {
           var b = $('mList'); if (seq !== mSeq || !b) return;
@@ -813,16 +873,16 @@
       '<div id="mList">' + (mCache === false ? '<p class="loading">Yazılar yükleniyor…</p>' : mListHtml()) + '</div></div>' +
       '<aside class="m-side"><div class="box box-pad m-rules"><h3>Meydanın kuralları</h3><ul>' +
       '<li>Adınızı ve soyadınızı yazın.</li><li>Saygılı bir dil kullanın; kırıcı söz, siyaset ve kavga yok.</li>' +
-      '<li>Telefon, adres gibi kişisel bilgileri paylaşmayın.</li><li>Her yazı ve cevap, dernek yönetimi onayladıktan sonra yayınlanır.</li></ul>' +
+      '<li>Telefon, adres gibi kişisel bilgileri paylaşmayın.</li><li>Yazınıza ve cevabınıza fotoğraf ekleyebilirsiniz; başkasının fotoğrafını izinsiz paylaşmayın.</li><li>Her yazı ve cevap, dernek yönetimi onayladıktan sonra yayınlanır.</li></ul>' +
       '<p class="small muted" style="margin:10px 0 0">Satılık ve aranan şeyler için <a href="#/pazar">Market</a> sayfasına bakın.</p></div></aside>' +
       '</div></section>';
   }
 
-  function mReply(c) { return '<div class="m-rep" data-m-cevap="' + c.id + '">' + mBy(c) + '<div class="m-rep-text">' + mParas(c.metin) + '</div></div>'; }
+  function mReply(c) { return '<div class="m-rep" data-m-cevap="' + c.id + '">' + mBy(c) + '<div class="m-rep-text">' + mParas(c.metin) + '</div>' + C.fotolarHtml(c) + '</div>'; }
   function mTopicHtml(k) {
     return '<article class="m-art" data-m-konu="' + k.id + '"' + (k.sabit ? ' data-sabit="1"' : '') + '>' +
       '<div class="news-meta">' + (k.sabit ? '<span class="badge m-pinned">Sabit</span>' : '') + '<span class="badge">' + esc(k.kategori) + '</span></div>' +
-      '<h1>' + esc(k.baslik) + '</h1>' + mBy(k) + '<div class="article-text">' + mParas(k.metin) + '</div>' + mShare(k) + '</article>' +
+      '<h1>' + esc(k.baslik) + '</h1>' + mBy(k) + '<div class="article-text">' + mParas(k.metin) + '</div>' + C.fotolarHtml(k) + mShare(k) + '</article>' +
       '<section class="m-rep-sec"><h2 class="m-rep-h">Cevaplar</h2><div id="mReps"><p class="muted">Cevaplar yükleniyor…</p></div><div id="mPend"></div>' +
       '<div class="box box-pad">' + mForm('cevap', k.id) + '</div></section>' +
       '<p style="margin-top:24px"><a class="btn btn-light" href="#/meydan">‹ Köy Meydanı</a></p>';
@@ -833,8 +893,8 @@
     if (!/^\d+$/.test(id)) return gone;
     setTimeout(function () {
       Promise.all([
-        k ? Promise.resolve([k]) : C.sb('/forum_konular?id=eq.' + id + '&select=id,kategori,baslik,metin,ad,sabit,cevap_sayisi,son_hareket,created_at'),
-        C.sb('/forum_cevaplar?konu_id=eq.' + id + '&select=id,metin,ad,created_at&order=created_at.asc&limit=500')
+        k ? Promise.resolve([k]) : mSel('/forum_konular?id=eq.' + id + '&select=id,kategori,baslik,metin,ad,sabit,cevap_sayisi,son_hareket,created_at,fotolar'),
+        mSel('/forum_cevaplar?konu_id=eq.' + id + '&select=id,metin,ad,created_at,fotolar&order=created_at.asc&limit=500')
       ]).then(function (r) {
         if (seq !== mSeq) return;
         var x = C.arr(r[0])[0], box = $('mTopic');
@@ -874,16 +934,27 @@
     mAdKaydet(v.ad);
     var label = btn.innerHTML;
     btn.disabled = true; btn.textContent = 'Gönderiliyor…';
-    var done = function () { var t = document.createElement('div'); t.innerHTML = mThanks(tur); f.parentNode.replaceChild(t.firstChild, f); };
+    var fotos = (f._fotos || []).slice();
+    var done = function () { fotos.forEach(function (x) { URL.revokeObjectURL(x.url); });
+      var t = document.createElement('div'); t.innerHTML = mThanks(tur); f.parentNode.replaceChild(t.firstChild, f); };
     if (v.web) { done(); return; }   // yalnız otomatik programların doldurduğu gizli alan
     var ys = f.closest('.y-sec');
     var body = tur === 'konu' ? { ad: v.ad, kategori: v.kategori, baslik: v.baslik, metin: v.metin } :
       tur === 'yorum' ? { ad: v.ad, metin: v.metin, hedef_tur: ys.getAttribute('data-y'), hedef: ys.getAttribute('data-yh'), hedef_baslik: (ys.getAttribute('data-yb') || '').slice(0, 200) } :
       { ad: v.ad, metin: v.metin, konu_id: +f.getAttribute('data-konu') };
-    C.sb({ konu: '/forum_konular', cevap: '/forum_cevaplar', yorum: '/yorumlar' }[tur], { method: 'POST', headers: { Prefer: 'return=minimal' }, body: body })
-      .then(done).catch(function (er) {
+    // Fotoğraflar sırayla yüklenir; hepsi yüklenince yazı, dosya yollarıyla birlikte kaydedilir
+    fotos.reduce(function (p, x, i) {
+      return p.then(function (yollar) {
+        btn.textContent = fotos.length > 1 ? 'Fotoğraflar yükleniyor (' + (i + 1) + ' / ' + fotos.length + ')…' : 'Fotoğraf yükleniyor…';
+        return x.yol ? yollar.concat(x.yol) : C.fotoYukle(x.blob).then(function (yol) { x.yol = yol; return yollar.concat(yol); });
+      });
+    }, Promise.resolve([])).then(function (yollar) {
+      if (yollar.length) { body.fotolar = yollar; btn.textContent = 'Gönderiliyor…'; }
+      return C.sb({ konu: '/forum_konular', cevap: '/forum_cevaplar', yorum: '/yorumlar' }[tur], { method: 'POST', headers: { Prefer: 'return=minimal' }, body: body });
+    }).then(done).catch(function (er) {
         btn.disabled = false; btn.innerHTML = label;
         hata(er && er.status === 'net' ? 'İnternet bağlantısı yok gibi görünüyor. Bağlantınızı kontrol edip tekrar deneyin.' :
+          er && er.foto ? 'Fotoğraf yüklenemedi. Biraz sonra tekrar deneyin ya da fotoğrafı kaldırıp yazınızı fotoğrafsız gönderin.' :
           er && /çok fazla/.test(er.message || '') ? er.message : 'Gönderilemedi. Lütfen biraz sonra tekrar deneyin.');
       });
   });
@@ -893,6 +964,21 @@
       mKat = k.getAttribute('data-m-kat');
       main.querySelectorAll('[data-m-kat]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === k)); });
       var l = $('mList'); if (l && mCache) { l.innerHTML = mListHtml(); mDrawn('meydan'); }
+      return;
+    }
+    var mf = e.target.closest('[data-mf]');
+    if (mf) {
+      e.preventDefault();
+      var kutu = mf.closest('[data-mf-list]'), sahip = kutu.closest('.m-card,.m-art,.m-rep,.ed-m-item'), kim = sahip && sahip.querySelector('.m-by b, .ed-m-by b');
+      openV(kutu.getAttribute('data-mf-list').split(',').map(function (p) { return { src: C.fotoUrl(p), cap: kim ? kim.textContent : '' }; }), +mf.getAttribute('data-mf'));
+      return;
+    }
+    var sil = e.target.closest('[data-mf-sil]');
+    if (sil) {
+      var ff = sil.closest('form'), x = ff._fotos.splice(+sil.getAttribute('data-mf-sil'), 1)[0];
+      if (x) URL.revokeObjectURL(x.url);
+      ff.querySelector('.m-err').hidden = true;
+      mFotoCiz(ff); ff.querySelector('.m-file').focus();
       return;
     }
     var a = e.target.closest('[data-m-again]');

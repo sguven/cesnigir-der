@@ -483,6 +483,32 @@ button.cal-day:hover{filter:brightness(.93)}
 .m-rep{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 .m-rep-text p{margin:0 0 8px}
 .m-rep-text p:last-child{margin:0}
+/* Köy Meydanı: yazı ve cevaplardaki fotoğraflar */
+.m-fotos{display:grid;gap:6px;margin:12px 0 4px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.m-fotos.n1{grid-template-columns:minmax(0,1fr)}
+.m-fotos.n3>button:first-child{grid-column:1/-1}
+.m-fotos>button{position:relative;padding:0;border:0;background:var(--line);border-radius:8px;overflow:hidden;cursor:zoom-in;aspect-ratio:4/3;display:block}
+.m-fotos.n1>button{aspect-ratio:auto;max-height:560px;background:transparent}
+.m-fotos.n3>button:first-child{aspect-ratio:16/9}
+.m-fotos img{width:100%;height:100%;object-fit:cover;display:block}
+.m-fotos.n1 img{height:auto;max-height:560px;object-fit:contain;border-radius:8px}
+.m-fotos>button:focus-visible{outline:3px solid var(--bordo);outline-offset:2px}
+.m-fotos.kucuk{grid-template-columns:repeat(3,minmax(0,1fr));margin:4px 0 8px;max-width:420px}
+.m-fotos.kucuk>button,.m-fotos.kucuk.n3>button:first-child{grid-column:auto;aspect-ratio:1;max-height:none;background:var(--line)}
+.m-fotos.kucuk img{height:100%;max-height:none;object-fit:cover;border-radius:0}
+.m-fotos-artan{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);color:#fff;font-weight:800;font-size:24px}
+.m-rep .m-fotos{max-width:520px}
+.m-foto{display:flex;flex-direction:column;gap:10px}
+.m-foto-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.m-foto-list:empty{display:none}
+.m-foto-kutu{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.m-foto-kutu img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.m-foto-kutu button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px;border:0;border-top:1px solid var(--line);background:#fff;color:#B42318;font:inherit;font-weight:700;font-size:17px;cursor:pointer}
+.m-foto-kutu button svg{width:18px;height:18px}
+.m-form .m-foto-btn{cursor:pointer;position:relative}
+.m-foto[hidden],.m-foto-btn[hidden]{display:none}
+.m-file{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
+.m-foto-btn:focus-within{outline:3px solid var(--bordo);outline-offset:2px}
 .m-cta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;padding:18px 20px;margin-top:18px;background:var(--bordo-soft);border-color:#E7C9BE}
 .m-cta>div{flex:1 1 260px}
 .m-cta h3{margin:0 0 4px}

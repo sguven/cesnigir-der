@@ -359,7 +359,7 @@
       '<div class="news-meta"><span class="badge">' + esc(tur === 'konu' ? 'Köy Meydanı · ' + x.kategori : tur === 'cevap' ? 'Köy Meydanı · Cevap' : yt[0]) + '</span><span>' + esc(C.zaman(x.created_at)) + '</span></div>' +
       (tur === 'konu' ? '<h3>' + esc(x.baslik) + '</h3>' : where ? '<p class="small muted" style="margin:0 0 6px">' + esc(where) +
         (link && href ? ' · <a href="' + href + '">Sayfasını aç</a>' : '') + '</p>' : '') +
-      '<p class="ed-m-by"><b>' + esc(x.ad) + '</b></p><div class="ed-m-text">' + esc(x.metin) + '</div>' +
+      '<p class="ed-m-by"><b>' + esc(x.ad) + '</b></p><div class="ed-m-text">' + esc(x.metin) + '</div>' + C.fotolarHtml(x) +
       '<div class="ed-bar"><button type="button" class="ed-btn green" data-fm="onayla" data-tur="' + tur + '" data-id="' + x.id + '">' + icon('check') + 'Onayla, yayınla</button>' +
       '<button type="button" class="ed-btn red" data-fm="sil" data-tur="' + tur + '" data-id="' + x.id + '">' + icon('trash') + 'Sil</button></div></div>';
   }

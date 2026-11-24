@@ -275,6 +275,8 @@
      Bu anahtar herkese açık "publishable" anahtardır; neyin okunup yazılabileceğini veritabanındaki kurallar belirler. */
   var MEYDAN = {
     url: 'https://hdztvyindbhhpveukvox.supabase.co/rest/v1',
+    depo: 'https://hdztvyindbhhpveukvox.supabase.co/storage/v1',   // yazı ve cevaplara eklenen fotoğraflar ("meydan" kovası)
+    fotoEnCok: 4,
     key: 'sb_publishable_Ory-OQ3Xxt8Fzf8oq_P8BA_p3Loet-w',
     kategoriler: ['Genel Sohbet', 'Hatıralar', 'Gurbettekiler', 'Soru-Cevap']
   };
@@ -292,6 +294,30 @@
           return j;
         });
       });
+  }
+  // Köy Meydanı fotoğrafları: veritabanında yalnız dosya yolu durur (2026-11/<kimlik>.jpg); adres buradan kurulur
+  var FOTO_YOL = /^\d{4}-\d{2}\/[0-9a-f-]{36}\.jpg$/;
+  function fotoUrl(p) { return MEYDAN.depo + '/object/public/meydan/' + p; }
+  function fotolar(x) { return (x && Array.isArray(x.fotolar) ? x.fotolar : []).filter(function (p) { return FOTO_YOL.test(p); }); }
+  // Yazının/cevabın fotoğrafları: dokununca büyür (app.js: data-mf). En fazla "enCok" tanesi çizilir, kalanı "+2" olarak yazar.
+  function fotolarHtml(x, enCok) {
+    var a = fotolar(x), n = a.length, g = enCok ? a.slice(0, enCok) : a;
+    if (!n) return '';
+    return '<div class="m-fotos' + (enCok ? ' kucuk' : '') + ' n' + g.length + '" data-mf-list="' + esc(a.join(',')) + '">' + g.map(function (p, i) {
+      var artan = i === g.length - 1 ? n - g.length : 0;
+      return '<button type="button" data-mf="' + i + '" aria-label="Fotoğrafı büyüt (' + (i + 1) + ' / ' + n + ')"><img src="' + esc(fotoUrl(p)) + '" alt="' + esc((x.ad || '') + ' paylaştı: fotoğraf ' + (i + 1)) + '" loading="lazy">' +
+        (artan ? '<span class="m-fotos-artan">+' + artan + '</span>' : '') + '</button>';
+    }).join('') + '</div>';
+  }
+  // Fotoğrafı yükler (önce app.js telefonda küçültür); dosya yolunu döndürür
+  function fotoYukle(blob) {
+    var d = new Date(), id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() :
+      'xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx'.replace(/x/g, function () { return ((typeof crypto !== 'undefined' && crypto.getRandomValues ? crypto.getRandomValues(new Uint8Array(1))[0] : Math.random() * 256) & 15).toString(16); });
+    var yol = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '/' + id + '.jpg';
+    return fetch(MEYDAN.depo + '/object/meydan/' + yol, { method: 'POST', body: blob,
+      headers: { apikey: MEYDAN.key, Authorization: 'Bearer ' + MEYDAN.key, 'Content-Type': 'image/jpeg', 'x-upsert': 'false' } })
+      .catch(function () { throw { status: 'net' }; })
+      .then(function (r) { if (!r.ok) throw { status: r.status, foto: true }; return yol; });
   }
   // Yazının zamanı: "Az önce", "25 dakika önce", "Bugün 14:05", "Dün 09:30", "3 gün önce", yoksa tarih
   function zaman(ts) {
@@ -321,6 +347,6 @@
     shortCode: shortCode, shortPath: shortPath, shortPage: shortPage,
     untilText: untilText, imgSrc: imgSrc, linkUrl: linkUrl, telHref: telHref, waHref: waHref, arr: arr,
     ytEmbed: ytEmbed, ytFrame: ytFrame, bindShare: bindShare, warmShare: warmShare,
-    MEYDAN: MEYDAN, sb: sb, zaman: zaman
+    MEYDAN: MEYDAN, sb: sb, zaman: zaman, fotoUrl: fotoUrl, fotolar: fotolar, fotolarHtml: fotolarHtml, fotoYukle: fotoYukle
   };
 })();

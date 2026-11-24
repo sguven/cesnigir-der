@@ -1,4 +1,4 @@
--- Köy Meydanı (forum) ve yorumlar (haber, etkinlik, fotoğraf) · Supabase veritabanı kurulumu
+-- Köy Meydanı (forum, fotoğraflı yazı ve cevaplar) ve yorumlar (haber, etkinlik, fotoğraf) · Supabase veritabanı kurulumu
 -- Supabase → SQL Editor'de bir kez çalıştırılır. Tekrar çalıştırmak zararsızdır (var olanı bozmaz).
 --
 -- Kurallar:
@@ -51,6 +51,27 @@ create index if not exists yorumlar_hedef on public.yorumlar (hedef_tur, hedef, 
 create index if not exists forum_konular_akis on public.forum_konular (durum, sabit desc, son_hareket desc);
 create index if not exists forum_cevaplar_konu on public.forum_cevaplar (konu_id, created_at);
 
+-- Fotoğraflar: yazıya ve cevaba en çok 4 fotoğraf eklenebilir. Dosyalar Supabase deposunda ("meydan" kovası) durur;
+-- tabloda yalnız dosya yolu saklanır (2026-11/<kimlik>.jpg), başka adres yazılamaz.
+alter table public.forum_konular add column if not exists fotolar text[] not null default '{}';
+alter table public.forum_cevaplar add column if not exists fotolar text[] not null default '{}';
+alter table public.forum_konular drop constraint if exists forum_konular_fotolar;
+alter table public.forum_konular add constraint forum_konular_fotolar check (
+  cardinality(fotolar) <= 4 and array_to_string(fotolar, ',') ~ '^([0-9]{4}-[0-9]{2}/[0-9a-f-]{36}[.]jpg(,|$))*$');
+alter table public.forum_cevaplar drop constraint if exists forum_cevaplar_fotolar;
+alter table public.forum_cevaplar add constraint forum_cevaplar_fotolar check (
+  cardinality(fotolar) <= 4 and array_to_string(fotolar, ',') ~ '^([0-9]{4}-[0-9]{2}/[0-9a-f-]{36}[.]jpg(,|$))*$');
+
+-- Depo: herkese açık okunur, yalnız JPEG, dosya başına en çok 3 MB (site fotoğrafı göndermeden önce küçültür).
+-- Ziyaretçi yalnız yeni dosya ekleyebilir; var olanı değiştiremez, silemez, dosyaları listeleyemez.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+  values ('meydan', 'meydan', true, 3145728, array['image/jpeg'])
+  on conflict (id) do update set public = excluded.public, file_size_limit = excluded.file_size_limit,
+    allowed_mime_types = excluded.allowed_mime_types;
+drop policy if exists "meydan fotograf yukleme" on storage.objects;
+create policy "meydan fotograf yukleme" on storage.objects for insert to anon, authenticated
+  with check (bucket_id = 'meydan' and name ~ '^[0-9]{4}-[0-9]{2}/[0-9a-f-]{36}[.]jpg$');
+
 alter table public.forum_konular enable row level security;
 alter table public.forum_cevaplar enable row level security;
 alter table public.yorumlar enable row level security;
@@ -58,8 +79,8 @@ alter table public.yorumlar enable row level security;
 -- Yetkiler: ziyaretçi okur ve yalnız izin verilen sütunları yazar (durum, sabit, tarih gibi alanlara dokunamaz)
 revoke all on public.forum_konular, public.forum_cevaplar from anon, authenticated;
 grant select on public.forum_konular, public.forum_cevaplar to anon, authenticated;
-grant insert (kategori, baslik, metin, ad) on public.forum_konular to anon, authenticated;
-grant insert (konu_id, metin, ad) on public.forum_cevaplar to anon, authenticated;
+grant insert (kategori, baslik, metin, ad, fotolar) on public.forum_konular to anon, authenticated;
+grant insert (konu_id, metin, ad, fotolar) on public.forum_cevaplar to anon, authenticated;
 revoke all on public.yorumlar from anon, authenticated;
 grant select on public.yorumlar to anon, authenticated;
 grant insert (hedef_tur, hedef, hedef_baslik, metin, ad) on public.yorumlar to anon, authenticated;
