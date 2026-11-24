@@ -317,7 +317,13 @@
     return fetch(MEYDAN.depo + '/object/meydan/' + yol, { method: 'POST', body: blob,
       headers: { apikey: MEYDAN.key, Authorization: 'Bearer ' + MEYDAN.key, 'Content-Type': 'image/jpeg', 'x-upsert': 'false' } })
       .catch(function () { throw { status: 'net' }; })
-      .then(function (r) { if (!r.ok) throw { status: r.status, foto: true }; return yol; });
+      .then(function (r) {
+        if (r.ok) return yol;
+        return r.text().then(function (t) {
+          var m = ''; try { var j = JSON.parse(t); m = j.message || j.error || ''; } catch (e) { m = t; }
+          throw { status: r.status, foto: true, message: String(m || '').slice(0, 120) };
+        });
+      });
   }
   // Yazının zamanı: "Az önce", "25 dakika önce", "Bugün 14:05", "Dün 09:30", "3 gün önce", yoksa tarih
   function zaman(ts) {

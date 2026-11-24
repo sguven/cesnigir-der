@@ -954,8 +954,8 @@
     }).then(done).catch(function (er) {
         btn.disabled = false; btn.innerHTML = label;
         hata(er && er.status === 'net' ? 'İnternet bağlantısı yok gibi görünüyor. Bağlantınızı kontrol edip tekrar deneyin.' :
-          er && er.foto ? 'Fotoğraf yüklenemedi. Biraz sonra tekrar deneyin ya da fotoğrafı kaldırıp yazınızı fotoğrafsız gönderin.' :
-          er && /çok fazla/.test(er.message || '') ? er.message : 'Gönderilemedi. Lütfen biraz sonra tekrar deneyin.');
+          er && er.foto ? 'Fotoğraf yüklenemedi. Biraz sonra tekrar deneyin ya da fotoğrafı kaldırıp yazınızı fotoğrafsız gönderin. (Hata F' + er.status + (er.message ? ': ' + er.message : '') + ')' :
+          er && /çok fazla/.test(er.message || '') ? er.message : 'Gönderilemedi. Lütfen biraz sonra tekrar deneyin.' + (er && er.status ? ' (Hata ' + er.status + (er.message ? ': ' + String(er.message).slice(0, 120) : '') + ')' : ''));
       });
   });
   document.addEventListener('click', function (e) {
