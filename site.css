@@ -42,7 +42,7 @@ main:focus{outline:none}
 /* başlığın arkasında köprü fotoğrafı durur (telefonda da bilgisayarda da). Ana sayfada büyük fotoğraf başlığın altına girdikçe
    kaydırmayla birlikte yavaş yavaş belirir (app.js: --hf, 0 ile 1 arası), diğer sayfalarda hep oradadır. Üstündeki açık ton yazıyı okunur tutar. */
 .header::before,.header::after{content:"";position:absolute;inset:0;z-index:-1;opacity:var(--hf,0);pointer-events:none}
-.header::before{background:url(images/kapak.jpg?v=2) 50% 66%/cover no-repeat #0D1B2E}
+.header::before{background:url(images/kapak.jpg?v=3) 50% 66%/cover no-repeat #0D1B2E}
 .header::after{background:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.56))}
 .logo b{color:var(--bordo-dark);text-shadow:0 0 6px #fff,0 0 2px #fff}
 .logo small{color:var(--ink);text-shadow:0 0 5px #fff,0 0 2px #fff}
@@ -679,3 +679,17 @@ button.cal-day:hover{filter:brightness(.93)}
 .rh-alt .btn-row .btn{flex:none;width:100%}
 .rh-alt .share{margin-top:0;max-width:none}
 @media (max-width:640px){ .cards{grid-template-columns:minmax(0,1fr);gap:14px} .rh .box-pad{padding:16px} }
+
+/* ---- Telefon (Android) için hız ve dokunma ayarları ---- */
+/* başlığın arkasındaki köprü fotoğrafı açık bir tülün altında durur: telefonda küçük dosyası yeter, ana sayfanın büyük fotoğrafıyla aynı dosya (kırpma yok, aynı fotoğraf) */
+@media (max-width:1180px){ .header::before{background-image:url(images/kapak-1200.jpg)} }
+/* içerik gelene kadar alt bilgi ekranın altında bekler: sayfa açılırken aşağı yukarı zıplamaz */
+#icerik .loading{min-height:100vh;min-height:100svh}
+/* küçük bağlantılar parmakla rahat dokunulacak kadar büyük (en az 44 piksel) */
+@media (max-width:900px){
+  .crumb a,.sec-head a,.radyo-src,.footer-bottom a,#footContact a{display:inline-flex;align-items:center;min-height:44px}
+  .f-links li{padding:0}
+  .f-links a{display:flex;align-items:center;min-height:44px}
+  .ev-link{display:inline-block;padding:6px 0}
+  .radyo-src{display:flex;justify-content:center}
+}

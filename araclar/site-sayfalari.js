@@ -66,6 +66,9 @@ function setMeta(html, attr, name, value) {
 }
 function build(dom, o) {
   var h = deepen(dom);
+  // ana sayfaya özel kapak fotoğrafı ön yüklemesi ve haritanın (Leaflet) sonradan eklenen dosyaları bölüm sayfalarının başına girmez
+  h = h.replace(/<link[^>]*id="kapakOnYukle"[^>]*>\n?/, '')
+    .replace(/<link[^>]*unpkg\.com\/leaflet[^>]*>\n?/g, '').replace(/<script[^>]*unpkg\.com\/leaflet[^>]*><\/script>\n?/g, '');
   h = setMeta(h, 'name', 'description', o.desc);
   h = setMeta(h, 'property', 'og:title', o.ogTitle || o.title);
   h = setMeta(h, 'property', 'og:description', o.ogDesc || o.desc);

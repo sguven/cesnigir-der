@@ -35,7 +35,7 @@
   // Düzenleme modu (yonetim/): yonetim/duzen.js bu nesneyi tanımlar; ziyaretçi sitesinde yoktur
   var E = window.CD_EDIT || null;
   var main = document.getElementById('icerik');
-  var pos = {}, curHash = location.hash, tapped = false;   // sayfaların kaydırma yeri (geri dönünce kaldığı yerden)
+  var pos = {}, curHash = location.hash, tapped = false, ilkAcilis = true;   // sayfaların kaydırma yeri (geri dönünce kaldığı yerden)
 
   function $(id) { return document.getElementById(id); }
   function icon(n) { return '<svg aria-hidden="true"><use href="#i-' + n + '"/></svg>'; }
@@ -315,7 +315,7 @@
       '<button type="button" class="live-open" id="liveOpen" aria-label="Görüntüyü büyüt">' + (d.canli_not ? '' : '<span class="live-tag">CANLI</span>') + '<span class="live-zoom">⤢ Büyüt</span></button>' +
       '<button type="button" class="live-close" id="liveClose" hidden>✕ Kapat</button></div></div>' :
       (d.canli_yayin || d.canli_not) ? '<div class="live-mini"' + ed('dernek:canli') + '>' + liveLabel + '</div>' : '';
-    var h = '<section class="hero"><img src="' + B + 'images/kapak.jpg?v=2" width="1926" height="817" decoding="async" alt="Gün batımında Çeşnigir Köprüsü ve Türk bayrağı, üzerinde Çeşnigir-Der yazısı."></section>' +
+    var h = '<section class="hero"><img src="' + B + 'images/kapak.jpg?v=3" srcset="' + B + 'images/kapak-800.jpg 800w, ' + B + 'images/kapak-1200.jpg 1200w, ' + B + 'images/kapak.jpg?v=3 1926w" sizes="100vw" width="1926" height="817" fetchpriority="high" alt="Gün batımında Çeşnigir Köprüsü ve Türk bayrağı, üzerinde Çeşnigir-Der yazısı."></section>' +
       '<div class="welcome"><div class="container welcome-in" style="padding:22px 18px"><div><h1>Köprüköy\'e hoş geldiniz</h1>' +
       '<p>Köyümüzden duyurular, vefat ve düğün haberleri, etkinlikler ve fotoğraflar.</p></div>' +
       '<div class="welcome-side">' + (liveBox || (E ? '<div' + ed('dernek:canli') + '></div>' : '')) + radyoHtml() + '</div></div></div>' + quickLinks();
@@ -1387,7 +1387,7 @@
     main.innerHTML = html;
     radyoSync();
     realLinks(main);
-    main.classList.remove('gir'); void main.offsetWidth; main.classList.add('gir');
+    if (ilkAcilis) ilkAcilis = false; else { main.classList.remove('gir'); void main.offsetWidth; main.classList.add('gir'); }   // ilk açılışta beklemeden görünsün
     var navKey = page === 'duyuru' ? 'duyurular' : page === 'etkinlik' ? 'etkinlikler' : page === 'ilan' ? 'pazar' : page === 'isletme' ? 'rehber' : page === 'konu' ? 'meydan' : page === 'foto' ? 'fotograflar' : page;
     if (page === 'etkinlik' || page === 'ilan' || page === 'isletme' || page === 'duyuru') { var sp = main.querySelector('[data-share-photo]'); if (sp) C.warmShare(sp.getAttribute('data-share-photo')); }
     document.querySelectorAll('[data-nav]').forEach(function (a) {
