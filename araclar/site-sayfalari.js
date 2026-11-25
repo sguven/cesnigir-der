@@ -28,7 +28,7 @@ var PAGES = {
   hakkimizda: 'Çeşnigir-Der (Köprüköy Çeşnigir Kültür Sosyal Yardımlaşma ve Dayanışma Derneği) hakkında: başkan, yönetim ve denetim kurulu, dernek binasının adresi ve haritadaki konumu.',
   duyurular: 'Köprüköy, Keskin ve Kırıkkale\'den güncel haberler, duyurular, vefat ve düğün ilanları. Çeşnigir-Der derneğinin haber sayfası.',
   etkinlikler: 'Köprüköy etkinlik takvimi: düğünler, mevlitler, toplantılar, resmî bayramlar ve dinî günler.',
-  fotograflar: 'Köprüköy (Keskin, Kırıkkale) fotoğrafları: Çeşnigir-Der dernek binası, köy meydanı, açılış töreni ve köyden kareler.'
+  fotograflar: 'Köprüköy (Keskin, Kırıkkale) fotoğrafları: tarihi Çeşnigir Köprüsü, Kızılırmak ve baraj gölü manzaraları, eski köy fotoğrafları ve Çeşnigir-Der dernek açılışından kareler.'
 };
 var MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
