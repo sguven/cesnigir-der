@@ -1,5 +1,20 @@
 [
   {
+    "tur": "Dükkân",
+    "tarih": "2026-11-25",
+    "baslik": "Gökçe Erkek Kuaförü",
+    "aciklama": "Saç sakal şekillendirme",
+    "adres": "Şahin tepe mahallesi gamze Özdemir caddesi 26/B Gökçe erkek kuaförü Mamak Ankara",
+    "kisi": "Güngör Gökçe",
+    "telefon": "05434295337",
+    "foto": "images/yuklenen/2026-11-25-233112-3aqk8.jpg",
+    "fotolar": [
+      {
+        "foto": "images/yuklenen/2026-11-25-233115-48uze.jpg"
+      }
+    ]
+  },
+  {
     "tur": "Sanayi",
     "tarih": "2026-11-25",
     "baslik": "Sincan oto elektrik",
