@@ -990,10 +990,14 @@
       '<ul class="check-list">' +
       '<li>Tarihi Çeşnigir Köprüsü\'nü yakından görmek</li>' +
       '<li>Kanyona bakan seyir teraslarından (biri cam zeminli) Kızılırmak\'ı izlemek</li>' +
-      '<li>Ahşap iskeleden kalkan teknelerle kanyonu sudan gezmek</li>' +
+      '<li>Ahşap iskeleden kalkan teknelerle kanyonda tekne turu yapmak</li>' +
       '<li>Kanyon boyunca yaklaşık 6,5 km\'lik yolda yürüyüş yapmak ya da bisiklete binmek</li>' +
       '<li>Mesire alanında piknik yapmak</li>' +
-      '<li>Gün batımında köprünün sudaki yansımasını fotoğraflamak</li>' +
+      '<li>Doğada kamp yapmak</li>' +
+      '<li>Behrek (Böğrek) Dağı ve çevresindeki tepelerde doğa yürüyüşü (trekking) yapmak</li>' +
+      '<li>Gün doğumunu ve gün batımını izlemek</li>' +
+      '<li>Özellikle ilkbahar ve sonbaharda tarihi köprüyü, kanyonun ışığını ve nehirdeki yansımaları fotoğraflamak</li>' +
+      '<li>Kızılırmak kenarında yöresel kahvaltı yapmak, köylü pazarından alışveriş yapmak</li>' +
       '<li>Göl kıyısında sazan ve tatlı su levreği avlamak</li>' +
       '<li>Karşı kıyıdaki 5 bin yıllık Büklükale ören yerini ve Keskin\'deki Sulu Mağara\'yı görmek</li></ul>' +
       '</div><aside><div class="box box-pad"><h3>Nerede, Nasıl Gidilir?</h3>' +
