@@ -81,6 +81,12 @@
     return ((d.baskan || d.telefon) ? person(d.baskan, d.telefon) : '') + ((d.baskan2 || d.telefon2) ? person(d.baskan2, d.telefon2) : '');
   }
   // Düzenleme modunda kaydın hangi listede kaçıncı olduğunu işaretler (düzenle / sil düğmeleri için)
+  // Duyurular dosyadaki sırayla (en son eklenen en üstte) gösterilir; "sabit": "Evet" olanlar (panelde "En üstte sabit dursun mu?") her zaman en üstte kalır
+  function duyuruSirali() {
+    var d = data.duyurular || [];
+    var sabit = function (p) { return p.sabit === 'Evet' || p.sabit === true; };
+    return d.filter(sabit).concat(d.filter(function (p) { return !sabit(p); }));
+  }
   function ek(col, i) { return E && i >= 0 ? ' data-ek="' + col + '" data-ix="' + i + '"' : ''; }
   function ed(what) { return E ? ' data-ed="' + what + '"' : ''; }
   /* ---------- parçalar ---------- */
@@ -308,7 +314,7 @@
 
   /* ---------- sayfalar ---------- */
   function pageHome() {
-    var d = data.dernek, news = data.duyurular.slice(0, 4), ev = upcoming(45).slice(0, 4);
+    var d = data.dernek, news = duyuruSirali().slice(0, 4), ev = upcoming(45).slice(0, 4);
     // Canlı görüntü: karşılama bandının sağında küçük oynar; dokununca aynı oynatıcı ekranı kaplayacak kadar büyür
     // (oynatıcı yeniden yüklenmez, yalnızca boyutu değişir). Kapat, karanlık alana dokunmak ya da Esc eski hâline döndürür.
     // CANLI_VIDEO_GOSTER: YouTube oynatıcısı şimdilik gizli; yalnız "Köyden Canlı Görüntü · Yakında" yazısı görünür.
@@ -350,7 +356,7 @@
 
   var filter = 'Tümü', NEWS_STEP = 8, newsShown = NEWS_STEP;
   function pageNews() {
-    var all = data.duyurular.slice();
+    var all = duyuruSirali();
     var types = ['Tümü'].concat(C.DUYURU_TURLERI.filter(function (t) { return all.some(function (p) { return p.tur === t; }); }));
     if (types.indexOf(filter) < 0) filter = 'Tümü';
     var list = filter === 'Tümü' ? all : all.filter(function (p) { return p.tur === filter; });
@@ -382,7 +388,7 @@
     }
     return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/duyurular">Duyurular</a></div></div></div>' +
       '<section class="section"><div class="container"><article class="article"' + ek('duyurular', data.duyurular.indexOf(p)) + '>' +
-      '<div class="news-meta">' + (p.tur ? '<span class="' + C.badgeClass(p.tur) + '">' + esc(p.tur) + '</span>' : '') + (isTarih(p) && p.olay_tarihi ? '<span class="olay">' + esc(p.olay_tarihi) + '</span><span>Paylaşıldı: ' + esc(C.longDate(p.tarih)) + '</span>' : '<span>' + esc(C.longDate(p.tarih, true)) + '</span>') + '</div>' +
+      '<div class="news-meta">' + (p.tur ? '<span class="' + C.badgeClass(p.tur) + '">' + esc(p.tur) + '</span>' : '') + (isTarih(p) && p.olay_tarihi ? '<span class="olay">' + esc(p.olay_tarihi) + '</span>' : '<span>' + esc(C.longDate(p.tarih, true)) + '</span>') + '</div>' +
       '<h1>' + esc(p.baslik) + '</h1>' +
       (src ? '<button type="button" class="article-img" data-photo="' + esc(src) + '" data-cap="' + esc(p.baslik) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(src) + '" alt="' + esc(p.foto_aciklama || p.baslik) + '"></button>' : '') +
       ekFoto(true) +
@@ -884,6 +890,14 @@
     ataAns: ['Atatürk Ansiklopedisi, Mustafa Kemal Paşa\'nın Ankara\'ya Gelişi', 'https://ataturkansiklopedisi.gov.tr/detay/385/Mustafa-Kemal-Pa%C5%9Fa%E2%80%99n%C4%B1n-Ankara%E2%80%99ya-Geli%C5%9Fi-(27-Aral%C4%B1k-1919)'],
     atam: ['G. Çaykıran, ATAM Dergisi', 'https://atamdergi.gov.tr/tam-metin/1101/tur'],
     vikiBala: ['Vikipedi, Balâ', 'https://tr.wikipedia.org/wiki/Bal%C3%A2'],
+    ozkan: ['A. Ateş Özkan, Hacettepe Türkiyat Araştırmaları Dergisi 44, 2026', 'https://dergipark.org.tr/tr/download/article-file/4744013'],
+    ozcelik: 'B. Özçelik, Kırıkkale Karakeçilileri\'nin Halkbilimi Derlemeleri, 1995',
+    culpan: 'Cevdet Çulpan, Türk Taş Köprüleri, 2002',
+    ahiEvran: ['Kırşehir Ahi Evran Üniversitesi, Büklükale kazısı', 'https://ahievran.edu.tr/en/archive-news/7205-kaeu-faculty-member-discovered-a-palace-built-in-the-buklukale-area-in-the-20th-century-bc'],
+    hdn23: ['Hürriyet Daily News, 30 Haziran 2023', 'https://hurriyetdailynews.com/japanese-archaeologist-unearths-hittite-remains-184319'],
+    hdnIsk: ['Hürriyet Daily News, Büklükale\'de İskender dönemi izleri', 'https://www.hurriyetdailynews.com/excavations-uncover-traces-of-alexander-the-great-era-site-223825'],
+    sabah23: ['Daily Sabah, 19 Haziran 2023', 'https://www.dailysabah.com/arts/japanese-archaeologist-reveal-1st-settlement-of-cimmerians-in-anatolia/news'],
+    wikiBaraj: ['Wikipedia, Kapulukaya Dam', 'https://en.wikipedia.org/wiki/Kapulukaya_Dam'],
     kardes: ['Sırrı Kardeş, Heyet-i Temsiliye ve Mustafa Kemal Kırşehir\'de (1950), aktaran Adnan Yılmaz', 'https://www.adnanyilmaz.com.tr/2020/01/28/100-yilinda-samsundan-kirsehire-gelen-mustafa-kemal-pasa/']
   };
   function srcHtml(list) {
@@ -894,6 +908,7 @@
   }
 
   var TARIH = [
+    ['MÖ 3000 civarı', 'Köprünün hemen yanında, Kızılırmak\'ın en dar yerindeki Büklükale tepesinde ilk yerleşim kurulur. Burada Eski Tunç Çağı\'ndan Osmanlı dönemine kadar aralıksız yaşanır; ırmağın bu dar yeri her dönemde önemli bir geçit olur.', [K.ahiEvran, K.sabah23]],
     ['Rivayet: MÖ 6. yüzyıl', 'Herodot, Lidya Kralı Kroisos\'un Kızılırmak\'ı orada bulunan köprülerden geçtiğini yazar, ama yer adı vermez. Tarihçi Olcay Zengin Koşan (2021), O\'Grady\'ye (2002) dayanarak bu geçişin bugünkü köprünün yerinde bulunmuş daha eski bir köprüden olmuş olabileceğini öne sürer. Garstang ve Gurney (1959) da köprünün altında Roma dönemi ve daha eski köprülerden kalma taşlar gördüklerini yazar. Ancak Herodot köprüyü görmemiştir; geçişin burada olduğunu kesinleştiren bir belge yoktur.', [K.kosan, K.gg, K.pehl]],
     ['13. yüzyıl', 'Köprü Anadolu Selçukluları döneminde, yanındaki bir hanla birlikte yapılır. Sanat tarihçisi Fügen İlter\'e göre İslam öncesine ait eski bir köprünün temelleri üzerine kurulmuştur. Han bugün ayakta değildir.', [K.pehl, K.kure]],
     ['1402', 'Rivayete göre Timur\'un ordusu Ankara Savaşı\'na giderken köprüden geçer.', [K.wikiKopru, K.kure]],
@@ -916,7 +931,8 @@
     ['1936', 'Avusturyalı araştırmacı K. Ritter köprüyü iki kez inceler ve bugünkü hâliyle Osmanlı yapısı olduğunu yazar.', [K.pehl]],
     ['19 Nisan 1938', 'Kırşehir–Keskin depremi bölgeyi sarsar. Depremi inceleyen bilim heyeti Köprüköy çevresinde de çalışır.', [K.deprem]],
     ['29 Şubat 1972', 'Köprüköy\'de belediye kurulur, köy belde olur.', [K.vikiKoy, K.wikiKoy]],
-    ['1979–1989', 'Kızılırmak üzerinde Kapulukaya Barajı yapılır. 1989\'da sular yükselince köprü araç trafiğine kapanır, yakınına yeni karayolu köprüsü yapılır.', [K.wikiKopru, K.wikiKoy]],
+    ['1979–1989', 'Kızılırmak üzerinde 61 metre yüksekliğindeki Kapulukaya Barajı yapılır ve 1979\'da açılır. 1989\'da sular yükselince köprü araç trafiğine kapanır, yakınına yeni karayolu köprüsü yapılır.', [K.wikiKopru, K.wikiKoy, K.wikiBaraj]],
+    ['2009', 'Kültür ve Turizm Bakanlığı izniyle Japon arkeolog Kimiyoshi Matsumura başkanlığında karşı kıyıdaki Büklükale\'de kazılar başlar. Kazılarda Hitit dönemine ait çivi yazılı tabletler bulunur.', [K.ahiEvran, K.hdn23]],
     ['2010', 'Karayolları 4. Bölge Müdürlüğü köprüyü restore eder. Köprü bugün yayalara açıktır.', [K.wikiKopru, K.kure]],
     ['2013', 'Nüfus 2.000\'in altına düşünce belediye kapanır, Köprüköy yeniden köy olur.', [K.vikiKoy, K.wikiKoy]],
     ['2019–2020', 'Kırıkkale Valiliği çalışmalarıyla Çeşnigir Kanyonu seyir terasları, yürüyüş yolları ve tekne turlarıyla turizme açılır.', [K.kure, K.tekne]],
@@ -944,6 +960,12 @@
       '</div><div class="box box-pad"><h3>"Çeşnigir" ne demek?</h3>' +
       '<p style="margin:0 0 10px">Farsça <i>çaşni</i> (tat) ve <i>gir</i> (alan) sözlerinden gelir. Selçuklu ve Osmanlı saraylarında padişaha sunulan yemekleri önceden tadıp güvenliğinden sorumlu olan görevliye <b>çaşnigir</b> denirdi; Osmanlı sarayının en itibarlı görevlerinden biriydi.</p>' +
       '<p style="margin:0">Kelimenin bir anlamı da darphanede basılan altın ve gümüş paraların ayarını denetleyen görevlidir. Köprünün neden bu adı aldığı kesin olarak bilinmiyor; belgelerde hem "Çaşnigir" hem "Çeşnigir" yazılışı geçer.</p></div></div>' +
+      '<div class="box box-pad"><h3>Kaynaklar nerede ayrılıyor?</h3><ul class="check-list">' +
+      '<li><b>Boyu:</b> Yukarıdaki ölçülerde 113,25 m yazar; Cevdet Çulpan ve Wikipedia 110 m verir.' + srcHtml([K.culpan, K.ozkan, K.wikiKopru]) + '</li>' +
+      '<li><b>Göz sayısı:</b> Çulpan\'a göre köprü "sivri kemerli tek bir gözden ibaret"tir. Wikipedia ise 12 kemerden söz eder (9 ana, 3 hafifletme gözü). Yukarıdaki ölçüler altı açıklık ve üç gizli göz sayar.' + srcHtml([K.culpan, K.ozkan, K.wikiKopru]) + '</li>' +
+      '<li><b>Yapım dönemi:</b> Çoğu kaynak 13. yüzyıl Anadolu Selçuklu dönemini söyler. Avusturyalı K. Ritter (1936) ve 1852 tarihli bir arşiv belgesi ise köprüyü Osmanlı dönemine, Sultan Murad\'a bağlar. Kitabe olmadığı için kesin tarih bilinmiyor.' + srcHtml([K.kure, K.pehl]) + '</li>' +
+      '<li><b>Mimar Sinan:</b> Wikipedia, onarımın Yavuz Sultan Selim zamanında Mimar Sinan\'ın gözetiminde yapıldığını kesin bilgi gibi yazar; KÜRE Ansiklopedisi ve Kırıkkale Tanıtım Portalı bunu rivayet olarak aktarır. Bunu doğrulayan bir arşiv belgesine rastlamadık.' + srcHtml([K.wikiKopru, K.kure, K.kkTanitim]) + '</li>' +
+      '</ul></div>' +
 
       biliyorKutu('t-biliyor-tel') +
       '<div class="sec-head" style="margin-top:40px"><h2>Köyümüz Köprüköy</h2></div>' +
@@ -960,6 +982,12 @@
       para('<b>Derbend</b>, Farsça "geçit tutmak" demektir. Osmanlı devleti, bugünkü jandarma ve polisin olmadığı dönemlerde, eşkıyanın sık görüldüğü tehlikeli geçitleri civar köylerin halkına korutur; karşılığında onları bazı vergilerden muaf tutardı. Bekçiler yolcuların canına ve malına zarar gelmeyeceğine söz verir, bir şey olursa zararı öderlerdi. Başlarındaki kişiye <b>derbend ağası</b> denirdi.') +
       para('Çaşnigir Köprüsü, Kırşehir Sancağı\'nın Konur Kazası\'nda, bu düzenin Anadolu\'daki önemli noktalarından biriydi. 17. yüzyıl sonunda başka yerlerde bekçiler dağılırken, burada 19. yüzyılın ortasında hâlâ kalabalık bir nüfus yaşıyordu: 1845 vergi defterine göre köyde 182 Müslüman hane, 1840 defterine göre de 7 Rum hanesi vardı. Hane başına beş kişi sayılırsa nüfus 945 civarındadır.') +
       para('Zamanla düzen bozuldu. Arşiv belgelerinde halktan fazla para isteyen ağalar, vergi muafiyetine rağmen vergi talep eden valiler ve halka zulmettiği için 1822\'de cezalandırılan Deli Battal adlı bir ağa geçer. 1831\'de derbendin muafiyeti kaldırıldı; Tanzimat\'tan sonra yol güvenliğini önce zaptiye, sonra jandarma üstlendi. Derbendden geriye bugün yalnızca köprü kaldı; han ve caminin izi yoktur.') +
+
+      '<div class="sec-head" style="margin-top:30px"><h2>Köprünün komşusu: Büklükale</h2></div>' +
+      figure('buklukale.jpg', 'Kızılırmak kıyısında Büklükale ören yerinin kayalık tepesi; sağda Çeşnigir Köprüsü.', 'Büklükale tepesi ve sağda Çeşnigir Köprüsü. ' + credit(IS, 'B%C3%BCkl%C3%BCkale_01.jpg')) +
+      para('Köprünün karşı kıyısında, Karakeçili sınırları içindeki Büklükale, Kızılırmak\'ın en dar yerinde kurulmuş eski bir şehirdir. Kazı ekibine göre burada yaklaşık MÖ 3000\'den Osmanlı dönemine kadar yaşanmıştır ve bu dar geçit her çağda önemli bir geçiş noktası olmuştur. Ekip, ırmağın batı kıyısında, yerleşimin kuzeyinde bir Roma köprüsünün kalıntılarını da kaydeder. Bu, köprümüzün yerinde ya da yakınında çok daha eski köprüler bulunduğunu söyleyen kaynaklarla uyuşur.') +
+      para('Kazılar 2009\'dan beri Japon arkeolog Kimiyoshi Matsumura başkanlığında sürüyor. Toprağın altından üstüne doğru Eski Tunç Çağı, Hitit, Demir Çağı, Helenistik (Büyük İskender dönemi) ve Osmanlı katmanları çıktı. Hitit dönemine ait çivi yazılı tabletler, bugüne kadar bulunanların en batıdakileri olarak anılıyor. Ekip, büyük sur duvarının Kimmerlere ait olabileceğini düşünüyor; bu henüz kesinleşmiş değil.') +
+      '<p class="muted small" style="margin-top:-6px">' + srcHtml([K.ahiEvran, K.hdn23, K.hdnIsk, K.sabah23]).replace('<small class="t-src">', '').replace('</small>', '') + '</p>' +
 
       '<div class="sec-head" style="margin-top:30px"><h2>Atatürk köyümüzden geçti</h2></div>' +
       '<figure class="fig"><img src="' + B + 'images/ataturk-yol-haritasi.jpg" alt="Harita: Mustafa Kemal Paşa\'nın 18-27 Aralık 1919\'da Sivas\'tan Kayseri, Mucur, Hacıbektaş, Kırşehir, Kaman, Köprüköy, Bala ve Beynam üzerinden Ankara\'ya yolculuğu." loading="lazy" style="aspect-ratio:auto;object-fit:contain">' +
@@ -999,8 +1027,14 @@
       rows([['1972', 'Hacı Erbek (ilk başkan)'], ['1973', 'Mehmet Güven'], ['1977', 'M. Dede Köprülü'], ['1984', 'Şerafettin Güven'], ['1989', 'Şerafettin Güven'], ['1994', 'Muzaffer Büken'], ['1999', 'Selahattin Güven'], ['2004', 'Oğuzhan Köprülü'], ['2009', 'Hasan Taşpınar']]) +
       '<p class="muted small" style="margin:10px 0 0">Kaynak: Vikipedi, Köprüköy (Keskin)</p></div></div>' +
 
-      '<div class="box box-pad" style="margin-top:24px"><h3>Türküde Köprüköy</h3>' +
-      '<p style="margin:0">Kızılırmak türkülerinden "Nettin Kızılırmak Allı Gelini"nde anlatılan olayın köyümüzde yaşandığı aktarılır. Hikâyeye göre karşı köye götürülen gelin alayı köprüden geçerken köprü yıkılır, gelin ve alaydan pek çok kişi ırmağa kapılır. Ardından Kızılırmak\'a sitem eden ağıtlar yakılır.</p></div>' +
+      '<div class="sec-head" style="margin-top:30px"><h2>Köprünün rivayetleri</h2></div>' +
+      '<div class="pair" style="margin-bottom:0"><div class="box box-pad"><h3>Kan Taşı</h3>' +
+      '<p style="margin:0 0 10px">Karakeçili\'den derlenen bir rivayete göre köprü sekiz kez yapılmaya çalışılmış, her seferinde yıkılmıştır. Ustabaşı mimar rüyasında, kızını ve oğlunu kurban edip onların kanına bulanmış iki taşı köprüye koyarsa köprünün ayakta kalacağını görür. Rivayete göre bu taşlar büyük kemere konur ve bugün "Kan Taşı" diye gösterilir.</p>' +
+      '<p style="margin:0">Hikâyenin sonunda köprüyü yaptıran hükümdar, mimarın sözüne gücenip köprüden geçmez, ırmağı sığ bir yerden geçer. Benzer "kurban" söylenceleri Anadolu ve Balkanlar\'daki pek çok köprü için anlatılır.</p>' +
+      srcHtml([K.ozcelik, K.ozkan]) + '</div>' +
+      '<div class="box box-pad"><h3>Türküde Köprüköy</h3>' +
+      '<p style="margin:0">Kızılırmak türkülerinden "Nettin Kızılırmak Allı Gelini"nde anlatılan olayın köyümüzde yaşandığı aktarılır. Hikâyeye göre karşı köye götürülen gelin alayı köprüden geçerken köprü yıkılır, gelin ve alaydan pek çok kişi ırmağa kapılır. Ardından Kızılırmak\'a sitem eden ağıtlar yakılır.</p>' +
+      srcHtml([['Timeturk, Türkülere ve hikâyelere konu olan Kızılırmak', 'https://www.timeturk.com/kultur/turkulere-hikayelere-konu-olan-kizilirmak/haber-1780026']]) + '</div></div>' +
 
       '<p class="muted small" style="margin-top:20px">Kaynak: Prof. Dr. Hamit Pehlivanlı, <a href="https://pusulagazetesi.net/kose-yazilari/osmanlilarda_yol_emniyeti-1242" target="_blank" rel="noopener">"Osmanlılarda Yol Emniyetinin Sağlanmasında Derbendlerin Yeri ve Çaşnigir Köprüsü Derbendi"</a> (Yedi Kıta, Aralık 2012; Osmanlı arşiv belgeleri, Cevdet Çulpan ve Fügen İlter\'in çalışmalarına dayanır) · ' +
       '<a href="' + W + 'K%C3%B6pr%C3%BC,_Keskin" target="_blank" rel="noopener">Vikipedi, Köprüköy (Keskin)</a> · <a href="https://en.wikipedia.org/wiki/%C3%87e%C5%9Fnigir_Bridge" target="_blank" rel="noopener">Wikipedia, Çeşnigir Bridge</a> · ' +

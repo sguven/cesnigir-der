@@ -43,6 +43,7 @@
         { name: 'baslik', label: 'Başlık', type: 'text', required: true },
         { name: 'metin', label: 'Açıklama', type: 'textarea' },
         { name: 'foto', label: 'Fotoğraf', type: 'photo', help: 'İsterseniz bir fotoğraf ekleyin.' },
+        { name: 'sabit', label: 'Listenin en üstünde sabit dursun mu?', type: 'choice', opts: ['Hayır', 'Evet'], def: 'Hayır' },
         { name: 'olay_tarihi', label: 'Olayın tarihi (Tarihten yazıları için)', type: 'text', extra: true, placeholder: 'Örnek: 26 Aralık 1919' },
         { name: 'kaynak', label: 'Haberin kaynağı', type: 'text', extra: true, placeholder: 'Örnek: Kırıkkale Haber' },
         { name: 'link', label: 'Haberin internet adresi', type: 'url', extra: true, placeholder: 'https://…' }
@@ -916,6 +917,7 @@
       busy(orig ? 'Kaydediliyor…' : 'Yayınlanıyor…');
       return updateJson(c.file, function (data) {
         var list = C.arr(data), item = clean(v);
+        if (item.sabit !== 'Evet') delete item.sabit;   // yalnız sabitlenen duyuruda yazılır
         // formda alanı olmayan bilgiler (ek fotoğraflar vb.) düzenlemede kaybolmasın
         if (orig) {
           var eski = JSON.parse(orig);
