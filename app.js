@@ -303,12 +303,16 @@
     var d = data.dernek, news = data.duyurular.slice(0, 4), ev = upcoming(45).slice(0, 4);
     // Canlı görüntü: karşılama bandının sağında küçük oynar; dokununca aynı oynatıcı ekranı kaplayacak kadar büyür
     // (oynatıcı yeniden yüklenmez, yalnızca boyutu değişir). Kapat, karanlık alana dokunmak ya da Esc eski hâline döndürür.
-    var live = C.ytEmbed(d.canli_yayin), liveBox = live ? '<div class="live-mini" id="liveBox"' + ed('dernek:canli') + '>' +
-      '<div class="live-label"><span class="live-dot" aria-hidden="true"></span>Köyden Canlı Görüntü' +
-      (d.canli_not ? ' <span class="live-soon">' + esc(d.canli_not) + '</span>' : '') + '</div>' +
+    // CANLI_VIDEO_GOSTER: YouTube oynatıcısı şimdilik gizli; yalnız "Köyden Canlı Görüntü · Yakında" yazısı görünür.
+    // Videoyu geri açmak için bunu true yapın (adres data/dernek.json'daki canli_yayin alanında duruyor).
+    var CANLI_VIDEO_GOSTER = false;
+    var liveLabel = '<div class="live-label"><span class="live-dot" aria-hidden="true"></span>Köyden Canlı Görüntü' +
+      (d.canli_not ? ' <span class="live-soon">' + esc(d.canli_not) + '</span>' : '') + '</div>';
+    var live = CANLI_VIDEO_GOSTER ? C.ytEmbed(d.canli_yayin) : '', liveBox = live ? '<div class="live-mini" id="liveBox"' + ed('dernek:canli') + '>' + liveLabel +
       '<div class="live-frame">' + C.ytFrame(live) +
       '<button type="button" class="live-open" id="liveOpen" aria-label="Görüntüyü büyüt">' + (d.canli_not ? '' : '<span class="live-tag">CANLI</span>') + '<span class="live-zoom">⤢ Büyüt</span></button>' +
-      '<button type="button" class="live-close" id="liveClose" hidden>✕ Kapat</button></div></div>' : '';
+      '<button type="button" class="live-close" id="liveClose" hidden>✕ Kapat</button></div></div>' :
+      (d.canli_yayin || d.canli_not) ? '<div class="live-mini"' + ed('dernek:canli') + '>' + liveLabel + '</div>' : '';
     var h = '<section class="hero"><img src="' + B + 'images/kapak.jpg?v=2" width="1926" height="817" decoding="async" alt="Gün batımında Çeşnigir Köprüsü ve Türk bayrağı, üzerinde Çeşnigir-Der yazısı."></section>' +
       '<div class="welcome"><div class="container welcome-in" style="padding:22px 18px"><div><h1>Köprüköy\'e hoş geldiniz</h1>' +
       '<p>Köyümüzden duyurular, vefat ve düğün haberleri, etkinlikler ve fotoğraflar.</p></div>' +
