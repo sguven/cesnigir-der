@@ -737,6 +737,79 @@
   }
   var EG = 'Egeasln, CC BY-SA 4.0', IS = 'Ingeborg Simon, CC BY-SA 3.0', VH = 'Volker Höhfeld, CC BY-SA 4.0';
 
+  /* Bize Ulaşın: ziyaretçi dernek yönetimine mesaj yazar (Hakkımızda sayfasının içinde; #/bize-ulasin doğrudan buraya açılır).
+     Mesaj Supabase'de (mesajlar tablosu, kurulum: araclar/supabase-mesajlar.sql) durur, sitede yayınlanmaz; yönetim panelinde okunur
+     (yonetim/duzen.js: mesajlar). Tablo henüz kurulmadıysa formun yerine "yakında" yazar. */
+  var buVar = null;   // null: henüz bakılmadı · true: mesaj alınabiliyor · false: kurulum yok
+  function buForm() {
+    return '<form class="m-form" data-bu-form novalidate>' +
+      '<label class="m-l">Adınız ve soyadınız<input name="ad" autocomplete="name" maxlength="60" value="' + esc(mAd()) + '"></label>' +
+      '<label class="m-l">Telefon numaranız ya da e-posta adresiniz<input name="iletisim" autocomplete="tel" maxlength="100" placeholder="0555 123 45 67">' +
+      '<span class="i-yardim">Size cevap verebilmemiz için yazın. İstemiyorsanız boş bırakabilirsiniz.</span></label>' +
+      '<label class="m-l">Mesajınız<textarea name="metin" rows="6" maxlength="3000" placeholder="Sorunuzu, önerinizi ya da isteğinizi buraya yazın."></textarea></label>' +
+      '<label class="m-hp" aria-hidden="true">Web sitesi<input name="web" tabindex="-1" autocomplete="off"></label>' +
+      '<p class="m-err" role="alert" hidden></p>' +
+      '<button type="submit" class="btn">' + icon('mail') + 'Mesajı gönder</button>' +
+      '<p class="muted small m-note">Mesajınızı yalnız dernek yönetimi okur, sitede yayınlanmaz.</p></form>';
+  }
+  function buSection() {
+    return '<section class="section alt bu-sec" id="bize-ulasin"><div class="container bu-in"><div class="sec-head"><h2>Bize Ulaşın</h2></div>' +
+      '<p style="margin:0 0 16px">Dernek yönetimine sorunuzu, önerinizi ya da isteğinizi yazın. En kısa zamanda size dönüş yaparız.</p>' +
+      '<div class="box box-pad" id="buKutu">' + (buVar === false ? buYakinda() : buForm()) + '</div></div></section>';
+  }
+  function buYakinda() { return '<p style="margin:0">Mesaj formu çok yakında burada olacak.</p>'; }
+  function buHazirla() {
+    if (buVar !== null || !$('buKutu')) return;
+    C.sb('/mesajlar?select=id&limit=1').then(function () { buVar = true; }, function (e) {
+      if (!e || e.status === 'net') return;
+      buVar = false;
+      var b = $('buKutu'); if (b && !E) b.innerHTML = buYakinda();
+    });
+  }
+  var BU_SON = 'cd-bu-son';   // son gönderilen mesajın zamanı: aynı kişi art arda çok mesaj göndermesin
+  document.addEventListener('submit', function (e) {
+    var f = e.target.closest && e.target.closest('form[data-bu-form]');
+    if (!f) return;
+    e.preventDefault();
+    var v = {}, err = f.querySelector('.m-err'), btn = f.querySelector('button[type=submit]');
+    ['ad', 'iletisim', 'metin', 'web'].forEach(function (n) { v[n] = f.elements[n] ? f.elements[n].value.trim() : ''; });
+    function hata(t, n) { err.textContent = t; err.hidden = false; if (n && f.elements[n]) f.elements[n].focus(); }
+    if (v.ad.length < 3) return hata('Lütfen adınızı ve soyadınızı yazın.', 'ad');
+    if (v.iletisim && !/@/.test(v.iletisim) && (!/^[0-9+ ()\-]+$/.test(v.iletisim) || v.iletisim.replace(/\D/g, '').length < 10))
+      return hata('Telefon numaranızı başında 0 ile yazın (örnek: 0555 123 45 67) ya da e-posta adresinizi yazın. İstemiyorsanız boş bırakın.', 'iletisim');
+    if (/@/.test(v.iletisim) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.iletisim)) return hata('E-posta adresi anlaşılamadı. Örnek: ad@gmail.com', 'iletisim');
+    if (v.metin.length < 5) return hata('Lütfen mesajınızı yazın.', 'metin');
+    var son = 0; try { son = +localStorage.getItem(BU_SON) || 0; } catch (x) { /* yok say */ }
+    if (Date.now() - son < 60000) return hata('Mesajınız az önce gönderildi. Yeni bir mesaj için lütfen bir dakika bekleyin.');
+    err.hidden = true;
+    mAdKaydet(v.ad);
+    var label = btn.innerHTML;
+    btn.disabled = true; btn.textContent = 'Gönderiliyor…';
+    var done = function () {
+      try { localStorage.setItem(BU_SON, String(Date.now())); } catch (x) { /* yok say */ }
+      var t = document.createElement('div');
+      t.innerHTML = '<div class="m-thanks" role="status"><b>Teşekkürler, mesajınız dernek yönetimine ulaştı.</b>' +
+        '<p>' + (v.iletisim ? 'En kısa zamanda size dönüş yapacağız.' : 'Mesajınızı okuyacağız.') + '</p>' +
+        '<button type="button" class="btn btn-light" data-bu-again>Yeni bir mesaj yaz</button></div>';
+      f.parentNode.replaceChild(t.firstChild, f);
+    };
+    if (v.web) { done(); return; }   // yalnız otomatik programların doldurduğu gizli alan
+    var body = { ad: v.ad, metin: v.metin };
+    if (v.iletisim) body.iletisim = v.iletisim;
+    C.sb('/mesajlar', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: body }).then(done).catch(function (er) {
+      btn.disabled = false; btn.innerHTML = label;
+      hata(er && er.status === 'net' ? 'İnternet bağlantısı yok gibi görünüyor. Bağlantınızı kontrol edip tekrar deneyin.' :
+        er && /çok fazla/.test(er.message || '') ? er.message : 'Gönderilemedi. Lütfen biraz sonra tekrar deneyin.' + (er && er.status ? ' (Hata ' + er.status + ')' : ''));
+    });
+  });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-bu-again]');
+    if (!a) return;
+    var t = document.createElement('div'); t.innerHTML = buForm();
+    var f = t.firstChild, box = a.parentNode; box.parentNode.replaceChild(f, box);
+    f.elements.metin.focus();
+  });
+
   /* Hakkımızda: yalnız dernekle ilgili bilgiler. Eski İletişim sayfasının içeriği (adres, harita) de burada; #/iletisim buraya açılır.
      Köyün ve köprünün tarihi Tarihimiz sayfasında (pageTarih). */
   function pageAbout() {
@@ -766,7 +839,7 @@
       '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li>' +
       '<li><span>Konum</span><a href="' + MAP + '" target="_blank" rel="noopener">Haritada aç</a></li>' +
       '</ul></div>' + (kasa || (E ? '<div' + ed('dernek:kasa') + ' style="margin-top:20px"></div>' : '')) + '</aside></div></section>' +
-      boardsSection(d) +
+      boardsSection(d) + buSection() +
       '<section class="section alt"><div class="container"><div class="sec-head"><h2>Dernek Binası ve Konum</h2></div>' +
       '<p style="margin:0 0 14px">' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + ' · <a href="' + MAP + '" target="_blank" rel="noopener">Haritada aç</a></p>' +
       '<div class="box"><iframe class="map" title="Çeşnigir-Der haritası" loading="lazy" ' +
@@ -1505,7 +1578,8 @@
     etkinlikler: 'Köprüköy etkinlik takvimi: düğün, mevlit ve özel günler · Çeşnigir-Der',
     fotograflar: 'Köprüköy ve Çeşnigir Köprüsü fotoğrafları · Çeşnigir-Der',
     meydan: 'Sizden Gelenler: Köprüköylülerin yazıları, hatıraları ve selamları · Çeşnigir-Der',
-    rehber: 'Esnaf Rehberi: Köprüköylülerin dükkân ve işletmeleri · Çeşnigir-Der'
+    rehber: 'Esnaf Rehberi: Köprüköylülerin dükkân ve işletmeleri · Çeşnigir-Der',
+    'bize-ulasin': 'Bize Ulaşın: dernek yönetimine mesaj gönderin · Çeşnigir-Der'
   };
   function route() {
     // adreste #/… yoksa üretilmiş sayfanın kendi içeriği (CD_ROUTE) açılır
@@ -1521,6 +1595,7 @@
     else if (page === 'rehber') html = pageRehber();
     else if (page === 'isletme') html = pageIsletme(decodeURIComponent(p.slice(1).join('/')));
     else if (page === 'hakkimizda' || page === 'iletisim') { page = 'hakkimizda'; html = pageAbout(); }   // İletişim, Hakkımızda'ya taşındı
+    else if (page === 'bize-ulasin') html = pageAbout();   // mesaj formu Hakkımızda'nın içinde; sayfa forma kayar
     else if (page === 'tarihimiz' || page === 'tarihce' || page === 'koyumuz') { page = 'tarihimiz'; html = pageTarih(); }
     else if (page === 'gezilecek-yerler' || page === 'gezi') { page = 'gezilecek-yerler'; html = pageGezi(); }
     else if (page === 'meydan') html = pageForum(p[1] === 'yaz');
@@ -1547,6 +1622,8 @@
     var t = main.querySelector('h1');
     document.title = TITLES[page] || (t ? t.textContent + ' · Çeşnigir-Der, Köprüköy' : TITLES['']);
     if (page === 'gezilecek-yerler') geziHarita();
+    if (page === 'hakkimizda' || page === 'bize-ulasin') buHazirla();
+    if (page === 'bize-ulasin' && !back) { var bu = $('bize-ulasin'); if (bu) bu.scrollIntoView(); }
     if (E) E.after(page);
     yLoad(page); yBadges();
   }
@@ -1583,6 +1660,7 @@
     f += people(d);
     if (/@/.test(d.eposta || '')) f += '<div><a href="mailto:' + esc(d.eposta) + '">' + esc(d.eposta) + '</a></div>';
     f += '<div><a href="' + MAP + '" target="_blank" rel="noopener">Haritada göster</a></div>';
+    f += '<div class="f-bu"><a href="#/bize-ulasin">✉ Bize Ulaşın: mesaj gönderin</a></div>';
     $('footContact').innerHTML = f;
     $('yil').textContent = new Date().getFullYear();
   }
