@@ -789,9 +789,9 @@
       '<p style="margin:0 0 10px">Farsça <i>çaşni</i> (tat) ve <i>gir</i> (alan) sözlerinden gelir. Selçuklu ve Osmanlı saraylarında padişaha sunulan yemekleri önceden tadıp güvenliğinden sorumlu olan görevliye <b>çaşnigir</b> denirdi; Osmanlı sarayının en itibarlı görevlerinden biriydi.</p>' +
       '<p style="margin:0">Kelimenin bir anlamı da darphanede basılan altın ve gümüş paraların ayarını denetleyen görevlidir. Köprünün neden bu adı aldığı kesin olarak bilinmiyor; belgelerde hem "Çaşnigir" hem "Çeşnigir" yazılışı geçer.</p></div></div>' +
 
+      biliyorKutu('t-biliyor-tel') +
       '<div class="sec-head" style="margin-top:40px"><h2>Köyümüz Köprüköy</h2></div>' +
       figure('koprukoy-gol.jpg', 'Kapulukaya Baraj Gölü kıyısında Köprüköy: kayalık yamaçta kırmızı çatılı evler, solda Çeşnigir Köprüsü.', 'Göl kıyısından Köprüköy ve Çeşnigir Köprüsü. ' + credit(IS, '%C3%87e%C5%9Fnigir_K%C3%B6pr%C3%BCs%C3%BC_02.jpg')) +
-      biliyorKutu('t-biliyor-tel') +
       para('Kırıkkale\'nin Keskin ilçesine bağlı Köprüköy, adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır; halk arasında kısaca "Köprü" de denir. Köy, Ankara–Kırşehir yolunun eski güzergâhında, ırmağın kayalar arasında daraldığı ve en sağlam geçit verdiği yerde kurulmuştur. Yerleşimin Selçuklu döneminde başladığı kabul edilir.') +
       para('Köyümüzün asıl hikâyesi köprüyle birlikte yazılmıştır. Osmanlı döneminde kervanların geçtiği bu kayalık geçidi eşkıyadan korumak için köprünün çevresine derbendciler, yani geçit bekçileri yerleştirildi. Bekçilerin aileleri burada kalıp çoğaldı; han ve cami yapıldı. Böylece bir güvenlik noktası, zamanla kalabalık bir köye dönüştü. Kayıtlarda köyün adı 1777\'de "Çaşnigir Köprüsü", 1815\'te "Çaşnigir Derbendi" olarak geçer.') +
 
@@ -857,7 +857,7 @@
       '</div>' + biliyorKutu('t-biliyor-masa') +
       '</aside></div></section>';
   }
-  /* Biliyor muydunuz? kutusu: masaüstünde yan sütunda, telefonda (tek sütun) "Köyümüz Köprüköy" fotoğrafının hemen altında.
+  /* Biliyor muydunuz? kutusu: masaüstünde yan sütunda, telefonda (tek sütun) "Köyümüz Köprüköy" başlığının hemen üstünde.
      İki kopya yazılır, site.css hangisinin görüneceğini seçer (t-biliyor-masa / t-biliyor-tel). */
   function biliyorKutu(cls) {
     return '<div class="box box-pad ' + cls + '" style="margin-top:20px"><h3>Biliyor muydunuz?</h3><ul class="check-list">' +
