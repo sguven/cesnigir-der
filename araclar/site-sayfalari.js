@@ -1,6 +1,7 @@
 /* Arama motorları (Google, Bing, Yandex) ve paylaşım önizlemeleri için sitenin gerçek adresli sayfalarını üretir:
 
-     gezilecek-yerler/  hakkimizda/  duyurular/  etkinlikler/  fotograflar/  iletisim/     her bölümün kendi sayfası
+     gezilecek-yerler/  tarihimiz/  hakkimizda/  duyurular/  etkinlikler/  fotograflar/   her bölümün kendi sayfası
+     (iletisim/ elle yazılmış bir yönlendirme: eski bağlantılar Hakkımızda'ya açılır)
      p/d-….html                                                        her duyuru ve haberin kendi sayfası
      p/e-….html                                                        her köy etkinliğinin kendi sayfası
      p/i-….html                                                        fotoğraflı pazar ilanlarının paylaşım sayfası (aramaya kapalı)
@@ -23,11 +24,11 @@ var SITE = 'https://' + fs.readFileSync(path.join(root, 'CNAME'), 'utf8').trim()
 var ORG = 'Köprüköy Çeşnigir Kültür Sosyal Yardımlaşma ve Dayanışma Derneği';
 var PAGES = {
   'gezilecek-yerler': 'Kırıkkale Keskin\'deki Köprüköy\'de gezilecek yerler: tarihi Çeşnigir Köprüsü, Çeşnigir Kanyonu mesire alanı, cam seyir terası, tekne turu, yürüyüş yolu, Büklükale ve Sulu Mağara. Ankara\'dan günübirlik, yaklaşık 113 km.',
-  hakkimizda: 'Köprüköy (Keskin, Kırıkkale) ve Çeşnigir Köprüsü: köyün ve köprünün kaynaklı tarihçesi, köy bilgileri ve Çeşnigir-Der derneği hakkında bilgiler.',
+  tarihimiz: 'Çeşnigir Köprüsü ve Köprüköy (Keskin, Kırıkkale) tarihi: köprünün tanıtımı, ölçüleri, "Çeşnigir" adının anlamı ve köyün kaynaklı tarihçesi.',
+  hakkimizda: 'Çeşnigir-Der (Köprüköy Çeşnigir Kültür Sosyal Yardımlaşma ve Dayanışma Derneği) hakkında: başkan, yönetim ve denetim kurulu, dernek binasının adresi ve haritadaki konumu.',
   duyurular: 'Köprüköy, Keskin ve Kırıkkale\'den güncel haberler, duyurular, vefat ve düğün ilanları. Çeşnigir-Der derneğinin haber sayfası.',
   etkinlikler: 'Köprüköy etkinlik takvimi: düğünler, mevlitler, toplantılar, resmî bayramlar ve dinî günler.',
-  fotograflar: 'Köprüköy (Keskin, Kırıkkale) fotoğrafları: Çeşnigir-Der dernek binası, köy meydanı, açılış töreni ve köyden kareler.',
-  iletisim: 'Çeşnigir-Der iletişim bilgileri: dernek başkanı, yönetim kurulu, adres ve Köprüköy\'ün haritadaki konumu.'
+  fotograflar: 'Köprüköy (Keskin, Kırıkkale) fotoğrafları: Çeşnigir-Der dernek binası, köy meydanı, açılış töreni ve köyden kareler.'
 };
 var MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml' };

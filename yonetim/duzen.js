@@ -88,7 +88,7 @@
 
   // Dernek bilgileri parça parça düzenlenir: sitede hangi kutunun yanındaki "Düzenle"ye dokunulduysa yalnız o kutunun bilgileri açılır
   var DERNEK = {
-    kisiler: { title: 'Dernek Bilgileri', help: 'Başkan ve yardımcısı Hakkımızda ve İletişim sayfalarında, telefonlarıyla birlikte görünür.', fields: [
+    kisiler: { title: 'Dernek Bilgileri', help: 'Başkan ve yardımcısı Hakkımızda sayfasında yalnız adlarıyla görünür.', fields: [
       { name: 'baskan', label: 'Dernek başkanı', type: 'text', placeholder: 'Ad Soyad' },
       { name: 'telefon', label: 'Başkanın telefonu', type: 'tel', placeholder: '0555 123 45 67' },
       { name: 'baskan2', label: 'Başkan yardımcısı', type: 'text', placeholder: 'Ad Soyad', help: 'Yoksa boş bırakın.' },
