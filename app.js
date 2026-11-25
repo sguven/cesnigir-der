@@ -1389,7 +1389,7 @@
 
   /* ---------- Keskin FM canlı radyo ---------- */
   // Keskin FM'in (102.1) canlı yayını ana sayfada, canlı görüntünün altındaki düğmeyle dinlenir. Ses yalnızca düğmeye basınca başlar;
-  // sayfalar arasında gezerken ve kaydırırken çalmaya devam eder; çaldığı sürece sağ altta küçük bir "Durdur" düğmesi görünür.
+  // sayfalar arasında gezerken ve kaydırırken çalmaya devam eder; bir kez açıldıktan sonra sağ altta küçük bir düğme kalır (durdurur / yeniden başlatır).
   // Durdurunca bağlantı kesilir (internet harcamaz); yeniden başlatınca yayın o anki yerinden gelir.
   var RADYO = 'https://keskinfm.com/api/stream', RADYO_SITE = 'https://keskinfm.com', rAudio = null, rSt = 'idle', rNo = 0;
   var R_TX = { idle: 'Canlı radyo · dinlemek için dokunun', load: 'Bağlanıyor…', play: 'Çalıyor · durdurmak için dokunun', err: 'Yayına şu an ulaşılamıyor, biraz sonra deneyin' };
@@ -1401,12 +1401,17 @@
       '<span class="radyo-ic">' + R_IC + '</span><span class="radyo-tx"><b>Keskin FM 102.1</b><small aria-live="polite">' + R_TX[rSt] + '</small></span></button>' +
       '<a class="radyo-src" href="' + RADYO_SITE + '" target="_blank" rel="noopener">Yayın: keskinfm.com</a></div>';
   }
+  // Radyo bir kez açıldıktan sonra sağ alttaki küçük düğme kaybolmaz: çalarken durdurur, durmuşken yeniden başlatır
+  // (sayfa yenilense de aynı sekmede kalır).
+  var rSeen = false; try { rSeen = sessionStorage.getItem('cd_radyo') === '1'; } catch (e) { /* yok say */ }
   function radyoSync() {
-    var b = $('radyoBtn'), p = $('radyoPill'), show = radyoOn();   // çalarken her sayfada, kaydırırken de sağ altta durur
-    if (b) { b.setAttribute('data-st', rSt); b.setAttribute('aria-pressed', String(radyoOn())); b.querySelector('small').textContent = R_TX[rSt]; }
-    if (show && !p) { document.body.insertAdjacentHTML('beforeend', '<button type="button" id="radyoPill" class="radyo-pill" hidden>' + R_IC + '<span>Keskin FM</span><i class="r-bars" aria-hidden="true"><i></i><i></i><i></i></i><span class="sr">çalıyor, durdurmak için dokunun</span></button>'); p = $('radyoPill'); }
-    if (p) p.hidden = !show;
-    document.body.classList.toggle('radyo-acik', show);
+    var b = $('radyoBtn'), p = $('radyoPill'), on = radyoOn();
+    if (on && !rSeen) { rSeen = true; try { sessionStorage.setItem('cd_radyo', '1'); } catch (e) { /* yok say */ } }
+    if (b) { b.setAttribute('data-st', rSt); b.setAttribute('aria-pressed', String(on)); b.querySelector('small').textContent = R_TX[rSt]; }
+    if (rSeen && !p) { document.body.insertAdjacentHTML('beforeend', '<button type="button" id="radyoPill" class="radyo-pill">' + R_IC + '<span>Keskin FM</span><i class="r-bars" aria-hidden="true"><i></i><i></i><i></i></i></button>'); p = $('radyoPill'); }
+    if (p) { p.setAttribute('data-st', rSt); p.setAttribute('aria-pressed', String(on));
+      p.setAttribute('aria-label', 'Keskin FM radyo: ' + (rSt === 'play' ? 'çalıyor, durdurmak için dokunun' : rSt === 'load' ? 'bağlanıyor' : rSt === 'err' ? 'yayına ulaşılamadı, yeniden denemek için dokunun' : 'dinlemek için dokunun')); }
+    document.body.classList.toggle('radyo-acik', rSeen);
   }
   function radyoStop(st) {
     rSt = st || 'idle'; rNo++;
@@ -1456,7 +1461,7 @@
       if ($('nav').classList.contains('open') && !e.target.closest('.header')) { closeMenu(); e.preventDefault(); return; }
       if (e.target.closest('#liveOpen')) { liveBig(true); return; }
       if (e.target.closest('#radyoBtn')) { radyoToggle(); return; }
-      if (e.target.closest('#radyoPill')) { radyoStop(); return; }
+      if (e.target.closest('#radyoPill')) { radyoToggle(); return; }
       // büyükken Kapat'a ya da oynatıcının dışındaki karanlık alana dokunmak küçültür
       if (e.target.closest('#liveClose') || (e.target.id === 'liveBox' && e.target.classList.contains('big'))) { liveBig(false); return; }
       if (e.target.closest('a[href^="#/"]')) { tapped = true; setTimeout(function () { tapped = false; }, 600); }

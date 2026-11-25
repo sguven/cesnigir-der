@@ -138,7 +138,7 @@ Telefonda "WhatsApp'ta paylaş": Android'de paylaşım ekranı fotoğraf ve yaz�
 ## Keskin FM canlı radyo
 
 Ana sayfada canlı görüntünün altındaki "Keskin FM 102.1" düğmesi, radyonun canlı yayınını çalar (`app.js` içinde `RADYO` adresi:
-`https://keskinfm.com/api/stream`). Ses yalnızca düğmeye basınca başlar; kaydırırken ve sayfalar arasında gezerken sürer; çaldığı sürece sağ altta küçük bir durdurma düğmesi durur.
+`https://keskinfm.com/api/stream`). Ses yalnızca düğmeye basınca başlar; kaydırırken ve sayfalar arasında gezerken sürer; bir kez açıldıktan sonra sağ altta küçük bir düğme kalır: çalarken durdurur, durmuşken yeniden başlatır.
 Bu adres Keskin FM'in kendi sitesinin kullandığı adrestir; radyo adresi değiştirirse düğme "Yayına şu an ulaşılamıyor" der, `RADYO` değerini
 yeni adresle değiştirmek yeter. Düğmeyi kaldırmak için `pageHome` içindeki `radyoHtml()` çağrısını silin.
 

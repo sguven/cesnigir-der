@@ -193,15 +193,16 @@ main:focus{outline:none}
 .radyo-btn[data-st="load"] .radyo-ic{animation:livePulse 1.2s ease-in-out infinite}
 .radyo-btn[data-st="err"] small{color:#B3261E;font-weight:600}
 .radyo-src{display:block;margin-top:5px;font-size:14px;color:var(--ink2);text-align:right}
-/* radyo çalarken sağ altta küçük durdurma düğmesi: kaydırırken ve her sayfada görünür; "Yukarı" düğmesi onun üstüne çıkar */
+/* radyo bir kez açılınca sağ altta kalan küçük düğme (durdur / yeniden çal): kaydırırken ve her sayfada görünür; "Yukarı" düğmesi onun üstüne çıkar */
 .radyo-pill{position:fixed;z-index:26;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:7px;
   min-height:42px;padding:0 13px 0 9px;border:0;border-radius:99px;background:var(--bordo);color:#fff;font:inherit;font-weight:700;font-size:15px;cursor:pointer;
   box-shadow:0 2px 10px rgba(35,26,20,.3);opacity:.95}
 .radyo-pill[hidden]{display:none}
 .radyo-pill svg{width:20px;height:20px}
-.radyo-pill .r-play{display:none}
-.radyo-pill .r-stop{display:block}
-.radyo-pill .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* durmuşken: açık renkli, oynat simgeli; çalarken: bordo, durdur simgeli ve hareketli çizgili */
+.radyo-pill[data-st="idle"],.radyo-pill[data-st="err"]{background:var(--white);color:var(--bordo);box-shadow:0 2px 10px rgba(35,26,20,.22),inset 0 0 0 2px var(--bordo)}
+.radyo-pill[data-st="idle"] .r-bars,.radyo-pill[data-st="err"] .r-bars{display:none}
+.radyo-pill[data-st="load"] .r-bars{opacity:.5}
 .r-bars{display:flex;align-items:flex-end;gap:2px;height:14px}
 .r-bars i{display:block;width:3px;height:100%;background:#fff;border-radius:1px;transform-origin:bottom;animation:rBar .9s ease-in-out infinite}
 .r-bars i:nth-child(2){animation-delay:.3s}
