@@ -496,8 +496,8 @@
         (src ? '<a class="rh-img" href="#/isletme/' + id + '" tabindex="-1" aria-hidden="true"><img src="' + esc(src) + '" alt="" loading="lazy"></a>' : '') +
         '<div class="box-pad">' + (x.tur ? '<div class="news-meta"><span class="badge">' + esc(x.tur) + '</span></div>' : '') +
         '<h3><a class="ev-link" href="#/isletme/' + id + '"><b>' + esc(x.baslik) + '</b></a></h3>' + rAdres(x) +
-        (x.aciklama ? '<p>' + esc(excerpt(x.aciklama, 160)) + '</p>' : '') + (x.kisi ? '<p class="muted">' + esc(x.kisi) + '</p>' : '') +
-        mkContact(x, rMesaj(x)) + shareButtons(rShare(x)) + '</div></article>';
+        (x.aciklama ? '<p class="rh-acik">' + esc(excerpt(x.aciklama, 160)) + '</p>' : '') + (x.kisi ? '<p class="muted rh-kisi">' + esc(x.kisi) + '</p>' : '') +
+        '<div class="rh-alt">' + mkContact(x, rMesaj(x)) + shareButtons(rShare(x)) + '</div></div></article>';
     }).join('');
   }
   function pageRehber() {
