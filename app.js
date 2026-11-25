@@ -1293,7 +1293,7 @@
 
   /* ---------- Keskin FM canlı radyo ---------- */
   // Keskin FM'in (102.1) canlı yayını ana sayfada, canlı görüntünün altındaki düğmeyle dinlenir. Ses yalnızca düğmeye basınca başlar;
-  // sayfalar arasında gezerken çalmaya devam eder, ana sayfa dışında sol altta küçük bir "Durdur" düğmesi görünür.
+  // sayfalar arasında gezerken ve kaydırırken çalmaya devam eder; çaldığı sürece sağ altta küçük bir "Durdur" düğmesi görünür.
   // Durdurunca bağlantı kesilir (internet harcamaz); yeniden başlatınca yayın o anki yerinden gelir.
   var RADYO = 'https://keskinfm.com/api/stream', RADYO_SITE = 'https://keskinfm.com', rAudio = null, rSt = 'idle', rNo = 0;
   var R_TX = { idle: 'Canlı radyo · dinlemek için dokunun', load: 'Bağlanıyor…', play: 'Çalıyor · durdurmak için dokunun', err: 'Yayına şu an ulaşılamıyor, biraz sonra deneyin' };
@@ -1306,10 +1306,11 @@
       '<a class="radyo-src" href="' + RADYO_SITE + '" target="_blank" rel="noopener">Yayın: keskinfm.com</a></div>';
   }
   function radyoSync() {
-    var b = $('radyoBtn'), p = $('radyoPill'), show = !b && radyoOn();
+    var b = $('radyoBtn'), p = $('radyoPill'), show = radyoOn();   // çalarken her sayfada, kaydırırken de sağ altta durur
     if (b) { b.setAttribute('data-st', rSt); b.setAttribute('aria-pressed', String(radyoOn())); b.querySelector('small').textContent = R_TX[rSt]; }
-    if (show && !p) { document.body.insertAdjacentHTML('beforeend', '<button type="button" id="radyoPill" class="radyo-pill" hidden>' + R_IC + '<span>Keskin FM · Durdur</span></button>'); p = $('radyoPill'); }
+    if (show && !p) { document.body.insertAdjacentHTML('beforeend', '<button type="button" id="radyoPill" class="radyo-pill" hidden>' + R_IC + '<span>Keskin FM</span><i class="r-bars" aria-hidden="true"><i></i><i></i><i></i></i><span class="sr">çalıyor, durdurmak için dokunun</span></button>'); p = $('radyoPill'); }
     if (p) p.hidden = !show;
+    document.body.classList.toggle('radyo-acik', show);
   }
   function radyoStop(st) {
     rSt = st || 'idle'; rNo++;
