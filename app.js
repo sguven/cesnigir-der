@@ -323,8 +323,7 @@
     h += '<section class="section"><div class="container grid-main"><div>' +
       '<div class="sec-head"' + ed('ekle:duyurular') + '><h2>Son Duyurular</h2><a href="#/duyurular">Tüm duyurular ›</a></div>' +
       (news.length ? '<div class="news-list">' + news.map(newsCard).join('') + '</div>' : '<div class="box empty"><b>Henüz duyuru yok</b></div>') +
-      '<div class="box m-cta"><div><h3>Sizden Gelenler</h3><p>Hatıranızı, sorunuzu, gurbetten selamınızı paylaşın; köylülerimizle sohbet edin.</p></div>' +
-      '<a class="btn" href="#/meydan">' + icon('chat') + 'Sizden Gelenler sayfasına git</a></div>' +
+      mSonKutu() +
       '</div><aside>' + wxBox() +
       '<div class="sec-head"' + ed('ekle:etkinlikler') + '><h2>Yaklaşan Günler</h2></div>' + calendar() +
       '<div class="box" style="margin-top:14px">' + (ev.length ? ev.map(evRowSade).join('') : '<div class="empty">Yaklaşan bir gün yok.</div>') + '</div>' +
@@ -1122,7 +1121,41 @@
   }
   function mDrawn(sayfa) { realLinks(main);
     if (C.MEYDAN.fotoYok) main.querySelectorAll('.m-foto').forEach(function (x) { x.hidden = true; }); document.dispatchEvent(new CustomEvent('meydan:ciz', { detail: { sayfa: sayfa } })); }
-  function pageForum() {
+  /* Ana sayfa: "Sizden Gelenler" önizlemesi. Onaylı en yeni 3 yazı (başlık, kısa metin, varsa ilk fotoğraf, ad, zaman);
+     dokununca yazı açılır. Altta "Siz de yazın" düğmesi yazı formunu açık hâlde açar (#/meydan/yaz).
+     Telefonda açılışı yavaşlatmasın diye yazılar kutu ekrana yaklaşınca yüklenir. */
+  var mSon = null;
+  function mSonSatir(k) {
+    var f = C.fotolar(k)[0];
+    return '<a class="m-son-i" href="#/konu/' + k.id + '">' +
+      (f ? '<img src="' + esc(C.fotoUrl(f)) + '" alt="" loading="lazy" width="64" height="64">' : '<span class="m-son-ik" aria-hidden="true">' + icon('chat') + '</span>') +
+      '<span class="m-son-t"><b>' + esc(k.baslik) + '</b><span class="m-son-ex">' + esc(excerpt(k.metin, 110)) + '</span>' +
+      '<span class="m-son-by">' + esc(k.ad) + ' · ' + esc(C.zaman(k.created_at)) + (k.cevap_sayisi ? ' · ' + k.cevap_sayisi + ' cevap' : '') + '</span></span></a>';
+  }
+  function mSonIc() {
+    if (mSon === null) return '<p class="m-son-yuk">Yazılar yükleniyor…</p>';
+    if (mSon === false) return '<p class="m-son-yuk">Yazılar şu anda açılamadı.</p>';
+    if (!mSon.length) return '<p class="m-son-yuk">Henüz yazı yok. İlk yazıyı siz paylaşın.</p>';
+    return mSon.map(mSonSatir).join('');
+  }
+  function mSonKutu() {
+    setTimeout(function () {
+      var b = $('mSon'); if (!b || mSon) return;
+      var yukle = function () {
+        mSel('/forum_konular?select=id,baslik,metin,ad,cevap_sayisi,created_at,fotolar&order=created_at.desc&limit=3')
+          .then(function (r) { mSon = C.arr(r); }, function () { mSon = false; })
+          .then(function () { var x = $('mSon'); if (x) { x.innerHTML = mSonIc(); realLinks(x); } if (mSon === false) mSon = null; });
+      };
+      if (!('IntersectionObserver' in window)) return yukle();
+      var io = new IntersectionObserver(function (en) { if (en[0].isIntersecting) { io.disconnect(); yukle(); } }, { rootMargin: '600px 0px' });
+      io.observe(b);
+    }, 0);
+    return '<section class="box m-son" aria-labelledby="mSonH"><div class="m-son-head"><h3 id="mSonH">Sizden Gelenler</h3><a href="#/meydan">Tümünü gör ›</a></div>' +
+      '<p class="m-son-alt">Hatıranızı, sorunuzu, gurbetten selamınızı paylaşın; köylülerimizle sohbet edin.</p>' +
+      '<div id="mSon" class="m-son-list" aria-live="polite">' + mSonIc() + '</div>' +
+      '<a class="btn m-son-btn" href="#/meydan/yaz">' + icon('pen') + 'Siz de yazın</a></section>';
+  }
+  function pageForum(yaz) {
     var seq = ++mSeq;
     setTimeout(function () {
       mSel('/forum_konular?select=id,kategori,baslik,metin,ad,sabit,cevap_sayisi,son_hareket,created_at,fotolar&order=sabit.desc,son_hareket.desc&limit=300')
@@ -1136,7 +1169,7 @@
     var kats = ['Tümü'].concat(C.MEYDAN.kategoriler);
     return band('Sizden Gelenler', 'Hatıranızı, sorunuzu, gurbetten selamınızı paylaşın; köylülerimizle sohbet edin.') +
       '<section class="section"><div class="container m-wrap"><div class="m-main">' +
-      '<details class="m-new"><summary class="btn">' + icon('pen') + 'Yeni yazı paylaş</summary><div class="box box-pad">' + mForm('konu') + '</div></details>' +
+      '<details class="m-new"' + (yaz ? ' open' : '') + '><summary class="btn">' + icon('pen') + 'Yeni yazı paylaş</summary><div class="box box-pad">' + mForm('konu') + '</div></details>' +
       '<div class="filters" role="group" aria-label="Yazıların konusu">' + kats.map(function (t) {
         return '<button type="button" data-m-kat="' + esc(t) + '" aria-pressed="' + (t === mKat) + '">' + esc(t) + '</button>';
       }).join('') + '</div>' +
@@ -1378,7 +1411,7 @@
     else if (page === 'hakkimizda' || page === 'iletisim') { page = 'hakkimizda'; html = pageAbout(); }   // İletişim, Hakkımızda'ya taşındı
     else if (page === 'tarihimiz' || page === 'tarihce' || page === 'koyumuz') { page = 'tarihimiz'; html = pageTarih(); }
     else if (page === 'gezilecek-yerler' || page === 'gezi') { page = 'gezilecek-yerler'; html = pageGezi(); }
-    else if (page === 'meydan') html = pageForum();
+    else if (page === 'meydan') html = pageForum(p[1] === 'yaz');
     else if (page === 'foto') html = pagePhoto(decodeURIComponent(p.slice(1).join('/')));
     else if (page === 'konu') html = pageTopic(decodeURIComponent(p.slice(1).join('/')));
     else { page = ''; loadWeather(); html = pageHome(); }
