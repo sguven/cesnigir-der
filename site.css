@@ -427,7 +427,7 @@ a,button{touch-action:manipulation}
 .btn-fb:hover{background:#0F4E9E}
 .mk h3 .ev-link b{font-weight:700}
 .ev-link{color:inherit;text-decoration:none}
-.ev-link b::after{content:" ›";color:var(--bordo)}
+.ev-link b::after{content:"\00a0›";color:var(--bordo)}
 .ev-link:hover b,.ev-link:active b{color:var(--bordo)}
 .article .ev-when{font-size:17px}
 
@@ -665,3 +665,17 @@ button.cal-day:hover{filter:brightness(.93)}
 .gezi-kart.vurgu{animation:ghVurgu 2.4s ease}
 @keyframes ghVurgu{0%,40%{box-shadow:0 0 0 5px var(--gold)}100%{box-shadow:0 0 0 0 transparent}}
 @media (max-width:600px){.gh-harita{height:58vh;min-height:300px}.gh-cip{font-size:16px}}
+
+/* Esnaf Rehberi kartları: aynı boyda, düğmeler hep kartın dibinde hizalı */
+.rh{display:flex;flex-direction:column}
+.rh .box-pad{flex:1 1 auto}
+.rh h3{overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+.rh-adres span,.rh-acik,.rh-kisi{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.rh-adres span{-webkit-line-clamp:2;line-clamp:2}
+.rh-acik{-webkit-line-clamp:3;line-clamp:3}
+.rh-kisi{-webkit-line-clamp:1;line-clamp:1}
+.rh-alt{margin-top:auto;padding-top:8px;display:flex;flex-direction:column;gap:10px}
+.rh-alt .btn-row{margin-top:0!important;flex-direction:column;gap:10px}
+.rh-alt .btn-row .btn{flex:none;width:100%}
+.rh-alt .share{margin-top:0;max-width:none}
+@media (max-width:640px){ .cards{grid-template-columns:minmax(0,1fr);gap:14px} .rh .box-pad{padding:16px} }
