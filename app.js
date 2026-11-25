@@ -289,10 +289,12 @@
     fotograflar: '<rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/>',
     pazar: '<path d="M4 9h16l-1 11H5L4 9Z"/><path d="M8 9a4 4 0 0 1 8 0"/>',
     rehber: '<path d="M4 10 5.5 4h13L20 10"/><path d="M4 10a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0"/><path d="M5.5 12.5V20h13v-7.5M10 20v-4.5h4V20"/>',
-    'gezilecek-yerler': '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>'
+    'gezilecek-yerler': '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>',
+    tarihimiz: '<path d="M2 13Q12 5 22 13"/><path d="M3 12.3V19M21 12.3V19"/><path d="M7 19a5 5 0 0 1 10 0"/><path d="M1 19h5M18 19h5"/>',   // kemerli köprü
+    hakkimizda: '<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14a5 5 0 0 1 5 6"/>'
   };
   function quickLinks() {
-    var L = [['duyurular', 'Duyurular'], ['etkinlikler', 'Etkinlikler'], ['meydan', 'Köy Meydanı'], ['fotograflar', 'Fotoğraflar'], ['pazar', 'Market'], ['rehber', 'Esnaf Rehberi'], ['gezilecek-yerler', 'Gezilecek Yerler']];
+    var L = [['duyurular', 'Duyurular'], ['etkinlikler', 'Etkinlikler'], ['meydan', 'Köy Meydanı'], ['fotograflar', 'Fotoğraflar'], ['pazar', 'Market'], ['rehber', 'Esnaf Rehberi'], ['gezilecek-yerler', 'Gezilecek Yerler'], ['tarihimiz', 'Tarihimiz'], ['hakkimizda', 'Hakkımızda']];
     return '<nav class="quick" aria-label="Kısayollar"><div class="container quick-in">' + L.map(function (x) {
       return '<a href="#/' + x[0] + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + QI[x[0]] + '</svg><span>' + x[1] + '</span></a>';
     }).join('') + '</div></nav>';

@@ -583,7 +583,7 @@ button.cal-day:hover{filter:brightness(.93)}
 .quick a:hover,.quick a:active{background:var(--bordo-soft);border-color:var(--bordo)}
 .quick a:active{transform:scale(.97)}
 @media (max-width:1180px){ .quick{display:block} }
-@media (min-width:700px) and (max-width:1180px){ .quick-in{grid-template-columns:repeat(6,minmax(0,1fr))} }
+@media (min-width:900px) and (max-width:1180px){ .quick-in{grid-template-columns:repeat(9,minmax(0,1fr))} }
 @media (max-width:350px){ .quick a{font-size:15px} }
 /* telefonda haber kartının özeti iki satır: aynı ekrana daha çok haber sığar, başlık öne çıkar */
 @media (max-width:640px){
