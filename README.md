@@ -110,6 +110,13 @@ Dosyası henüz yazılmamış bir kod açılırsa `404.html` kaydı bulup ona gi
 
 Telefonda "WhatsApp'ta paylaş": Android'de paylaşım ekranı fotoğraf ve yazıyla birlikte açılır. iPhone'da WhatsApp paylaşım ekranından tek mesajda ikisini birden almadığı için doğrudan WhatsApp açılır: başlık, bilgiler ve bağlantı tek mesajda gider, fotoğraf bağlantının önizlemesinde çıkar (kısa bağlantı sayfasındaki og:image; boyutu da yazılır). Önizleme fotoğrafları 300 KB'ı geçmemeli (WhatsApp sınırı); fotoğrafı olmayan kayıtlarda `images/kapak-paylasim.jpg` kullanılır.
 
+## Keskin FM canlı radyo
+
+Ana sayfada canlı görüntünün altındaki "Keskin FM 102.1" düğmesi, radyonun canlı yayınını çalar (`app.js` içinde `RADYO` adresi:
+`https://keskinfm.com/api/stream`). Ses yalnızca düğmeye basınca başlar; sayfalar arasında gezerken sürer, sol altta "Durdur" düğmesi çıkar.
+Bu adres Keskin FM'in kendi sitesinin kullandığı adrestir; radyo adresi değiştirirse düğme "Yayına şu an ulaşılamıyor" der, `RADYO` değerini
+yeni adresle değiştirmek yeter. Düğmeyi kaldırmak için `pageHome` içindeki `radyoHtml()` çağrısını silin.
+
 ## Sürüm eki
 
 Sayfalardaki `site.css?v=…`, `app.js?v=…` gibi ekler, yeni sürüm yayınlanınca telefonda eski dosyanın kalmamasını sağlar.

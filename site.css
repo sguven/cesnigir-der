@@ -134,7 +134,8 @@ main:focus{outline:none}
 /* canlı yayın */
 .live-dot{display:inline-block;width:14px;height:14px;border-radius:50%;background:#D93025;margin-right:10px;vertical-align:middle}
 /* karşılama bandının sağında küçük oynatıcı; dokununca büyür */
-.live-mini{width:300px;max-width:100%;margin-left:auto;flex:0 0 auto}
+.welcome-side{width:300px;max-width:100%;margin-left:auto;flex:0 0 auto}
+.live-mini{width:100%}
 .live-label{font-weight:700;font-size:16px;color:var(--bordo-dark);margin-bottom:6px}
 .live-soon{display:inline-block;background:var(--bordo-dark);color:#fff;font-size:13px;font-weight:700;padding:1px 8px;border-radius:999px;margin-left:4px;vertical-align:1px}
 .live-label .live-dot{width:11px;height:11px;margin-right:7px;animation:livePulse 1.6s ease-in-out infinite}
@@ -167,11 +168,42 @@ main:focus{outline:none}
 @media (max-width:900px){
   .welcome-in{flex-direction:column;align-items:stretch}
   .welcome-in>div:first-child{flex:none}
-  .live-mini{width:100%;max-width:560px;margin:4px auto 0}
+  .welcome-side{width:100%;max-width:560px;margin:4px auto 0}
   .live-label{text-align:center;font-size:17px}
   .live-zoom{font-size:16px;padding:7px 12px}
 }
 @media (prefers-reduced-motion:reduce){ .live-label .live-dot{animation:none} }
+
+/* Keskin FM canlı radyo: canlı görüntünün altında tek büyük düğme */
+.radyo{margin-top:12px}
+.welcome-side>.radyo:first-child,.welcome-side>div:empty+.radyo{margin-top:0}
+.radyo-btn{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:8px 14px 8px 8px;border:2px solid var(--bordo);border-radius:10px;
+  background:var(--white);color:var(--bordo-dark);font:inherit;text-align:left;cursor:pointer;transition:background-color .15s,transform .12s}
+.radyo-btn:hover{background:var(--bordo-soft)}
+.radyo-btn:active{transform:scale(.98)}
+.radyo-ic{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--bordo);color:#fff}
+.radyo-ic svg{width:24px;height:24px}
+.radyo-tx{min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.radyo-tx b{font-size:18px}
+.radyo-tx small{font-size:15px;color:var(--ink2)}
+.r-stop,[data-st="play"] .r-play,[data-st="load"] .r-play{display:none}
+[data-st="play"] .r-stop,[data-st="load"] .r-stop{display:block}
+.radyo-btn[data-st="play"],.radyo-btn[data-st="load"]{background:var(--bordo-soft)}
+.radyo-btn[data-st="play"] .radyo-ic{background:var(--green)}
+.radyo-btn[data-st="load"] .radyo-ic{animation:livePulse 1.2s ease-in-out infinite}
+.radyo-btn[data-st="err"] small{color:#B3261E;font-weight:600}
+.radyo-src{display:block;margin-top:5px;font-size:14px;color:var(--ink2);text-align:right}
+/* başka sayfada gezerken radyo çalıyorsa sol altta durdurma düğmesi */
+.radyo-pill{position:fixed;z-index:25;left:max(14px,env(safe-area-inset-left));bottom:max(14px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:8px;
+  min-height:50px;padding:0 16px 0 12px;border:0;border-radius:99px;background:var(--bordo);color:#fff;font:inherit;font-weight:700;font-size:17px;cursor:pointer;
+  box-shadow:0 3px 12px rgba(35,26,20,.3)}
+.radyo-pill[hidden]{display:none}
+.radyo-pill svg{width:22px;height:22px}
+.radyo-pill .r-play{display:none}
+.radyo-pill .r-stop{display:block}
+@media (max-width:900px){ .radyo-btn{min-height:66px} .radyo-tx b{font-size:19px} .radyo-tx small{font-size:16px} .radyo-src{text-align:center} }
+@media (prefers-reduced-motion:reduce){ .radyo-btn{transition:none} .radyo-btn:active{transform:none} .radyo-btn[data-st="load"] .radyo-ic{animation:none} }
+@media print{ .radyo,.radyo-pill{display:none!important} }
 
 /* rozetler */
 .badge{display:inline-block;font-size:15px;font-weight:700;padding:2px 10px;border-radius:4px;background:var(--sand);color:var(--ink);letter-spacing:.02em}

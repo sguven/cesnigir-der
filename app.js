@@ -309,7 +309,8 @@
       '<button type="button" class="live-close" id="liveClose" hidden>✕ Kapat</button></div></div>' : '';
     var h = '<section class="hero"><img src="' + B + 'images/kapak.jpg?v=2" width="1926" height="817" decoding="async" alt="Gün batımında Çeşnigir Köprüsü ve Türk bayrağı, üzerinde Çeşnigir-Der yazısı."></section>' +
       '<div class="welcome"><div class="container welcome-in" style="padding:22px 18px"><div><h1>Köprüköy\'e hoş geldiniz</h1>' +
-      '<p>Köyümüzden duyurular, vefat ve düğün haberleri, etkinlikler ve fotoğraflar.</p></div>' + (liveBox || (E ? '<div' + ed('dernek:canli') + '></div>' : '')) + '</div></div>' + quickLinks();
+      '<p>Köyümüzden duyurular, vefat ve düğün haberleri, etkinlikler ve fotoğraflar.</p></div>' +
+      '<div class="welcome-side">' + (liveBox || (E ? '<div' + ed('dernek:canli') + '></div>' : '')) + radyoHtml() + '</div></div></div>' + quickLinks();
 
     h += '<section class="section"><div class="container grid-main"><div>' +
       '<div class="sec-head"' + ed('ekle:duyurular') + '><h2>Son Duyurular</h2><a href="#/duyurular">Tüm duyurular ›</a></div>' +
@@ -1109,6 +1110,7 @@
     var hash = location.hash, back = !tapped && hash !== curHash && pos[hash] > 0;
     tapped = false; curHash = hash;
     main.innerHTML = html;
+    radyoSync();
     realLinks(main);
     main.classList.remove('gir'); void main.offsetWidth; main.classList.add('gir');
     var navKey = page === 'duyuru' ? 'duyurular' : page === 'etkinlik' ? 'etkinlikler' : page === 'ilan' ? 'pazar' : page === 'konu' ? 'meydan' : page === 'foto' ? 'fotograflar' : page;
@@ -1209,6 +1211,51 @@
     var box = $('liveBox'); if (box && box.classList.contains('big')) liveBig(false);
   }
 
+  /* ---------- Keskin FM canlı radyo ---------- */
+  // Keskin FM'in (102.1) canlı yayını ana sayfada, canlı görüntünün altındaki düğmeyle dinlenir. Ses yalnızca düğmeye basınca başlar;
+  // sayfalar arasında gezerken çalmaya devam eder, ana sayfa dışında sol altta küçük bir "Durdur" düğmesi görünür.
+  // Durdurunca bağlantı kesilir (internet harcamaz); yeniden başlatınca yayın o anki yerinden gelir.
+  var RADYO = 'https://keskinfm.com/api/stream', RADYO_SITE = 'https://keskinfm.com', rAudio = null, rSt = 'idle', rNo = 0;
+  var R_TX = { idle: 'Canlı radyo · dinlemek için dokunun', load: 'Bağlanıyor…', play: 'Çalıyor · durdurmak için dokunun', err: 'Yayına şu an ulaşılamıyor, biraz sonra deneyin' };
+  var R_IC = '<svg class="r-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5Z"/></svg>' +
+    '<svg class="r-stop" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>';
+  function radyoOn() { return rSt === 'play' || rSt === 'load'; }
+  function radyoHtml() {
+    return '<div class="radyo"><button type="button" class="radyo-btn" id="radyoBtn" data-st="' + rSt + '" aria-pressed="' + radyoOn() + '">' +
+      '<span class="radyo-ic">' + R_IC + '</span><span class="radyo-tx"><b>Keskin FM 102.1</b><small aria-live="polite">' + R_TX[rSt] + '</small></span></button>' +
+      '<a class="radyo-src" href="' + RADYO_SITE + '" target="_blank" rel="noopener">Yayın: keskinfm.com</a></div>';
+  }
+  function radyoSync() {
+    var b = $('radyoBtn'), p = $('radyoPill'), show = !b && radyoOn();
+    if (b) { b.setAttribute('data-st', rSt); b.setAttribute('aria-pressed', String(radyoOn())); b.querySelector('small').textContent = R_TX[rSt]; }
+    if (show && !p) { document.body.insertAdjacentHTML('beforeend', '<button type="button" id="radyoPill" class="radyo-pill" hidden>' + R_IC + '<span>Keskin FM · Durdur</span></button>'); p = $('radyoPill'); }
+    if (p) p.hidden = !show;
+  }
+  function radyoStop(st) {
+    rSt = st || 'idle'; rNo++;
+    if (rAudio) { try { rAudio.pause(); rAudio.removeAttribute('src'); rAudio.load(); } catch (e) { /* yok say */ } }
+    radyoSync();
+  }
+  function radyoToggle() {
+    if (radyoOn()) { radyoStop(); return; }
+    if (!rAudio) {
+      rAudio = new Audio(); rAudio.preload = 'none';
+      rAudio.addEventListener('playing', function () { if (radyoOn()) { rSt = 'play'; radyoSync(); } });
+      rAudio.addEventListener('waiting', function () { if (rSt === 'play') { rSt = 'load'; radyoSync(); } });
+      rAudio.addEventListener('error', function () { if (radyoOn()) radyoStop('err'); });
+      rAudio.addEventListener('ended', function () { if (radyoOn()) radyoStop('err'); });
+    }
+    var no = ++rNo;
+    rSt = 'load'; radyoSync();
+    rAudio.src = RADYO;
+    try {
+      var pr = rAudio.play();
+      if (pr && pr.catch) pr.catch(function () { if (no === rNo && radyoOn()) radyoStop('err'); });
+    } catch (e) { radyoStop('err'); }
+    // telefonun kilit ekranında ve bildirimde yayının adı görünsün
+    try { if ('mediaSession' in navigator && window.MediaMetadata) navigator.mediaSession.metadata = new MediaMetadata({ title: 'Keskin FM 102.1', artist: 'Canlı yayın', album: 'Çeşnigir-Der' }); } catch (e) { /* yok say */ }
+  }
+
   function bind() {
     window.addEventListener('hashchange', route);
     // sayfadan çıkılırken büyük canlı görüntü açık kaldıysa kaydırma kilidini bırak
@@ -1231,6 +1278,8 @@
       // menü açıkken dışına dokunmak yalnızca menüyü kapatır
       if ($('nav').classList.contains('open') && !e.target.closest('.header')) { closeMenu(); e.preventDefault(); return; }
       if (e.target.closest('#liveOpen')) { liveBig(true); return; }
+      if (e.target.closest('#radyoBtn')) { radyoToggle(); return; }
+      if (e.target.closest('#radyoPill')) { radyoStop(); return; }
       // büyükken Kapat'a ya da oynatıcının dışındaki karanlık alana dokunmak küçültür
       if (e.target.closest('#liveClose') || (e.target.id === 'liveBox' && e.target.classList.contains('big'))) { liveBig(false); return; }
       if (e.target.closest('a[href^="#/"]')) { tapped = true; setTimeout(function () { tapped = false; }, 600); }
