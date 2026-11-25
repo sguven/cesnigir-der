@@ -855,7 +855,6 @@
       rows([['Konum', 'Kapulukaya Baraj Gölü\'nün doğu kıyısı'], ['Uzaklık', 'Keskin 25 km, Kırıkkale 37 km, Ankara yaklaşık 113 km'], ['Rakım', '803 m'], ['Nüfus', '662 (2025, TÜİK)'],
         ['Geçim', 'Buğday, arpa, patates, nohut, fasulye, ayçiçeği, pancar; hayvancılık; tatlı su levreği ve sazan balıkçılığı'], ['Yönetim', 'Muhtar ve ihtiyar heyeti'], ['Posta kodu', '71860']]) +
       '</div><div class="box box-pad" style="margin-top:20px"><h3>Biliyor muydunuz?</h3><ul class="check-list">' +
-      '<li>Köprü, Ankara–Kırşehir eski yolunun 100. kilometresindeydi ve "Köprüköy Köprüsü" diye de anılırdı.</li>' +
       '<li>Baraj kapakları açılıp su indirilmezse göl köprüyü yutabiliyor; yetkililer köprünün su üstünde kalmasına dikkat ediyor.</li>' +
       '<li>1892\'de köprünün başında taştan bir aslan heykeli vardı.</li>' +
       '<li>1852\'deki onarım açık eksiltmeyle en ucuz fiyatı veren ustaya verilmişti.</li>' +
