@@ -854,12 +854,100 @@
     ['Sulu Mağara (Keskin)', 'Keskin\'de üç katlı, 285 metrelik mağara; içi yıl boyu 18 derece civarında. Yakınındaki Ceritkale Kanyonu\'nda yaklaşık 10 km\'lik doğa yürüyüşü yapılabiliyor.', 'sulu-magara.jpg', '', '', 'Keskin\'deki Sulu Mağara\'nın içi: ışıklandırılmış kaya tavan ve ahşap korkuluklu yürüyüş yolu.']
   ];
 
+  /* Gezilecek yerler haritası (yalnız Gezilecek Yerler sayfasında). Konumlar GEZI ile aynı sırada: [enlem, boylam].
+     Köprü ve kanyondaki noktalar yaklaşık konumdur; düzeltmek için buradaki sayıları değiştirmek yeterli. */
+  var GEZI_KONUM = [
+    [39.5795, 33.4305],   // Çeşnigir Kanyonu Mesire Alanı
+    [39.5772, 33.4282],   // Seyir Terasları
+    [39.5822, 33.4298],   // Kanyonda Tekne Turu (iskele)
+    [39.5802, 33.4312],   // Yürüyüş ve Bisiklet Yolu (köprüye inen merdiven)
+    [39.5850, 33.4322],   // Kapulukaya Baraj Gölü Kıyısı
+    [39.5835, 33.4255],   // Büklükale Ören Yeri
+    [39.6650, 33.5900]    // Sulu Mağara (Keskin, Altıntaş Mahallesi)
+  ];
+  var KOPRU_YER = { ad: 'Tarihi Çeşnigir Köprüsü', konum: [39.58083, 33.42944], foto: 'kanyon-kopru.jpg', link: '#/hakkimizda', yazi: 'Köprünün tarihçesini oku' };
+  var LF = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.', lfYuk = null, gHarita = null;
+  function leafletYukle() {
+    if (window.L) return Promise.resolve();
+    if (lfYuk) return lfYuk;
+    lfYuk = new Promise(function (ok, hata) {
+      var c = document.createElement('link'); c.rel = 'stylesheet'; c.href = LF + 'css';
+      c.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY='; c.crossOrigin = '';
+      document.head.appendChild(c);
+      var j = document.createElement('script'); j.src = LF + 'js';
+      j.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo='; j.crossOrigin = '';
+      j.onload = ok; j.onerror = function () { lfYuk = null; hata(); };
+      document.head.appendChild(j);
+    });
+    return lfYuk;
+  }
+  function geziHaritaBolum() {
+    var cip = function (i, ad) { return '<button type="button" class="gh-cip" data-gh="' + i + '"><b>' + (i < 0 ? '★' : i + 1) + '</b>' + ad + '</button>'; };
+    return '<section class="section"><div class="container"><div class="sec-head"><h2>Haritada Gezilecek Yerler</h2></div>' +
+      '<p class="gh-ipucu">Haritadaki bir noktaya ' + (window.matchMedia && matchMedia('(hover: hover)').matches ? 'farenizle gelin, fotoğrafı görünsün; tıklayınca o yerin bilgilerine gidersiniz.' : 'dokunun, fotoğrafı açılsın; "Ayrıntıları gör" ile o yerin bilgilerine gidersiniz.') + '</p>' +
+      '<div class="box gh-kutu"><div id="geziHarita" class="gh-harita" role="region" aria-label="Gezilecek yerler haritası"><p class="gh-yukleniyor">Harita yükleniyor…</p></div></div>' +
+      '<div class="gh-cipler" role="group" aria-label="Haritada göster">' + cip(-1, 'Çeşnigir Köprüsü') + GEZI.map(function (g, i) { return cip(i, g[0]); }).join('') + '</div>' +
+      '</div></section>';
+  }
+  function geziDetay(i) {
+    var el = $('yer-' + (i + 1));
+    if (!el) { location.hash = KOPRU_YER.link; return; }
+    var hb = document.querySelector('.header'), y = el.getBoundingClientRect().top + window.pageYOffset - (hb ? hb.offsetHeight : 0) - 12;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+    el.classList.remove('vurgu'); void el.offsetWidth; el.classList.add('vurgu');
+  }
+  function geziHarita() {
+    var kutu = $('geziHarita'); if (!kutu) return;
+    leafletYukle().then(function () {
+      if (!document.body.contains(kutu)) return;
+      kutu.innerHTML = '';
+      var L = window.L, hover = window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches;
+      var m = L.map(kutu, { scrollWheelZoom: false, tap: true, zoomControl: true, attributionControl: true });
+      gHarita = m;
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, subdomains: 'abc',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' }).addTo(m);
+      var yerler = [{ i: -1, ad: KOPRU_YER.ad, konum: KOPRU_YER.konum, foto: KOPRU_YER.foto, yazi: KOPRU_YER.yazi }].concat(GEZI.map(function (g, i) {
+        return { i: i, ad: g[0], konum: GEZI_KONUM[i], foto: g[2], yazi: 'Ayrıntıları gör' };
+      }));
+      var isaret = {};
+      yerler.forEach(function (y) {
+        var ikon = L.divIcon({ className: 'gh-pin' + (y.i < 0 ? ' gh-kopru' : ''), html: '<span><i>' + (y.i < 0 ? '★' : y.i + 1) + '</i></span>', iconSize: [40, 40], iconAnchor: [20, 40], popupAnchor: [0, -38], tooltipAnchor: [0, -40] });
+        var resim = '<img src="' + B + 'images/' + y.foto + '" alt="" width="260" height="173">';
+        var mk = L.marker(y.konum, { icon: ikon, title: y.ad, alt: y.ad, riseOnHover: true }).addTo(m);
+        if (hover) {
+          mk.bindTooltip('<div class="gh-onizle">' + resim + '<b>' + esc(y.ad) + '</b><small>Tıklayın: ' + y.yazi.toLocaleLowerCase('tr') + '</small></div>', { direction: 'top', className: 'gh-tip', opacity: 1 });
+          mk.on('click', function () { geziDetay(y.i); });
+        } else {
+          mk.bindPopup('<div class="gh-onizle">' + resim + '<b>' + esc(y.ad) + '</b><button type="button" class="btn gh-git" data-gh-git="' + y.i + '">' + y.yazi + ' ›</button></div>', { className: 'gh-pop', maxWidth: 280, minWidth: 240, autoPanPadding: [16, 16] });
+        }
+        isaret[y.i] = mk;
+      });
+      // köy ve kanyondaki noktalar başta görünsün; Sulu Mağara (Keskin) düğmesiyle gidilir
+      m.fitBounds(L.latLngBounds(yerler.filter(function (y) { return y.i < 6; }).map(function (y) { return y.konum; })), { padding: [40, 40], maxZoom: 15 });
+      kutu.addEventListener('click', function (e) {
+        var b = e.target.closest && e.target.closest('[data-gh-git]');
+        if (b) { m.closePopup(); geziDetay(+b.getAttribute('data-gh-git')); }
+      });
+      document.querySelectorAll('[data-gh]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var i = +b.getAttribute('data-gh'), mk = isaret[i];
+          m.flyTo(mk.getLatLng(), i === 6 ? 14 : 16, { duration: 0.8 });
+          m.once('moveend', function () { if (hover) mk.openTooltip(); else mk.openPopup(); });
+          var hb = document.querySelector('.header'), y = kutu.getBoundingClientRect().top + window.pageYOffset - (hb ? hb.offsetHeight : 0) - 12;
+          if (kutu.getBoundingClientRect().top < 0) window.scrollTo({ top: y, behavior: 'smooth' });
+        });
+      });
+    }).catch(function () {
+      kutu.innerHTML = '<p class="gh-yukleniyor">Harita şu an açılamadı. <a href="' + MAP + '" target="_blank" rel="noopener">Google Haritalar\'da açın</a>.</p>';
+    });
+  }
+
   function placesSection() {
     return '<section class="section alt"><div class="container"><div class="sec-head"><h2>Görülecek Yerler</h2></div>' +
       '<figure class="fig" style="margin-bottom:24px"><img class="wide" src="' + B + 'images/mesire.jpg" alt="Çeşnigir Kanyonu mesire alanının tepeden görünüşü: Kızılırmak kıyısında seyir terası, yürüyüş yolları ve tekne iskelesi." loading="lazy"></figure>' +
-      '<div class="cards">' + GEZI.map(function (g) {
+      '<div class="cards">' + GEZI.map(function (g, i) {
         var kredi = g[4] ? credit(g[3], g[4]) : (g[3] ? '<span class="kredi">Fotoğraf: ' + g[3] + '</span>' : '');
-        return '<article class="box mk"><img src="' + B + 'images/' + g[2] + '" alt="' + esc(g[5] || g[0]) + '" loading="lazy">' +
+        return '<article class="box mk gezi-kart" id="yer-' + (i + 1) + '"><span class="gezi-no" aria-hidden="true">' + (i + 1) + '</span><img src="' + B + 'images/' + g[2] + '" alt="' + esc(g[5] || g[0]) + '" loading="lazy">' +
           '<div class="box-pad"><h3>' + g[0] + '</h3><p>' + g[1] + '</p>' + kredi + '</div></article>';
       }).join('') + '</div>' +
       '<div class="pair" style="margin-top:28px">' +
@@ -890,6 +978,7 @@
       '</div><aside><div class="box box-pad"><h3>Nerede, Nasıl Gidilir?</h3>' +
       rows([['Yer', 'Köprüköy, Keskin / Kırıkkale'], ['Ankara\'dan', 'yaklaşık 113 km'], ['Kırıkkale\'den', '37 km'], ['Keskin\'den', '25 km'], ['Yol', 'Eski Ankara–Kırşehir yolu üzerinde']]) +
       '<p style="margin:14px 0 0"><a class="btn" href="' + MAP + '" target="_blank" rel="noopener">Haritada aç</a></p></div></aside></div></section>' +
+      geziHaritaBolum() +
       placesSection() +
       '<section class="section"><div class="container"><div class="sec-head"><h2>Sık Sorulan Sorular</h2></div><div class="box box-pad">' +
       sss('Çeşnigir Köprüsü nerede?', 'Kırıkkale\'nin Keskin ilçesine bağlı Köprüköy\'de, Kızılırmak üzerindedir. Keskin\'e 25 km, Kırıkkale\'ye 37 km, Ankara\'ya yaklaşık 113 km uzaklıktadır.').replace('margin:18px', 'margin:0') +
@@ -1306,6 +1395,7 @@
     headerPhoto();
     var t = main.querySelector('h1');
     document.title = TITLES[page] || (t ? t.textContent + ' · Çeşnigir-Der, Köprüköy' : TITLES['']);
+    if (page === 'gezilecek-yerler') geziHarita();
     if (E) E.after(page);
     yLoad(page); yBadges();
   }
