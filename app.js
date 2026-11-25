@@ -940,7 +940,7 @@
   var OLCU = rows([['Uzunluk', '113,25 m (Çulpan ve Özkan 110 m verir)'], ['Genişlik', 'Korkuluklar hariç 5,80 m'], ['Ana kemer', '18,60 m açıklık, 13,65 m yükseklik'],
     ['Kemer açıklıkları', 'Ankara yönünden: 3,75 · 4,00 · 4,13 · 6,28 · 18,60 · 5,90 m'], ['Boşaltma gözleri', 'Ana kemerin doğusunda bir, batısında beş'],
     ['Gizli gözler', 'Gövde içinde üç sivri kemerli hafifletme gözü'], ['Malzeme', 'Kesme taş']]) + srcHtml([K.pehl, K.ozkan]);
-  /* Tarihimiz: hikâye sırasıyla bölümler. Kapak fotoğrafı, bölüm şeridi, sonra
+  /* Tarihimiz: hikâye sırasıyla bölümler. Kapak fotoğrafı, sonra
      1 Köprü · 2 Köprüden önce (Büklükale) · 3 Köprüden doğan köy (derbend) · 4 Atatürk · 5 Rivayetler · 6 Tarihçe.
      Her bilginin kaynağı yanında yazılı (K, srcHtml); kaynaksız bilgi eklenmez. Köprü bilgilerinde Vikipedi kaynak alınmaz. */
   var TB = [['t-kopru', 'Köprü'], ['t-once', 'Köprüden önce'], ['t-koy', 'Köyümüz'], ['t-ataturk', 'Atatürk'], ['t-rivayet', 'Rivayetler'], ['t-tarihce', 'Tarihçe']];
@@ -960,9 +960,6 @@
       '<div class="t-kapak-yazi"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › Tarihimiz</div>' +
       '<h1>Tarihimiz</h1><p>Kızılırmak\'ın en dar yerinde, yedi yüzyılı aşkın bir köprü ve onun bekçilerinin kurduğu köy.</p></div></div>' +
       '<span class="t-kapak-kredi">' + credit(EG, 'Cesnigir_paradise3.jpg') + '</span></div>' +
-      '<nav class="t-serit" aria-label="Bölümler"><div class="container">' + TB.map(function (b, i) {
-        return '<a href="#' + b[0] + '" data-git="' + b[0] + '"><span>' + (i + 1) + '</span>' + b[1] + '</a>';
-      }).join('') + '</div></nav>' +
       '<div class="container"><div class="stats t-stats">' + stats.map(function (s) { return '<div><b>' + s[0] + '</b><span>' + s[1] + '</span></div>'; }).join('') + '</div></div>' +
 
       /* 1. Köprü */
@@ -1079,25 +1076,9 @@
         '1852\'deki onarım açık eksiltmeyle en ucuz fiyatı veren ustaya verilmişti.'
       ].map(function (b) { return '<li>' + b + '</li>'; }).join('') + '</ul></div></div>';
   }
-  // Bölüm şeridi yapışkan başlığın hemen altında dursun diye başlık yüksekliği CSS'e verilir (--hdr)
+  // "Sonraki bölüm" ile gidilen başlık yapışkan üst menünün altında kalmasın diye başlık yüksekliği CSS'e verilir (--hdr)
   function hdrH() { var h = document.querySelector('.header'); if (h) document.documentElement.style.setProperty('--hdr', h.offsetHeight + 'px'); }
   hdrH(); window.addEventListener('resize', hdrH);
-  // Tarihimiz bölüm şeridi: okunan bölümün düğmesi işaretlenir ve şeritte görünür kalır
-  var tsTick = false;
-  window.addEventListener('scroll', function () {
-    if (tsTick) return; tsTick = true;
-    requestAnimationFrame(function () {
-      tsTick = false;
-      var serit = document.querySelector('.t-serit'); if (!serit) return;
-      var sinir = serit.getBoundingClientRect().bottom + 40, akt = null;
-      TB.forEach(function (b) { var el = document.getElementById(b[0]); if (el && el.getBoundingClientRect().top <= sinir) akt = b[0]; });
-      serit.querySelectorAll('a').forEach(function (a) {
-        var on = a.getAttribute('data-git') === akt;
-        if (on && !a.classList.contains('on')) { var c = a.parentNode; c.scrollTo({ left: a.offsetLeft - 16, behavior: 'smooth' }); }
-        a.classList.toggle('on', on);
-      });
-    });
-  }, { passive: true });
   document.addEventListener('click', function (e) {
     var a = e.target.closest('[data-git]'); if (!a) return;
     var h = document.getElementById(a.getAttribute('data-git')); if (!h) return;
