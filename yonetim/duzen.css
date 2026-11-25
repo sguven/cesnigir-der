@@ -63,6 +63,13 @@ html.ed-out .ed-ribbon,html.ed-out .ed-dock{display:none}
 .ed-gdel{position:absolute;right:6px;bottom:6px;display:inline-flex;align-items:center;gap:4px;min-height:38px;padding:0 10px;border:0;border-radius:8px;
   background:rgba(255,255,255,.94);color:#B42318;font-weight:700;font-size:15px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
 .ed-gdel .ed-i{width:18px;height:18px}
+.ed-gkat{position:absolute;left:6px;top:6px;min-height:38px;padding:0 10px;border:0;border-radius:8px;background:rgba(255,255,255,.94);color:var(--bordo);
+  font-weight:700;font-size:15px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.ed-choices.ed-choices-2{grid-template-columns:1fr 1fr}
+/* fotoğrafın altında yan yana: Sil ve bölüm değiştir (site.css'teki ".gal button" kuralını bozmadan) */
+.gal .ed-gal{display:flex;flex-wrap:wrap;gap:6px;align-content:start}
+.gal .ed-gal > button[data-gal]{flex:1 0 100%}
+.gal .ed-gdel,.gal .ed-gkat{position:static;aspect-ratio:auto;flex:1 1 auto;justify-content:center;min-height:44px;cursor:pointer}
 .ed-gadd{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;aspect-ratio:4/3;border:2px dashed var(--bordo);border-radius:6px;
   background:#fff;color:var(--bordo);font-weight:700;font-size:16px;cursor:pointer;padding:6px;text-align:center}
 .ed-gadd .ed-i{width:32px;height:32px}

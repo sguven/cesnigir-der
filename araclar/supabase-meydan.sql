@@ -1,4 +1,4 @@
--- Köy Meydanı (forum, fotoğraflı yazı ve cevaplar), yorumlar (haber, etkinlik, fotoğraf), Market ilan istekleri ve Esnaf Rehberi istekleri · Supabase veritabanı kurulumu
+-- Köy Meydanı (forum, fotoğraflı yazı ve cevaplar), yorumlar (haber, etkinlik, fotoğraf), Market ilan istekleri, Esnaf Rehberi istekleri ve fotoğraf istekleri · Supabase veritabanı kurulumu
 -- Supabase → SQL Editor'de bir kez çalıştırılır. Tekrar çalıştırmak zararsızdır (var olanı bozmaz).
 --
 -- Kurallar:
@@ -159,6 +159,41 @@ drop trigger if exists rehber_istek_sel on public.rehber_istekleri;
 create trigger rehber_istek_sel before insert on public.rehber_istekleri for each row execute function public.rehber_sel_kontrol();
 revoke all on function public.rehber_sel_kontrol() from public, anon, authenticated;
 
+-- Fotoğraf istekleri: ziyaretçi Fotoğraflar sayfasından fotoğraf gönderir (Köyümüzden ya da Derneğimizden bölümüne).
+-- Yönetici onaylayınca panel fotoğrafları sitenin deposuna aktarır, data/galeri.json'a yazar ve isteği buradan siler.
+create table if not exists public.foto_istekleri (
+  id bigint generated always as identity primary key,
+  kategori text not null default 'koy' check (kategori in ('koy', 'dernek')),
+  aciklama text check (char_length(aciklama) <= 200),
+  ad text not null check (char_length(btrim(ad)) between 3 and 60),
+  fotolar text[] not null check (
+    cardinality(fotolar) between 1 and 4 and array_to_string(fotolar, ',') ~ '^([0-9]{4}-[0-9]{2}/[0-9a-f-]{36}[.]jpg(,|$))*$'),
+  created_at timestamptz not null default now()
+);
+alter table public.foto_istekleri enable row level security;
+revoke all on public.foto_istekleri from anon, authenticated;
+grant select (id) on public.foto_istekleri to anon, authenticated;
+grant insert (kategori, aciklama, ad, fotolar) on public.foto_istekleri to anon, authenticated;
+drop policy if exists "istekler okunmaz" on public.foto_istekleri;
+create policy "istekler okunmaz" on public.foto_istekleri for select to anon, authenticated using (false);
+drop policy if exists "foto onaya gonderilir" on public.foto_istekleri;
+create policy "foto onaya gonderilir" on public.foto_istekleri for insert to anon, authenticated with check (true);
+
+create or replace function public.foto_sel_kontrol() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  if (select count(*) from public.foto_istekleri where created_at > now() - interval '10 minutes') >= 15
+   or (select count(*) from public.foto_istekleri) >= 200 then
+    raise exception 'Şu anda çok fazla fotoğraf gönderildi. Lütfen biraz sonra tekrar deneyin.';
+  end if;
+  new.ad := btrim(new.ad);
+  new.aciklama := nullif(btrim(new.aciklama), '');
+  return new;
+end $$;
+drop trigger if exists foto_istek_sel on public.foto_istekleri;
+create trigger foto_istek_sel before insert on public.foto_istekleri for each row execute function public.foto_sel_kontrol();
+revoke all on function public.foto_sel_kontrol() from public, anon, authenticated;
+
 alter table public.forum_konular enable row level security;
 alter table public.forum_cevaplar enable row level security;
 alter table public.yorumlar enable row level security;
@@ -258,7 +293,7 @@ begin
 end $$;
 revoke all on function public.forum_yetki(text) from public, anon, authenticated;
 
--- Panel: onay bekleyenler (yazılar, cevaplar, yorumlar, Market ve Esnaf Rehberi istekleri)
+-- Panel: onay bekleyenler (yazılar, cevaplar, yorumlar, Market, Esnaf Rehberi ve fotoğraf istekleri)
 create or replace function public.forum_bekleyenler(anahtar text) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 begin
@@ -272,7 +307,8 @@ begin
     'yorumlar', coalesce((select jsonb_agg(to_jsonb(y) order by y.created_at)
                            from public.yorumlar y where y.durum = 'bekliyor'), '[]'::jsonb),
     'ilanlar', coalesce((select jsonb_agg(to_jsonb(i) order by i.created_at) from public.pazar_istekleri i), '[]'::jsonb),
-    'rehber', coalesce((select jsonb_agg(to_jsonb(r) order by r.created_at) from public.rehber_istekleri r), '[]'::jsonb));
+    'rehber', coalesce((select jsonb_agg(to_jsonb(r) order by r.created_at) from public.rehber_istekleri r), '[]'::jsonb),
+    'fotolar', coalesce((select jsonb_agg(to_jsonb(f) order by f.created_at) from public.foto_istekleri f), '[]'::jsonb));
 end $$;
 
 -- Panel: onayla / sil / sabitle
@@ -302,6 +338,9 @@ begin
     else raise exception 'bilinmeyen işlem'; end if;
   elsif tur = 'rehber' then
     if islem = 'sil' then delete from public.rehber_istekleri where id = kayit;
+    else raise exception 'bilinmeyen işlem'; end if;
+  elsif tur = 'foto' then
+    if islem = 'sil' then delete from public.foto_istekleri where id = kayit;
     else raise exception 'bilinmeyen işlem'; end if;
   else
     raise exception 'bilinmeyen tür';

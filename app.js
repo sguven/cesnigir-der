@@ -157,8 +157,12 @@
       '<div class="muted">' + esc(C.longDate(e.iso, true)) + (det ? ' · ' + esc(det) : '') + '</div>' + (sade === true ? '' : evExtras(e, det)) + '</div></div>';
   }
 
-  function galleryGrid(list, cls) {
-    return '<div class="gal ' + (cls || '') + '"' + ed('galeri') + '>' + list.map(function (x) {
+  /* Fotoğraflar iki bölümdür: "kategori": "koy" (Köyümüzden) ya da "dernek" (Derneğimizden). Kategorisi yazmayan fotoğraf Köyümüzden sayılır. */
+  var FOTO_KAT = { koy: ['Köyümüzden Fotoğraflar', 'Köyümüzden'], dernek: ['Derneğimizden Fotoğraflar', 'Derneğimizden'] };
+  function fKat(x) { return x && x.kategori === 'dernek' ? 'dernek' : 'koy'; }
+  // kat verilirse büyütülen fotoğrafın oklarla gezilmesi o bölümün fotoğraflarıyla sınırlı kalır (data-gk)
+  function galleryGrid(list, cls, kat) {
+    return '<div class="gal ' + (cls || '') + '"' + (kat ? ' data-gk="' + kat + '"' : '') + ed('galeri') + '>' + list.map(function (x) {
       var i = data.galeri.indexOf(x);
       return '<button type="button" data-gal="' + i + '" data-yc="foto:' + esc(fKey(x)) + '" aria-label="Fotoğrafı büyüt: ' + esc(x.aciklama) + '"><img src="' + esc(img(x.foto)) + '" alt="' + esc((x.aciklama || 'Fotoğraf') + ' Köprüköy, Keskin (Kırıkkale).') + '" loading="lazy"></button>';
     }).join('') + '</div>';
@@ -428,10 +432,98 @@
       '</article></div></section>';
   }
 
-  function pagePhotos() {
-    return band('Fotoğraflar', 'Büyütmek için fotoğrafa dokunun; altındaki "Yorumlar" düğmesiyle yorum yazabilirsiniz.') + '<section class="section"><div class="container"' + ed('ekle:galeri') + '>' +
-      (data.galeri.length ? galleryGrid(data.galeri) : '<div class="box empty"><b>Henüz fotoğraf yok</b></div>') + '</div></section>';
+  var fotoSekme = '';   // son açılan bölüm: fotoğraftan "Tüm fotoğraflar"a dönünce aynı bölüm açılır
+  function pagePhotos(kat) {
+    var say = { koy: 0, dernek: 0 };
+    data.galeri.forEach(function (x) { say[fKat(x)]++; });
+    if (!FOTO_KAT[kat]) kat = fotoSekme || 'koy';
+    fotoSekme = kat;
+    var list = data.galeri.filter(function (x) { return fKat(x) === kat; });
+    var sekme = '<nav class="f-tabs" aria-label="Fotoğraf bölümleri">' + ['koy', 'dernek'].map(function (k) {
+      return '<a class="f-tab" href="#/fotograflar/' + k + '"' + (k === kat ? ' aria-current="page"' : '') + '>' + (k === 'koy' ? FOTO_IKON.koy : FOTO_IKON.dernek) +
+        '<span><b>' + FOTO_KAT[k][0] + '</b><small>' + say[k] + ' fotoğraf</small></span></a>';
+    }).join('') + '</nav>';
+    if (!E) setTimeout(fHazirla, 0);
+    return band('Fotoğraflar', 'Köyümüzden ve derneğimizden kareler. Büyütmek için fotoğrafa dokunun; altındaki "Yorumlar" düğmesiyle yorum yazabilirsiniz.') +
+      '<section class="section"><div class="container"' + ed('ekle:galeri') + '>' + sekme +
+      (E ? '' : '<div id="fYeni" hidden></div>') +
+      '<h2 class="f-h">' + FOTO_KAT[kat][0] + '</h2>' +
+      (list.length ? galleryGrid(list, '', kat) : '<div class="box empty"><b>Bu bölümde henüz fotoğraf yok</b>Yeni fotoğraflar burada görünecek.</div>') + '</div></section>';
   }
+  var FOTO_IKON = {
+    koy: '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20l7-10 4 6 3-4 6 8z"/><circle cx="17" cy="6" r="2"/></svg>',
+    dernek: '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M15 14.5c.6-.3 1.3-.5 2-.5 2.5 0 4 2 4 5"/></svg>'
+  };
+
+  /* ---------- Ziyaretçinin fotoğraf göndermesi ----------
+     Fotoğraflar sayfasındaki "Fotoğraf gönderin" formu: ziyaretçi bölümü (Köyümüzden / Derneğimizden) seçer, en çok 4 fotoğraf ekler
+     (telefonda küçültülür, Supabase deposuna yüklenir), adını ve isterse fotoğrafta ne olduğunu yazar. İstek foto_istekleri tablosunda
+     bekler (kurulum: araclar/supabase-meydan.sql); yönetici panelde onaylayınca fotoğraflar sitenin deposuna aktarılır ve
+     data/galeri.json'a yazılır (yonetim/duzen.js: fotoYayinla). Tablo henüz kurulmadıysa form hiç gösterilmez. */
+  var fVar = null;   // null: henüz bakılmadı · true: istek alınabiliyor · false: kurulum yok
+  function fForm(kat) {
+    return '<form class="m-form" data-f-form novalidate>' +
+      '<fieldset class="f-kat"><legend class="m-l">Fotoğraflar hangi bölüme?</legend>' + ['koy', 'dernek'].map(function (k) {
+        return '<label class="f-kat-s"><input type="radio" name="kategori" value="' + k + '"' + (k === kat ? ' checked' : '') + '><span>' + FOTO_KAT[k][0] +
+          '<small>' + (k === 'koy' ? 'Köyün manzarası, köprü, mesire yerleri, eski fotoğraflar' : 'Dernek toplantıları, açılış, etkinlikler') + '</small></span></label>';
+      }).join('') + '</fieldset>' +
+      mFotoAlan(true) +
+      '<label class="m-l">Fotoğrafta ne var?<input name="aciklama" maxlength="200" placeholder="Örnek: 1985 yılında köy meydanı">' + '<span class="i-yardim">İsterseniz boş bırakın.</span></label>' +
+      '<label class="m-l">Adınız ve soyadınız<input name="ad" autocomplete="name" maxlength="60" value="' + esc(mAd()) + '"></label>' +
+      '<label class="m-hp" aria-hidden="true">Web sitesi<input name="web" tabindex="-1" autocomplete="off"></label>' +
+      '<p class="m-err" role="alert" hidden></p>' +
+      '<button type="submit" class="btn">' + KAMERA + 'Fotoğrafları gönder</button>' +
+      '<p class="muted small m-note">Fotoğraflarınız dernek yönetimi onayladıktan sonra sitede görünür. Adınız fotoğrafın altında yazar. Lütfen yalnız kendi çektiğiniz ya da paylaşmaya izniniz olan fotoğrafları gönderin.</p></form>';
+  }
+  function fCiz() {
+    var b = $('fYeni'); if (!b || !fVar) return;
+    if (!b.firstChild) b.innerHTML = '<details class="m-new"><summary class="btn">' + KAMERA + 'Fotoğraf gönderin</summary><div class="box box-pad">' + fForm(fotoSekme || 'koy') + '</div></details>';
+    b.hidden = false;
+  }
+  function fHazirla() {
+    if (fVar !== null) { fCiz(); return; }
+    C.sb('/foto_istekleri?select=id&limit=1').then(function () { fVar = true; fCiz(); }, function (e) { if (e && e.status !== 'net') fVar = false; });
+  }
+  document.addEventListener('submit', function (e) {
+    var f = e.target.closest && e.target.closest('form[data-f-form]');
+    if (!f) return;
+    e.preventDefault();
+    var err = f.querySelector('.m-err'), btn = f.querySelector('button[type=submit]'), fotos = (f._fotos || []).slice();
+    var kat = (f.querySelector('input[name=kategori]:checked') || {}).value, ad = f.elements.ad.value.trim(), aciklama = f.elements.aciklama.value.trim();
+    function hata(t, el) { err.textContent = t; err.hidden = false; if (el) el.focus(); }
+    if (!fotos.length) return hata('Lütfen önce "Fotoğraf ekle" düğmesiyle en az bir fotoğraf seçin.', f.querySelector('.m-file'));
+    if (!FOTO_KAT[kat]) return hata('Lütfen fotoğrafların hangi bölüme ait olduğunu seçin.', f.querySelector('input[name=kategori]'));
+    if (ad.length < 3) return hata('Lütfen adınızı ve soyadınızı yazın.', f.elements.ad);
+    err.hidden = true;
+    mAdKaydet(ad);
+    var label = btn.innerHTML;
+    btn.disabled = true; btn.textContent = 'Gönderiliyor…';
+    var done = function () {
+      fotos.forEach(function (x) { URL.revokeObjectURL(x.url); });
+      var t = document.createElement('div');
+      t.innerHTML = '<div class="m-thanks" role="status"><b>Teşekkürler, fotoğraflarınız alındı.</b><p>Dernek yönetimi onayladıktan sonra "' + FOTO_KAT[kat][0] + '" bölümünde görünecek.</p>' +
+        '<button type="button" class="btn btn-light" data-f-again>Başka fotoğraf gönder</button></div>';
+      f.parentNode.replaceChild(t.firstChild, f);
+    };
+    if (f.elements.web.value) { done(); return; }   // yalnız otomatik programların doldurduğu gizli alan
+    mFotoGonder(fotos, btn).then(function (yollar) {
+      btn.textContent = 'Gönderiliyor…';
+      var body = { kategori: kat, ad: ad, fotolar: yollar };
+      if (aciklama) body.aciklama = aciklama;
+      return C.sb('/foto_istekleri', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: body });
+    }).then(done).catch(function (er) {
+      btn.disabled = false; btn.innerHTML = label;
+      hata(er && er.status === 'net' ? 'İnternet bağlantısı yok gibi görünüyor. Bağlantınızı kontrol edip tekrar deneyin.' :
+        er && er.foto ? 'Fotoğraf yüklenemedi. Biraz sonra tekrar deneyin. (Hata F' + er.status + (er.message ? ': ' + er.message : '') + ')' :
+        er && /çok fazla/.test(er.message || '') ? er.message : 'Gönderilemedi. Lütfen biraz sonra tekrar deneyin.' + (er && er.status ? ' (Hata ' + er.status + ')' : ''));
+    });
+  });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-f-again]');
+    if (!a) return;
+    var t = document.createElement('div'); t.innerHTML = fForm(fotoSekme || 'koy');
+    a.parentNode.parentNode.replaceChild(t.firstChild, a.parentNode);
+  });
 
   // İlan sahibine ulaşma düğmeleri ve ilanın paylaşım bilgisi
   function mkContact(x, mesaj) {
@@ -1058,10 +1150,11 @@
     });
   }
   var KAMERA = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/></svg>';
-  function mFotoAlan() {
-    return '<div class="m-foto"' + (C.MEYDAN.fotoYok ? ' hidden' : '') + '><div class="m-foto-list" aria-live="polite"></div>' +
+  // zorunlu: fotoğraf gönderme formu (fotoğrafsız gönderilemez, fotoğraf sütunu kontrolüne bağlı değil)
+  function mFotoAlan(zorunlu) {
+    return '<div class="m-foto"' + (C.MEYDAN.fotoYok && !zorunlu ? ' hidden' : '') + '><div class="m-foto-list" aria-live="polite"></div>' +
       '<label class="btn btn-light m-foto-btn">' + KAMERA + '<span>Fotoğraf ekle</span><input type="file" class="m-file" accept="image/*" multiple></label>' +
-      '<p class="muted small m-note">İsterseniz en fazla ' + C.MEYDAN.fotoEnCok + ' fotoğraf ekleyebilirsiniz.</p></div>';
+      '<p class="muted small m-note">' + (zorunlu ? 'Telefonunuzun galerisinden seçebilir ya da kamerayla çekebilirsiniz. Bir seferde en fazla ' : 'İsterseniz en fazla ') + C.MEYDAN.fotoEnCok + ' fotoğraf ekleyebilirsiniz.</p></div>';
   }
   function mFotoCiz(f) {
     var a = f._fotos || [], list = f.querySelector('.m-foto-list'), btn = f.querySelector('.m-foto-btn');
@@ -1367,18 +1460,22 @@
     }).catch(function () { /* sayı görünmez, o kadar */ });
   }
   function pagePhoto(key) {
-    var list = data.galeri, i = -1;
-    list.some(function (x, j) { if (fKey(x) === key) { i = j; return true; } return false; });
-    if (i < 0) return band('Fotoğraf bulunamadı') + '<section class="section"><div class="container"><p>Bu fotoğraf kaldırılmış olabilir.</p><a class="btn" href="#/fotograflar">Tüm fotoğraflar</a></div></section>';
-    var x = list[i], n = list.length, prev = list[(i - 1 + n) % n], next = list[(i + 1) % n], cap = x.aciklama || '';
-    return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/fotograflar">Fotoğraflar</a></div></div></div>' +
-      '<section class="section"><div class="container"><article class="article">' +
-      '<button type="button" class="article-img" data-gal="' + i + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(img(x.foto)) + '" alt="' + esc(cap || 'Fotoğraf') + '" style="aspect-ratio:auto;object-fit:contain"></button>' +
-      (cap ? '<h1 class="f-cap">' + esc(cap) + '</h1>' : '<h1 class="f-cap">Fotoğraf ' + (i + 1) + ' / ' + n + '</h1>') +
+    var x = null;
+    data.galeri.some(function (y) { if (fKey(y) === key) { x = y; return true; } return false; });
+    if (!x) return band('Fotoğraf bulunamadı') + '<section class="section"><div class="container"><p>Bu fotoğraf kaldırılmış olabilir.</p><a class="btn" href="#/fotograflar">Tüm fotoğraflar</a></div></section>';
+    // önceki / sonraki fotoğraf aynı bölümden (Köyümüzden ya da Derneğimizden)
+    var kat = fKat(x), list = data.galeri.filter(function (y) { return fKat(y) === kat; }), i = list.indexOf(x), gi = data.galeri.indexOf(x);
+    var n = list.length, prev = list[(i - 1 + n) % n], next = list[(i + 1) % n], cap = x.aciklama || '';
+    fotoSekme = kat;
+    return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/fotograflar">Fotoğraflar</a> › <a href="#/fotograflar/' + kat + '">' + FOTO_KAT[kat][1] + '</a></div></div></div>' +
+      '<section class="section"><div class="container"><article class="article" data-gk="' + kat + '">' +
+      '<button type="button" class="article-img" data-gal="' + gi + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(img(x.foto)) + '" alt="' + esc(cap || 'Fotoğraf') + '" style="aspect-ratio:auto;object-fit:contain"></button>' +
+      (cap ? '<h1 class="f-cap">' + esc(cap) + '</h1>' : '<h1 class="f-cap">' + FOTO_KAT[kat][0] + ' · ' + (i + 1) + ' / ' + n + '</h1>') +
+      (x.gonderen ? '<p class="muted">Gönderen: ' + esc(x.gonderen) + '</p>' : '') +
       (n > 1 ? '<div class="btn-row"><a class="btn btn-light" href="#/foto/' + encodeURIComponent(fKey(prev)) + '">‹ Önceki fotoğraf</a>' +
         '<a class="btn btn-light" href="#/foto/' + encodeURIComponent(fKey(next)) + '">Sonraki fotoğraf ›</a></div>' : '') +
       yBox('foto', key, cap || 'Fotoğraf') +
-      '<p style="margin-top:24px"><a class="btn btn-light" href="#/fotograflar">‹ Tüm fotoğraflar</a></p></article></div></section>';
+      '<p style="margin-top:24px"><a class="btn btn-light" href="#/fotograflar/' + kat + '">‹ ' + FOTO_KAT[kat][0] + '</a></p></article></div></section>';
   }
 
   /* ---------- yönlendirme ---------- */
@@ -1418,7 +1515,7 @@
     else if (page === 'duyurular') html = pageNews();
     else if (page === 'etkinlikler') html = pageEvents();
     else if (page === 'etkinlik') html = pageEvent(decodeURIComponent(p.slice(1).join('/')));
-    else if (page === 'fotograflar') html = pagePhotos();
+    else if (page === 'fotograflar') html = pagePhotos(p[1]);
     else if (page === 'pazar') html = pageMarket();
     else if (page === 'ilan') html = pageListing(decodeURIComponent(p.slice(1).join('/')));
     else if (page === 'rehber') html = pageRehber();
@@ -1640,7 +1737,12 @@
       var cd = e.target.closest('[data-cal-day]');
       if (cd) { var ci = cd.getAttribute('data-cal-day'); calSel = calSel === ci ? '' : ci; redrawCal('[data-cal-day="' + ci + '"]'); return; }
       var g = e.target.closest('[data-gal]');
-      if (g) { openV(data.galeri.map(function (x) { return { src: img(x.foto), cap: x.aciklama, key: fKey(x) }; }), +g.getAttribute('data-gal')); return; }
+      if (g) {
+        // bölüm sayfasında oklarla yalnız o bölümün fotoğrafları gezilir
+        var gk = g.closest('[data-gk]'), gkat = gk ? gk.getAttribute('data-gk') : '', gi = +g.getAttribute('data-gal'), gl = [], at = 0;
+        data.galeri.forEach(function (x, j) { if (!gkat || fKat(x) === gkat) { if (j === gi) at = gl.length; gl.push(x); } });
+        openV(gl.map(function (x) { return { src: img(x.foto), cap: x.aciklama, key: fKey(x) }; }), at); return;
+      }
       if (e.target.closest('#vCom')) { closeV(); return; }
       var ph = e.target.closest('[data-photo]');
       if (ph) openV([{ src: ph.getAttribute('data-photo'), cap: ph.getAttribute('data-cap') }], 0);
