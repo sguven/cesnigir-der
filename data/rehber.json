@@ -1,5 +1,24 @@
 [
   {
+    "tur": "Sanayi",
+    "tarih": "2026-11-25",
+    "baslik": "Başkaya Ford servis",
+    "aciklama": "Oto tamir bakım mekanik",
+    "adres": "Ankara İvedik 1341/162",
+    "kisi": "Veli dede başkaya",
+    "telefon": "05315665717",
+    "link": "https://başkayaford.com",
+    "foto": "images/yuklenen/2026-11-25-210922-49mdy.jpg",
+    "fotolar": [
+      {
+        "foto": "images/yuklenen/2026-11-25-210924-52gjz.jpg"
+      },
+      {
+        "foto": "images/yuklenen/2026-11-25-210927-6jcgg.jpg"
+      }
+    ]
+  },
+  {
     "tur": "Diğer",
     "tarih": "2026-11-25",
     "baslik": "Alf pro enerji elektrik",
