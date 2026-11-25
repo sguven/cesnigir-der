@@ -300,6 +300,12 @@
         var w = el('<div class="ed-gal"></div>');
         b.parentNode.insertBefore(w, b); w.appendChild(b);
         w.appendChild(el('<button type="button" class="ed-gdel" data-act="gdel" data-gi="' + b.getAttribute('data-gal') + '" aria-label="Bu fotoğrafı sil">' + icon('trash') + 'Sil</button>'));
+        // Fotoğraflar sayfasında: fotoğrafı öteki bölüme taşı (Köyümüzden <-> Derneğimizden)
+        if (g.hasAttribute('data-gk')) {
+          var oteki = g.getAttribute('data-gk') === 'dernek' ? 'koy' : 'dernek';
+          w.appendChild(el('<button type="button" class="ed-gkat" data-act="gkat" data-gi="' + b.getAttribute('data-gal') + '" data-kat="' + oteki + '">' +
+            (oteki === 'koy' ? 'Köyümüze taşı' : 'Derneğimize taşı') + '</button>'));
+        }
       });
       g.insertBefore(el('<button type="button" class="ed-gadd" data-act="add" data-col="galeri">' + icon('plus') + '<span>Fotoğraf ekle</span></button>'), g.firstChild);
     });
@@ -350,17 +356,18 @@
     if (!force && mPend && Date.now() - mPendT < 15000) return Promise.resolve(mPend);
     if (mPendP) return mPendP;
     mPendP = mRpc('forum_bekleyenler', {}).then(function (r) {
-      mPend = { konular: C.arr(r && r.konular), cevaplar: C.arr(r && r.cevaplar), yorumlar: C.arr(r && r.yorumlar), ilanlar: C.arr(r && r.ilanlar), rehber: C.arr(r && r.rehber) }; mPendT = Date.now(); mBadge(); return mPend;
+      mPend = { konular: C.arr(r && r.konular), cevaplar: C.arr(r && r.cevaplar), yorumlar: C.arr(r && r.yorumlar), ilanlar: C.arr(r && r.ilanlar), rehber: C.arr(r && r.rehber), fotolar: C.arr(r && r.fotolar) }; mPendT = Date.now(); mBadge(); return mPend;
     }).then(function (x) { mPendP = null; return x; }, function (e) { mPendP = null; throw e; });
     return mPendP;
   }
   function mBadge() {
     var a = document.querySelector('.nav [data-nav="meydan"]'), n = mPend ? mPend.konular.length + mPend.cevaplar.length : 0;
-    var ni = mPend ? mPend.ilanlar.length : 0, nr = mPend ? mPend.rehber.length : 0, all = mPend ? n + mPend.yorumlar.length + ni + nr : 0, pill = $('edPendPill');
+    var ni = mPend ? mPend.ilanlar.length : 0, nr = mPend ? mPend.rehber.length : 0, nf = mPend ? mPend.fotolar.length : 0, all = mPend ? n + mPend.yorumlar.length + ni + nr + nf : 0, pill = $('edPendPill');
     if (pill) { pill.hidden = !all; pill.querySelector('b').textContent = all; }
     say(a, n, ' yazı onay bekliyor');
     say(document.querySelector('.nav [data-nav="pazar"]'), ni, ' ilan onay bekliyor');
     say(document.querySelector('.nav [data-nav="rehber"]'), nr, ' işletme onay bekliyor');
+    say(document.querySelector('.nav [data-nav="fotograflar"]'), nf, ' fotoğraf isteği onay bekliyor');
     function say(a, n, ne) {
       if (!a) return;
       var b = a.querySelector('.ed-count');
@@ -370,7 +377,20 @@
     }
   }
   var Y_TUR = { duyuru: ['Haber yorumu', 'duyuru'], etkinlik: ['Etkinlik yorumu', 'etkinlik'], foto: ['Fotoğraf yorumu', 'foto'] };
+  var F_KAT = { koy: 'Köyümüzden Fotoğraflar', dernek: 'Derneğimizden Fotoğraflar' };
   function mPendItem(x, tur, link) {
+    if (tur === 'foto') {   // ziyaretçinin gönderdiği fotoğraflar: yönetici bölümü onaylamadan önce değiştirebilir
+      var n = C.fotolar(x).length;
+      return '<div class="ed-m-item">' +
+        '<div class="news-meta"><span class="badge">Fotoğraf · ' + n + ' fotoğraf</span><span>' + esc(C.zaman(x.created_at)) + '</span></div>' +
+        '<p class="ed-m-by"><b>' + esc(x.ad) + '</b></p>' +
+        (x.aciklama ? '<div class="ed-m-text">' + esc(x.aciklama) + '</div>' : '') + C.fotolarHtml(x) +
+        '<div class="ed-field" style="margin-top:10px"><span class="ed-label">Hangi bölüme?</span><div class="ed-choices ed-choices-2" role="radiogroup">' + ['koy', 'dernek'].map(function (k) {
+          return '<label class="ed-choice"><input type="radio" name="fk' + x.id + '" value="' + k + '"' + ((x.kategori === 'dernek' ? 'dernek' : 'koy') === k ? ' checked' : '') + '><span>' + F_KAT[k] + '</span></label>';
+        }).join('') + '</div></div>' +
+        '<div class="ed-bar"><button type="button" class="ed-btn green" data-fm="onayla" data-tur="foto" data-id="' + x.id + '">' + icon('check') + 'Onayla, yayınla</button>' +
+        '<button type="button" class="ed-btn red" data-fm="sil" data-tur="foto" data-id="' + x.id + '">' + icon('trash') + 'Sil</button></div></div>';
+    }
     if (tur === 'ilan' || tur === 'rehber') {
       var tel = C.telHref(x.telefon), web = C.linkUrl(x.link);
       return '<div class="ed-m-item">' +
@@ -413,11 +433,12 @@
       t.appendChild(el('<div class="ed-bar"><button type="button" class="ed-btn red" data-fm="sil" data-tur="yorum" data-id="' + t.getAttribute('data-y-id') + '">' + icon('trash') + 'Yorumu sil</button></div>'));
     });
     var ys = main.querySelector('.y-sec');
-    if (page !== '' && page !== 'meydan' && page !== 'konu' && page !== 'pazar' && page !== 'rehber' && !ys) return;
+    if (page !== '' && page !== 'meydan' && page !== 'konu' && page !== 'pazar' && page !== 'rehber' && page !== 'fotograflar' && !ys) return;
     mPendLoad().then(function (p) {
       var konu = main.querySelector('[data-m-konu]'), kid = konu ? +konu.getAttribute('data-m-konu') : 0;
-      var host = null, konular = [], cevaplar = [], yorumlar = [], ilanlar = [], rehber = [];
-      if (page === '') { konular = p.konular; cevaplar = p.cevaplar; yorumlar = p.yorumlar; ilanlar = p.ilanlar; rehber = p.rehber; }
+      var host = null, konular = [], cevaplar = [], yorumlar = [], ilanlar = [], rehber = [], fotolar = [];
+      if (page === '') { konular = p.konular; cevaplar = p.cevaplar; yorumlar = p.yorumlar; ilanlar = p.ilanlar; rehber = p.rehber; fotolar = p.fotolar; }
+      else if (page === 'fotograflar') { host = main.querySelector('.section > .container'); fotolar = p.fotolar; }
       else if (page === 'rehber') { host = main.querySelector('.section > .container'); rehber = p.rehber; }
       else if (page === 'pazar') { host = main.querySelector('.section > .container'); ilanlar = p.ilanlar; }
       else if (page === 'meydan') { host = main.querySelector('.m-main'); konular = p.konular; cevaplar = p.cevaplar; }
@@ -426,7 +447,7 @@
         host = ys.querySelector('.y-pend');
         yorumlar = p.yorumlar.filter(function (y) { return y.hedef_tur === ys.getAttribute('data-y') && y.hedef === ys.getAttribute('data-yh'); });
       }
-      var n = konular.length + cevaplar.length + yorumlar.length + ilanlar.length + rehber.length, old = $('edMPend'), oldW = $('edMPendWrap');
+      var n = konular.length + cevaplar.length + yorumlar.length + ilanlar.length + rehber.length + fotolar.length, old = $('edMPend'), oldW = $('edMPendWrap');
       if (old) old.remove();
       if (oldW) oldW.remove();
       if (page === '') {
@@ -441,6 +462,7 @@
       host.insertBefore(el('<div id="edMPend" class="ed-m-pend"><h2>' + (n ? 'Onay bekleyenler (' + n + ')' : 'Onay bekleyen yazı yok') + '</h2>' +
         (n ? '<p class="small muted">Bunları yalnız siz görüyorsunuz. Onaylarsanız sitede görünür; uygun değilse silin.</p>' : '<p class="small muted">Yeni yazı ve cevaplar gelince burada görünecek.</p>') +
         ilanlar.map(function (i) { return mPendItem(i, 'ilan', home); }).join('') + rehber.map(function (i) { return mPendItem(i, 'rehber', home); }).join('') +
+        fotolar.map(function (i) { return mPendItem(i, 'foto', home); }).join('') +
         konular.map(function (k) { return mPendItem(k, 'konu', home); }).join('') + cevaplar.map(function (c) { return mPendItem(c, 'cevap', home); }).join('') +
         yorumlar.map(function (y) { return mPendItem(y, 'yorum', home); }).join('') + '</div>'), host.firstChild);
       if (home && mScroll) { mScroll = false; $('edMPend').scrollIntoView({ block: 'start', behavior: 'smooth' }); }
@@ -456,10 +478,11 @@
     e.preventDefault(); e.stopPropagation();
     var islem = b.getAttribute('data-fm'), tur = b.getAttribute('data-tur'), id = +b.getAttribute('data-id');
     var ask = islem !== 'sil' ? Promise.resolve(true) :
-      dialog('Silinsin mi?', tur === 'konu' ? 'Bu yazı ve altındaki bütün cevaplar silinecek. Geri alınamaz.' : tur === 'cevap' ? 'Bu cevap silinecek. Geri alınamaz.' : tur === 'ilan' ? 'Bu ilan isteği silinecek, sitede yayınlanmayacak. Geri alınamaz.' : tur === 'rehber' ? 'Bu işletme isteği silinecek, sitede yayınlanmayacak. Geri alınamaz.' : 'Bu yorum silinecek. Geri alınamaz.', 'Evet, sil', { danger: true });
+      dialog('Silinsin mi?', tur === 'konu' ? 'Bu yazı ve altındaki bütün cevaplar silinecek. Geri alınamaz.' : tur === 'cevap' ? 'Bu cevap silinecek. Geri alınamaz.' : tur === 'ilan' ? 'Bu ilan isteği silinecek, sitede yayınlanmayacak. Geri alınamaz.' : tur === 'rehber' ? 'Bu işletme isteği silinecek, sitede yayınlanmayacak. Geri alınamaz.' : tur === 'foto' ? 'Gönderilen fotoğraflar silinecek, sitede yayınlanmayacak. Geri alınamaz.' : 'Bu yorum silinecek. Geri alınamaz.', 'Evet, sil', { danger: true });
     ask.then(function (ok) {
       if (!ok) return;
       if ((tur === 'ilan' || tur === 'rehber') && islem === 'onayla') { istekYayinla(id, tur); return; }
+      if (tur === 'foto' && islem === 'onayla') { var sec = document.querySelector('input[name="fk' + id + '"]:checked'); fotoYayinla(id, sec ? sec.value : 'koy'); return; }
       busy(islem === 'onayla' ? 'Yayınlanıyor…' : islem === 'sil' ? 'Siliniyor…' : 'Kaydediliyor…');
       mRpc('forum_islem', { tur: tur, kayit: id, islem: islem }).then(function () {
         busy(false);
@@ -511,6 +534,39 @@
     }).catch(function (e) {
       busy(false);
       fail(ne + ' yayınlanamadı', e);
+    });
+  }
+
+  /* Ziyaretçinin gönderdiği fotoğrafları yayınlar: Supabase deposundan alıp sitenin deposuna (images/yuklenen/) aktarır,
+     seçilen bölümle (kategori) data/galeri.json'un başına yazar, gönderenin adını "gonderen" olarak saklar, sonra isteği siler. */
+  function fotoYayinla(id, kat) {
+    var x = (mPend ? mPend.fotolar : []).filter(function (i) { return i.id === id; })[0];
+    if (!x) return;
+    var yollar = C.fotolar(x), paths = [], kaldi = false;
+    busy('Yayınlanıyor…');
+    yollar.reduce(function (p, yol, i) {
+      return p.then(function () {
+        busy(yollar.length > 1 ? 'Fotoğraflar aktarılıyor (' + (i + 1) + ' / ' + yollar.length + ')…' : 'Fotoğraf aktarılıyor…');
+        return fetch(C.fotoUrl(yol)).catch(function () { throw { status: 'net' }; })
+          .then(function (r) { if (!r.ok) throw { status: 'photo' }; return r.blob(); })
+          .then(shrink).then(uploadPhoto).then(function (path) { paths.push(path); });
+      });
+    }, Promise.resolve()).then(function () {
+      busy('Yayınlanıyor…');
+      var yeni = paths.map(function (pth) { return clean({ foto: pth, kategori: kat, aciklama: x.aciklama, gonderen: x.ad }); });
+      return updateJson('data/galeri.json', function (data) { return yeni.concat(C.arr(data)); }, 'Panel: galeriye ' + paths.length + ' fotoğraf eklendi (ziyaretçinin isteği, ' + x.ad + ')');
+    }).then(function (list) {
+      site.set('galeri', list);
+      return mRpc('forum_islem', { tur: 'foto', kayit: id, islem: 'sil' }).catch(function () { kaldi = true; });
+    }).then(function () {
+      busy(false);
+      if (!kaldi) mPend.fotolar = mPend.fotolar.filter(function (i) { return i.id !== id; });
+      mPendT = 0; mBadge(); rerender();
+      if (kaldi) dialog('Fotoğraflar yayınlandı', 'Fotoğraflar sitede yayınlandı ama istek listeden kaldırılamadı. Onay bekleyenlerde hâlâ görünüyorsa "Sil" düğmesiyle kaldırın; yeniden onaylamayın.', 'Tamam', { single: true });
+      else toast('Fotoğraflar yayınlandı', 'Herkes 1-2 dakika içinde "' + F_KAT[kat] + '" bölümünde görecek.');
+    }).catch(function (e) {
+      busy(false);
+      fail('Fotoğraflar yayınlanamadı', e);
     });
   }
 
@@ -840,18 +896,22 @@
 
   /* ---------------- fotoğraflar ---------------- */
   function openGalleryAdd() {
+    // bölüm: Fotoğraflar sayfasında açık olan bölüm, başka yerde Köyümüzden
+    var gk = document.querySelector('#icerik [data-gk]'), kat0 = gk && gk.getAttribute('data-gk') === 'dernek' ? 'dernek' : 'koy';
     var picked = [];
     var root = openSheet('Fotoğraf Ekle',
       '<div class="ed-field"><span class="ed-label">Fotoğraflar</span><span class="ed-help">Birden fazla fotoğraf seçebilirsiniz.</span>' +
       '<div class="ed-photo"><div class="ed-previews" id="edPrev"></div>' +
       '<label class="btn ed-pick ed-wide">' + icon('camera') + '<span id="edPickTxt">Fotoğraf Seç</span>' +
       '<input type="file" accept="image/*" multiple id="edFiles" aria-label="Fotoğraf seç"></label></div><span class="ed-err" hidden></span></div>' +
+      '<div class="ed-field"><span class="ed-label" id="edKatL">Hangi bölüme?</span><div class="ed-choices ed-choices-2" role="radiogroup" aria-labelledby="edKatL">' +
+      ['koy', 'dernek'].map(function (k) { return '<label class="ed-choice"><input type="radio" name="edKat" value="' + k + '"' + (k === kat0 ? ' checked' : '') + '><span>' + F_KAT[k] + '</span></label>'; }).join('') + '</div></div>' +
       '<div class="ed-field"><label class="ed-label" for="edCap">Fotoğraflarda ne var?</label><span class="ed-help">İsteğe bağlı. Örnek: 2026 bayramlaşması</span>' +
       '<input id="edCap" type="text" autocomplete="off"></div>',
       'Yükle', function () {
         var err = root.querySelector('.ed-err');
         if (!picked.length) { err.textContent = 'Önce fotoğraf seçin.'; err.hidden = false; return; }
-        var cap = $('edCap').value.trim(), paths = [];
+        var cap = $('edCap').value.trim(), paths = [], ks = root.querySelector('input[name="edKat"]:checked'), kat = ks ? ks.value : 'koy';
         picked.reduce(function (p, r, i) {
           return p.then(function () {
             busy('Fotoğraf yükleniyor… (' + (i + 1) + ' / ' + picked.length + ')');
@@ -860,7 +920,7 @@
         }, Promise.resolve()).then(function () {
           busy('Kaydediliyor…');
           return updateJson('data/galeri.json', function (data) {
-            return paths.map(function (pth) { return cap ? { foto: pth, aciklama: cap } : { foto: pth }; }).concat(C.arr(data));
+            return paths.map(function (pth) { return cap ? { foto: pth, kategori: kat, aciklama: cap } : { foto: pth, kategori: kat }; }).concat(C.arr(data));
           }, 'Panel: galeriye ' + paths.length + ' fotoğraf eklendi');
         }).then(function (list) {
           busy(false); site.set('galeri', list); closeSheet(true); rerender();
@@ -881,6 +941,19 @@
         e.target.value = '';
       });
     };
+  }
+  function movePhoto(gi, kat) {
+    var x = site.data().galeri[gi];
+    if (!x || !F_KAT[kat]) return;
+    var orig = JSON.stringify(x);
+    busy('Taşınıyor…');
+    updateJson('data/galeri.json', function (data) {
+      var list = C.arr(data), k = list.findIndex(function (y) { return JSON.stringify(y) === orig; });
+      if (k < 0) throw { status: 'gone' };
+      list[k].kategori = kat; return list;
+    }, 'Panel: fotoğraf "' + F_KAT[kat] + '" bölümüne taşındı').then(function (list) {
+      busy(false); site.set('galeri', list); rerender(); toast('Fotoğraf taşındı', '"' + F_KAT[kat] + '" bölümünde görünecek.');
+    }).catch(function (e) { busy(false); fail('Taşınamadı', e).then(function (r) { if (r === 'gone') refresh('galeri'); }); });
   }
   function removePhoto(gi) {
     var x = site.data().galeri[gi];
@@ -1047,6 +1120,7 @@
       else if (act === 'del') removeItem(col, ix);
       else if (act === 'add') { if (col === 'galeri') openGalleryAdd(); else openForm(col, null); }
       else if (act === 'gdel') removePhoto(+b.getAttribute('data-gi'));
+      else if (act === 'gkat') movePhoto(+b.getAttribute('data-gi'), b.getAttribute('data-kat'));
       else if (act === 'dernek') openDernek(b.getAttribute('data-g'));
     }, true);
   }
