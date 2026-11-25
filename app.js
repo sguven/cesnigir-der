@@ -81,6 +81,12 @@
     return ((d.baskan || d.telefon) ? person(d.baskan, d.telefon) : '') + ((d.baskan2 || d.telefon2) ? person(d.baskan2, d.telefon2) : '');
   }
   // Düzenleme modunda kaydın hangi listede kaçıncı olduğunu işaretler (düzenle / sil düğmeleri için)
+  // Duyurular dosyadaki sırayla (en son eklenen en üstte) gösterilir; "sabit": "Evet" olanlar (panelde "En üstte sabit dursun mu?") her zaman en üstte kalır
+  function duyuruSirali() {
+    var d = data.duyurular || [];
+    var sabit = function (p) { return p.sabit === 'Evet' || p.sabit === true; };
+    return d.filter(sabit).concat(d.filter(function (p) { return !sabit(p); }));
+  }
   function ek(col, i) { return E && i >= 0 ? ' data-ek="' + col + '" data-ix="' + i + '"' : ''; }
   function ed(what) { return E ? ' data-ed="' + what + '"' : ''; }
   /* ---------- parçalar ---------- */
@@ -308,7 +314,7 @@
 
   /* ---------- sayfalar ---------- */
   function pageHome() {
-    var d = data.dernek, news = data.duyurular.slice(0, 4), ev = upcoming(45).slice(0, 4);
+    var d = data.dernek, news = duyuruSirali().slice(0, 4), ev = upcoming(45).slice(0, 4);
     // Canlı görüntü: karşılama bandının sağında küçük oynar; dokununca aynı oynatıcı ekranı kaplayacak kadar büyür
     // (oynatıcı yeniden yüklenmez, yalnızca boyutu değişir). Kapat, karanlık alana dokunmak ya da Esc eski hâline döndürür.
     // CANLI_VIDEO_GOSTER: YouTube oynatıcısı şimdilik gizli; yalnız "Köyden Canlı Görüntü · Yakında" yazısı görünür.
@@ -350,7 +356,7 @@
 
   var filter = 'Tümü', NEWS_STEP = 8, newsShown = NEWS_STEP;
   function pageNews() {
-    var all = data.duyurular.slice();
+    var all = duyuruSirali();
     var types = ['Tümü'].concat(C.DUYURU_TURLERI.filter(function (t) { return all.some(function (p) { return p.tur === t; }); }));
     if (types.indexOf(filter) < 0) filter = 'Tümü';
     var list = filter === 'Tümü' ? all : all.filter(function (p) { return p.tur === filter; });
@@ -382,7 +388,7 @@
     }
     return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/duyurular">Duyurular</a></div></div></div>' +
       '<section class="section"><div class="container"><article class="article"' + ek('duyurular', data.duyurular.indexOf(p)) + '>' +
-      '<div class="news-meta">' + (p.tur ? '<span class="' + C.badgeClass(p.tur) + '">' + esc(p.tur) + '</span>' : '') + (isTarih(p) && p.olay_tarihi ? '<span class="olay">' + esc(p.olay_tarihi) + '</span><span>Paylaşıldı: ' + esc(C.longDate(p.tarih)) + '</span>' : '<span>' + esc(C.longDate(p.tarih, true)) + '</span>') + '</div>' +
+      '<div class="news-meta">' + (p.tur ? '<span class="' + C.badgeClass(p.tur) + '">' + esc(p.tur) + '</span>' : '') + (isTarih(p) && p.olay_tarihi ? '<span class="olay">' + esc(p.olay_tarihi) + '</span>' : '<span>' + esc(C.longDate(p.tarih, true)) + '</span>') + '</div>' +
       '<h1>' + esc(p.baslik) + '</h1>' +
       (src ? '<button type="button" class="article-img" data-photo="' + esc(src) + '" data-cap="' + esc(p.baslik) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(src) + '" alt="' + esc(p.foto_aciklama || p.baslik) + '"></button>' : '') +
       ekFoto(true) +
