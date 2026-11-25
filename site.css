@@ -172,6 +172,17 @@ main:focus{outline:none}
   .live-label{text-align:center;font-size:17px}
   .live-zoom{font-size:16px;padding:7px 12px}
 }
+/* tablet genişliğinde: "Köyden Canlı Görüntü" solda, radyo sağda, yan yana (dikey yer kazanır); telefonda alt alta kalır */
+@media (min-width:601px) and (max-width:900px){
+  .welcome-side{display:flex;justify-content:space-between;gap:12px 24px;max-width:none}
+  .welcome-side{align-items:flex-start}
+  .welcome-side>.live-mini{width:auto;flex:0 1 auto;min-height:66px;display:flex;align-items:center}
+  .welcome-side>.live-mini:has(.live-frame){display:block;min-height:0}
+  .welcome-side>.live-mini:has(.live-frame){flex:1 1 0}
+  .welcome-side .live-label{text-align:left;margin-bottom:0}
+  .welcome-side>.live-mini:has(.live-frame) .live-label{margin-bottom:6px}
+  .welcome-side>.radyo{flex:0 1 380px;margin-top:0}
+}
 @media (prefers-reduced-motion:reduce){ .live-label .live-dot{animation:none} }
 
 /* Keskin FM canlı radyo: canlı görüntünün altında tek büyük düğme */
