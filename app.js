@@ -438,13 +438,16 @@
   function pageListing(id) {
     var x = data.pazar.filter(function (v) { return iid(v) === id; })[0];
     if (!x) return band('İlan bulunamadı') + '<section class="section"><div class="container"><p>Bu ilan kaldırılmış olabilir.</p><a class="btn" href="#/pazar">Tüm ilanlar</a></div></section>';
-    var src = img(x.foto);
+    var src = img(x.foto), ekF = C.arr(x.fotolar).map(function (f) { return img(f.foto); }).filter(Boolean);   // ek fotoğraflar (ziyaretçinin gönderdiği ilanlarda)
     return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/pazar">Market</a></div></div></div>' +
       '<section class="section"><div class="container"><article class="article"' + ek('pazar', data.pazar.indexOf(x)) + '>' +
       '<div class="news-meta">' + (x.tur ? '<span class="' + C.badgeClass(x.tur) + '">' + esc(x.tur) + '</span>' : '') + '<span>' + esc(C.longDate(x.tarih)) + '</span></div>' +
       '<h1>' + esc(x.baslik) + '</h1>' + (x.fiyat ? '<div class="mk-price" style="margin:-6px 0 12px">' + esc(x.fiyat) + ' ₺</div>' : '') +
       (src ? '<button type="button" class="article-img" data-photo="' + esc(src) + '" data-cap="' + esc(x.baslik) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(src) + '" alt="' + esc(x.baslik) + '"></button>' : '') +
-      '<div class="article-text">' + (x.aciklama ? '<p>' + esc(x.aciklama) + '</p>' : '') + (x.kisi ? '<p class="muted">İlan sahibi: ' + esc(x.kisi) + '</p>' : '') + '</div>' +
+      (ekF.length ? '<div class="mk-fotos">' + ekF.map(function (s, i) {
+        return '<button type="button" data-photo="' + esc(s) + '" data-cap="' + esc(x.baslik) + '" aria-label="Fotoğrafı büyüt (' + (i + 2) + ' / ' + (ekF.length + 1) + ')"><img src="' + esc(s) + '" alt="' + esc(x.baslik) + ': fotoğraf ' + (i + 2) + '" loading="lazy"></button>';
+      }).join('') + '</div>' : '') +
+      '<div class="article-text">' + (x.aciklama ? mParas(x.aciklama) : '') + (x.kisi ? '<p class="muted">İlan sahibi: ' + esc(x.kisi) + '</p>' : '') + '</div>' +
       mkContact(x) +
       '<div class="btn-row">' + shareButtons(mkShare(x), true) + '<a class="btn btn-light" href="#/pazar">‹ Tüm ilanlar</a></div>' +
       '</article></div></section>';
@@ -460,11 +463,84 @@
         (x.aciklama ? '<p>' + esc(x.aciklama) + '</p>' : '') + (x.kisi ? '<p class="muted">' + esc(x.kisi) + '</p>' : '') +
         mkContact(x) + shareButtons(mkShare(x)) +
         '</div></article>';
-    }).join('') + '</div>' : '<div class="box empty"><b>Şu anda ilan yok</b>İlan vermek isterseniz derneği arayın.' +
-      (dtel ? '<p style="margin:14px 0 0"><a class="btn" href="tel:' + esc(dtel) + '">' + icon('phone') + 'Derneği Ara</a></p>' : '') + '</div>';
+    }).join('') + '</div>' : '<div class="box empty"><b>Şu anda ilan yok</b><span id="iBos">İlan vermek isterseniz derneği arayın.' +
+      (dtel ? '<p style="margin:14px 0 0"><a class="btn" href="tel:' + esc(dtel) + '">' + icon('phone') + 'Derneği Ara</a></p>' : '') + '</span></div>';
+    if (!E) setTimeout(iHazirla, 0);
     return band('Market ve Yardımlaşma', 'Köyümüzden satılık ürünler, aranan şeyler ve yardım istekleri.') +
-      '<section class="section"><div class="container"' + ed('ekle:pazar') + '>' + body + '</div></section>';
+      '<section class="section"><div class="container"' + ed('ekle:pazar') + '>' + (E ? '' : '<div id="iYeni" hidden></div>') + body + '</div></section>';
   }
+
+  /* ---------- Market: ziyaretçinin ilan isteği ----------
+     Ziyaretçi Market sayfasındaki "İlan ver" formuyla kendi ilanını (fotoğraf ve telefonuyla) gönderir. İstek Supabase'de
+     pazar_istekleri tablosunda bekler (kurulum: araclar/supabase-meydan.sql); yönetici panelde onaylayınca ilan öteki ilanlar
+     gibi data/pazar.json'a yazılır (yonetim/duzen.js: ilanYayinla). Tablo henüz kurulmadıysa form hiç gösterilmez. */
+  var iVar = null;   // null: henüz bakılmadı · true: ilan isteği alınabiliyor · false: kurulum yok
+  function iForm() {
+    return '<form class="m-form" data-i-form novalidate>' +
+      '<label class="m-l">İlanın türü<select name="tur">' + C.PAZAR_TURLERI.map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label>' +
+      '<label class="m-l">Ne satıyorsunuz / arıyorsunuz?<input name="baslik" maxlength="120" placeholder="Örnek: Köy yumurtası"></label>' +
+      '<label class="m-l">Fiyat (TL)<input name="fiyat" maxlength="30" inputmode="numeric" placeholder="Örnek: 150"><span class="i-yardim">Fiyat yoksa boş bırakın.</span></label>' +
+      '<label class="m-l">Açıklama<textarea name="aciklama" rows="4" maxlength="2000" placeholder="Örnek: Günlük taze, köyde elden teslim."></textarea></label>' +
+      mFotoAlan() +
+      '<label class="m-l">Adınız ve soyadınız<input name="ad" autocomplete="name" maxlength="60" value="' + esc(mAd()) + '"></label>' +
+      '<label class="m-l">Telefon numaranız<input name="telefon" type="tel" autocomplete="tel" inputmode="tel" maxlength="25" placeholder="0555 123 45 67"><span class="i-yardim">İlanı görenler sizi bu numaradan arar.</span></label>' +
+      '<label class="m-hp" aria-hidden="true">Web sitesi<input name="web" tabindex="-1" autocomplete="off"></label>' +
+      '<p class="m-err" role="alert" hidden></p>' +
+      '<button type="submit" class="btn">' + icon('pen') + 'İlanı gönder</button>' +
+      '<p class="muted small m-note">İlanınız dernek yönetimi onayladıktan sonra sitede görünür. Adınız ve telefon numaranız ilanda herkese açık olur.</p></form>';
+  }
+  function iCiz() {
+    var b = $('iYeni'); if (!b || !iVar) return;
+    if (!b.firstChild) b.innerHTML = '<details class="m-new"><summary class="btn">' + icon('pen') + 'İlan ver</summary><div class="box box-pad">' + iForm() + '</div></details>';
+    b.hidden = false;
+    var bos = $('iBos'); if (bos) bos.textContent = 'İlk ilanı siz verin: yukarıdaki "İlan ver" düğmesine dokunun.';
+  }
+  function iHazirla() {
+    if (iVar !== null) { iCiz(); return; }
+    C.sb('/pazar_istekleri?select=id&limit=1').then(function () { iVar = true; iCiz(); }, function (e) { if (e && e.status !== 'net') iVar = false; });
+  }
+  function iTesekkur() {
+    return '<div class="m-thanks" role="status"><b>Teşekkürler, ilanınız alındı.</b><p>Dernek yönetimi onayladıktan sonra Market sayfasında görünecek.</p>' +
+      '<button type="button" class="btn btn-light" data-i-again>Bir ilan daha ver</button></div>';
+  }
+  document.addEventListener('submit', function (e) {
+    var f = e.target.closest && e.target.closest('form[data-i-form]');
+    if (!f) return;
+    e.preventDefault();
+    var v = {}, err = f.querySelector('.m-err'), btn = f.querySelector('button[type=submit]');
+    ['tur', 'baslik', 'fiyat', 'aciklama', 'ad', 'telefon', 'web'].forEach(function (n) { v[n] = f.elements[n].value.trim(); });
+    function hata(t, n) { err.textContent = t; err.hidden = false; if (n && f.elements[n]) f.elements[n].focus(); }
+    if (v.baslik.length < 3) return hata('Lütfen ne sattığınızı ya da aradığınızı yazın.', 'baslik');
+    if (v.ad.length < 3) return hata('Lütfen adınızı ve soyadınızı yazın.', 'ad');
+    if (!/^[0-9+ ()\-]+$/.test(v.telefon) || v.telefon.replace(/\D/g, '').length < 10 || !C.telHref(v.telefon)) return hata('Lütfen telefon numaranızı başında 0 ile yazın. Örnek: 0555 123 45 67', 'telefon');
+    err.hidden = true;
+    mAdKaydet(v.ad);
+    var label = btn.innerHTML, fotos = (f._fotos || []).slice();
+    btn.disabled = true; btn.textContent = 'Gönderiliyor…';
+    var done = function () { fotos.forEach(function (x) { URL.revokeObjectURL(x.url); });
+      var t = document.createElement('div'); t.innerHTML = iTesekkur(); f.parentNode.replaceChild(t.firstChild, f); };
+    if (v.web) { done(); return; }   // yalnız otomatik programların doldurduğu gizli alan
+    var body = { tur: v.tur, baslik: v.baslik, ad: v.ad, telefon: v.telefon };
+    var fiyat = v.fiyat.replace(/\s*(tl|₺|lira)\.?$/i, '').trim();
+    if (fiyat) body.fiyat = fiyat;
+    if (v.aciklama) body.aciklama = v.aciklama;
+    mFotoGonder(fotos, btn).then(function (yollar) {
+      if (yollar.length) { body.fotolar = yollar; btn.textContent = 'Gönderiliyor…'; }
+      return C.sb('/pazar_istekleri', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: body });
+    }).then(done).catch(function (er) {
+      btn.disabled = false; btn.innerHTML = label;
+      hata(er && er.status === 'net' ? 'İnternet bağlantısı yok gibi görünüyor. Bağlantınızı kontrol edip tekrar deneyin.' :
+        er && er.foto ? 'Fotoğraf yüklenemedi. Biraz sonra tekrar deneyin ya da fotoğrafı kaldırıp ilanınızı fotoğrafsız gönderin. (Hata F' + er.status + (er.message ? ': ' + er.message : '') + ')' :
+        er && /çok fazla/.test(er.message || '') ? er.message : 'Gönderilemedi. Lütfen biraz sonra tekrar deneyin.' + (er && er.status ? ' (Hata ' + er.status + (er.message ? ': ' + String(er.message).slice(0, 120) : '') + ')' : ''));
+    });
+  });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-i-again]');
+    if (!a) return;
+    var t = document.createElement('div'); t.innerHTML = iForm();
+    var f = t.firstChild; a.parentNode.parentNode.replaceChild(f, a.parentNode);
+    f.elements.baslik.focus();
+  });
 
   function credit(who, file) {
     return '<span class="kredi">Fotoğraf: <a href="https://commons.wikimedia.org/wiki/File:' + file + '" target="_blank" rel="noopener">' + who + '</a></span>';
@@ -916,6 +992,15 @@
       '<section class="section"><div class="container"><div class="article m-topic" id="mTopic">' + (k ? mTopicHtml(k) : '<p class="loading">Yükleniyor…</p>') + '</div></div></section>';
   }
 
+  // Formdaki fotoğrafları sırayla yükler, dosya yollarını döndürür (yüklenmiş olan yeniden yüklenmez)
+  function mFotoGonder(fotos, btn) {
+    return fotos.reduce(function (p, x, i) {
+      return p.then(function (yollar) {
+        btn.textContent = fotos.length > 1 ? 'Fotoğraflar yükleniyor (' + (i + 1) + ' / ' + fotos.length + ')…' : 'Fotoğraf yükleniyor…';
+        return x.yol ? yollar.concat(x.yol) : C.fotoYukle(x.blob).then(function (yol) { x.yol = yol; return yollar.concat(yol); });
+      });
+    }, Promise.resolve([]));
+  }
   function mThanks(tur) {
     return '<div class="m-thanks" role="status"><b>Teşekkürler, ' + ({ konu: 'yazınız', cevap: 'cevabınız', yorum: 'mesajınız' }[tur]) + ' alındı.</b>' +
       '<p>Dernek yönetimi onayladıktan sonra burada görünecek.</p>' +
@@ -944,12 +1029,7 @@
       tur === 'yorum' ? { ad: v.ad, metin: v.metin, hedef_tur: ys.getAttribute('data-y'), hedef: ys.getAttribute('data-yh'), hedef_baslik: (ys.getAttribute('data-yb') || '').slice(0, 200) } :
       { ad: v.ad, metin: v.metin, konu_id: +f.getAttribute('data-konu') };
     // Fotoğraflar sırayla yüklenir; hepsi yüklenince yazı, dosya yollarıyla birlikte kaydedilir
-    fotos.reduce(function (p, x, i) {
-      return p.then(function (yollar) {
-        btn.textContent = fotos.length > 1 ? 'Fotoğraflar yükleniyor (' + (i + 1) + ' / ' + fotos.length + ')…' : 'Fotoğraf yükleniyor…';
-        return x.yol ? yollar.concat(x.yol) : C.fotoYukle(x.blob).then(function (yol) { x.yol = yol; return yollar.concat(yol); });
-      });
-    }, Promise.resolve([])).then(function (yollar) {
+    mFotoGonder(fotos, btn).then(function (yollar) {
       if (yollar.length) { body.fotolar = yollar; btn.textContent = 'Gönderiliyor…'; }
       return C.sb({ konu: '/forum_konular', cevap: '/forum_cevaplar', yorum: '/yorumlar' }[tur], { method: 'POST', headers: { Prefer: 'return=minimal' }, body: body });
     }).then(done).catch(function (er) {

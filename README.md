@@ -66,7 +66,7 @@ panel sayfası adres çubuğundaki anahtarı başka sitelere göndermez (`referr
 | `data/galeri.json` | Fotoğraflar |
 | `data/pazar.json` | Pazar ve yardımlaşma ilanları |
 | `data/dernek.json` | Hakkımızda, başkan, yönetim ve denetim kurulu, iletişim, kasa durumu |
-| `araclar/supabase-meydan.sql` | Köy Meydanı ve yorumlar veritabanı (Supabase) kurulumu |
+| `araclar/supabase-meydan.sql` | Köy Meydanı, yorumlar ve Market ilan istekleri veritabanı (Supabase) kurulumu |
 
 ## Köy Meydanı (forum)
 
@@ -100,6 +100,19 @@ Vefat ilanlarında bölümün adı **Başsağlığı dilekleri**, düğün ve ni
   kutusunda Köy Meydanı yazıları, cevaplar ve bütün yorumlar birlikte listelenir (her kaydın kendi sayfasında da o kayda gelenler görünür).
 - Yorumlar `yorumlar` tablosunda; kaydın kimliğiyle (duyuru ve etkinlikte adresindeki kimlik, fotoğrafta dosya adı) bağlanır.
   Bir duyurunun başlığı ya da tarihi değişirse adresi de değişir; eski yorumları o kayıtta görünmez olur (silinmez).
+
+## Market: ziyaretçinin ilan isteği
+
+Market sayfasındaki **İlan ver** düğmesiyle ziyaretçi kendi ilanını gönderir: tür, başlık, fiyat, açıklama, en çok 4 fotoğraf, adı ve telefonu.
+
+- İstek önce onaya düşer (Supabase, `pazar_istekleri` tablosu). Ziyaretçiler bu tabloyu okuyamaz; telefonlar onaydan önce yalnız yöneticiye görünür.
+- Panelde üst şeritteki **Onay bekleyen** sayısına ve menüde Market'in yanındaki kırmızı sayıya eklenir; ana sayfadaki ve Market sayfasındaki
+  "Onay bekleyenler" kutusunda **Onayla, yayınla** / **Sil** ile görünür.
+- Onaylanınca panel fotoğrafları `images/yuklenen/` klasörüne aktarır, ilanı öteki ilanlar gibi `data/pazar.json`'a yazar (ilk fotoğraf kapak,
+  kalanı `fotolar`; ilanın sayfasında küçük kareler olarak çıkar), paylaşım sayfasını üretir ve isteği veritabanından siler.
+  Yayınlanan ilan sıradan bir ilandır: **Düzenle** / **Sil** ile değiştirilir.
+- Kurulum `araclar/supabase-meydan.sql` içinde. Dosya Supabase'de çalıştırılmadıysa (tablo yoksa) site **İlan ver** düğmesini göstermez.
+- Kod: `app.js` (Market: ziyaretçinin ilan isteği), panel tarafı `yonetim/duzen.js` (`ilanYayinla`).
 
 ## Kısa paylaşım bağlantıları
 

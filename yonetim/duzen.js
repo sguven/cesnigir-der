@@ -336,22 +336,36 @@
     if (!force && mPend && Date.now() - mPendT < 15000) return Promise.resolve(mPend);
     if (mPendP) return mPendP;
     mPendP = mRpc('forum_bekleyenler', {}).then(function (r) {
-      mPend = { konular: C.arr(r && r.konular), cevaplar: C.arr(r && r.cevaplar), yorumlar: C.arr(r && r.yorumlar) }; mPendT = Date.now(); mBadge(); return mPend;
+      mPend = { konular: C.arr(r && r.konular), cevaplar: C.arr(r && r.cevaplar), yorumlar: C.arr(r && r.yorumlar), ilanlar: C.arr(r && r.ilanlar) }; mPendT = Date.now(); mBadge(); return mPend;
     }).then(function (x) { mPendP = null; return x; }, function (e) { mPendP = null; throw e; });
     return mPendP;
   }
   function mBadge() {
     var a = document.querySelector('.nav [data-nav="meydan"]'), n = mPend ? mPend.konular.length + mPend.cevaplar.length : 0;
-    var all = mPend ? n + mPend.yorumlar.length : 0, pill = $('edPendPill');
+    var ni = mPend ? mPend.ilanlar.length : 0, all = mPend ? n + mPend.yorumlar.length + ni : 0, pill = $('edPendPill');
     if (pill) { pill.hidden = !all; pill.querySelector('b').textContent = all; }
-    if (!a) return;
-    var b = a.querySelector('.ed-count');
-    if (!n) { if (b) b.remove(); return; }
-    if (!b) { b = el('<span class="ed-count"></span>'); a.appendChild(b); }
-    b.textContent = n; b.title = n + ' yazı onay bekliyor';
+    say(a, n, ' yazı onay bekliyor');
+    say(document.querySelector('.nav [data-nav="pazar"]'), ni, ' ilan onay bekliyor');
+    function say(a, n, ne) {
+      if (!a) return;
+      var b = a.querySelector('.ed-count');
+      if (!n) { if (b) b.remove(); return; }
+      if (!b) { b = el('<span class="ed-count"></span>'); a.appendChild(b); }
+      b.textContent = n; b.title = n + ne;
+    }
   }
   var Y_TUR = { duyuru: ['Haber yorumu', 'duyuru'], etkinlik: ['Etkinlik yorumu', 'etkinlik'], foto: ['Fotoğraf yorumu', 'foto'] };
   function mPendItem(x, tur, link) {
+    if (tur === 'ilan') {
+      var tel = C.telHref(x.telefon);
+      return '<div class="ed-m-item">' +
+        '<div class="news-meta"><span class="badge">' + esc('Market · ' + x.tur) + '</span><span>' + esc(C.zaman(x.created_at)) + '</span></div>' +
+        '<h3>' + esc(x.baslik) + (x.fiyat ? ' · ' + esc(x.fiyat) + ' ₺' : '') + '</h3>' +
+        '<p class="ed-m-by"><b>' + esc(x.ad) + '</b> · ' + (tel ? '<a href="tel:' + esc(tel) + '">' + esc(x.telefon) + '</a>' : esc(x.telefon)) + '</p>' +
+        (x.aciklama ? '<div class="ed-m-text">' + esc(x.aciklama) + '</div>' : '') + C.fotolarHtml(x) +
+        '<div class="ed-bar"><button type="button" class="ed-btn green" data-fm="onayla" data-tur="ilan" data-id="' + x.id + '">' + icon('check') + 'Onayla, yayınla</button>' +
+        '<button type="button" class="ed-btn red" data-fm="sil" data-tur="ilan" data-id="' + x.id + '">' + icon('trash') + 'Sil</button></div></div>';
+    }
     var yt = tur === 'yorum' ? Y_TUR[x.hedef_tur] || ['Yorum', ''] : null;
     var where = tur === 'konu' ? '' : tur === 'cevap' ? (x.konu_baslik ? 'Köy Meydanı: "' + x.konu_baslik + '" yazısına cevap' : '') : (x.hedef_baslik ? '"' + x.hedef_baslik + '"' : '');
     var href = tur === 'cevap' ? '#/konu/' + x.konu_id : yt && yt[1] ? '#/' + yt[1] + '/' + encodeURIComponent(x.hedef) : '';
@@ -382,18 +396,19 @@
       t.appendChild(el('<div class="ed-bar"><button type="button" class="ed-btn red" data-fm="sil" data-tur="yorum" data-id="' + t.getAttribute('data-y-id') + '">' + icon('trash') + 'Yorumu sil</button></div>'));
     });
     var ys = main.querySelector('.y-sec');
-    if (page !== '' && page !== 'meydan' && page !== 'konu' && !ys) return;
+    if (page !== '' && page !== 'meydan' && page !== 'konu' && page !== 'pazar' && !ys) return;
     mPendLoad().then(function (p) {
       var konu = main.querySelector('[data-m-konu]'), kid = konu ? +konu.getAttribute('data-m-konu') : 0;
-      var host = null, konular = [], cevaplar = [], yorumlar = [];
-      if (page === '') { konular = p.konular; cevaplar = p.cevaplar; yorumlar = p.yorumlar; }
+      var host = null, konular = [], cevaplar = [], yorumlar = [], ilanlar = [];
+      if (page === '') { konular = p.konular; cevaplar = p.cevaplar; yorumlar = p.yorumlar; ilanlar = p.ilanlar; }
+      else if (page === 'pazar') { host = main.querySelector('.section > .container'); ilanlar = p.ilanlar; }
       else if (page === 'meydan') { host = main.querySelector('.m-main'); konular = p.konular; cevaplar = p.cevaplar; }
       else if (page === 'konu') { host = $('mPend'); cevaplar = p.cevaplar.filter(function (c) { return c.konu_id === kid; }); }
       else if (ys) {
         host = ys.querySelector('.y-pend');
         yorumlar = p.yorumlar.filter(function (y) { return y.hedef_tur === ys.getAttribute('data-y') && y.hedef === ys.getAttribute('data-yh'); });
       }
-      var n = konular.length + cevaplar.length + yorumlar.length, old = $('edMPend'), oldW = $('edMPendWrap');
+      var n = konular.length + cevaplar.length + yorumlar.length + ilanlar.length, old = $('edMPend'), oldW = $('edMPendWrap');
       if (old) old.remove();
       if (oldW) oldW.remove();
       if (page === '') {
@@ -407,6 +422,7 @@
       var home = page === '';
       host.insertBefore(el('<div id="edMPend" class="ed-m-pend"><h2>' + (n ? 'Onay bekleyenler (' + n + ')' : 'Onay bekleyen yazı yok') + '</h2>' +
         (n ? '<p class="small muted">Bunları yalnız siz görüyorsunuz. Onaylarsanız sitede görünür; uygun değilse silin.</p>' : '<p class="small muted">Yeni yazı ve cevaplar gelince burada görünecek.</p>') +
+        ilanlar.map(function (i) { return mPendItem(i, 'ilan', home); }).join('') +
         konular.map(function (k) { return mPendItem(k, 'konu', home); }).join('') + cevaplar.map(function (c) { return mPendItem(c, 'cevap', home); }).join('') +
         yorumlar.map(function (y) { return mPendItem(y, 'yorum', home); }).join('') + '</div>'), host.firstChild);
       if (home && mScroll) { mScroll = false; $('edMPend').scrollIntoView({ block: 'start', behavior: 'smooth' }); }
@@ -422,9 +438,10 @@
     e.preventDefault(); e.stopPropagation();
     var islem = b.getAttribute('data-fm'), tur = b.getAttribute('data-tur'), id = +b.getAttribute('data-id');
     var ask = islem !== 'sil' ? Promise.resolve(true) :
-      dialog('Silinsin mi?', tur === 'konu' ? 'Bu yazı ve altındaki bütün cevaplar silinecek. Geri alınamaz.' : tur === 'cevap' ? 'Bu cevap silinecek. Geri alınamaz.' : 'Bu yorum silinecek. Geri alınamaz.', 'Evet, sil', { danger: true });
+      dialog('Silinsin mi?', tur === 'konu' ? 'Bu yazı ve altındaki bütün cevaplar silinecek. Geri alınamaz.' : tur === 'cevap' ? 'Bu cevap silinecek. Geri alınamaz.' : tur === 'ilan' ? 'Bu ilan isteği silinecek, sitede yayınlanmayacak. Geri alınamaz.' : 'Bu yorum silinecek. Geri alınamaz.', 'Evet, sil', { danger: true });
     ask.then(function (ok) {
       if (!ok) return;
+      if (tur === 'ilan' && islem === 'onayla') { ilanYayinla(id); return; }
       busy(islem === 'onayla' ? 'Yayınlanıyor…' : islem === 'sil' ? 'Siliniyor…' : 'Kaydediliyor…');
       mRpc('forum_islem', { tur: tur, kayit: id, islem: islem }).then(function () {
         busy(false);
@@ -438,6 +455,43 @@
       });
     });
   }, true);
+
+  /* Ziyaretçinin gönderdiği Market ilanını yayınlar: fotoğrafları Supabase deposundan alıp sitenin deposuna (images/yuklenen/)
+     aktarır, ilanı öteki ilanlar gibi data/pazar.json'a yazar (ilk fotoğraf kapak, kalanı "fotolar"), paylaşım sayfasını üretir,
+     sonra isteği veritabanından siler. Yayınlanan ilan artık sıradan bir ilandır: Düzenle / Sil ile değiştirilir. */
+  function ilanYayinla(id) {
+    var x = (mPend ? mPend.ilanlar : []).filter(function (i) { return i.id === id; })[0];
+    if (!x) return;
+    var yollar = C.fotolar(x), paths = [], item, kaldi = false;
+    busy('Yayınlanıyor…');
+    yollar.reduce(function (p, yol, i) {
+      return p.then(function () {
+        busy(yollar.length > 1 ? 'Fotoğraflar aktarılıyor (' + (i + 1) + ' / ' + yollar.length + ')…' : 'Fotoğraf aktarılıyor…');
+        return fetch(C.fotoUrl(yol)).catch(function () { throw { status: 'net' }; })
+          .then(function (r) { if (!r.ok) throw { status: 'photo' }; return r.blob(); })
+          .then(shrink).then(uploadPhoto).then(function (path) { paths.push(path); });
+      });
+    }, Promise.resolve()).then(function () {
+      busy('Yayınlanıyor…');
+      item = clean({ tur: x.tur, tarih: C.todayIso(), baslik: x.baslik, fiyat: x.fiyat, aciklama: x.aciklama, kisi: x.ad, telefon: x.telefon, foto: paths[0] });
+      if (paths.length > 1) item.fotolar = paths.slice(1).map(function (p) { return { foto: p }; });
+      return updateJson('data/pazar.json', function (data) { return [item].concat(C.arr(data)); }, 'Panel: ilan eklendi (ziyaretçinin isteği) – ' + x.baslik);
+    }).then(function (list) {
+      site.set('pazar', list);
+      return writeSharePage('pazar', item);
+    }).then(function () {
+      return mRpc('forum_islem', { tur: 'ilan', kayit: id, islem: 'sil' }).catch(function () { kaldi = true; });
+    }).then(function () {
+      busy(false);
+      if (!kaldi) mPend.ilanlar = mPend.ilanlar.filter(function (i) { return i.id !== id; });
+      mPendT = 0; mBadge(); rerender();
+      if (kaldi) dialog('İlan yayınlandı', 'İlan sitede yayınlandı ama istek listeden kaldırılamadı. Onay bekleyenlerde hâlâ görünüyorsa "Sil" düğmesiyle kaldırın; yeniden onaylamayın.', 'Tamam', { single: true });
+      else toast('İlan yayınlandı', 'Herkes 1-2 dakika içinde Market sayfasında görecek.');
+    }).catch(function (e) {
+      busy(false);
+      fail('İlan yayınlanamadı', e);
+    });
+  }
 
   /* ---------------- pencereler ---------------- */
   function busy(text) {
