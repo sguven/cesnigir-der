@@ -955,7 +955,7 @@
     return i < TB.length ? '<p class="t-sonraki"><a href="#' + TB[i][0] + '" data-git="' + TB[i][0] + '">Sonraki bölüm: ' + TB[i][1] + ' ↓</a></p>' : '';
   }
   function pageTarih() {
-    var stats = [['800 yıla yakın', 'köprünün tahmini yaşı'], ['18,60 m', 'ana kemerin açıklığı'], ['50 kadar', 'Osmanlı\'da geçit bekçisi'], ['26 Aralık 1919', 'Atatürk köyümüzden geçti']];
+    var stats = [['800 yıla yakın', 'köprünün tahmini yaşı'], ['18,60 m', 'ana kemerin açıklığı'], ['50 kadar', 'Osmanlı\'da geçit bekçisi'], ['113 m', 'köprünün boyu']];
     return '<div class="t-kapak"><img src="' + B + 'images/kanyon-kopru.jpg" alt="Tarihi Çeşnigir Köprüsü, Kızılırmak\'ın yeşil suyundaki yansımasıyla (Köprüköy, Keskin, Kırıkkale)." fetchpriority="high">' +
       '<div class="t-kapak-yazi"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › Tarihimiz</div>' +
       '<h1>Tarihimiz</h1><p>Kızılırmak\'ın en dar yerinde, yedi yüzyılı aşkın bir köprü ve onun bekçilerinin kurduğu köy.</p></div></div>' +
