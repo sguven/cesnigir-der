@@ -1491,7 +1491,7 @@
   // Durdurunca bağlantı kesilir (internet harcamaz); yeniden başlatınca yayın o anki yerinden gelir.
   // RADYO_GOSTER: Keskin FM'den izin gelene kadar radyo kapalı (ana sayfadaki düğme ve sağ alttaki küçük düğme görünmez).
   // İzin gelince true yapın ve sayfalardaki app.js?v= ekini değiştirin.
-  var RADYO_GOSTER = false;
+  var RADYO_GOSTER = true;
   var RADYO = 'https://keskinfm.com/api/stream', RADYO_SITE = 'https://keskinfm.com', rAudio = null, rSt = 'idle', rNo = 0;
   var R_TX = { idle: 'Canlı radyo · dinlemek için dokunun', load: 'Bağlanıyor…', play: 'Çalıyor · durdurmak için dokunun', err: 'Yayına şu an ulaşılamıyor, biraz sonra deneyin' };
   var R_IC = '<svg class="r-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5Z"/></svg>' +
