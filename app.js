@@ -1,5 +1,5 @@
 /* Çeşnigir-Der · Tasarım 3
-   Sayfalar: Ana Sayfa, Duyurular (ve ayrıntı), Etkinlikler, Köy Meydanı (forum), Fotoğraflar, Market, Esnaf Rehberi, Hakkımızda, İletişim.
+   Sayfalar: Ana Sayfa, Duyurular (ve ayrıntı), Etkinlikler, Köy Meydanı (forum), Fotoğraflar, Market, Esnaf Rehberi, Gezilecek Yerler, Tarihimiz, Hakkımızda (iletişim bilgileri dahil).
    İçerik data/ klasöründen okunur; yönetim panelinden değişir. */
 
 /* Ziyaretçi sayacı (GoatCounter): istatistikler https://cesnifirder.goatcounter.com
@@ -72,7 +72,7 @@
     return '<div class="kisi"><b>' + esc(ad || '') + '</b>' +
       (no ? (tel ? '<a href="tel:' + esc(tel) + '">' + esc(no) + '</a>' : '<span>' + esc(no) + '</span>') : '') + '</div>';
   }
-  // noTel: yalnız isimler (Hakkımızda); İletişim'de numaralarıyla
+  // noTel: yalnız isimler (Hakkımızda)
   function peopleRows(d, noTel) {
     return (d.baskan ? '<li><span>Dernek Başkanı</span>' + person(d.baskan, noTel ? '' : d.telefon) + '</li>' : (!noTel && d.telefon ? '<li><span>Dernek Başkanı</span>' + person('', d.telefon) + '</li>' : '')) +
       (d.baskan2 ? '<li><span>Başkan Yardımcısı</span>' + person(d.baskan2, noTel ? '' : d.telefon2) + '</li>' : (!noTel && d.telefon2 ? '<li><span>Başkan Yardımcısı</span>' + person('', d.telefon2) + '</li>' : ''));
@@ -337,7 +337,7 @@
       '<div><div class="sec-head"><h2>Köyümüz Köprüköy</h2></div>' +
       '<p>Köyümüz adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır. Selçuklu döneminden kalan on iki gözlü bu taş köprü, yüzyıllarca Ankara ile Kırşehir arasındaki yolun geçiş noktası oldu.</p>' +
       '<p class="muted">Kapulukaya Baraj Gölü kıyısında, Keskin\'e 25 km, Kırıkkale\'ye 37 km uzaklıktayız.</p>' +
-      '<div class="btn-row"><a class="btn btn-light" href="#/hakkimizda">Köyümüz ve tarihçe</a><a class="btn btn-light" href="#/gezilecek-yerler">Gezilecek yerler</a></div></div></div></section>';
+      '<div class="btn-row"><a class="btn btn-light" href="#/tarihimiz">Köyümüz ve tarihçe</a><a class="btn btn-light" href="#/gezilecek-yerler">Gezilecek yerler</a></div></div></div></section>';
     return h;
   }
 
@@ -644,8 +644,10 @@
   }
   var EG = 'Egeasln, CC BY-SA 4.0', IS = 'Ingeborg Simon, CC BY-SA 3.0', VH = 'Volker Höhfeld, CC BY-SA 4.0';
 
+  /* Hakkımızda: yalnız dernekle ilgili bilgiler. Eski İletişim sayfasının içeriği (adres, harita) de burada; #/iletisim buraya açılır.
+     Köyün ve köprünün tarihi Tarihimiz sayfasında (pageTarih). */
   function pageAbout() {
-    var d = data.dernek;
+    var d = data.dernek, mail = /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(d.eposta || '') ? d.eposta : '';
     var paras = String(d.hakkimizda || '').split(/\n\s*\n/).map(function (s) { return s.trim(); }).filter(Boolean);
     var kasa = (d.kasa || d.gelir || d.gider) ? '<div class="box box-pad"' + ed('dernek:kasa') + ' style="margin-top:20px"><h3>Kasa Durumu</h3>' +
       (d.kasa_donem ? '<p class="muted small" style="margin:-4px 0 10px">' + esc(d.kasa_donem) + '</p>' : '') + '<div class="kasa">' +
@@ -661,18 +663,27 @@
       '<li>Köyden haberleri ve duyuruları herkese ulaştırıyoruz.</li>' +
       '<li>Düğün, nişan, mevlit ve cenaze gibi özel günleri takvimde duyuruyoruz.</li>' +
       '<li>Köylülerin alım satım ve yardımlaşma ilanlarına aracılık ediyoruz.</li>' +
-      '<li>Çeşnigir Köprüsü\'nü ve Köprüköy\'ün tarihini tanıtıyoruz.</li>' +
+      '<li>Çeşnigir Köprüsü\'nü ve <a href="#/tarihimiz">Köprüköy\'ün tarihini</a> tanıtıyoruz.</li>' +
       '<li>Köyde yaşayanla gurbetteki hemşehrilerimiz arasındaki bağı canlı tutuyoruz.</li></ul>' +
       '</div><aside><div class="box box-pad"' + ed('dernek:kisiler') + '><h3>Dernek Bilgileri</h3><ul class="facts">' +
       peopleRows(d, true) +
       '<li><span>Kuruluş</span>Aralık 2025</li>' +
       '<li><span>Açılış töreni</span>6 Eylül 2026</li>' +
+      (mail ? '<li><span>E-posta</span><a href="mailto:' + esc(mail) + '">' + esc(mail) + '</a></li>' : '') +
       '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li>' +
+      '<li><span>Konum</span><a href="' + MAP + '" target="_blank" rel="noopener">Haritada aç</a></li>' +
       '</ul></div>' + (kasa || (E ? '<div' + ed('dernek:kasa') + ' style="margin-top:20px"></div>' : '')) + '</aside></div></section>' +
-      boardsSection(d) + villageSection() +
-      '<section class="section alt"><div class="container"><div class="sec-head"><h2>Gezilecek Yerler</h2></div>' +
-      '<p>Çeşnigir Kanyonu mesire alanı, seyir terasları, tekne turu, yürüyüş yolu, Büklükale ören yeri ve Sulu Mağara: köyümüzde ve çevresinde görülecek yerleri ayrı bir sayfada topladık.</p>' +
-      '<a class="btn" href="#/gezilecek-yerler">Gezilecek yerleri gör</a></div></section>';
+      boardsSection(d) +
+      '<section class="section alt"><div class="container"><div class="sec-head"><h2>Dernek Binası ve Konum</h2></div>' +
+      '<p style="margin:0 0 14px">' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + ' · <a href="' + MAP + '" target="_blank" rel="noopener">Haritada aç</a></p>' +
+      '<div class="box"><iframe class="map" title="Çeşnigir-Der haritası" loading="lazy" ' +
+      'src="https://www.google.com/maps?q=39.5765122,33.4357454&z=17&output=embed"></iframe></div></div></section>' +
+      '<section class="section"><div class="container"><div class="pair" style="margin-bottom:0">' +
+      '<div class="box box-pad"><h3>Tarihimiz</h3><p>Çeşnigir Köprüsü\'nün tanıtımı, teknik bilgileri, "Çeşnigir" adının anlamı ve köyümüzün kaynaklı tarihçesi.</p>' +
+      '<a class="btn" href="#/tarihimiz">Tarihimizi oku</a></div>' +
+      '<div class="box box-pad"><h3>Gezilecek Yerler</h3><p>Çeşnigir Kanyonu mesire alanı, seyir terasları, tekne turu, yürüyüş yolu, Büklükale ören yeri ve Sulu Mağara.</p>' +
+      '<a class="btn" href="#/gezilecek-yerler">Gezilecek yerleri gör</a></div>' +
+      '</div></div></section>';
   }
 
   function rows(list) {
@@ -756,17 +767,16 @@
     ['6 Eylül 2026', 'Dernek merkezi Köprüköy Çarşı Merkezi\'nde törenle açılır.', [K.acilis]]
   ];
 
-  function villageSection() {
+  /* Tarihimiz: önce Çeşnigir Köprüsü'nün tanıtımı, teknik bilgileri ve "Çeşnigir" adının anlamı, sonra köyün ve köprünün tarihçesi.
+     Her bilginin kaynağı yanında yazılı (K, srcHtml); kaynaksız bilgi eklenmez. */
+  function pageTarih() {
     var W = 'https://tr.wikipedia.org/wiki/';
     var stats = [['800 yıla yakın', 'köprünün tahmini yaşı'], ['113 m', 'köprünün boyu'], ['18,60 m', 'ana kemer açıklığı'], ['50', 'Osmanlı döneminde köprü bekçisi'], ['1972', 'belde oluşu']];
-    return '<section class="section alt"><div class="container"><div class="sec-head"><h2>Köyümüz Köprüköy</h2></div>' +
+    return band('Tarihimiz', 'Çeşnigir Köprüsü ve Köprüköy\'ün kaynaklı tarihi') +
+      '<section class="section alt"><div class="container">' +
       '<div class="stats">' + stats.map(function (s) { return '<div><b>' + s[0] + '</b><span>' + s[1] + '</span></div>'; }).join('') + '</div></div>' +
       '<div class="container grid-main"><div>' +
-      figure('koprukoy-gol.jpg', 'Kapulukaya Baraj Gölü kıyısında Köprüköy: kayalık yamaçta kırmızı çatılı evler, solda Çeşnigir Köprüsü.', 'Göl kıyısından Köprüköy ve Çeşnigir Köprüsü. ' + credit(IS, '%C3%87e%C5%9Fnigir_K%C3%B6pr%C3%BCs%C3%BC_02.jpg')) +
-      para('Kırıkkale\'nin Keskin ilçesine bağlı Köprüköy, adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır; halk arasında kısaca "Köprü" de denir. Köy, Ankara–Kırşehir yolunun eski güzergâhında, ırmağın kayalar arasında daraldığı ve en sağlam geçit verdiği yerde kurulmuştur. Yerleşimin Selçuklu döneminde başladığı kabul edilir.') +
-      para('Köyümüzün asıl hikâyesi köprüyle birlikte yazılmıştır. Osmanlı döneminde kervanların geçtiği bu kayalık geçidi eşkıyadan korumak için köprünün çevresine derbendciler, yani geçit bekçileri yerleştirildi. Bekçilerin aileleri burada kalıp çoğaldı; han ve cami yapıldı. Böylece bir güvenlik noktası, zamanla kalabalık bir köye dönüştü. Kayıtlarda köyün adı 1777\'de "Çaşnigir Köprüsü", 1815\'te "Çaşnigir Derbendi" olarak geçer.') +
-
-      '<div class="sec-head" style="margin-top:30px"><h2>Çeşnigir Köprüsü</h2></div>' +
+      '<div class="sec-head"><h2>Çeşnigir Köprüsü</h2></div>' +
       '<div class="pair">' +
       figure('kopru-1972.jpg', 'Çeşnigir Köprüsü 1972\'de: baraj öncesi, kemerlerin altından akan turkuaz Kızılırmak.', '15 Eylül 1972, baraj suları yükselmeden önce. ' + credit(VH, 'K%C3%B6pr%C3%BCk%C3%B6y_15_09_1972_historischen_%C3%87e%C5%9Fnigir-Br%C3%BCcke_%C3%BCber_den_K%C4%B1z%C4%B1l%C4%B1rmak.jpg')) +
       figure('kopru-bugun.jpg', 'Bugün Çeşnigir Köprüsü: kemerlerin yarısı baraj suyunda.', 'Bugün: su kemerlerin yarısına ulaşıyor. ' + credit(EG, 'Cesnigir_paradise3_(cropped).jpg')) + '</div>' +
@@ -777,6 +787,11 @@
       '</div><div class="box box-pad"><h3>"Çeşnigir" ne demek?</h3>' +
       '<p style="margin:0 0 10px">Farsça <i>çaşni</i> (tat) ve <i>gir</i> (alan) sözlerinden gelir. Selçuklu ve Osmanlı saraylarında padişaha sunulan yemekleri önceden tadıp güvenliğinden sorumlu olan görevliye <b>çaşnigir</b> denirdi; Osmanlı sarayının en itibarlı görevlerinden biriydi.</p>' +
       '<p style="margin:0">Kelimenin bir anlamı da darphanede basılan altın ve gümüş paraların ayarını denetleyen görevlidir. Köprünün neden bu adı aldığı kesin olarak bilinmiyor; belgelerde hem "Çaşnigir" hem "Çeşnigir" yazılışı geçer.</p></div></div>' +
+
+      '<div class="sec-head" style="margin-top:40px"><h2>Köyümüz Köprüköy</h2></div>' +
+      figure('koprukoy-gol.jpg', 'Kapulukaya Baraj Gölü kıyısında Köprüköy: kayalık yamaçta kırmızı çatılı evler, solda Çeşnigir Köprüsü.', 'Göl kıyısından Köprüköy ve Çeşnigir Köprüsü. ' + credit(IS, '%C3%87e%C5%9Fnigir_K%C3%B6pr%C3%BCs%C3%BC_02.jpg')) +
+      para('Kırıkkale\'nin Keskin ilçesine bağlı Köprüköy, adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır; halk arasında kısaca "Köprü" de denir. Köy, Ankara–Kırşehir yolunun eski güzergâhında, ırmağın kayalar arasında daraldığı ve en sağlam geçit verdiği yerde kurulmuştur. Yerleşimin Selçuklu döneminde başladığı kabul edilir.') +
+      para('Köyümüzün asıl hikâyesi köprüyle birlikte yazılmıştır. Osmanlı döneminde kervanların geçtiği bu kayalık geçidi eşkıyadan korumak için köprünün çevresine derbendciler, yani geçit bekçileri yerleştirildi. Bekçilerin aileleri burada kalıp çoğaldı; han ve cami yapıldı. Böylece bir güvenlik noktası, zamanla kalabalık bir köye dönüştü. Kayıtlarda köyün adı 1777\'de "Çaşnigir Köprüsü", 1815\'te "Çaşnigir Derbendi" olarak geçer.') +
 
       '<div class="sec-head" style="margin-top:30px"><h2>Köprüyü kim yaptırdı?</h2></div>' +
       para('Kitabesi olmadığı için bu soru hâlâ tartışmalıdır. En yaygın görüş, köprünün 13. yüzyılda Anadolu Selçukluları döneminde, yanındaki hanla birlikte yapıldığıdır. Sanat tarihçisi Fügen İlter, köprünün İslam öncesi döneme ait eski bir köprünün temelleri üzerine kurulduğunu, Osmanlı döneminde yenilenince ilk biçimini yitirdiğini yazar.') +
@@ -805,7 +820,9 @@
 
       '<div class="sec-head" style="margin-top:30px"><h2>Tarihçe</h2></div>' +
       (function () {
-        var t = data.duyurular.filter(isTarih);
+        // Bu sayfada zaten anlatılan yazılar tekrar bağlantı olarak listelenmez (Atatürk'ün geçişi yukarıda anlatılıyor)
+        var anlatilan = ['2026-11-22-ataturk-koyumuzden-gecti-26-aralik-1919'];
+        var t = data.duyurular.filter(function (p) { return isTarih(p) && anlatilan.indexOf(p.eski_id || p.id) < 0; });
         return t.length ? '<div class="box box-pad" style="margin-bottom:18px;background:#FBF5E8;border-color:#D9C49A"><h3>Tarihten yazılar</h3><ul class="tarih-links">' +
           t.map(function (p) { return '<li><a href="#/duyuru/' + esc(pid(p)) + '">' + esc(p.baslik) + '</a>' + (p.olay_tarihi ? '<span>' + esc(p.olay_tarihi) + '</span>' : '') + '</li>'; }).join('') +
           '</ul></div>' : '';
@@ -865,7 +882,7 @@
     [39.5835, 33.4255],   // Büklükale Ören Yeri
     [39.6650, 33.5900]    // Sulu Mağara (Keskin, Altıntaş Mahallesi)
   ];
-  var KOPRU_YER = { ad: 'Tarihi Çeşnigir Köprüsü', konum: [39.58083, 33.42944], foto: 'kanyon-kopru.jpg', link: '#/hakkimizda', yazi: 'Köprünün tarihçesini oku' };
+  var KOPRU_YER = { ad: 'Tarihi Çeşnigir Köprüsü', konum: [39.58083, 33.42944], foto: 'kanyon-kopru.jpg', link: '#/tarihimiz', yazi: 'Köprünün tarihçesini oku' };
   var LF = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.', lfYuk = null, gHarita = null;
   function leafletYukle() {
     if (window.L) return Promise.resolve();
@@ -982,23 +999,11 @@
       placesSection() +
       '<section class="section"><div class="container"><div class="sec-head"><h2>Sık Sorulan Sorular</h2></div><div class="box box-pad">' +
       sss('Çeşnigir Köprüsü nerede?', 'Kırıkkale\'nin Keskin ilçesine bağlı Köprüköy\'de, Kızılırmak üzerindedir. Keskin\'e 25 km, Kırıkkale\'ye 37 km, Ankara\'ya yaklaşık 113 km uzaklıktadır.').replace('margin:18px', 'margin:0') +
-      sss('Çeşnigir Köprüsü ne zaman yapıldı?', 'Köprü 13. yüzyılda, Anadolu Selçukluları döneminde yapılmıştır. Ayrıntılar için <a href="#/hakkimizda">köyün ve köprünün tarihçesine</a> bakabilirsiniz.') +
+      sss('Çeşnigir Köprüsü ne zaman yapıldı?', 'Köprü 13. yüzyılda, Anadolu Selçukluları döneminde yapılmıştır. Ayrıntılar için <a href="#/tarihimiz">köyün ve köprünün tarihçesine</a> bakabilirsiniz.') +
       sss('Ankara\'dan günübirlik gidilir mi?', 'Evet. Köprüköy Ankara\'ya yaklaşık 113 km uzaklıktadır; köprü, kanyon, seyir terası ve tekne turu bir günde gezilebilir.') +
       sss('En güzel fotoğraf ne zaman çekilir?', 'Gün batımında köprü sudaki yansımasıyla birlikte görünür. Sisli sabahlarda vadiyi kaplayan sis de görülmeye değerdir.') +
       sss('Yakında başka nereler gezilir?', 'Köprünün karşı kıyısındaki Büklükale ören yeri, Keskin\'deki Sulu Mağara ve yakınındaki Ceritkale Kanyonu.') +
-      '</div><div class="btn-row" style="margin-top:20px"><a class="btn btn-light" href="#/hakkimizda">Köyün ve köprünün tarihçesi</a><a class="btn btn-light" href="#/fotograflar">Fotoğraflar</a></div></div></section>';
-  }
-
-  function pageContact() {
-    var d = data.dernek, mail = /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(d.eposta || '') ? d.eposta : '';
-    return band('İletişim', 'Bize telefonla ya da dernek binasında ulaşabilirsiniz.') +
-      '<section class="section"><div class="container grid-main"><div class="box"><iframe class="map" title="Çeşnigir-Der haritası" loading="lazy" ' +
-      'src="https://www.google.com/maps?q=39.5765122,33.4357454&z=17&output=embed"></iframe></div>' +
-      '<aside><div class="box box-pad"' + ed('dernek:kisiler') + '><h3>Bize Ulaşın</h3><ul class="facts">' +
-      peopleRows(d) +
-      (mail ? '<li><span>E-posta</span><a href="mailto:' + esc(mail) + '">' + esc(mail) + '</a></li>' : '') +
-      '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li>' +
-      '<li><span>Konum</span><a href="' + MAP + '" target="_blank" rel="noopener">Haritada aç</a></li></ul></div></aside></div></section>';
+      '</div><div class="btn-row" style="margin-top:20px"><a class="btn btn-light" href="#/tarihimiz">Köyün ve köprünün tarihçesi</a><a class="btn btn-light" href="#/fotograflar">Fotoğraflar</a></div></div></section>';
   }
 
   /* ---------- Köy Meydanı (forum) ----------
@@ -1329,7 +1334,7 @@
   /* ---------- yönlendirme ---------- */
   /* Arama motorları için her sayfanın gerçek bir adresi vardır (hakkimizda/, duyurular/, p/d-…html; araclar/site-sayfalari.js üretir).
      Sayfadaki #/… bağlantıları bu adresleri gösterir (data-h asıl hedefi tutar); dokununca sayfa yenilenmeden geçilir. */
-  var REAL = { 'gezilecek-yerler': 1, hakkimizda: 1, duyurular: 1, etkinlikler: 1, fotograflar: 1, iletisim: 1 };
+  var REAL = { 'gezilecek-yerler': 1, tarihimiz: 1, hakkimizda: 1, duyurular: 1, etkinlikler: 1, fotograflar: 1 };
   function realHref(hash) {
     var r = hash.replace(/^#\/?/, ''), p = r.split('/');
     if (!r) return B || './';
@@ -1346,12 +1351,12 @@
   }
   var TITLES = {
     '': 'Çeşnigir-Der · Köprüköy Çeşnigir Derneği (Keskin, Kırıkkale)',
-    hakkimizda: 'Köprüköy ve Çeşnigir Köprüsü\'nün tarihi · Çeşnigir-Der',
+    tarihimiz: 'Tarihimiz: Çeşnigir Köprüsü ve Köprüköy\'ün tarihi · Çeşnigir-Der',
+    hakkimizda: 'Hakkımızda ve iletişim · Çeşnigir-Der, Köprüköy (Keskin, Kırıkkale)',
     'gezilecek-yerler': 'Çeşnigir Köprüsü ve Kanyonu: Kırıkkale\'de gezilecek yerler · Köprüköy',
     duyurular: 'Köprüköy, Keskin ve Kırıkkale haberleri ve duyurular · Çeşnigir-Der',
     etkinlikler: 'Köprüköy etkinlik takvimi: düğün, mevlit ve özel günler · Çeşnigir-Der',
     fotograflar: 'Köprüköy ve Çeşnigir Köprüsü fotoğrafları · Çeşnigir-Der',
-    iletisim: 'İletişim · Çeşnigir-Der, Köprüköy (Keskin, Kırıkkale)',
     meydan: 'Köy Meydanı: Köprüköylülerin sohbet ve hatıra köşesi · Çeşnigir-Der',
     rehber: 'Esnaf Rehberi: Köprüköylülerin dükkân ve işletmeleri · Çeşnigir-Der'
   };
@@ -1368,10 +1373,9 @@
     else if (page === 'ilan') html = pageListing(decodeURIComponent(p.slice(1).join('/')));
     else if (page === 'rehber') html = pageRehber();
     else if (page === 'isletme') html = pageIsletme(decodeURIComponent(p.slice(1).join('/')));
-    else if (page === 'hakkimizda') html = pageAbout();
-    else if (page === 'koyumuz') { page = 'hakkimizda'; html = pageAbout(); }
+    else if (page === 'hakkimizda' || page === 'iletisim') { page = 'hakkimizda'; html = pageAbout(); }   // İletişim, Hakkımızda'ya taşındı
+    else if (page === 'tarihimiz' || page === 'tarihce' || page === 'koyumuz') { page = 'tarihimiz'; html = pageTarih(); }
     else if (page === 'gezilecek-yerler' || page === 'gezi') { page = 'gezilecek-yerler'; html = pageGezi(); }
-    else if (page === 'iletisim') html = pageContact();
     else if (page === 'meydan') html = pageForum();
     else if (page === 'foto') html = pagePhoto(decodeURIComponent(p.slice(1).join('/')));
     else if (page === 'konu') html = pageTopic(decodeURIComponent(p.slice(1).join('/')));

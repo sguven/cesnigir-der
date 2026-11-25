@@ -19,7 +19,7 @@ Eski `site3/` adresi ana adrese yönlendirir, daha önce paylaşılan bağlantı
 
 - Panel sitenin kendisidir, düzenleme modunda: yönetici siteyi ziyaretçi gibi gezer. Her duyurunun, etkinliğin, market ilanının ve
   fotoğrafın yanında **Düzenle** / **Sil**, her bölümün başında **Yeni … ekle** düğmesi vardır; sağ alttaki **Ekle** düğmesi de her yerden açılır.
-  Hakkımızda, İletişim ve ana sayfadaki kutuların (dernek bilgileri, kurullar, kasa, canlı görüntü) köşesindeki **Düzenle** yalnız o kutunun bilgilerini açar.
+  Hakkımızda ve ana sayfadaki kutuların (dernek bilgileri, kurullar, kasa, canlı görüntü) köşesindeki **Düzenle** yalnız o kutunun bilgilerini açar.
 - Geçmiş etkinlikler sitede görünmez; düzenleme modunda Etkinlikler sayfasının sonunda listelenir.
 - Değişiklikler doğrudan bu depodaki `data/` dosyalarına kaydedilir ve sayfada hemen görünür; ziyaretçilere 1-2 dakika içinde yansır.
 - Telefondan yüklenen fotoğraflar otomatik küçültülür (en fazla 1600 piksel, 250 KB altı) ve `images/yuklenen/` klasörüne gider.
@@ -160,7 +160,7 @@ Sonra tarayıcıda `http://localhost:8000` adresini açın.
 Her bölümün ve her kaydın gerçek bir adresi vardır; arama motorları içeriği bu sayfalardan okur, WhatsApp ve Facebook da önizlemedeki
 fotoğrafı ve başlığı buradan alır:
 
-- `gezilecek-yerler/`, `hakkimizda/`, `duyurular/`, `etkinlikler/`, `fotograflar/`, `iletisim/`: bölüm sayfaları
+- `gezilecek-yerler/`, `tarihimiz/`, `hakkimizda/`, `duyurular/`, `etkinlikler/`, `fotograflar/`: bölüm sayfaları (`iletisim/` eski bağlantılar için Hakkımızda'ya yönlendirir)
 - `p/d-….html` duyuru ve haberler, `p/e-….html` etkinlikler (aramaya açık); `p/i-….html` pazar ilanları (telefon içerdiği için aramaya kapalı)
 - `sitemap.xml` sayfa ve fotoğraf listesi, `robots.txt` bu listeyi arama motorlarına gösterir
 
