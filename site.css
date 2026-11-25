@@ -122,6 +122,8 @@ main:focus{outline:none}
 .sec-head a{font-weight:700;font-size:18px}
 .grid-main{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:28px;align-items:start}
 @media (max-width:900px){ .grid-main{grid-template-columns:minmax(0,1fr)} }
+.t-biliyor-tel{display:none;margin-bottom:20px}
+@media (max-width:900px){ .t-biliyor-tel{display:block} .t-biliyor-masa{display:none} }
 
 .box{background:var(--white);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .box-pad{padding:20px}

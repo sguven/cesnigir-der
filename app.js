@@ -791,6 +791,7 @@
 
       '<div class="sec-head" style="margin-top:40px"><h2>Köyümüz Köprüköy</h2></div>' +
       figure('koprukoy-gol.jpg', 'Kapulukaya Baraj Gölü kıyısında Köprüköy: kayalık yamaçta kırmızı çatılı evler, solda Çeşnigir Köprüsü.', 'Göl kıyısından Köprüköy ve Çeşnigir Köprüsü. ' + credit(IS, '%C3%87e%C5%9Fnigir_K%C3%B6pr%C3%BCs%C3%BC_02.jpg')) +
+      biliyorKutu('t-biliyor-tel') +
       para('Kırıkkale\'nin Keskin ilçesine bağlı Köprüköy, adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır; halk arasında kısaca "Köprü" de denir. Köy, Ankara–Kırşehir yolunun eski güzergâhında, ırmağın kayalar arasında daraldığı ve en sağlam geçit verdiği yerde kurulmuştur. Yerleşimin Selçuklu döneminde başladığı kabul edilir.') +
       para('Köyümüzün asıl hikâyesi köprüyle birlikte yazılmıştır. Osmanlı döneminde kervanların geçtiği bu kayalık geçidi eşkıyadan korumak için köprünün çevresine derbendciler, yani geçit bekçileri yerleştirildi. Bekçilerin aileleri burada kalıp çoğaldı; han ve cami yapıldı. Böylece bir güvenlik noktası, zamanla kalabalık bir köye dönüştü. Kayıtlarda köyün adı 1777\'de "Çaşnigir Köprüsü", 1815\'te "Çaşnigir Derbendi" olarak geçer.') +
 
@@ -853,16 +854,21 @@
       '</div><aside><div class="box box-pad"><h3>Köy Bilgileri</h3>' +
       rows([['Konum', 'Kapulukaya Baraj Gölü\'nün doğu kıyısı'], ['Uzaklık', 'Keskin 25 km, Kırıkkale 37 km, Ankara yaklaşık 113 km'], ['Rakım', '803 m'], ['Nüfus', '662 (2025, TÜİK)'],
         ['Geçim', 'Buğday, arpa, patates, nohut, fasulye, ayçiçeği, pancar; hayvancılık; tatlı su levreği ve sazan balıkçılığı'], ['Yönetim', 'Muhtar ve ihtiyar heyeti'], ['Posta kodu', '71860']]) +
-      '</div><div class="box box-pad" style="margin-top:20px"><h3>Biliyor muydunuz?</h3><ul class="check-list">' +
-      // Her maddenin kaynağı altında yazılı (K, srcHtml)
-      [['Köyümüzün eski adları: 1777\'de devlet kayıtlarında "Çaşnigir Köprüsü karyesi", 1815\'te "Çaşnigir Derbendi". Halk arasında bugün de kısaca "Köprü" denir.', [K.pehl, K.vikiKoy]],
-        ['1609\'da padişah iki ayrı emirle Çaşnigir Köprüsü çevresindeki eşkıyanın araştırılmasını ve "Kırkkeçili kalesi" denen yerdeki eşkıyanın temizlenmesini istedi.', ['BOA, Mühimme Defteri 78/504 ve 78/1234']],
-        ['1724\'te bir padişah emri, Ankara sancağının sınırını "Çaşnigir" diye anar ve yolların eşkıyaya karşı korunmasını ister.', ['BOA, Mühimme Defteri 131/1456']],
-        ['Köprüyü eşkıyadan koruyan derbendcilerin başındaki ağa, Deli Battal, halka zulmettiği için 1822\'de padişah emriyle cezalandırıldı.', [K.pehl]],
-        ['1892\'de köprünün başında taştan bir aslan heykeli vardı.', [K.pehl, 'Cevdet Çulpan, Türk Taş Köprüleri']],
-        ['1852\'deki onarım açık eksiltmeyle en ucuz fiyatı veren ustaya verilmişti.', [K.pehl]]
-      ].map(function (b) { return '<li>' + b[0] + srcHtml(b[1]) + '</li>'; }).join('') + '</ul></div>' +
+      '</div>' + biliyorKutu('t-biliyor-masa') +
       '</aside></div></section>';
+  }
+  /* Biliyor muydunuz? kutusu: masaüstünde yan sütunda, telefonda (tek sütun) "Köyümüz Köprüköy" fotoğrafının hemen altında.
+     İki kopya yazılır, site.css hangisinin görüneceğini seçer (t-biliyor-masa / t-biliyor-tel). */
+  function biliyorKutu(cls) {
+    return '<div class="box box-pad ' + cls + '" style="margin-top:20px"><h3>Biliyor muydunuz?</h3><ul class="check-list">' +
+      // Kaynaklar burada tekrar yazılmaz: her madde yukarıdaki Tarihçe ve Derbend bölümlerinde kaynağıyla anlatılıyor
+      ['Köyümüzün eski adları: 1777\'de devlet kayıtlarında "Çaşnigir Köprüsü karyesi", 1815\'te "Çaşnigir Derbendi". Halk arasında bugün de kısaca "Köprü" denir.',
+        '1609\'da Sultan I. Ahmed iki ayrı emirle Çaşnigir Köprüsü çevresindeki eşkıyanın araştırılmasını ve "Kırkkeçili kalesi" denen yerdeki eşkıyanın temizlenmesini istedi.',
+        '1724\'te Sultan III. Ahmed\'in bir emri, Ankara sancağının sınırını "Çaşnigir" diye anar ve yolların eşkıyaya karşı korunmasını ister.',
+        'Köprüyü eşkıyadan koruyan derbendcilerin başındaki ağa, Deli Battal, halka zulmettiği için 1822\'de Sultan II. Mahmud\'un emriyle cezalandırıldı.',
+        '1892\'de köprünün başında taştan bir aslan heykeli vardı.',
+        '1852\'deki onarım açık eksiltmeyle en ucuz fiyatı veren ustaya verilmişti.'
+      ].map(function (b) { return '<li>' + b + '</li>'; }).join('') + '</ul></div>';
   }
 
   var GEZI = [
