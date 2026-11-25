@@ -805,7 +805,9 @@
 
       '<div class="sec-head" style="margin-top:30px"><h2>Tarihçe</h2></div>' +
       (function () {
-        var t = data.duyurular.filter(isTarih);
+        // Bu sayfada zaten anlatılan yazılar tekrar bağlantı olarak listelenmez (Atatürk'ün geçişi yukarıda anlatılıyor)
+        var anlatilan = ['2026-11-22-ataturk-koyumuzden-gecti-26-aralik-1919'];
+        var t = data.duyurular.filter(function (p) { return isTarih(p) && anlatilan.indexOf(p.eski_id || p.id) < 0; });
         return t.length ? '<div class="box box-pad" style="margin-bottom:18px;background:#FBF5E8;border-color:#D9C49A"><h3>Tarihten yazılar</h3><ul class="tarih-links">' +
           t.map(function (p) { return '<li><a href="#/duyuru/' + esc(pid(p)) + '">' + esc(p.baslik) + '</a>' + (p.olay_tarihi ? '<span>' + esc(p.olay_tarihi) + '</span>' : '') + '</li>'; }).join('') +
           '</ul></div>' : '';
