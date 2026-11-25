@@ -861,9 +861,7 @@
         ['1724\'te bir padişah emri, Ankara sancağının sınırını "Çaşnigir" diye anar ve yolların eşkıyaya karşı korunmasını ister.', ['BOA, Mühimme Defteri 131/1456']],
         ['Köprüyü eşkıyadan koruyan derbendcilerin başındaki ağa, Deli Battal, halka zulmettiği için 1822\'de padişah emriyle cezalandırıldı.', [K.pehl]],
         ['1892\'de köprünün başında taştan bir aslan heykeli vardı.', [K.pehl, 'Cevdet Çulpan, Türk Taş Köprüleri']],
-        ['1852\'deki onarım açık eksiltmeyle en ucuz fiyatı veren ustaya verilmişti.', [K.pehl]],
-        ['Baraj kapakları açılıp su indirilmezse göl köprüyü yutabiliyor; yetkililer köprünün su üstünde kalmasına dikkat ediyor.'],
-        ['Gün batımında köprünün sudaki yansıması, Türkiye\'nin dört bir yanından fotoğrafçıları köye getiriyor.']
+        ['1852\'deki onarım açık eksiltmeyle en ucuz fiyatı veren ustaya verilmişti.', [K.pehl]]
       ].map(function (b) { return '<li>' + b[0] + srcHtml(b[1]) + '</li>'; }).join('') + '</ul></div>' +
       '</aside></div></section>';
   }
