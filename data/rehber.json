@@ -1,6 +1,21 @@
 [
   {
     "tur": "Dükkân",
+    "tarih": "2026-11-25",
+    "baslik": "Konveyör bant sistemleri",
+    "aciklama": "Konveyör bant ekleme buharlı sistem bant ekleme",
+    "adres": "Fevzi çakmak mahallesi 14 cadde no 19 Yenikent sanayi sitesi Sincan",
+    "kisi": "Enes Demir",
+    "telefon": "05373782402",
+    "foto": "images/yuklenen/2026-11-25-224743-10q1s.jpg",
+    "fotolar": [
+      {
+        "foto": "images/yuklenen/2026-11-25-224746-26l6f.jpg"
+      }
+    ]
+  },
+  {
+    "tur": "Dükkân",
     "baslik": "Köprü Hırdavat ve Yapı Malzemeleri",
     "aciklama": "Hırdavat kum çimento bims ve elektirik malzemeleri",
     "adres": "Köprüköy",
