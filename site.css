@@ -481,7 +481,7 @@ button.cal-day:hover{filter:brightness(.93)}
 .wx-src{margin:8px 0 0;font-size:13px;color:var(--ink2);text-align:right}
 .wx-src a{color:var(--ink2)}
 
-/* Köy Meydanı (forum): köylülerin yazıları ve cevapları */
+/* Sizden Gelenler (forum): köylülerin yazıları ve cevapları */
 .m-wrap{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:28px;align-items:start}
 @media (max-width:900px){ .m-wrap{grid-template-columns:minmax(0,1fr)} }
 .m-new{margin-bottom:20px}
@@ -524,7 +524,7 @@ button.cal-day:hover{filter:brightness(.93)}
 .m-rep{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 .m-rep-text p{margin:0 0 8px}
 .m-rep-text p:last-child{margin:0}
-/* Köy Meydanı: yazı ve cevaplardaki fotoğraflar */
+/* Sizden Gelenler: yazı ve cevaplardaki fotoğraflar */
 .m-fotos{display:grid;gap:6px;margin:12px 0 4px;grid-template-columns:repeat(2,minmax(0,1fr))}
 .m-fotos.n1{grid-template-columns:minmax(0,1fr)}
 .m-fotos.n3>button:first-child{grid-column:1/-1}
@@ -555,11 +555,11 @@ button.cal-day:hover{filter:brightness(.93)}
 .m-cta h3{margin:0 0 4px}
 .m-cta p{margin:0;color:var(--ink2)}
 .m-cta .btn{flex:0 0 auto}
-/* Menüde 9 başlık var (Köy Meydanı eklendi). Hepsi yan yana yalnız geniş ekranda sığar (1181 piksel ve üstü);
+/* Menüde 9 başlık var (Sizden Gelenler eklendi). Hepsi yan yana yalnız geniş ekranda sığar (1181 piksel ve üstü);
    daha dar ekranda telefondaki gibi "Menü" düğmesi çıkar. Başlıklar biraz sıkı: derneğin adı eskisi kadar yer bulsun. */
 @media (min-width:1181px){ .nav{gap:0} .nav a{padding:0 9px;font-size:16.5px} .logo b{white-space:nowrap} }
 
-/* Yorumlar: haber, etkinlik ve fotoğraf sayfalarında (Köy Meydanı'nın cevaplarıyla aynı görünüm) */
+/* Yorumlar: haber, etkinlik ve fotoğraf sayfalarında (Sizden Gelenler'in cevaplarıyla aynı görünüm) */
 .y-sec{margin-top:30px;border-top:1px solid var(--line);padding-top:6px}
 .y-list>p{margin:0 0 20px}
 .y-n{display:inline-flex;align-items:center;gap:4px;font-size:15px;font-weight:700;color:var(--bordo)}

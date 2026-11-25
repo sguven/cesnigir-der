@@ -1,5 +1,5 @@
 /* Çeşnigir-Der · Tasarım 3
-   Sayfalar: Ana Sayfa, Duyurular (ve ayrıntı), Etkinlikler, Köy Meydanı (forum), Fotoğraflar, Market, Esnaf Rehberi, Gezilecek Yerler, Tarihimiz, Hakkımızda (iletişim bilgileri dahil).
+   Sayfalar: Ana Sayfa, Duyurular (ve ayrıntı), Etkinlikler, Sizden Gelenler (forum), Fotoğraflar, Market, Esnaf Rehberi, Gezilecek Yerler, Tarihimiz, Hakkımızda (iletişim bilgileri dahil).
    İçerik data/ klasöründen okunur; yönetim panelinden değişir. */
 
 /* Ziyaretçi sayacı (GoatCounter): istatistikler https://cesnifirder.goatcounter.com
@@ -294,7 +294,7 @@
     hakkimizda: '<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14a5 5 0 0 1 5 6"/>'
   };
   function quickLinks() {
-    var L = [['duyurular', 'Duyurular'], ['etkinlikler', 'Etkinlikler'], ['meydan', 'Köy Meydanı'], ['fotograflar', 'Fotoğraflar'], ['pazar', 'Market'], ['rehber', 'Esnaf Rehberi'], ['gezilecek-yerler', 'Gezilecek Yerler'], ['tarihimiz', 'Tarihimiz'], ['hakkimizda', 'Hakkımızda']];
+    var L = [['duyurular', 'Duyurular'], ['etkinlikler', 'Etkinlikler'], ['meydan', 'Sizden Gelenler'], ['fotograflar', 'Fotoğraflar'], ['pazar', 'Market'], ['rehber', 'Esnaf Rehberi'], ['gezilecek-yerler', 'Gezilecek Yerler'], ['tarihimiz', 'Tarihimiz'], ['hakkimizda', 'Hakkımızda']];
     return '<nav class="quick" aria-label="Kısayollar"><div class="container quick-in">' + L.map(function (x) {
       return '<a href="#/' + x[0] + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + QI[x[0]] + '</svg><span>' + x[1] + '</span></a>';
     }).join('') + '</div></nav>';
@@ -323,8 +323,8 @@
     h += '<section class="section"><div class="container grid-main"><div>' +
       '<div class="sec-head"' + ed('ekle:duyurular') + '><h2>Son Duyurular</h2><a href="#/duyurular">Tüm duyurular ›</a></div>' +
       (news.length ? '<div class="news-list">' + news.map(newsCard).join('') + '</div>' : '<div class="box empty"><b>Henüz duyuru yok</b></div>') +
-      '<div class="box m-cta"><div><h3>Köy Meydanı</h3><p>Hatıranızı, sorunuzu, gurbetten selamınızı paylaşın; köylülerimizle sohbet edin.</p></div>' +
-      '<a class="btn" href="#/meydan">' + icon('chat') + 'Köy Meydanı\'na git</a></div>' +
+      '<div class="box m-cta"><div><h3>Sizden Gelenler</h3><p>Hatıranızı, sorunuzu, gurbetten selamınızı paylaşın; köylülerimizle sohbet edin.</p></div>' +
+      '<a class="btn" href="#/meydan">' + icon('chat') + 'Sizden Gelenler sayfasına git</a></div>' +
       '</div><aside>' + wxBox() +
       '<div class="sec-head"' + ed('ekle:etkinlikler') + '><h2>Yaklaşan Günler</h2></div>' + calendar() +
       '<div class="box" style="margin-top:14px">' + (ev.length ? ev.map(evRowSade).join('') : '<div class="empty">Yaklaşan bir gün yok.</div>') + '</div>' +
@@ -1008,7 +1008,7 @@
       '</div><div class="btn-row" style="margin-top:20px"><a class="btn btn-light" href="#/tarihimiz">Köyün ve köprünün tarihçesi</a><a class="btn btn-light" href="#/fotograflar">Fotoğraflar</a></div></div></section>';
   }
 
-  /* ---------- Köy Meydanı (forum) ----------
+  /* ---------- Sizden Gelenler (forum) ----------
      Köylülerin yazı paylaşıp birbirine cevap yazdığı bölüm. Yazılar Supabase'de durur (C.sb, kurulum: araclar/supabase-meydan.sql).
      Gönderilen her yazı ve cevap önce onaya düşer; yönetim panelinde onaylanınca burada görünür (yonetim/duzen.js).
      Liste ve yazı sayfası önce bellekteki son listeyle çizilir (geri dönünce kaldığı yerden açılsın), sonra yenisi gelir.
@@ -1030,7 +1030,7 @@
   function mBy(x) { return '<p class="m-by">' + mAvatar(x.ad) + '<span><b>' + esc(x.ad) + '</b><span class="m-time">' + esc(C.zaman(x.created_at)) + '</span></span></p>'; }
   // Paylaşılan bağlantı …/?m=12 yazının sayfasını açar (openShared)
   function mShare(k) {
-    var url = new URL(B || './', location.href.split(/[?#]/)[0]).href + '?m=' + k.id, text = 'KÖY MEYDANI: ' + k.baslik + '\n' + url;
+    var url = new URL(B || './', location.href.split(/[?#]/)[0]).href + '?m=' + k.id, text = 'SİZDEN GELENLER: ' + k.baslik + '\n' + url;
     return '<div class="share"><span>Paylaş:</span><a class="s-wa" href="https://wa.me/?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp</a>' +
       '<a class="s-fb" href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '" target="_blank" rel="noopener">' + icon('fb') + 'Facebook</a></div>';
   }
@@ -1134,14 +1134,14 @@
         });
     }, 0);
     var kats = ['Tümü'].concat(C.MEYDAN.kategoriler);
-    return band('Köy Meydanı', 'Hatıranızı, sorunuzu, gurbetten selamınızı paylaşın; köylülerimizle sohbet edin.') +
+    return band('Sizden Gelenler', 'Hatıranızı, sorunuzu, gurbetten selamınızı paylaşın; köylülerimizle sohbet edin.') +
       '<section class="section"><div class="container m-wrap"><div class="m-main">' +
       '<details class="m-new"><summary class="btn">' + icon('pen') + 'Yeni yazı paylaş</summary><div class="box box-pad">' + mForm('konu') + '</div></details>' +
       '<div class="filters" role="group" aria-label="Yazıların konusu">' + kats.map(function (t) {
         return '<button type="button" data-m-kat="' + esc(t) + '" aria-pressed="' + (t === mKat) + '">' + esc(t) + '</button>';
       }).join('') + '</div>' +
       '<div id="mList">' + (mCache === false ? '<p class="loading">Yazılar yükleniyor…</p>' : mListHtml()) + '</div></div>' +
-      '<aside class="m-side"><div class="box box-pad m-rules"><h3>Meydanın kuralları</h3><ul>' +
+      '<aside class="m-side"><div class="box box-pad m-rules"><h3>Paylaşım kuralları</h3><ul>' +
       '<li>Adınızı ve soyadınızı yazın.</li><li>Saygılı bir dil kullanın; kırıcı söz, siyaset ve kavga yok.</li>' +
       '<li>Telefon, adres gibi kişisel bilgileri paylaşmayın.</li><li>Yazınıza ve cevabınıza fotoğraf ekleyebilirsiniz; başkasının fotoğrafını izinsiz paylaşmayın.</li><li>Her yazı ve cevap, dernek yönetimi onayladıktan sonra yayınlanır.</li></ul>' +
       '<p class="small muted" style="margin:10px 0 0">Satılık ve aranan şeyler için <a href="#/pazar">Market</a> sayfasına bakın.</p></div></aside>' +
@@ -1155,11 +1155,11 @@
       '<h1>' + esc(k.baslik) + '</h1>' + mBy(k) + '<div class="article-text">' + mParas(k.metin) + '</div>' + C.fotolarHtml(k) + mShare(k) + '</article>' +
       '<section class="m-rep-sec"><h2 class="m-rep-h">Cevaplar</h2><div id="mReps"><p class="muted">Cevaplar yükleniyor…</p></div><div id="mPend"></div>' +
       '<div class="box box-pad">' + mForm('cevap', k.id) + '</div></section>' +
-      '<p style="margin-top:24px"><a class="btn btn-light" href="#/meydan">‹ Köy Meydanı</a></p>';
+      '<p style="margin-top:24px"><a class="btn btn-light" href="#/meydan">‹ Sizden Gelenler</a></p>';
   }
   function pageTopic(id) {
     var seq = ++mSeq, k = /^\d+$/.test(id) && mCache ? mCache.filter(function (x) { return String(x.id) === id; })[0] : null;
-    var gone = band('Yazı bulunamadı') + '<section class="section"><div class="container"><p>Bu yazı kaldırılmış ya da henüz onaylanmamış olabilir.</p><a class="btn" href="#/meydan">Köy Meydanı</a></div></section>';
+    var gone = band('Yazı bulunamadı') + '<section class="section"><div class="container"><p>Bu yazı kaldırılmış ya da henüz onaylanmamış olabilir.</p><a class="btn" href="#/meydan">Sizden Gelenler</a></div></section>';
     if (!/^\d+$/.test(id)) return gone;
     setTimeout(function () {
       Promise.all([
@@ -1170,7 +1170,7 @@
         var x = C.arr(r[0])[0], box = $('mTopic');
         if (!box) return;
         if (!x) { main.innerHTML = gone; realLinks(main); return; }
-        if (!box.querySelector('[data-m-konu]')) { box.innerHTML = mTopicHtml(x); document.title = x.baslik + ' · Köy Meydanı · Çeşnigir-Der'; }
+        if (!box.querySelector('[data-m-konu]')) { box.innerHTML = mTopicHtml(x); document.title = x.baslik + ' · Sizden Gelenler · Çeşnigir-Der'; }
         var reps = C.arr(r[1]);
         $('mReps').innerHTML = reps.length ? '<div class="m-reps">' + reps.map(mReply).join('') + '</div>' : '<p class="muted">Henüz cevap yok. İlk cevabı siz yazın.</p>';
         box.querySelector('.m-rep-h').textContent = reps.length ? 'Cevaplar (' + reps.length + ')' : 'Cevaplar';
@@ -1181,7 +1181,7 @@
         else box.innerHTML = mFail();
       });
     }, 0);
-    return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/meydan">Köy Meydanı</a></div></div></div>' +
+    return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/meydan">Sizden Gelenler</a></div></div></div>' +
       '<section class="section"><div class="container"><div class="article m-topic" id="mTopic">' + (k ? mTopicHtml(k) : '<p class="loading">Yükleniyor…</p>') + '</div></div></section>';
   }
 
@@ -1265,7 +1265,7 @@
   });
 
   /* ---------- Yorumlar: haberlere (duyurular), etkinliklere ve fotoğraflara ----------
-     Köy Meydanı ile aynı düzen: yorumlar Supabase'de (yorumlar tablosu), her yorum önce onaya düşer.
+     Sizden Gelenler ile aynı düzen: yorumlar Supabase'de (yorumlar tablosu), her yorum önce onaya düşer.
      Vefat ilanında "Başsağlığı dilekleri", düğün ve nişanda "Tebrik ve dilekler" olarak görünür.
      Fotoğrafın kendi sayfası var (#/foto/<dosya adı>): büyük fotoğraf, önceki/sonraki ve yorumlar. */
   var YL = {
@@ -1359,7 +1359,7 @@
     duyurular: 'Köprüköy, Keskin ve Kırıkkale haberleri ve duyurular · Çeşnigir-Der',
     etkinlikler: 'Köprüköy etkinlik takvimi: düğün, mevlit ve özel günler · Çeşnigir-Der',
     fotograflar: 'Köprüköy ve Çeşnigir Köprüsü fotoğrafları · Çeşnigir-Der',
-    meydan: 'Köy Meydanı: Köprüköylülerin sohbet ve hatıra köşesi · Çeşnigir-Der',
+    meydan: 'Sizden Gelenler: Köprüköylülerin yazıları, hatıraları ve selamları · Çeşnigir-Der',
     rehber: 'Esnaf Rehberi: Köprüköylülerin dükkân ve işletmeleri · Çeşnigir-Der'
   };
   function route() {

@@ -4,7 +4,7 @@ Köprüköy Çeşnigir Kültür Sosyal Yardımlaşma ve Dayanışma Derneği'nin
 Adres: https://cesnigirder.org/ (alan adı GoDaddy'den; eski https://sguven.github.io/cesnigir-der/ adresi buraya yönlenir)
 
 Sade, telefon öncelikli bir statik site. Alan adı ayarı kökteki `CNAME` dosyasında. GitHub Pages ile yayınlanır; sunucu yok.
-Tek veritabanı Köy Meydanı (forum) ve yorumlar içindir: Supabase'de durur (aşağıda).
+Tek veritabanı Sizden Gelenler (forum) ve yorumlar içindir: Supabase'de durur (aşağıda).
 
 ## Tasarım
 
@@ -67,15 +67,15 @@ panel sayfası adres çubuğundaki anahtarı başka sitelere göndermez (`referr
 | `data/pazar.json` | Pazar ve yardımlaşma ilanları |
 | `data/rehber.json` | Esnaf Rehberi: işletme kartları |
 | `data/dernek.json` | Hakkımızda, başkan, yönetim ve denetim kurulu, iletişim, kasa durumu |
-| `araclar/supabase-meydan.sql` | Köy Meydanı, yorumlar, Market ve Esnaf Rehberi istekleri veritabanı (Supabase) kurulumu |
+| `araclar/supabase-meydan.sql` | Sizden Gelenler, yorumlar, Market ve Esnaf Rehberi istekleri veritabanı (Supabase) kurulumu |
 
-## Köy Meydanı (forum)
+## Sizden Gelenler (forum)
 
-Sitedeki **Köy Meydanı** sayfasında (`#/meydan`, yazı sayfası `#/konu/12`) ziyaretçiler adını ve soyadını yazarak yazı paylaşır,
+Sitedeki **Sizden Gelenler** sayfasında (`#/meydan`, yazı sayfası `#/konu/12`) ziyaretçiler adını ve soyadını yazarak yazı paylaşır,
 birbirlerinin yazısına cevap yazar. Konular: Genel Sohbet, Hatıralar, Gurbettekiler, Soru-Cevap.
 
-- **Her yazı ve cevap önce onaya düşer.** Yönetim panelinde Köy Meydanı sayfasının en üstünde "Onay bekleyenler" kutusu çıkar
-  (cevaplar ayrıca kendi yazısının sayfasında); menüde Köy Meydanı'nın yanında kırmızı sayı görünür. **Onayla, yayınla** ya da **Sil**.
+- **Her yazı ve cevap önce onaya düşer.** Yönetim panelinde Sizden Gelenler sayfasının en üstünde "Onay bekleyenler" kutusu çıkar
+  (cevaplar ayrıca kendi yazısının sayfasında); menüde Sizden Gelenler'in yanında kırmızı sayı görünür. **Onayla, yayınla** ya da **Sil**.
   Yayındaki yazılarda **En üste sabitle** ve **Yazıyı sil**, cevaplarda **Cevabı sil** düğmesi vardır.
 - Yazılar Supabase'de durur: proje `cesnigir-der` (https://supabase.com/dashboard/project/hdztvyindbhhpveukvox), ücretsiz plan.
   Ücretsiz planda proje 7 gün hiç kullanılmazsa duraklatılır; panelden tek tıkla açılır, yazılar silinmez.
@@ -88,7 +88,7 @@ birbirlerinin yazısına cevap yazar. Konular: Genel Sohbet, Hatıralar, Gurbett
   Kurulum çalıştırılmadıysa (sütun yoksa) site fotoğraf düğmesini gizler, bölüm fotoğrafsız çalışır.
 - Sitedeki bağlantı bilgisi (herkese açık "publishable" anahtar) `ortak.js` içinde `MEYDAN`. Supabase'in **secret** anahtarı hiçbir yere yazılmaz.
 - Paylaşılan bağlantı `https://cesnigirder.org/?m=12` yazının sayfasını açar.
-- Kod: `app.js` (Köy Meydanı bölümü), panel tarafı `yonetim/duzen.js` (Köy Meydanı: onay).
+- Kod: `app.js` (Sizden Gelenler bölümü), panel tarafı `yonetim/duzen.js` (Sizden Gelenler: onay).
 
 ## Yorumlar (haberler, etkinlikler, fotoğraflar)
 
@@ -98,7 +98,7 @@ Vefat ilanlarında bölümün adı **Başsağlığı dilekleri**, düğün ve ni
 - Fotoğrafların kendi sayfası var: `#/foto/<dosya adı>` (örnek `#/foto/galeri-01`). Galeride fotoğrafı büyütünce üstteki **Yorumlar** düğmesi oraya götürür.
 - Yorumu olan haber kartlarında, etkinliklerde ve galeri fotoğraflarında küçük bir yorum sayısı görünür.
 - Yorumlar da önce onaya düşer. Panelde üst şeritte kırmızı **Onay bekleyen** sayısı çıkar; ana sayfanın en üstündeki "Onay bekleyenler"
-  kutusunda Köy Meydanı yazıları, cevaplar ve bütün yorumlar birlikte listelenir (her kaydın kendi sayfasında da o kayda gelenler görünür).
+  kutusunda Sizden Gelenler yazıları, cevaplar ve bütün yorumlar birlikte listelenir (her kaydın kendi sayfasında da o kayda gelenler görünür).
 - Yorumlar `yorumlar` tablosunda; kaydın kimliğiyle (duyuru ve etkinlikte adresindeki kimlik, fotoğrafta dosya adı) bağlanır.
   Bir duyurunun başlığı ya da tarihi değişirse adresi de değişir; eski yorumları o kayıtta görünmez olur (silinmez).
 

@@ -338,10 +338,10 @@
     box.querySelectorAll('[data-ek]').forEach(function (t) { (t.querySelector('.ev-info') || t).appendChild(itemBar('etkinlikler', +t.getAttribute('data-ix'))); });
   }
 
-  /* ---------------- Köy Meydanı ve yorumlar: onay ----------------
+  /* ---------------- Sizden Gelenler ve yorumlar: onay ----------------
      Ziyaretçilerin yazıları, cevapları ve haber/etkinlik/fotoğraf yorumları onaya düşer. Hepsi ana sayfanın en üstünde
      "Onay bekleyenler" kutusunda "Onayla" / "Sil" düğmeleriyle görünür; üst şeritte sayısı yazar ("Onay bekleyen: 3").
-     Ayrıca Köy Meydanı sayfasında forum yazıları, her kaydın kendi sayfasında da o kayda gelenler görünür.
+     Ayrıca Sizden Gelenler sayfasında forum yazıları, her kaydın kendi sayfasında da o kayda gelenler görünür.
      Yayındaki yazılarda "En üste sabitle" ve "Sil", cevaplarda ve yorumlarda "Sil" vardır.
      Yetki: giriş anahtarı veritabanına gönderilir, veritabanı GitHub'a sorar (araclar/supabase-meydan.sql: forum_yetki). */
   var mPend = null, mPendT = 0, mPendP = null;
@@ -384,10 +384,10 @@
         '<button type="button" class="ed-btn red" data-fm="sil" data-tur="' + tur + '" data-id="' + x.id + '">' + icon('trash') + 'Sil</button></div></div>';
     }
     var yt = tur === 'yorum' ? Y_TUR[x.hedef_tur] || ['Yorum', ''] : null;
-    var where = tur === 'konu' ? '' : tur === 'cevap' ? (x.konu_baslik ? 'Köy Meydanı: "' + x.konu_baslik + '" yazısına cevap' : '') : (x.hedef_baslik ? '"' + x.hedef_baslik + '"' : '');
+    var where = tur === 'konu' ? '' : tur === 'cevap' ? (x.konu_baslik ? 'Sizden Gelenler: "' + x.konu_baslik + '" yazısına cevap' : '') : (x.hedef_baslik ? '"' + x.hedef_baslik + '"' : '');
     var href = tur === 'cevap' ? '#/konu/' + x.konu_id : yt && yt[1] ? '#/' + yt[1] + '/' + encodeURIComponent(x.hedef) : '';
     return '<div class="ed-m-item">' +
-      '<div class="news-meta"><span class="badge">' + esc(tur === 'konu' ? 'Köy Meydanı · ' + x.kategori : tur === 'cevap' ? 'Köy Meydanı · Cevap' : yt[0]) + '</span><span>' + esc(C.zaman(x.created_at)) + '</span></div>' +
+      '<div class="news-meta"><span class="badge">' + esc(tur === 'konu' ? 'Sizden Gelenler · ' + x.kategori : tur === 'cevap' ? 'Sizden Gelenler · Cevap' : yt[0]) + '</span><span>' + esc(C.zaman(x.created_at)) + '</span></div>' +
       (tur === 'konu' ? '<h3>' + esc(x.baslik) + '</h3>' : where ? '<p class="small muted" style="margin:0 0 6px">' + esc(where) +
         (link && href ? ' · <a href="' + href + '">Sayfasını aç</a>' : '') + '</p>' : '') +
       '<p class="ed-m-by"><b>' + esc(x.ad) + '</b></p><div class="ed-m-text">' + esc(x.metin) + '</div>' + C.fotolarHtml(x) +
