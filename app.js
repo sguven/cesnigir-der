@@ -863,6 +863,8 @@
     return '<div class="box box-pad ' + cls + '" style="margin-top:20px"><h3>Biliyor muydunuz?</h3><ul class="check-list">' +
       // Kaynaklar burada tekrar yazılmaz: her madde yukarıdaki Tarihçe ve Derbend bölümlerinde kaynağıyla anlatılıyor
       ['Köyümüzün eski adları: 1777\'de devlet kayıtlarında "Çaşnigir Köprüsü karyesi", 1815\'te "Çaşnigir Derbendi". Halk arasında bugün de kısaca "Köprü" denir.',
+        'Rivayete göre 1402\'de Timur\'un ordusu Ankara Savaşı\'na giderken köprümüzden geçti.',
+        'Rivayete göre 16. yüzyılda Yavuz Sultan Selim\'in Mısır Seferi hazırlıkları sırasında köprü elden geçirildi; onarımın Mimar Sinan\'a ait olduğu söylenir.',
         '1609\'da Sultan I. Ahmed iki ayrı emirle Çaşnigir Köprüsü çevresindeki eşkıyanın araştırılmasını ve "Kırkkeçili kalesi" denen yerdeki eşkıyanın temizlenmesini istedi.',
         '1724\'te Sultan III. Ahmed\'in bir emri, Ankara sancağının sınırını "Çaşnigir" diye anar ve yolların eşkıyaya karşı korunmasını ister.',
         'Köprüyü eşkıyadan koruyan derbendcilerin başındaki ağa, Deli Battal, halka zulmettiği için 1822\'de Sultan II. Mahmud\'un emriyle cezalandırıldı.',
