@@ -70,6 +70,19 @@
         { name: 'telefon', label: 'Telefon', type: 'tel', placeholder: '0555 123 45 67', help: 'Sitede "Ara" ve "WhatsApp" düğmesi olarak görünür.' },
         { name: 'foto', label: 'Fotoğraf', type: 'photo' }
       ]
+    },
+    rehber: {
+      file: 'data/rehber.json', one: 'işletme', edit: 'İşletmeyi Düzenle', big: 'Bu kaydı düzenle', addLabel: 'Esnaf Rehberine İşletme Ekle', page: 'isletme', list: 'rehber', autoDate: true,
+      fields: [
+        { name: 'tur', label: 'İşletmenin türü', type: 'choice', opts: C.REHBER_TURLERI, required: true, def: 'Dükkân' },
+        { name: 'baslik', label: 'İşletmenin adı', type: 'text', required: true, placeholder: 'Örnek: Köprü Lokantası' },
+        { name: 'aciklama', label: 'Ne iş yapıyor?', type: 'textarea' },
+        { name: 'adres', label: 'Adres', type: 'text', placeholder: 'Örnek: Sanayi Sitesi 3. Sokak No: 12, Keskin' },
+        { name: 'kisi', label: 'Yetkili', type: 'text', placeholder: 'Örnek: Ahmet Yılmaz' },
+        { name: 'telefon', label: 'Telefon', type: 'tel', placeholder: '0555 123 45 67', help: 'Sitede "Ara" ve "WhatsApp" düğmesi olarak görünür.' },
+        { name: 'link', label: 'Web sitesi ya da Instagram', type: 'text', placeholder: 'https://instagram.com/…', help: 'Yoksa boş bırakın. Adresin başında https:// olmalı.' },
+        { name: 'foto', label: 'Kartvizit ya da dükkân fotoğrafı', type: 'photo' }
+      ]
     }
   };
 
@@ -114,6 +127,7 @@
     warn: '<path d="M12 3 2 21h20L12 3Z"/><path d="M12 10v5M12 18h.01"/>',
     news: '<path d="M4 5h13v14H6a2 2 0 0 1-2-2V5Z"/><path d="M17 9h3v8a2 2 0 0 1-2 2"/><path d="M8 9h5M8 13h5M8 16h3"/>',
     cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    shop: '<path d="M4 10 5.5 4h13L20 10"/><path d="M4 10a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0"/><path d="M5.5 12.5V20h13v-7.5M10 20v-4.5h4V20"/>',
     bag: '<path d="M5 8h14l-1 13H6L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
     photo: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/>',
     eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
@@ -262,7 +276,7 @@
       '<button type="button" class="ed-btn" data-act="edit" data-col="' + col + '" data-ix="' + ix + '">' + icon('edit') + (big ? c.big : 'Düzenle') + '</button>' +
       '<button type="button" class="ed-btn red" data-act="del" data-col="' + col + '" data-ix="' + ix + '">' + icon('trash') + 'Sil</button></div>');
   }
-  var ADD = { duyurular: 'Yeni duyuru ekle', etkinlikler: 'Yeni etkinlik ekle', pazar: 'Yeni market ilanı ekle', galeri: 'Fotoğraf ekle' };
+  var ADD = { duyurular: 'Yeni duyuru ekle', etkinlikler: 'Yeni etkinlik ekle', pazar: 'Yeni market ilanı ekle', rehber: 'Yeni işletme ekle', galeri: 'Fotoğraf ekle' };
   var DERNEK_ADD = { kasa: 'Kasa durumu ekle', kurullar: 'Yönetim ve denetim kurulu ekle', canli: 'Canlı görüntü ekle' };
 
   function after(page) {
@@ -336,16 +350,17 @@
     if (!force && mPend && Date.now() - mPendT < 15000) return Promise.resolve(mPend);
     if (mPendP) return mPendP;
     mPendP = mRpc('forum_bekleyenler', {}).then(function (r) {
-      mPend = { konular: C.arr(r && r.konular), cevaplar: C.arr(r && r.cevaplar), yorumlar: C.arr(r && r.yorumlar), ilanlar: C.arr(r && r.ilanlar) }; mPendT = Date.now(); mBadge(); return mPend;
+      mPend = { konular: C.arr(r && r.konular), cevaplar: C.arr(r && r.cevaplar), yorumlar: C.arr(r && r.yorumlar), ilanlar: C.arr(r && r.ilanlar), rehber: C.arr(r && r.rehber) }; mPendT = Date.now(); mBadge(); return mPend;
     }).then(function (x) { mPendP = null; return x; }, function (e) { mPendP = null; throw e; });
     return mPendP;
   }
   function mBadge() {
     var a = document.querySelector('.nav [data-nav="meydan"]'), n = mPend ? mPend.konular.length + mPend.cevaplar.length : 0;
-    var ni = mPend ? mPend.ilanlar.length : 0, all = mPend ? n + mPend.yorumlar.length + ni : 0, pill = $('edPendPill');
+    var ni = mPend ? mPend.ilanlar.length : 0, nr = mPend ? mPend.rehber.length : 0, all = mPend ? n + mPend.yorumlar.length + ni + nr : 0, pill = $('edPendPill');
     if (pill) { pill.hidden = !all; pill.querySelector('b').textContent = all; }
     say(a, n, ' yazı onay bekliyor');
     say(document.querySelector('.nav [data-nav="pazar"]'), ni, ' ilan onay bekliyor');
+    say(document.querySelector('.nav [data-nav="rehber"]'), nr, ' işletme onay bekliyor');
     function say(a, n, ne) {
       if (!a) return;
       var b = a.querySelector('.ed-count');
@@ -356,15 +371,17 @@
   }
   var Y_TUR = { duyuru: ['Haber yorumu', 'duyuru'], etkinlik: ['Etkinlik yorumu', 'etkinlik'], foto: ['Fotoğraf yorumu', 'foto'] };
   function mPendItem(x, tur, link) {
-    if (tur === 'ilan') {
-      var tel = C.telHref(x.telefon);
+    if (tur === 'ilan' || tur === 'rehber') {
+      var tel = C.telHref(x.telefon), web = C.linkUrl(x.link);
       return '<div class="ed-m-item">' +
-        '<div class="news-meta"><span class="badge">' + esc('Market · ' + x.tur) + '</span><span>' + esc(C.zaman(x.created_at)) + '</span></div>' +
+        '<div class="news-meta"><span class="badge">' + esc((tur === 'ilan' ? 'Market · ' : 'Esnaf Rehberi · ') + x.tur) + '</span><span>' + esc(C.zaman(x.created_at)) + '</span></div>' +
         '<h3>' + esc(x.baslik) + (x.fiyat ? ' · ' + esc(x.fiyat) + ' ₺' : '') + '</h3>' +
         '<p class="ed-m-by"><b>' + esc(x.ad) + '</b> · ' + (tel ? '<a href="tel:' + esc(tel) + '">' + esc(x.telefon) + '</a>' : esc(x.telefon)) + '</p>' +
-        (x.aciklama ? '<div class="ed-m-text">' + esc(x.aciklama) + '</div>' : '') + C.fotolarHtml(x) +
-        '<div class="ed-bar"><button type="button" class="ed-btn green" data-fm="onayla" data-tur="ilan" data-id="' + x.id + '">' + icon('check') + 'Onayla, yayınla</button>' +
-        '<button type="button" class="ed-btn red" data-fm="sil" data-tur="ilan" data-id="' + x.id + '">' + icon('trash') + 'Sil</button></div></div>';
+        (x.aciklama ? '<div class="ed-m-text">' + esc(x.aciklama) + '</div>' : '') +
+        (x.adres ? '<p class="small muted" style="margin:0 0 4px">Adres: ' + esc(x.adres) + '</p>' : '') +
+        (web ? '<p class="small" style="margin:0 0 4px"><a href="' + esc(web) + '" target="_blank" rel="noopener noreferrer">' + esc(web) + '</a></p>' : '') + C.fotolarHtml(x) +
+        '<div class="ed-bar"><button type="button" class="ed-btn green" data-fm="onayla" data-tur="' + tur + '" data-id="' + x.id + '">' + icon('check') + 'Onayla, yayınla</button>' +
+        '<button type="button" class="ed-btn red" data-fm="sil" data-tur="' + tur + '" data-id="' + x.id + '">' + icon('trash') + 'Sil</button></div></div>';
     }
     var yt = tur === 'yorum' ? Y_TUR[x.hedef_tur] || ['Yorum', ''] : null;
     var where = tur === 'konu' ? '' : tur === 'cevap' ? (x.konu_baslik ? 'Köy Meydanı: "' + x.konu_baslik + '" yazısına cevap' : '') : (x.hedef_baslik ? '"' + x.hedef_baslik + '"' : '');
@@ -396,11 +413,12 @@
       t.appendChild(el('<div class="ed-bar"><button type="button" class="ed-btn red" data-fm="sil" data-tur="yorum" data-id="' + t.getAttribute('data-y-id') + '">' + icon('trash') + 'Yorumu sil</button></div>'));
     });
     var ys = main.querySelector('.y-sec');
-    if (page !== '' && page !== 'meydan' && page !== 'konu' && page !== 'pazar' && !ys) return;
+    if (page !== '' && page !== 'meydan' && page !== 'konu' && page !== 'pazar' && page !== 'rehber' && !ys) return;
     mPendLoad().then(function (p) {
       var konu = main.querySelector('[data-m-konu]'), kid = konu ? +konu.getAttribute('data-m-konu') : 0;
-      var host = null, konular = [], cevaplar = [], yorumlar = [], ilanlar = [];
-      if (page === '') { konular = p.konular; cevaplar = p.cevaplar; yorumlar = p.yorumlar; ilanlar = p.ilanlar; }
+      var host = null, konular = [], cevaplar = [], yorumlar = [], ilanlar = [], rehber = [];
+      if (page === '') { konular = p.konular; cevaplar = p.cevaplar; yorumlar = p.yorumlar; ilanlar = p.ilanlar; rehber = p.rehber; }
+      else if (page === 'rehber') { host = main.querySelector('.section > .container'); rehber = p.rehber; }
       else if (page === 'pazar') { host = main.querySelector('.section > .container'); ilanlar = p.ilanlar; }
       else if (page === 'meydan') { host = main.querySelector('.m-main'); konular = p.konular; cevaplar = p.cevaplar; }
       else if (page === 'konu') { host = $('mPend'); cevaplar = p.cevaplar.filter(function (c) { return c.konu_id === kid; }); }
@@ -408,7 +426,7 @@
         host = ys.querySelector('.y-pend');
         yorumlar = p.yorumlar.filter(function (y) { return y.hedef_tur === ys.getAttribute('data-y') && y.hedef === ys.getAttribute('data-yh'); });
       }
-      var n = konular.length + cevaplar.length + yorumlar.length + ilanlar.length, old = $('edMPend'), oldW = $('edMPendWrap');
+      var n = konular.length + cevaplar.length + yorumlar.length + ilanlar.length + rehber.length, old = $('edMPend'), oldW = $('edMPendWrap');
       if (old) old.remove();
       if (oldW) oldW.remove();
       if (page === '') {
@@ -422,7 +440,7 @@
       var home = page === '';
       host.insertBefore(el('<div id="edMPend" class="ed-m-pend"><h2>' + (n ? 'Onay bekleyenler (' + n + ')' : 'Onay bekleyen yazı yok') + '</h2>' +
         (n ? '<p class="small muted">Bunları yalnız siz görüyorsunuz. Onaylarsanız sitede görünür; uygun değilse silin.</p>' : '<p class="small muted">Yeni yazı ve cevaplar gelince burada görünecek.</p>') +
-        ilanlar.map(function (i) { return mPendItem(i, 'ilan', home); }).join('') +
+        ilanlar.map(function (i) { return mPendItem(i, 'ilan', home); }).join('') + rehber.map(function (i) { return mPendItem(i, 'rehber', home); }).join('') +
         konular.map(function (k) { return mPendItem(k, 'konu', home); }).join('') + cevaplar.map(function (c) { return mPendItem(c, 'cevap', home); }).join('') +
         yorumlar.map(function (y) { return mPendItem(y, 'yorum', home); }).join('') + '</div>'), host.firstChild);
       if (home && mScroll) { mScroll = false; $('edMPend').scrollIntoView({ block: 'start', behavior: 'smooth' }); }
@@ -438,10 +456,10 @@
     e.preventDefault(); e.stopPropagation();
     var islem = b.getAttribute('data-fm'), tur = b.getAttribute('data-tur'), id = +b.getAttribute('data-id');
     var ask = islem !== 'sil' ? Promise.resolve(true) :
-      dialog('Silinsin mi?', tur === 'konu' ? 'Bu yazı ve altındaki bütün cevaplar silinecek. Geri alınamaz.' : tur === 'cevap' ? 'Bu cevap silinecek. Geri alınamaz.' : tur === 'ilan' ? 'Bu ilan isteği silinecek, sitede yayınlanmayacak. Geri alınamaz.' : 'Bu yorum silinecek. Geri alınamaz.', 'Evet, sil', { danger: true });
+      dialog('Silinsin mi?', tur === 'konu' ? 'Bu yazı ve altındaki bütün cevaplar silinecek. Geri alınamaz.' : tur === 'cevap' ? 'Bu cevap silinecek. Geri alınamaz.' : tur === 'ilan' ? 'Bu ilan isteği silinecek, sitede yayınlanmayacak. Geri alınamaz.' : tur === 'rehber' ? 'Bu işletme isteği silinecek, sitede yayınlanmayacak. Geri alınamaz.' : 'Bu yorum silinecek. Geri alınamaz.', 'Evet, sil', { danger: true });
     ask.then(function (ok) {
       if (!ok) return;
-      if (tur === 'ilan' && islem === 'onayla') { ilanYayinla(id); return; }
+      if ((tur === 'ilan' || tur === 'rehber') && islem === 'onayla') { istekYayinla(id, tur); return; }
       busy(islem === 'onayla' ? 'Yayınlanıyor…' : islem === 'sil' ? 'Siliniyor…' : 'Kaydediliyor…');
       mRpc('forum_islem', { tur: tur, kayit: id, islem: islem }).then(function () {
         busy(false);
@@ -456,11 +474,13 @@
     });
   }, true);
 
-  /* Ziyaretçinin gönderdiği Market ilanını yayınlar: fotoğrafları Supabase deposundan alıp sitenin deposuna (images/yuklenen/)
-     aktarır, ilanı öteki ilanlar gibi data/pazar.json'a yazar (ilk fotoğraf kapak, kalanı "fotolar"), paylaşım sayfasını üretir,
-     sonra isteği veritabanından siler. Yayınlanan ilan artık sıradan bir ilandır: Düzenle / Sil ile değiştirilir. */
-  function ilanYayinla(id) {
-    var x = (mPend ? mPend.ilanlar : []).filter(function (i) { return i.id === id; })[0];
+  /* Ziyaretçinin gönderdiği Market ilanını (tur: 'ilan') ya da Esnaf Rehberi kaydını (tur: 'rehber') yayınlar: fotoğrafları Supabase
+     deposundan alıp sitenin deposuna (images/yuklenen/) aktarır, kaydı öteki kayıtlar gibi data/pazar.json ya da data/rehber.json'a yazar
+     (ilk fotoğraf kapak, kalanı "fotolar"), paylaşım sayfasını üretir, sonra isteği veritabanından siler.
+     Yayınlanan kayıt artık sıradan bir kayıttır: Düzenle / Sil ile değiştirilir. */
+  function istekYayinla(id, tur) {
+    var ilan = tur === 'ilan', col = ilan ? 'pazar' : 'rehber', liste = ilan ? 'ilanlar' : 'rehber', ne = ilan ? 'İlan' : 'İşletme';
+    var x = (mPend ? mPend[liste] : []).filter(function (i) { return i.id === id; })[0];
     if (!x) return;
     var yollar = C.fotolar(x), paths = [], item, kaldi = false;
     busy('Yayınlanıyor…');
@@ -473,23 +493,24 @@
       });
     }, Promise.resolve()).then(function () {
       busy('Yayınlanıyor…');
-      item = clean({ tur: x.tur, tarih: C.todayIso(), baslik: x.baslik, fiyat: x.fiyat, aciklama: x.aciklama, kisi: x.ad, telefon: x.telefon, foto: paths[0] });
+      item = clean(ilan ? { tur: x.tur, tarih: C.todayIso(), baslik: x.baslik, fiyat: x.fiyat, aciklama: x.aciklama, kisi: x.ad, telefon: x.telefon, foto: paths[0] } :
+        { tur: x.tur, tarih: C.todayIso(), baslik: x.baslik, aciklama: x.aciklama, adres: x.adres, kisi: x.ad, telefon: x.telefon, link: C.linkUrl(x.link), foto: paths[0] });
       if (paths.length > 1) item.fotolar = paths.slice(1).map(function (p) { return { foto: p }; });
-      return updateJson('data/pazar.json', function (data) { return [item].concat(C.arr(data)); }, 'Panel: ilan eklendi (ziyaretçinin isteği) – ' + x.baslik);
+      return updateJson(COLS[col].file, function (data) { return [item].concat(C.arr(data)); }, 'Panel: ' + COLS[col].one + ' eklendi (ziyaretçinin isteği) – ' + x.baslik);
     }).then(function (list) {
-      site.set('pazar', list);
-      return writeSharePage('pazar', item);
+      site.set(col, list);
+      return writeSharePage(col, item);
     }).then(function () {
-      return mRpc('forum_islem', { tur: 'ilan', kayit: id, islem: 'sil' }).catch(function () { kaldi = true; });
+      return mRpc('forum_islem', { tur: tur, kayit: id, islem: 'sil' }).catch(function () { kaldi = true; });
     }).then(function () {
       busy(false);
-      if (!kaldi) mPend.ilanlar = mPend.ilanlar.filter(function (i) { return i.id !== id; });
+      if (!kaldi) mPend[liste] = mPend[liste].filter(function (i) { return i.id !== id; });
       mPendT = 0; mBadge(); rerender();
-      if (kaldi) dialog('İlan yayınlandı', 'İlan sitede yayınlandı ama istek listeden kaldırılamadı. Onay bekleyenlerde hâlâ görünüyorsa "Sil" düğmesiyle kaldırın; yeniden onaylamayın.', 'Tamam', { single: true });
-      else toast('İlan yayınlandı', 'Herkes 1-2 dakika içinde Market sayfasında görecek.');
+      if (kaldi) dialog(ne + ' yayınlandı', 'Kayıt sitede yayınlandı ama istek listeden kaldırılamadı. Onay bekleyenlerde hâlâ görünüyorsa "Sil" düğmesiyle kaldırın; yeniden onaylamayın.', 'Tamam', { single: true });
+      else toast(ne + ' yayınlandı', 'Herkes 1-2 dakika içinde ' + (ilan ? 'Market' : 'Esnaf Rehberi') + ' sayfasında görecek.');
     }).catch(function (e) {
       busy(false);
-      fail('İlan yayınlanamadı', e);
+      fail(ne + ' yayınlanamadı', e);
     });
   }
 
@@ -784,7 +805,7 @@
       // ayrıntı sayfasındaysak (başlık ya da tarih değişince adresi de değişir) yeni adrese geç
       var page = curPage();
       if (page === c.page) {
-        var id = col === 'duyurular' ? site.pid(saved) : col === 'etkinlikler' ? site.eid(saved) : site.iid(saved);
+        var id = col === 'duyurular' ? site.pid(saved) : col === 'etkinlikler' ? site.eid(saved) : col === 'rehber' ? site.rid(saved) : site.iid(saved);
         var to = '#/' + c.page + '/' + encodeURIComponent(id);
         if (location.hash !== to) location.hash = to; else rerender();
       } else rerender();
@@ -908,7 +929,7 @@
   /* ---------------- "Ekle" seçimi (alttaki çubuk) ---------------- */
   function openChooser() {
     var opts = [['duyurular', 'news', 'Duyuru', 'Vefat, düğün, toplantı, haber'], ['etkinlikler', 'cal', 'Etkinlik', 'Takvime düğün, nişan, mevlit'],
-      ['galeri', 'photo', 'Fotoğraf', 'Fotoğraflar bölümüne'], ['pazar', 'bag', 'Market ilanı', 'Satılık, aranıyor, yardım']];
+      ['galeri', 'photo', 'Fotoğraf', 'Fotoğraflar bölümüne'], ['pazar', 'bag', 'Market ilanı', 'Satılık, aranıyor, yardım'], ['rehber', 'shop', 'İşletme', 'Esnaf Rehberine dükkân, usta, lokanta']];
     var root = openSheet('Ne eklemek istersiniz?', '<div class="ed-choose">' + opts.map(function (o) {
       return '<button type="button" data-pick="' + o[0] + '">' + icon(o[1]) + '<b>' + o[2] + '</b><small>' + o[3] + '</small></button>';
     }).join('') + '</div>', '', null);

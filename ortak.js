@@ -10,6 +10,7 @@
   var DUYURU_TURLERI = ['Vefat', 'Düğün', 'Nişan', 'Mevlit', 'Toplantı', 'Duyuru', 'Haber', 'Tarihten'];
   var ETKINLIK_TURLERI = ['Düğün', 'Nişan', 'Mevlit', 'Toplantı', 'Etkinlik'];
   var PAZAR_TURLERI = ['Satılık', 'Aranıyor', 'Yardım isteği'];
+  var REHBER_TURLERI = ['Dükkân', 'Restoran', 'Sanayi', 'Okul', 'Hizmet', 'Diğer'];   // Esnaf Rehberi (işletme kartları)
 
   function slug(s) {
     return String(s || '').toLocaleLowerCase('tr')
@@ -193,10 +194,10 @@
      (p/e-…html, p/d-…html, p/i-…html). WhatsApp ve Facebook bağlantının önizlemesini bu sayfadan okur; böylece paylaşımda
      o kaydın kendi fotoğrafı ve başlığı çıkar. Sayfayı açan kişi doğrudan sitedeki kayda yönlenir.
      Sayfaları yönetim paneli kaydederken, araclar/paylasim-sayfalari.js ise topluca üretir. */
-  var SHARE_COLS = { duyurular: 'd', etkinlikler: 'e', pazar: 'i' };
+  var SHARE_COLS = { duyurular: 'd', etkinlikler: 'e', pazar: 'i', rehber: 'r' };
   function shareId(key, x) {
     var t = key === 'e' ? x.ad : x.baslik;
-    return (normIso(x.tarih) || 'x') + '-' + (slug(t).slice(0, 50) || { d: 'duyuru', e: 'etkinlik', i: 'ilan' }[key]);
+    return (normIso(x.tarih) || 'x') + '-' + (slug(t).slice(0, 50) || { d: 'duyuru', e: 'etkinlik', i: 'ilan', r: 'isletme' }[key]);
   }
   function sharePath(key, id) { return 'p/' + key + '-' + id + '.html'; }
   function shareVer(src) {
@@ -225,6 +226,7 @@
     var title = tur + (key === 'e' ? x.ad : x.baslik || ''), det;
     if (key === 'e') det = [longDate(x.tarih, true), x.saat, x.yer].filter(Boolean).join(' · ');
     else if (key === 'i') det = [x.fiyat ? x.fiyat + ' ₺' : '', shareShort(x.aciklama, 150)].filter(Boolean).join(' · ');
+    else if (key === 'r') det = [x.adres, shareShort(x.aciklama, 150)].filter(Boolean).join(' · ');
     else det = shareShort(x.metin, 180);
     var to = '../?' + key + '=' + encodeURIComponent(id);
     return { path: sharePath(key, id), html: '<!doctype html>\n<html lang="tr">\n<head>\n<meta charset="utf-8">\n' +
@@ -238,7 +240,7 @@
       '<body style="font-family:sans-serif;padding:24px;font-size:20px">\n<p><a href="' + esc(to) + '">' + esc(title) + '</a></p>\n</body>\n</html>\n' };
   }
 
-  /* Kısa paylaşım bağlantısı: cesnigirder.org/d/k3f9xa gibi. Her duyuru (d), etkinlik (e) ve ilan (i) için 6 harflik bir kod,
+  /* Kısa paylaşım bağlantısı: cesnigirder.org/d/k3f9xa gibi. Her duyuru (d), etkinlik (e), ilan (i) ve işletme (r) için 6 harflik bir kod,
      kodun dosyası (d/k3f9xa.html) önizleme bilgisini (başlık, açıklama, fotoğraf) taşır ve açanı doğrudan o kayda götürür.
      Kod, kaydın adresinden ve fotoğrafının adından hesaplanır: fotoğraf değişince kod da değişir, WhatsApp/Facebook eski önizlemeyi göstermez.
      Dosyayı yönetim paneli kaydederken, araclar/site-sayfalari.js ise topluca yazar; dosyası henüz yazılmamış kodu 404.html kayda çevirir. */
@@ -255,6 +257,7 @@
     var title = tur + (key === 'e' ? x.ad : x.baslik || ''), det;
     if (key === 'e') det = [longDate(x.tarih, true), x.saat, x.yer].filter(Boolean).join(' · ');
     else if (key === 'i') det = [x.fiyat ? x.fiyat + ' ₺' : '', shareShort(x.aciklama, 150)].filter(Boolean).join(' · ');
+    else if (key === 'r') det = [x.adres, shareShort(x.aciklama, 150)].filter(Boolean).join(' · ');
     else det = shareShort(x.metin, 180);
     // kapak.jpg 350 KB; WhatsApp ~300 KB üstünü önizlemede göstermediği için küçük kopyası kullanılır
     var foto = imgSrc(x.foto, base) || base + 'images/kapak-paylasim.jpg', to = '../?' + key + '=' + encodeURIComponent(id);
@@ -346,7 +349,7 @@
 
   (typeof window !== 'undefined' ? window : globalThis).CD = {
     AY: AY, AY_KISA: AY_KISA, GUN: GUN,
-    DUYURU_TURLERI: DUYURU_TURLERI, ETKINLIK_TURLERI: ETKINLIK_TURLERI, PAZAR_TURLERI: PAZAR_TURLERI,
+    DUYURU_TURLERI: DUYURU_TURLERI, ETKINLIK_TURLERI: ETKINLIK_TURLERI, PAZAR_TURLERI: PAZAR_TURLERI, REHBER_TURLERI: REHBER_TURLERI,
     slug: slug, badgeClass: badgeClass, esc: esc, pad: pad, normIso: normIso, parts: parts,
     todayIso: todayIso, addDays: addDays, daysBetween: daysBetween, longDate: longDate, relDate: relDate,
     SHARE_COLS: SHARE_COLS, shareId: shareId, sharePath: sharePath, shareVer: shareVer, sharePage: sharePage,

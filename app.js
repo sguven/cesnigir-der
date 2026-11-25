@@ -1,5 +1,5 @@
 /* Çeşnigir-Der · Tasarım 3
-   Sayfalar: Ana Sayfa, Duyurular (ve ayrıntı), Etkinlikler, Köy Meydanı (forum), Fotoğraflar, Market, Hakkımızda, İletişim.
+   Sayfalar: Ana Sayfa, Duyurular (ve ayrıntı), Etkinlikler, Köy Meydanı (forum), Fotoğraflar, Market, Esnaf Rehberi, Hakkımızda, İletişim.
    İçerik data/ klasöründen okunur; yönetim panelinden değişir. */
 
 /* Ziyaretçi sayacı (GoatCounter): istatistikler https://cesnifirder.goatcounter.com
@@ -9,7 +9,7 @@
   // Site sayfaları #/duyuru/… gibi adreslerle açılıyor; sayaçta her kayıt ayrı görünsün
   function yol() { return location.pathname + (location.hash.indexOf('#/') === 0 ? location.hash : ''); }
   // Kısa paylaşım bağlantısından (/d/…, /e/…, /i/…) gelen ziyareti ayrıca belirt
-  var kaynak = /\/\/(www\.)?cesnigirder\.org\/[dei]\//.test(document.referrer) ? 'Paylaşılan bağlantı (WhatsApp/Facebook)' : undefined;
+  var kaynak = /\/\/(www\.)?cesnigirder\.org\/[deir]\//.test(document.referrer) ? 'Paylaşılan bağlantı (WhatsApp/Facebook)' : undefined;
   window.goatcounter = { path: yol, referrer: kaynak };
   var son = yol();
   window.addEventListener('hashchange', function () {
@@ -118,6 +118,7 @@
   // Etkinliğin kendi adresi: #/etkinlik/2026-11-29-ali-ayse
   function eid(e) { return (C.normIso(e.tarih) || 'x') + '-' + (C.slug(e.ad).slice(0, 50) || 'etkinlik'); }
   function iid(x) { return (C.normIso(x.tarih) || 'x') + '-' + (C.slug(x.baslik).slice(0, 50) || 'ilan'); }
+  function rid(x) { return C.shareId('r', x); }
   function upper(t) { return String(t || '').toLocaleUpperCase('tr'); }
 
   /* Paylaşım: WhatsApp ve Facebook düğmeleri. Bağlantı doğrudan o etkinliğe, ilana ya da duyuruya gider (…/?e=…, ?i=…, ?d=…:
@@ -287,10 +288,11 @@
     meydan: '<path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h5"/>',
     fotograflar: '<rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/>',
     pazar: '<path d="M4 9h16l-1 11H5L4 9Z"/><path d="M8 9a4 4 0 0 1 8 0"/>',
+    rehber: '<path d="M4 10 5.5 4h13L20 10"/><path d="M4 10a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0"/><path d="M5.5 12.5V20h13v-7.5M10 20v-4.5h4V20"/>',
     'gezilecek-yerler': '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>'
   };
   function quickLinks() {
-    var L = [['duyurular', 'Duyurular'], ['etkinlikler', 'Etkinlikler'], ['meydan', 'Köy Meydanı'], ['fotograflar', 'Fotoğraflar'], ['pazar', 'Market'], ['gezilecek-yerler', 'Gezilecek Yerler']];
+    var L = [['duyurular', 'Duyurular'], ['etkinlikler', 'Etkinlikler'], ['meydan', 'Köy Meydanı'], ['fotograflar', 'Fotoğraflar'], ['pazar', 'Market'], ['rehber', 'Esnaf Rehberi'], ['gezilecek-yerler', 'Gezilecek Yerler']];
     return '<nav class="quick" aria-label="Kısayollar"><div class="container quick-in">' + L.map(function (x) {
       return '<a href="#/' + x[0] + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + QI[x[0]] + '</svg><span>' + x[1] + '</span></a>';
     }).join('') + '</div></nav>';
@@ -427,8 +429,8 @@
   }
 
   // İlan sahibine ulaşma düğmeleri ve ilanın paylaşım bilgisi
-  function mkContact(x) {
-    var tel = C.telHref(x.telefon), wa = C.waHref(x.telefon, (x.baslik || '') + ' ilanı için yazıyorum.');
+  function mkContact(x, mesaj) {
+    var tel = C.telHref(x.telefon), wa = C.waHref(x.telefon, mesaj || (x.baslik || '') + ' ilanı için yazıyorum.');
     return (tel || wa) ? '<div class="btn-row" style="margin-top:6px">' + (tel ? '<a class="btn" href="tel:' + esc(tel) + '">' + icon('phone') + 'Ara</a>' : '') +
       (wa ? '<a class="btn btn-green" href="' + esc(wa) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp\'tan yaz</a>' : '') + '</div>' : '';
   }
@@ -465,79 +467,170 @@
         '</div></article>';
     }).join('') + '</div>' : '<div class="box empty"><b>Şu anda ilan yok</b><span id="iBos">İlan vermek isterseniz derneği arayın.' +
       (dtel ? '<p style="margin:14px 0 0"><a class="btn" href="tel:' + esc(dtel) + '">' + icon('phone') + 'Derneği Ara</a></p>' : '') + '</span></div>';
-    if (!E) setTimeout(iHazirla, 0);
+    if (!E) setTimeout(function () { iHazirla('ilan'); }, 0);
     return band('Market ve Yardımlaşma', 'Köyümüzden satılık ürünler, aranan şeyler ve yardım istekleri.') +
       '<section class="section"><div class="container"' + ed('ekle:pazar') + '>' + (E ? '' : '<div id="iYeni" hidden></div>') + body + '</div></section>';
   }
 
-  /* ---------- Market: ziyaretçinin ilan isteği ----------
-     Ziyaretçi Market sayfasındaki "İlan ver" formuyla kendi ilanını (fotoğraf ve telefonuyla) gönderir. İstek Supabase'de
-     pazar_istekleri tablosunda bekler (kurulum: araclar/supabase-meydan.sql); yönetici panelde onaylayınca ilan öteki ilanlar
-     gibi data/pazar.json'a yazılır (yonetim/duzen.js: ilanYayinla). Tablo henüz kurulmadıysa form hiç gösterilmez. */
-  var iVar = null;   // null: henüz bakılmadı · true: ilan isteği alınabiliyor · false: kurulum yok
-  function iForm() {
-    return '<form class="m-form" data-i-form novalidate>' +
-      '<label class="m-l">İlanın türü<select name="tur">' + C.PAZAR_TURLERI.map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label>' +
-      '<label class="m-l">Ne satıyorsunuz / arıyorsunuz?<input name="baslik" maxlength="120" placeholder="Örnek: Köy yumurtası"></label>' +
-      '<label class="m-l">Fiyat (TL)<input name="fiyat" maxlength="30" inputmode="numeric" placeholder="Örnek: 150"><span class="i-yardim">Fiyat yoksa boş bırakın.</span></label>' +
-      '<label class="m-l">Açıklama<textarea name="aciklama" rows="4" maxlength="2000" placeholder="Örnek: Günlük taze, köyde elden teslim."></textarea></label>' +
-      mFotoAlan() +
+  /* ---------- Esnaf Rehberi: dükkân, restoran, sanayi, okul gibi işletmelerin kartları ----------
+     Kayıtlar data/rehber.json'da durur (tur, baslik = işletmenin adı, aciklama, adres, kisi, telefon, link, foto, fotolar).
+     Kartvizit bütün görünsün diye kart fotoğrafı kırpılmaz. Ziyaretçi kendi işletmesini "İşletmenizi ekleyin" formuyla gönderir (aşağıda). */
+  var rKat = 'Tümü';
+  function rShare(x) { return { key: 'r', id: rid(x), tur: x.tur, title: x.baslik, det: x.adres || '', photo: img(x.foto) }; }
+  function rMesaj(x) { return 'Merhaba, ' + (x.baslik || 'işletmenizi') + ' kaydını Çeşnigir-Der sitesinde gördüm.'; }
+  function rLink(x, big) {
+    var u = C.linkUrl(x.link); if (!u) return '';
+    var insta = /instagram\.com/i.test(u), fb = /facebook\.com/i.test(u);
+    return '<a class="btn btn-light' + (big ? '' : ' rh-link') + '" href="' + esc(u) + '" target="_blank" rel="noopener">' + icon('link') + (insta ? 'Instagram' : fb ? 'Facebook sayfası' : 'Web sitesi') + '</a>';
+  }
+  function rAdres(x) { return x.adres ? '<p class="rh-adres">' + icon('pin') + '<span>' + esc(x.adres) + '</span></p>' : ''; }
+  function rListHtml() {
+    var all = byDate(data.rehber, -1), list = rKat === 'Tümü' ? all : all.filter(function (x) { return x.tur === rKat; });
+    return list.map(function (x) {
+      var src = img(x.foto), id = esc(rid(x));
+      return '<article class="box mk rh"' + ek('rehber', data.rehber.indexOf(x)) + '>' +
+        (src ? '<a class="rh-img" href="#/isletme/' + id + '" tabindex="-1" aria-hidden="true"><img src="' + esc(src) + '" alt="" loading="lazy"></a>' : '') +
+        '<div class="box-pad">' + (x.tur ? '<div class="news-meta"><span class="badge">' + esc(x.tur) + '</span></div>' : '') +
+        '<h3><a class="ev-link" href="#/isletme/' + id + '"><b>' + esc(x.baslik) + '</b></a></h3>' + rAdres(x) +
+        (x.aciklama ? '<p>' + esc(excerpt(x.aciklama, 160)) + '</p>' : '') + (x.kisi ? '<p class="muted">' + esc(x.kisi) + '</p>' : '') +
+        mkContact(x, rMesaj(x)) + shareButtons(rShare(x)) + '</div></article>';
+    }).join('');
+  }
+  function pageRehber() {
+    var kats = C.REHBER_TURLERI.filter(function (t) { return data.rehber.some(function (x) { return x.tur === t; }); });
+    if (kats.indexOf(rKat) < 0) rKat = 'Tümü';
+    var body = data.rehber.length ? (kats.length > 1 ? '<div class="filters" role="group" aria-label="İşletme türü">' + ['Tümü'].concat(kats).map(function (t) {
+      return '<button type="button" data-r-kat="' + esc(t) + '" aria-pressed="' + (t === rKat) + '">' + esc(t) + '</button>';
+    }).join('') + '</div>' : '') + '<div class="cards" id="rList">' + rListHtml() + '</div>' :
+      '<div class="box empty"><b>Henüz kayıtlı işletme yok</b><span id="rBos">Yakında burada köylülerimizin işletmeleri yer alacak.</span></div>';
+    if (!E) setTimeout(function () { iHazirla('rehber'); }, 0);
+    return band('Esnaf Rehberi', 'Köylülerimizin dükkânları, lokantaları, sanayi ve hizmet işletmeleri. Alışverişte önce kendi esnafımız.') +
+      '<section class="section"><div class="container"' + ed('ekle:rehber') + '>' + (E ? '' : '<div id="rYeni" hidden></div>') + body + '</div></section>';
+  }
+  function pageIsletme(id) {
+    var x = data.rehber.filter(function (v) { return rid(v) === id; })[0];
+    if (!x) return band('İşletme bulunamadı') + '<section class="section"><div class="container"><p>Bu kayıt kaldırılmış olabilir.</p><a class="btn" href="#/rehber">Esnaf Rehberi</a></div></section>';
+    var src = img(x.foto), ekF = C.arr(x.fotolar).map(function (f) { return img(f.foto); }).filter(Boolean);
+    var harita = x.adres ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(x.adres) : '';
+    return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/rehber">Esnaf Rehberi</a></div></div></div>' +
+      '<section class="section"><div class="container"><article class="article"' + ek('rehber', data.rehber.indexOf(x)) + '>' +
+      (x.tur ? '<div class="news-meta"><span class="badge">' + esc(x.tur) + '</span></div>' : '') +
+      '<h1>' + esc(x.baslik) + '</h1>' +
+      (src ? '<button type="button" class="article-img rh-kart" data-photo="' + esc(src) + '" data-cap="' + esc(x.baslik) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(src) + '" alt="' + esc(x.baslik) + '"></button>' : '') +
+      (ekF.length ? '<div class="mk-fotos">' + ekF.map(function (s, i) {
+        return '<button type="button" data-photo="' + esc(s) + '" data-cap="' + esc(x.baslik) + '" aria-label="Fotoğrafı büyüt (' + (i + 2) + ' / ' + (ekF.length + 1) + ')"><img src="' + esc(s) + '" alt="' + esc(x.baslik) + ': fotoğraf ' + (i + 2) + '" loading="lazy"></button>';
+      }).join('') + '</div>' : '') +
+      '<div class="article-text">' + (x.aciklama ? mParas(x.aciklama) : '') +
+      (x.adres ? '<p class="rh-adres">' + icon('pin') + '<span>' + esc(x.adres) + ' · <a href="' + esc(harita) + '" target="_blank" rel="noopener">Haritada aç</a></span></p>' : '') +
+      (x.kisi ? '<p class="muted">Yetkili: ' + esc(x.kisi) + '</p>' : '') + '</div>' +
+      mkContact(x, rMesaj(x)) + (C.linkUrl(x.link) ? '<div class="btn-row" style="margin-top:10px">' + rLink(x, true) + '</div>' : '') +
+      '<div class="btn-row">' + shareButtons(rShare(x), true) + '<a class="btn btn-light" href="#/rehber">‹ Esnaf Rehberi</a></div>' +
+      '</article></div></section>';
+  }
+  document.addEventListener('click', function (e) {
+    var k = e.target.closest('[data-r-kat]');
+    if (!k) return;
+    rKat = k.getAttribute('data-r-kat');
+    main.querySelectorAll('[data-r-kat]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === k)); });
+    var l = $('rList'); if (l) { l.innerHTML = rListHtml(); realLinks(l); if (E) E.after('rehber'); }
+  });
+
+  /* ---------- Ziyaretçinin istekleri: Market ilanı ve Esnaf Rehberi kaydı ----------
+     Ziyaretçi Market sayfasındaki "İlan ver", Esnaf Rehberi sayfasındaki "İşletmenizi ekleyin" formuyla kendi kaydını
+     (fotoğraf ve telefonuyla) gönderir. İstek Supabase'de bekler (pazar_istekleri, rehber_istekleri; kurulum: araclar/supabase-meydan.sql);
+     yönetici panelde onaylayınca kayıt öteki kayıtlar gibi data/pazar.json ya da data/rehber.json'a yazılır (yonetim/duzen.js: istekYayinla).
+     Tablo henüz kurulmadıysa form hiç gösterilmez. */
+  var ISTEK = {
+    ilan: { tablo: '/pazar_istekleri', kutu: 'iYeni', bos: 'iBos', dugme: 'İlan ver', turler: C.PAZAR_TURLERI, turL: 'İlanın türü',
+      baslikL: 'Ne satıyorsunuz / arıyorsunuz?', baslikP: 'Örnek: Köy yumurtası', baslikH: 'Lütfen ne sattığınızı ya da aradığınızı yazın.',
+      aciklamaL: 'Açıklama', aciklamaP: 'Örnek: Günlük taze, köyde elden teslim.', telY: 'İlanı görenler sizi bu numaradan arar.', gonder: 'İlanı gönder',
+      not: 'İlanınız dernek yönetimi onayladıktan sonra sitede görünür. Adınız ve telefon numaranız ilanda herkese açık olur.',
+      ilk: 'İlk ilanı siz verin: yukarıdaki "İlan ver" düğmesine dokunun.', tamam: 'Teşekkürler, ilanınız alındı.', nerede: 'Market sayfasında', yine: 'Bir ilan daha ver', fotosuz: 'ilanınızı' },
+    rehber: { tablo: '/rehber_istekleri', kutu: 'rYeni', bos: 'rBos', dugme: 'İşletmenizi ekleyin', turler: C.REHBER_TURLERI, turL: 'İşletmenin türü',
+      baslikL: 'İşletmenin adı', baslikP: 'Örnek: Köprü Lokantası', baslikH: 'Lütfen işletmenizin adını yazın.',
+      aciklamaL: 'Ne iş yapıyorsunuz?', aciklamaP: 'Örnek: Ev yemekleri, gözleme, kahvaltı. Her gün 08.00-22.00 arası açık.', telY: 'Müşteriler sizi bu numaradan arar.', gonder: 'Gönder',
+      fotoL: 'Kartvizitinizin ya da dükkânınızın fotoğrafı',
+      not: 'Kaydınız dernek yönetimi onayladıktan sonra sitede görünür. Yazdığınız bütün bilgiler (ad, telefon, adres) herkese açık olur. Yayın ücretsizdir.',
+      ilk: 'İlk kaydı siz ekleyin: yukarıdaki "İşletmenizi ekleyin" düğmesine dokunun.', tamam: 'Teşekkürler, kaydınız alındı.', nerede: 'Esnaf Rehberi sayfasında', yine: 'Bir işletme daha ekle', fotosuz: 'kaydınızı' }
+  };
+  var iVar = { ilan: null, rehber: null };   // null: henüz bakılmadı · true: istek alınabiliyor · false: kurulum yok
+  function iForm(tur) {
+    var K = ISTEK[tur], y = function (t) { return '<span class="i-yardim">' + t + '</span>'; };
+    return '<form class="m-form" data-i-form="' + tur + '" novalidate>' +
+      '<label class="m-l">' + K.turL + '<select name="tur">' + K.turler.map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label>' +
+      '<label class="m-l">' + K.baslikL + '<input name="baslik" maxlength="120" placeholder="' + esc(K.baslikP) + '"></label>' +
+      (tur === 'ilan' ? '<label class="m-l">Fiyat (TL)<input name="fiyat" maxlength="30" inputmode="numeric" placeholder="Örnek: 150">' + y('Fiyat yoksa boş bırakın.') + '</label>' : '') +
+      '<label class="m-l">' + K.aciklamaL + '<textarea name="aciklama" rows="4" maxlength="2000" placeholder="' + esc(K.aciklamaP) + '"></textarea></label>' +
+      (tur === 'rehber' ? '<label class="m-l">Adres<input name="adres" maxlength="200" autocomplete="street-address" placeholder="Örnek: Sanayi Sitesi 3. Sokak No: 12, Keskin"></label>' : '') +
+      (K.fotoL ? '<p class="m-l" style="margin:0 0 -6px">' + K.fotoL + '</p>' : '') + mFotoAlan() +
       '<label class="m-l">Adınız ve soyadınız<input name="ad" autocomplete="name" maxlength="60" value="' + esc(mAd()) + '"></label>' +
-      '<label class="m-l">Telefon numaranız<input name="telefon" type="tel" autocomplete="tel" inputmode="tel" maxlength="25" placeholder="0555 123 45 67"><span class="i-yardim">İlanı görenler sizi bu numaradan arar.</span></label>' +
+      '<label class="m-l">Telefon numaranız<input name="telefon" type="tel" autocomplete="tel" inputmode="tel" maxlength="25" placeholder="0555 123 45 67">' + y(K.telY) + '</label>' +
+      (tur === 'rehber' ? '<label class="m-l">Web siteniz ya da Instagram adresiniz<input name="link" maxlength="200" inputmode="url" autocapitalize="none" autocomplete="off" placeholder="Örnek: instagram.com/koprulokantasi">' + y('Yoksa boş bırakın.') + '</label>' : '') +
       '<label class="m-hp" aria-hidden="true">Web sitesi<input name="web" tabindex="-1" autocomplete="off"></label>' +
       '<p class="m-err" role="alert" hidden></p>' +
-      '<button type="submit" class="btn">' + icon('pen') + 'İlanı gönder</button>' +
-      '<p class="muted small m-note">İlanınız dernek yönetimi onayladıktan sonra sitede görünür. Adınız ve telefon numaranız ilanda herkese açık olur.</p></form>';
+      '<button type="submit" class="btn">' + icon('pen') + K.gonder + '</button>' +
+      '<p class="muted small m-note">' + K.not + '</p></form>';
   }
-  function iCiz() {
-    var b = $('iYeni'); if (!b || !iVar) return;
-    if (!b.firstChild) b.innerHTML = '<details class="m-new"><summary class="btn">' + icon('pen') + 'İlan ver</summary><div class="box box-pad">' + iForm() + '</div></details>';
+  function iCiz(tur) {
+    var K = ISTEK[tur], b = $(K.kutu); if (!b || !iVar[tur]) return;
+    if (!b.firstChild) b.innerHTML = '<details class="m-new"><summary class="btn">' + icon('pen') + K.dugme + '</summary><div class="box box-pad">' + iForm(tur) + '</div></details>';
     b.hidden = false;
-    var bos = $('iBos'); if (bos) bos.textContent = 'İlk ilanı siz verin: yukarıdaki "İlan ver" düğmesine dokunun.';
+    var bos = $(K.bos); if (bos) bos.textContent = K.ilk;
   }
-  function iHazirla() {
-    if (iVar !== null) { iCiz(); return; }
-    C.sb('/pazar_istekleri?select=id&limit=1').then(function () { iVar = true; iCiz(); }, function (e) { if (e && e.status !== 'net') iVar = false; });
+  function iHazirla(tur) {
+    if (iVar[tur] !== null) { iCiz(tur); return; }
+    C.sb(ISTEK[tur].tablo + '?select=id&limit=1').then(function () { iVar[tur] = true; iCiz(tur); }, function (e) { if (e && e.status !== 'net') iVar[tur] = false; });
   }
-  function iTesekkur() {
-    return '<div class="m-thanks" role="status"><b>Teşekkürler, ilanınız alındı.</b><p>Dernek yönetimi onayladıktan sonra Market sayfasında görünecek.</p>' +
-      '<button type="button" class="btn btn-light" data-i-again>Bir ilan daha ver</button></div>';
+  // "instagram.com/x", "@x", "www.x.com" gibi yazılanı tam adrese çevirir; adres değilse boş döner
+  function iLink(t) {
+    t = String(t || '').trim();
+    if (!t) return '';
+    if (/^@[\w.]{2,30}$/.test(t)) t = 'https://www.instagram.com/' + t.slice(1);
+    else if (!/^https?:\/\//i.test(t)) t = 'https://' + t;
+    return /^https?:\/\/[^\s\/.]+\.[^\s]{2,}$/i.test(t) && t.length <= 200 ? t : '';
   }
   document.addEventListener('submit', function (e) {
     var f = e.target.closest && e.target.closest('form[data-i-form]');
     if (!f) return;
     e.preventDefault();
-    var v = {}, err = f.querySelector('.m-err'), btn = f.querySelector('button[type=submit]');
-    ['tur', 'baslik', 'fiyat', 'aciklama', 'ad', 'telefon', 'web'].forEach(function (n) { v[n] = f.elements[n].value.trim(); });
+    var tur = f.getAttribute('data-i-form'), K = ISTEK[tur], v = {}, err = f.querySelector('.m-err'), btn = f.querySelector('button[type=submit]');
+    ['tur', 'baslik', 'fiyat', 'aciklama', 'adres', 'link', 'ad', 'telefon', 'web'].forEach(function (n) { v[n] = f.elements[n] ? f.elements[n].value.trim() : ''; });
     function hata(t, n) { err.textContent = t; err.hidden = false; if (n && f.elements[n]) f.elements[n].focus(); }
-    if (v.baslik.length < 3) return hata('Lütfen ne sattığınızı ya da aradığınızı yazın.', 'baslik');
+    if (v.baslik.length < 3) return hata(K.baslikH, 'baslik');
     if (v.ad.length < 3) return hata('Lütfen adınızı ve soyadınızı yazın.', 'ad');
     if (!/^[0-9+ ()\-]+$/.test(v.telefon) || v.telefon.replace(/\D/g, '').length < 10 || !C.telHref(v.telefon)) return hata('Lütfen telefon numaranızı başında 0 ile yazın. Örnek: 0555 123 45 67', 'telefon');
+    var link = iLink(v.link);
+    if (v.link && !link) return hata('Web adresi anlaşılamadı. Örnek: instagram.com/koprulokantasi. Emin değilseniz boş bırakın.', 'link');
     err.hidden = true;
     mAdKaydet(v.ad);
     var label = btn.innerHTML, fotos = (f._fotos || []).slice();
     btn.disabled = true; btn.textContent = 'Gönderiliyor…';
     var done = function () { fotos.forEach(function (x) { URL.revokeObjectURL(x.url); });
-      var t = document.createElement('div'); t.innerHTML = iTesekkur(); f.parentNode.replaceChild(t.firstChild, f); };
+      var t = document.createElement('div');
+      t.innerHTML = '<div class="m-thanks" role="status"><b>' + K.tamam + '</b><p>Dernek yönetimi onayladıktan sonra ' + K.nerede + ' görünecek.</p>' +
+        '<button type="button" class="btn btn-light" data-i-again="' + tur + '">' + K.yine + '</button></div>';
+      f.parentNode.replaceChild(t.firstChild, f); };
     if (v.web) { done(); return; }   // yalnız otomatik programların doldurduğu gizli alan
     var body = { tur: v.tur, baslik: v.baslik, ad: v.ad, telefon: v.telefon };
     var fiyat = v.fiyat.replace(/\s*(tl|₺|lira)\.?$/i, '').trim();
     if (fiyat) body.fiyat = fiyat;
     if (v.aciklama) body.aciklama = v.aciklama;
+    if (v.adres) body.adres = v.adres;
+    if (link) body.link = link;
     mFotoGonder(fotos, btn).then(function (yollar) {
       if (yollar.length) { body.fotolar = yollar; btn.textContent = 'Gönderiliyor…'; }
-      return C.sb('/pazar_istekleri', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: body });
+      return C.sb(K.tablo, { method: 'POST', headers: { Prefer: 'return=minimal' }, body: body });
     }).then(done).catch(function (er) {
       btn.disabled = false; btn.innerHTML = label;
       hata(er && er.status === 'net' ? 'İnternet bağlantısı yok gibi görünüyor. Bağlantınızı kontrol edip tekrar deneyin.' :
-        er && er.foto ? 'Fotoğraf yüklenemedi. Biraz sonra tekrar deneyin ya da fotoğrafı kaldırıp ilanınızı fotoğrafsız gönderin. (Hata F' + er.status + (er.message ? ': ' + er.message : '') + ')' :
+        er && er.foto ? 'Fotoğraf yüklenemedi. Biraz sonra tekrar deneyin ya da fotoğrafı kaldırıp ' + K.fotosuz + ' fotoğrafsız gönderin. (Hata F' + er.status + (er.message ? ': ' + er.message : '') + ')' :
         er && /çok fazla/.test(er.message || '') ? er.message : 'Gönderilemedi. Lütfen biraz sonra tekrar deneyin.' + (er && er.status ? ' (Hata ' + er.status + (er.message ? ': ' + String(er.message).slice(0, 120) : '') + ')' : ''));
     });
   });
   document.addEventListener('click', function (e) {
     var a = e.target.closest('[data-i-again]');
     if (!a) return;
-    var t = document.createElement('div'); t.innerHTML = iForm();
+    var t = document.createElement('div'); t.innerHTML = iForm(a.getAttribute('data-i-again'));
     var f = t.firstChild; a.parentNode.parentNode.replaceChild(f, a.parentNode);
     f.elements.baslik.focus();
   });
@@ -1166,7 +1259,8 @@
     etkinlikler: 'Köprüköy etkinlik takvimi: düğün, mevlit ve özel günler · Çeşnigir-Der',
     fotograflar: 'Köprüköy ve Çeşnigir Köprüsü fotoğrafları · Çeşnigir-Der',
     iletisim: 'İletişim · Çeşnigir-Der, Köprüköy (Keskin, Kırıkkale)',
-    meydan: 'Köy Meydanı: Köprüköylülerin sohbet ve hatıra köşesi · Çeşnigir-Der'
+    meydan: 'Köy Meydanı: Köprüköylülerin sohbet ve hatıra köşesi · Çeşnigir-Der',
+    rehber: 'Esnaf Rehberi: Köprüköylülerin dükkân ve işletmeleri · Çeşnigir-Der'
   };
   function route() {
     // adreste #/… yoksa üretilmiş sayfanın kendi içeriği (CD_ROUTE) açılır
@@ -1179,6 +1273,8 @@
     else if (page === 'fotograflar') html = pagePhotos();
     else if (page === 'pazar') html = pageMarket();
     else if (page === 'ilan') html = pageListing(decodeURIComponent(p.slice(1).join('/')));
+    else if (page === 'rehber') html = pageRehber();
+    else if (page === 'isletme') html = pageIsletme(decodeURIComponent(p.slice(1).join('/')));
     else if (page === 'hakkimizda') html = pageAbout();
     else if (page === 'koyumuz') { page = 'hakkimizda'; html = pageAbout(); }
     else if (page === 'gezilecek-yerler' || page === 'gezi') { page = 'gezilecek-yerler'; html = pageGezi(); }
@@ -1193,8 +1289,8 @@
     radyoSync();
     realLinks(main);
     main.classList.remove('gir'); void main.offsetWidth; main.classList.add('gir');
-    var navKey = page === 'duyuru' ? 'duyurular' : page === 'etkinlik' ? 'etkinlikler' : page === 'ilan' ? 'pazar' : page === 'konu' ? 'meydan' : page === 'foto' ? 'fotograflar' : page;
-    if (page === 'etkinlik' || page === 'ilan' || page === 'duyuru') { var sp = main.querySelector('[data-share-photo]'); if (sp) C.warmShare(sp.getAttribute('data-share-photo')); }
+    var navKey = page === 'duyuru' ? 'duyurular' : page === 'etkinlik' ? 'etkinlikler' : page === 'ilan' ? 'pazar' : page === 'isletme' ? 'rehber' : page === 'konu' ? 'meydan' : page === 'foto' ? 'fotograflar' : page;
+    if (page === 'etkinlik' || page === 'ilan' || page === 'isletme' || page === 'duyuru') { var sp = main.querySelector('[data-share-photo]'); if (sp) C.warmShare(sp.getAttribute('data-share-photo')); }
     document.querySelectorAll('[data-nav]').forEach(function (a) {
       if (a.getAttribute('data-nav') === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
@@ -1413,7 +1509,7 @@
   // Paylaşılan bağlantı (?e=…, ?i=…, ?d=…) ilgili sayfayı açar; adres çubuğu sade adrese döner
   (function openShared() {
     var q; try { q = new URLSearchParams(location.search); } catch (e) { return; }
-    var map = { e: 'etkinlik', i: 'ilan', d: 'duyuru', m: 'konu' };
+    var map = { e: 'etkinlik', i: 'ilan', r: 'isletme', d: 'duyuru', m: 'konu' };
     Object.keys(map).some(function (k) {
       var v = q.get(k); if (!v) return false;
       history.replaceState(null, '', location.pathname + '#/' + map[k] + '/' + encodeURIComponent(v));
@@ -1422,12 +1518,12 @@
   })();
 
   bind();
-  Promise.all([load('duyurular', []), load('etkinlikler', []), load('resmi-gunler', {}), load('galeri', []), load('pazar', []), load('dernek', {})])
+  Promise.all([load('duyurular', []), load('etkinlikler', []), load('resmi-gunler', {}), load('galeri', []), load('pazar', []), load('dernek', {}), load('rehber', [])])
     .then(function (r) {
       data = {
         duyurular: C.arr(r[0]), etkinlikler: C.arr(r[1]),
         resmi: r[2] && typeof r[2] === 'object' ? r[2] : {},
-        galeri: C.arr(r[3]).filter(function (x) { return img(x.foto); }), pazar: C.arr(r[4]),
+        galeri: C.arr(r[3]).filter(function (x) { return img(x.foto); }), pazar: C.arr(r[4]), rehber: C.arr(r[6]),
         dernek: r[5] && typeof r[5] === 'object' && !Array.isArray(r[5]) ? r[5] : {}
       };
       renderChrome();
@@ -1441,7 +1537,7 @@
           data[k] = v;
           if (k === 'dernek') renderChrome();
         },
-        route: route, evRow: evRow, eid: eid, iid: iid, pid: pid
+        route: route, evRow: evRow, eid: eid, iid: iid, pid: pid, rid: rid
       });
       route();
     });

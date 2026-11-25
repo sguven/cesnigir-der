@@ -1,4 +1,4 @@
--- Köy Meydanı (forum, fotoğraflı yazı ve cevaplar), yorumlar (haber, etkinlik, fotoğraf) ve Market ilan istekleri · Supabase veritabanı kurulumu
+-- Köy Meydanı (forum, fotoğraflı yazı ve cevaplar), yorumlar (haber, etkinlik, fotoğraf), Market ilan istekleri ve Esnaf Rehberi istekleri · Supabase veritabanı kurulumu
 -- Supabase → SQL Editor'de bir kez çalıştırılır. Tekrar çalıştırmak zararsızdır (var olanı bozmaz).
 --
 -- Kurallar:
@@ -116,6 +116,49 @@ drop trigger if exists pazar_istek_sel on public.pazar_istekleri;
 create trigger pazar_istek_sel before insert on public.pazar_istekleri for each row execute function public.pazar_sel_kontrol();
 revoke all on function public.pazar_sel_kontrol() from public, anon, authenticated;
 
+-- Esnaf Rehberi istekleri: ziyaretçi kendi işletmesinin kartını (dükkân, restoran, sanayi, okul…) gönderir; düzen Market istekleriyle aynıdır.
+-- Yönetici onaylayınca panel kaydı sitenin dosyasına (data/rehber.json) yazar ve isteği buradan siler.
+create table if not exists public.rehber_istekleri (
+  id bigint generated always as identity primary key,
+  tur text not null default 'Dükkân' check (tur in ('Dükkân', 'Restoran', 'Sanayi', 'Okul', 'Hizmet', 'Diğer')),
+  baslik text not null check (char_length(btrim(baslik)) between 3 and 120),
+  aciklama text check (char_length(aciklama) <= 2000),
+  adres text check (char_length(adres) <= 200),
+  link text check (char_length(link) <= 200 and link ~* '^https?://'),
+  ad text not null check (char_length(btrim(ad)) between 3 and 60),
+  telefon text not null check (char_length(telefon) between 10 and 25 and telefon ~ '^[0-9+ ()-]+$'),
+  fotolar text[] not null default '{}' check (
+    cardinality(fotolar) <= 4 and array_to_string(fotolar, ',') ~ '^([0-9]{4}-[0-9]{2}/[0-9a-f-]{36}[.]jpg(,|$))*$'),
+  created_at timestamptz not null default now()
+);
+alter table public.rehber_istekleri enable row level security;
+revoke all on public.rehber_istekleri from anon, authenticated;
+grant select (id) on public.rehber_istekleri to anon, authenticated;
+grant insert (tur, baslik, aciklama, adres, link, ad, telefon, fotolar) on public.rehber_istekleri to anon, authenticated;
+drop policy if exists "istekler okunmaz" on public.rehber_istekleri;
+create policy "istekler okunmaz" on public.rehber_istekleri for select to anon, authenticated using (false);
+drop policy if exists "kayit onaya gonderilir" on public.rehber_istekleri;
+create policy "kayit onaya gonderilir" on public.rehber_istekleri for insert to anon, authenticated with check (true);
+
+create or replace function public.rehber_sel_kontrol() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  if (select count(*) from public.rehber_istekleri where created_at > now() - interval '10 minutes') >= 15
+   or (select count(*) from public.rehber_istekleri) >= 200 then
+    raise exception 'Şu anda çok fazla kayıt gönderildi. Lütfen biraz sonra tekrar deneyin.';
+  end if;
+  new.ad := btrim(new.ad);
+  new.baslik := btrim(new.baslik);
+  new.telefon := btrim(new.telefon);
+  new.aciklama := nullif(btrim(new.aciklama), '');
+  new.adres := nullif(btrim(new.adres), '');
+  new.link := nullif(btrim(new.link), '');
+  return new;
+end $$;
+drop trigger if exists rehber_istek_sel on public.rehber_istekleri;
+create trigger rehber_istek_sel before insert on public.rehber_istekleri for each row execute function public.rehber_sel_kontrol();
+revoke all on function public.rehber_sel_kontrol() from public, anon, authenticated;
+
 alter table public.forum_konular enable row level security;
 alter table public.forum_cevaplar enable row level security;
 alter table public.yorumlar enable row level security;
@@ -215,7 +258,7 @@ begin
 end $$;
 revoke all on function public.forum_yetki(text) from public, anon, authenticated;
 
--- Panel: onay bekleyenler (yazılar, cevaplar, yorumlar, Market ilan istekleri)
+-- Panel: onay bekleyenler (yazılar, cevaplar, yorumlar, Market ve Esnaf Rehberi istekleri)
 create or replace function public.forum_bekleyenler(anahtar text) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 begin
@@ -228,7 +271,8 @@ begin
                            where c.durum = 'bekliyor'), '[]'::jsonb),
     'yorumlar', coalesce((select jsonb_agg(to_jsonb(y) order by y.created_at)
                            from public.yorumlar y where y.durum = 'bekliyor'), '[]'::jsonb),
-    'ilanlar', coalesce((select jsonb_agg(to_jsonb(i) order by i.created_at) from public.pazar_istekleri i), '[]'::jsonb));
+    'ilanlar', coalesce((select jsonb_agg(to_jsonb(i) order by i.created_at) from public.pazar_istekleri i), '[]'::jsonb),
+    'rehber', coalesce((select jsonb_agg(to_jsonb(r) order by r.created_at) from public.rehber_istekleri r), '[]'::jsonb));
 end $$;
 
 -- Panel: onayla / sil / sabitle
@@ -255,6 +299,9 @@ begin
   elsif tur = 'ilan' then
     -- ilan isteği: yayınlanınca (panel ilanı sitenin dosyasına yazdıktan sonra) ya da reddedilince silinir
     if islem = 'sil' then delete from public.pazar_istekleri where id = kayit;
+    else raise exception 'bilinmeyen işlem'; end if;
+  elsif tur = 'rehber' then
+    if islem = 'sil' then delete from public.rehber_istekleri where id = kayit;
     else raise exception 'bilinmeyen işlem'; end if;
   else
     raise exception 'bilinmeyen tür';

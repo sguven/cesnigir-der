@@ -10,12 +10,12 @@
 (function () {
   var seg = location.pathname.split('/')[1] || '';
   var home = /\.github\.io$/.test(location.hostname) && seg ? '/' + seg + '/' : '/';
-  var m = /^(.*\/)p\/([dei])-(.+?)(\.html)?$/.exec(location.pathname);
+  var m = /^(.*\/)p\/([deir])-(.+?)(\.html)?$/.exec(location.pathname);
   if (m) return location.replace(m[1] + '?' + m[2] + '=' + m[3]);
   /* Kısa bağlantının (…/d/k3f9xa) dosyası henüz yazılmamışsa: kayıtlar içinde bu kodu taşıyanı bulup ona gider */
-  m = /^(.*\/)([dei])\/([0-9a-z]{6})(\.html)?\/?$/.exec(location.pathname);
+  m = /^(.*\/)([deir])\/([0-9a-z]{6})(\.html)?\/?$/.exec(location.pathname);
   if (!m) return location.replace(home);
-  var base = m[1], key = m[2], code = m[3], file = { d: 'duyurular', e: 'etkinlikler', i: 'pazar' }[key];
+  var base = m[1], key = m[2], code = m[3], file = { d: 'duyurular', e: 'etkinlikler', i: 'pazar', r: 'rehber' }[key];
   var s = document.createElement('script');
   s.src = base + 'ortak.js?v=' + Date.now();
   s.onerror = function () { location.replace(home); };

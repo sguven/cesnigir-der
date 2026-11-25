@@ -127,7 +127,7 @@ function build(dom, o) {
       if (!u || u.indexOf(SITE) !== 0 || /logo/.test(u) || seen[u]) return false; seen[u] = 1; return true; });
   }
 
-  var duyurular = read('duyurular'), etkinlikler = read('etkinlikler'), pazar = read('pazar');
+  var duyurular = read('duyurular'), etkinlikler = read('etkinlikler'), pazar = read('pazar'), rehber = read('rehber');
   var urls = [], n = 0;
   var newest = duyurular.map(function (x) { return C.normIso(x.tarih); }).filter(Boolean).sort().pop() || '';
   urls.push({ loc: SITE, lastmod: newest });
@@ -177,9 +177,10 @@ function build(dom, o) {
   for (var e of etkinlikler) await item('e', 'etkinlik', e);
   // pazar ilanları (telefon numarası içerir): yalnızca paylaşım önizlemesi, aramaya kapalı
   pazar.forEach(function (x) { var pg = C.sharePage('i', x, SITE, dims(x.foto)); if (pg) { write(pg.path, pg.html); n++; } });
+  rehber.forEach(function (x) { var pg = C.sharePage('r', x, SITE, dims(x.foto)); if (pg) { write(pg.path, pg.html); n++; } });   // Esnaf Rehberi kartları
   // kısa paylaşım bağlantıları (d/…, e/…, i/…): eskiler silinmez, daha önce paylaşılan bağlantılar çalışmaya devam eder
   var kisa = 0;
-  [['d', duyurular], ['e', etkinlikler], ['i', pazar]].forEach(function (g) {
+  [['d', duyurular], ['e', etkinlikler], ['i', pazar], ['r', rehber]].forEach(function (g) {
     g[1].forEach(function (x) { var pg = C.shortPage(g[0], x, SITE, dims(x.foto || 'images/kapak-paylasim.jpg')); write(pg.path, pg.html); kisa++; });
   });
   console.log(kisa + ' kısa bağlantı yazıldı');

@@ -65,8 +65,9 @@ panel sayfası adres çubuğundaki anahtarı başka sitelere göndermez (`referr
 | `data/resmi-gunler.json` | Resmî bayramlar ve dinî günler (2026-2027) |
 | `data/galeri.json` | Fotoğraflar |
 | `data/pazar.json` | Pazar ve yardımlaşma ilanları |
+| `data/rehber.json` | Esnaf Rehberi: işletme kartları |
 | `data/dernek.json` | Hakkımızda, başkan, yönetim ve denetim kurulu, iletişim, kasa durumu |
-| `araclar/supabase-meydan.sql` | Köy Meydanı, yorumlar ve Market ilan istekleri veritabanı (Supabase) kurulumu |
+| `araclar/supabase-meydan.sql` | Köy Meydanı, yorumlar, Market ve Esnaf Rehberi istekleri veritabanı (Supabase) kurulumu |
 
 ## Köy Meydanı (forum)
 
@@ -114,9 +115,20 @@ Market sayfasındaki **İlan ver** düğmesiyle ziyaretçi kendi ilanını gönd
 - Kurulum `araclar/supabase-meydan.sql` içinde. Dosya Supabase'de çalıştırılmadıysa (tablo yoksa) site **İlan ver** düğmesini göstermez.
 - Kod: `app.js` (Market: ziyaretçinin ilan isteği), panel tarafı `yonetim/duzen.js` (`ilanYayinla`).
 
+## Esnaf Rehberi (işletme kartları)
+
+**Esnaf Rehberi** sayfasında (`#/rehber`, kaydın sayfası `#/isletme/<kimlik>`) köylülerin dükkân, restoran, sanayi, okul ve hizmet işletmeleri
+kartvizit ya da dükkân fotoğrafıyla, adresi, telefonu (Ara / WhatsApp) ve varsa web ya da Instagram adresiyle yer alır. Kayıtlar `data/rehber.json`'da durur.
+
+- Ziyaretçi sayfadaki **İşletmenizi ekleyin** formuyla kendi kaydını gönderir; düzen Market ilan isteğiyle aynıdır: istek Supabase'de
+  `rehber_istekleri` tablosunda bekler, panelde "Onay bekleyenler" kutusunda **Onayla, yayınla** / **Sil** ile görünür, onaylanınca `data/rehber.json`'a yazılır.
+- Yönetici panelden de doğrudan ekleyebilir (**Yeni işletme ekle**), yayındaki kaydı **Düzenle** / **Sil** ile değiştirir.
+- Paylaşım bağlantısı `https://cesnigirder.org/r/…` (WhatsApp ve Facebook önizlemesinde kartvizit çıkar).
+- Türler `ortak.js` içinde `REHBER_TURLERI`; değişirse `araclar/supabase-meydan.sql`'deki liste de değişmeli.
+
 ## Kısa paylaşım bağlantıları
 
-WhatsApp ve Facebook'ta paylaşılan bağlantı kısadır: `https://cesnigirder.org/d/k3f9xa` (duyuru), `/e/…` (etkinlik), `/i/…` (pazar ilanı).
+WhatsApp ve Facebook'ta paylaşılan bağlantı kısadır: `https://cesnigirder.org/d/k3f9xa` (duyuru), `/e/…` (etkinlik), `/i/…` (pazar ilanı), `/r/…` (Esnaf Rehberi kaydı).
 Her kodun dosyası (`d/k3f9xa.html`) önizleme başlığını ve fotoğrafını taşır, açanı doğrudan kayda götürür.
 Dosyaları panel kaydederken ve gece görevi (`node araclar/site-sayfalari.js`) yazar; eski kodlar silinmez.
 Dosyası henüz yazılmamış bir kod açılırsa `404.html` kaydı bulup ona gider.

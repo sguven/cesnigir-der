@@ -55,6 +55,23 @@ content:
       - { name: telefon2, label: Başkan yardımcısının telefonu, type: string }
       - { name: foto, label: Fotoğraf, type: image }
 
+  - name: rehber
+    label: Esnaf Rehberi
+    type: file
+    path: data/rehber.json
+    format: json
+    list: true
+    fields:
+      - { name: tur, label: Tür, type: select, options: { values: [Dükkân, Restoran, Sanayi, Okul, Hizmet, Diğer] } }
+      - { name: tarih, label: Tarih, type: date, options: { format: yyyy-MM-dd } }
+      - { name: baslik, label: İşletmenin adı, type: string, required: true }
+      - { name: aciklama, label: Açıklama, type: text }
+      - { name: adres, label: Adres, type: string }
+      - { name: kisi, label: Yetkili, type: string }
+      - { name: telefon, label: Telefon, type: string }
+      - { name: link, label: Web sitesi ya da Instagram, type: string }
+      - { name: foto, label: Kartvizit ya da fotoğraf, type: image }
+
   - name: galeri
     label: Fotoğraflar
     type: file
