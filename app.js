@@ -1045,7 +1045,6 @@
 
       /* 6. Tarihçe */
       tBolum(5, 'Yıl yıl tarihçe',
-        '<p class="t-giris">Bütün bilgiler kaynaklarıyla, tarih sırasıyla.</p>' +
         (function () {
           var anlatilan = ['2026-11-22-ataturk-koyumuzden-gecti-26-aralik-1919'];
           var t = data.duyurular.filter(function (p) { return isTarih(p) && anlatilan.indexOf(p.eski_id || p.id) < 0; });
