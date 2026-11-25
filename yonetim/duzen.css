@@ -181,7 +181,7 @@ details.ed-extra[open] summary{margin-bottom:12px}
 .ed-login-form .btn{min-height:58px;font-size:20px}
 .ed-menu .ed-row .btn{flex:1 1 220px;min-height:50px;font-size:17px}
 
-/* Köy Meydanı: onay bekleyenler, menüdeki sayı */
+/* Sizden Gelenler: onay bekleyenler, menüdeki sayı */
 .ed-count{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin-left:6px;padding:0 7px;border-radius:99px;background:#D93025;color:#fff;font-size:14px;font-weight:700;line-height:1;text-shadow:none}
 .ed-m-pend{margin:0 0 22px;padding:16px;border-radius:10px;background:#FBF3E3;border:2px dashed #D9B66A}
 .ed-m-pend h2{font-size:22px;margin:0 0 4px}

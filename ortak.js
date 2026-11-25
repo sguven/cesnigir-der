@@ -274,7 +274,7 @@
       '<body style="font-family:sans-serif;padding:24px;font-size:20px">\n<p><a href="' + esc(to) + '">' + esc(title) + '</a></p>\n</body>\n</html>\n' };
   }
 
-  /* Köy Meydanı (forum): yazılar Supabase'de durur (kurulum: araclar/supabase-meydan.sql).
+  /* Sizden Gelenler (forum): yazılar Supabase'de durur (kurulum: araclar/supabase-meydan.sql).
      Bu anahtar herkese açık "publishable" anahtardır; neyin okunup yazılabileceğini veritabanındaki kurallar belirler. */
   var MEYDAN = {
     url: 'https://hdztvyindbhhpveukvox.supabase.co/rest/v1',
@@ -298,7 +298,7 @@
         });
       });
   }
-  // Köy Meydanı fotoğrafları: veritabanında yalnız dosya yolu durur (2026-11/<kimlik>.jpg); adres buradan kurulur
+  // Sizden Gelenler fotoğrafları: veritabanında yalnız dosya yolu durur (2026-11/<kimlik>.jpg); adres buradan kurulur
   var FOTO_YOL = /^\d{4}-\d{2}\/[0-9a-f-]{36}\.jpg$/;
   function fotoUrl(p) { return MEYDAN.depo + '/object/public/meydan/' + p; }
   function fotolar(x) { return (x && Array.isArray(x.fotolar) ? x.fotolar : []).filter(function (p) { return FOTO_YOL.test(p); }); }
