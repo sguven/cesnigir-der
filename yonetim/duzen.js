@@ -134,7 +134,8 @@
     out: '<path d="M10 4H5v16h5"/><path d="m15 8 4 4-4 4M19 12H9"/>',
     x: '<path d="M6 6l12 12M18 6 6 18"/>',
     key: '<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M15 8l2 2"/>',
-    pin: '<path d="M9 3h6l-1 6 4 3v2H6v-2l4-3-1-6Z"/><path d="M12 14v7"/>'
+    pin: '<path d="M9 3h6l-1 6 4 3v2H6v-2l4-3-1-6Z"/><path d="M12 14v7"/>',
+    mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'
   };
   function icon(n) {
     return '<svg class="ed-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[n] || '') + '</svg>';
@@ -327,6 +328,7 @@
     });
     if (page === 'etkinlikler') pastEvents(main);
     mAdmin(page);
+    msjAdmin(page);
   }
 
   // Geçmiş etkinlikler sitede görünmez; düzenleme modunda sayfanın sonunda listelenir (düzeltmek ya da silmek için)
@@ -493,6 +495,83 @@
         busy(false);
         dialog('Yapılamadı', er && er.status === 'net' ? errText(er) : er && er.status === 401 ? 'Yetkiniz doğrulanamadı. Giriş bağlantınızla yeniden girin; sorun sürerse site yöneticisine haber verin.' :
           'Bir sorun çıktı. Biraz sonra tekrar deneyin.', 'Tamam', { single: true });
+      });
+    });
+  }, true);
+
+  /* ---------------- Bize Ulaşın: gelen mesajlar ----------------
+     Ziyaretçinin Hakkımızda > Bize Ulaşın formuyla gönderdiği mesajlar sitede yayınlanmaz; yalnız burada görünür.
+     Hakkımızda sayfasında formun üstünde liste (en yeni üstte), okunmamışlar "Yeni" işaretli; "Okudum" / "Okunmadı yap" / "Sil".
+     Menüdeki "Bize Ulaşın" yanında ve ana sayfanın başında okunmamış mesaj sayısı yazar.
+     Kurulum: araclar/supabase-mesajlar.sql (mesaj_listesi, mesaj_islem). Kurulmamışsa bu bölüm hiç görünmez. */
+  var msj = null, msjT = 0, msjP = null, msjYok = false;
+  function msjLoad(force) {
+    if (msjYok || !getKey()) return Promise.resolve(null);
+    if (!force && msj && Date.now() - msjT < 15000) return Promise.resolve(msj);
+    if (msjP) return msjP;
+    msjP = mRpc('mesaj_listesi', {}).then(function (r) { msj = C.arr(r); msjT = Date.now(); msjBadge(); return msj; },
+      function (e) { if (e && e.status === 404) msjYok = true; return null; })
+      .then(function (x) { msjP = null; return x; });
+    return msjP;
+  }
+  function msjYeni() { return msj ? msj.filter(function (m) { return !m.okundu; }).length : 0; }
+  function msjBadge() {
+    var a = document.querySelector('.nav [data-nav="bize-ulasin"]'), n = msjYeni();
+    if (!a) return;
+    var b = a.querySelector('.ed-count');
+    if (!n) { if (b) b.remove(); return; }
+    if (!b) { b = el('<span class="ed-count"></span>'); a.appendChild(b); }
+    b.textContent = n; b.title = n + ' okunmamış mesaj';
+  }
+  function msjItem(m) {
+    var c = String(m.iletisim || ''), tel = /@/.test(c) ? '' : C.telHref(c);
+    var kim = !c ? '<span class="muted">İletişim bilgisi yazmamış</span>' : /@/.test(c) ? '<a href="mailto:' + esc(c) + '">' + esc(c) + '</a>' :
+      tel ? '<a href="tel:' + esc(tel) + '">' + esc(c) + '</a>' : esc(c);
+    return '<div class="ed-m-item' + (m.okundu ? ' ed-msj-okundu' : '') + '">' +
+      '<div class="news-meta">' + (m.okundu ? '<span class="badge" style="background:#E5E1DA;color:#5B5147">Okundu</span>' : '<span class="badge" style="background:#D93025;color:#fff">Yeni</span>') +
+      '<span>' + esc(C.zaman(m.created_at)) + '</span></div>' +
+      '<p class="ed-m-by"><b>' + esc(m.ad) + '</b> · ' + kim + '</p><div class="ed-m-text">' + esc(m.metin) + '</div>' +
+      '<div class="ed-bar">' + (m.okundu ? '<button type="button" class="ed-btn" data-msj="okunmadi" data-id="' + m.id + '">' + icon('mail') + 'Okunmadı yap</button>' :
+        '<button type="button" class="ed-btn green" data-msj="okundu" data-id="' + m.id + '">' + icon('check') + 'Okudum</button>') +
+      '<button type="button" class="ed-btn red" data-msj="sil" data-id="' + m.id + '">' + icon('trash') + 'Sil</button></div></div>';
+  }
+  function msjAdmin(page) {
+    msjLoad().then(function (list) {
+      if (!list || curPage() !== page) return;
+      var main = $('icerik'), old = $('edMsj'); if (old) old.remove();
+      var n = msjYeni();
+      if (page === '') {
+        if (!n) return;
+        var sec = main.querySelector('.section'); if (!sec) return;
+        sec.parentNode.insertBefore(el('<div class="container" id="edMsj" style="padding-top:22px"><div class="ed-m-pend"><h2>' + icon('mail') + ' ' + n + ' yeni mesaj var</h2>' +
+          '<p class="small muted" style="margin:0 0 10px">Ziyaretçiler "Bize Ulaşın" formuyla dernek yönetimine yazdı.</p><a class="ed-btn green" href="#/bize-ulasin">Mesajları oku</a></div></div>'), sec);
+        return;
+      }
+      if (page !== 'hakkimizda' && page !== 'bize-ulasin') return;
+      var host = main.querySelector('#bize-ulasin .container'); if (!host) return;
+      var head = host.querySelector('.sec-head');
+      host.insertBefore(el('<div id="edMsj" class="ed-m-pend"><h2>Gelen mesajlar' + (list.length ? ' (' + list.length + (n ? ', ' + n + ' yeni' : '') + ')' : '') + '</h2>' +
+        '<p class="small muted">Bunları yalnız siz görüyorsunuz; sitede yayınlanmaz. Okuduğunuz mesajı "Okudum" ile işaretleyin, gerekmeyeni silin.</p>' +
+        (list.length ? list.map(msjItem).join('') : '<p style="margin:8px 0 0">Henüz mesaj gelmedi.</p>') + '</div>'), head ? head.nextSibling : host.firstChild);
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-msj]');
+    if (!b || !site) return;
+    e.preventDefault(); e.stopPropagation();
+    var islem = b.getAttribute('data-msj'), id = +b.getAttribute('data-id');
+    var ask = islem !== 'sil' ? Promise.resolve(true) : dialog('Mesaj silinsin mi?', 'Bu mesaj silinecek. Geri alınamaz.', 'Evet, sil', { danger: true });
+    ask.then(function (ok) {
+      if (!ok) return;
+      busy(islem === 'sil' ? 'Siliniyor…' : 'Kaydediliyor…');
+      mRpc('mesaj_islem', { kayit: id, islem: islem }).then(function () {
+        busy(false);
+        if (islem === 'sil') { msj = msj.filter(function (m) { return m.id !== id; }); toast('Mesaj silindi', ''); }
+        else msj.forEach(function (m) { if (m.id === id) m.okundu = islem === 'okundu'; });
+        msjBadge(); msjAdmin(curPage());
+      }).catch(function (er) {
+        busy(false);
+        dialog('Yapılamadı', er && er.status === 'net' ? errText(er) : 'Bir sorun çıktı. Biraz sonra tekrar deneyin.', 'Tamam', { single: true });
       });
     });
   }, true);
