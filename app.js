@@ -1489,12 +1489,16 @@
   // Keskin FM'in (102.1) canlı yayını ana sayfada, canlı görüntünün altındaki düğmeyle dinlenir. Ses yalnızca düğmeye basınca başlar;
   // sayfalar arasında gezerken ve kaydırırken çalmaya devam eder; bir kez açıldıktan sonra sağ altta küçük bir düğme kalır (durdurur / yeniden başlatır).
   // Durdurunca bağlantı kesilir (internet harcamaz); yeniden başlatınca yayın o anki yerinden gelir.
+  // RADYO_GOSTER: Keskin FM'den izin gelene kadar radyo kapalı (ana sayfadaki düğme ve sağ alttaki küçük düğme görünmez).
+  // İzin gelince true yapın ve sayfalardaki app.js?v= ekini değiştirin.
+  var RADYO_GOSTER = false;
   var RADYO = 'https://keskinfm.com/api/stream', RADYO_SITE = 'https://keskinfm.com', rAudio = null, rSt = 'idle', rNo = 0;
   var R_TX = { idle: 'Canlı radyo · dinlemek için dokunun', load: 'Bağlanıyor…', play: 'Çalıyor · durdurmak için dokunun', err: 'Yayına şu an ulaşılamıyor, biraz sonra deneyin' };
   var R_IC = '<svg class="r-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5Z"/></svg>' +
     '<svg class="r-stop" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>';
   function radyoOn() { return rSt === 'play' || rSt === 'load'; }
   function radyoHtml() {
+    if (!RADYO_GOSTER) return '';
     return '<div class="radyo"><button type="button" class="radyo-btn" id="radyoBtn" data-st="' + rSt + '" aria-pressed="' + radyoOn() + '">' +
       '<span class="radyo-ic">' + R_IC + '</span><span class="radyo-tx"><b>Keskin FM 102.1</b><small aria-live="polite">' + R_TX[rSt] + '</small></span></button>' +
       '<a class="radyo-src" href="' + RADYO_SITE + '" target="_blank" rel="noopener">Yayın: keskinfm.com</a></div>';
@@ -1503,6 +1507,7 @@
   // (sayfa yenilense de aynı sekmede kalır).
   var rSeen = false; try { rSeen = sessionStorage.getItem('cd_radyo') === '1'; } catch (e) { /* yok say */ }
   function radyoSync() {
+    if (!RADYO_GOSTER) { var op = $('radyoPill'); if (op) op.remove(); document.body.classList.remove('radyo-acik'); return; }
     var b = $('radyoBtn'), p = $('radyoPill'), on = radyoOn();
     if (on && !rSeen) { rSeen = true; try { sessionStorage.setItem('cd_radyo', '1'); } catch (e) { /* yok say */ } }
     if (b) { b.setAttribute('data-st', rSt); b.setAttribute('aria-pressed', String(on)); b.querySelector('small').textContent = R_TX[rSt]; }
