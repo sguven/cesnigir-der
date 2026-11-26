@@ -542,6 +542,7 @@ button.cal-day:hover{filter:brightness(.93)}
 .m-new>summary::-webkit-details-marker{display:none}
 .m-new[open]>summary{border-radius:8px 8px 0 0}
 .m-new>.box{border-top:0;border-radius:0 0 10px 10px}
+.m-new-kucuk>summary{font-size:18px;min-height:50px;padding:8px 16px}
 .m-form{display:flex;flex-direction:column;gap:14px}
 .m-form-h{font-size:21px;margin:0}
 .m-l{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:18px}

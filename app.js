@@ -683,7 +683,7 @@
   }
   function iCiz(tur) {
     var K = ISTEK[tur], b = $(K.kutu); if (!b || !iVar[tur]) return;
-    if (!b.firstChild) b.innerHTML = '<details class="m-new"><summary class="btn">' + icon('pen') + K.dugme + '</summary><div class="box box-pad">' + iForm(tur) + '</div></details>';
+    if (!b.firstChild) b.innerHTML = '<details class="m-new' + (tur === 'rehber' ? ' m-new-kucuk' : '') + '"><summary class="btn">' + icon('pen') + K.dugme + '</summary><div class="box box-pad">' + iForm(tur) + '</div></details>';
     b.hidden = false;
     var bos = $(K.bos); if (bos) bos.textContent = K.ilk;
   }
