@@ -38,6 +38,7 @@ jobs:
         run: |
           pip install --quiet pillow
           python3 araclar/haber-foto-indir.py
+          python3 araclar/kucuk-fotolar.py
 
       - name: Paylaşım ve arama sayfalarını üret
         if: steps.kontrol.outputs.n != '0'
@@ -51,7 +52,7 @@ jobs:
         run: |
           git config user.name "Haber fotoğrafları (otomatik)"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          for p in data/duyurular.json images/haber p d e i hakkimizda duyurular etkinlikler fotograflar iletisim gezilecek-yerler sitemap.xml; do
+          for p in data/duyurular.json images/haber images/kucuk p d e i hakkimizda duyurular etkinlikler fotograflar iletisim gezilecek-yerler sitemap.xml; do
             [ -e "$p" ] && git add -A -- "$p"
           done
           if git diff --cached --quiet; then echo "Değişiklik yok"; exit 0; fi

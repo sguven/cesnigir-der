@@ -58,7 +58,11 @@ function dims(p) {
 
 // Üretilen sayfa bir alt klasörde durduğu için sayfadaki bütün göreli adreslerin başına ../ gelir
 function deepen(html) {
-  return html.replace(/\b(href|src|data-photo|data-share-photo)="(?!https?:|#|\/|mailto:|tel:|data:|\.\.\/|javascript:)([^"]*)"/g, '$1="../$2"');
+  return html.replace(/\b(href|src|data-photo|data-share-photo|data-tam)="(?!https?:|#|\/|mailto:|tel:|data:|\.\.\/|javascript:)([^"]*)"/g, '$1="../$2"')
+    // srcset: virgülle ayrılmış birden çok adres (küçük ve büyük fotoğraf)
+    .replace(/\bsrcset="([^"]*)"/g, function (m, v) {
+      return 'srcset="' + v.split(',').map(function (x) { x = x.trim(); return /^(https?:|\/|data:|\.\.\/)/.test(x) ? x : '../' + x; }).join(', ') + '"';
+    });
 }
 function setMeta(html, attr, name, value) {
   var re = new RegExp('(<meta ' + attr + '="' + name + '" content=")[^"]*(")');
@@ -107,9 +111,9 @@ function build(dom, o) {
       document.getElementById('icerik').classList.remove('gir');
       var tt = document.getElementById('toTop'); if (tt) tt.remove();   // "Yukarı" düğmesini app.js her açılışta kendi ekler
       document.body.removeAttribute('style'); document.documentElement.removeAttribute('style');
-      var imgs = [].map.call(document.querySelectorAll('#icerik img[alt]:not([alt=""])'), function (i) { return { src: i.getAttribute('src'), alt: i.getAttribute('alt') }; });
+      var imgs = [].map.call(document.querySelectorAll('#icerik img[alt]:not([alt=""])'), function (i) { return { src: i.getAttribute('data-tam') || i.getAttribute('src'), alt: i.getAttribute('alt') }; });   // küçük kopya değil, fotoğrafın kendisi
       var places = [].map.call(document.querySelectorAll('#icerik .cards article'), function (a) {
-        return { name: a.querySelector('h3').textContent, description: a.querySelector('p').textContent, image: a.querySelector('img').getAttribute('src') }; });
+        return { name: a.querySelector('h3').textContent, description: a.querySelector('p').textContent, image: a.querySelector('img').getAttribute('data-tam') || a.querySelector('img').getAttribute('src') }; });
       return { html: document.documentElement.outerHTML, title: document.title, h1: (document.querySelector('#icerik h1') || {}).textContent || '', imgs: imgs, places: places };
     });
     await pg.close();

@@ -40,6 +40,20 @@
   function $(id) { return document.getElementById(id); }
   function icon(n) { return '<svg aria-hidden="true"><use href="#i-' + n + '"/></svg>'; }
   function img(p) { return E ? E.img(p) : C.imgSrc(p, B); }
+  // Telefon için küçük kopya (images/kucuk/…, araclar/kucuk-fotolar.py üretir). Kopya yoksa tarayıcı büyük fotoğrafa döner.
+  function kucuk(src) {
+    if (E || !src || /^(https?:|data:|blob:)/i.test(src)) return '';
+    var m = /^(.*?)images\/(?!kucuk\/)([^?#]+\.jpe?g)(\?.*)?$/i.exec(src);
+    return m ? m[1] + 'images/kucuk/' + m[2] : '';
+  }
+  var KDON = ' onerror="this.onerror=null;this.removeAttribute(\'srcset\');this.src=this.getAttribute(\'data-tam\')"';
+  // kartlar ve listeler: yalnız küçük kopya (dokununca büyük hâli açılır)
+  function kSrc(src) { var k = kucuk(src); return k ? 'src="' + esc(k) + '" data-tam="' + esc(src) + '"' + KDON : 'src="' + esc(src) + '"'; }
+  // sayfa genişliğindeki fotoğraflar: dar telefonda küçük kopya, geniş ve keskin ekranda büyük hâli
+  function kSet(src) {
+    var k = kucuk(src);
+    return k ? 'src="' + esc(src) + '" srcset="' + esc(k) + ' 800w, ' + esc(src) + ' 1600w" sizes="(max-width:820px) 100vw, 760px" data-tam="' + esc(src) + '"' + KDON : 'src="' + esc(src) + '"';
+  }
   function load(name, fb) {
     if (E) return E.load(name, fb);
     return fetch(B + 'data/' + name + '.json', { cache: 'no-cache' })
@@ -93,7 +107,7 @@
   function newsCard(p) {
     var src = img(p.foto);
     return '<a class="news' + (isTarih(p) ? ' tarih' : '') + '" href="#/duyuru/' + esc(pid(p)) + '" data-yc="duyuru:' + esc(pid(p)) + '"' + ek('duyurular', data.duyurular.indexOf(p)) + '>' +
-      '<div class="news-img' + (src ? '' : ' noimg') + '">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy">' : '<img class="ph" src="' + B + 'images/logo-160.png" alt="">') + '</div>' +
+      '<div class="news-img' + (src ? '' : ' noimg') + '">' + (src ? '<img ' + kSrc(src) + ' alt="" loading="lazy">' : '<img class="ph" src="' + B + 'images/logo-160.png" alt="">') + '</div>' +
       '<div class="news-body"><div class="news-meta">' + (p.tur ? '<span class="' + C.badgeClass(p.tur) + '">' + esc(p.tur) + '</span>' : '') +
       dateSpan(p) + '</div>' +
       '<h3>' + esc(p.baslik) + '</h3>' + (p.metin ? '<p>' + esc(excerpt(p.metin, 150)) + '</p>' : '') +
@@ -149,7 +163,7 @@
     if (!e.koy) return '';
     var src = img(e.foto);
     return (src ? '<button type="button" class="ev-photo" data-photo="' + esc(src) + '" data-cap="' + esc(e.ad) + '" aria-label="Fotoğrafı büyüt">' +
-      '<img src="' + esc(src) + '" alt="' + esc(e.ad) + '" loading="lazy"></button>' : '') + shareButtons(evShare(e, det));
+      '<img ' + kSrc(src) + ' alt="' + esc(e.ad) + '" loading="lazy"></button>' : '') + shareButtons(evShare(e, det));
   }
 
   // sade: ana sayfadaki kısa listede fotoğraf ve paylaş düğmeleri çıkmaz (etkinliğin sayfasında ve takvimde günü seçince görünür)
@@ -172,7 +186,7 @@
   function galleryGrid(list, cls, kat) {
     return '<div class="gal ' + (cls || '') + '"' + (kat ? ' data-gk="' + kat + '"' : '') + ed('galeri') + '>' + list.map(function (x) {
       var i = data.galeri.indexOf(x);
-      return '<button type="button" data-gal="' + i + '" data-yc="foto:' + esc(fKey(x)) + '" aria-label="Fotoğrafı büyüt: ' + esc(x.aciklama) + '"><img src="' + esc(img(x.foto)) + '" alt="' + esc(fAlt(x)) + '" loading="lazy"></button>';
+      return '<button type="button" data-gal="' + i + '" data-yc="foto:' + esc(fKey(x)) + '" aria-label="Fotoğrafı büyüt: ' + esc(x.aciklama) + '"><img ' + kSrc(img(x.foto)) + ' alt="' + esc(fAlt(x)) + '" loading="lazy"></button>';
     }).join('') + '</div>';
   }
 
@@ -346,7 +360,7 @@
     if (g.length || E) h += '<section class="section alt"><div class="container"><div class="sec-head"' + ed('ekle:galeri') + '><h2>Fotoğraflardan</h2><a href="#/fotograflar">Tüm fotoğraflar (' + data.galeri.length + ') ›</a></div>' +
       galleryGrid(g, 'strip') + '</div></section>';
 
-    h += '<section class="section"><div class="container village"><img src="' + B + 'images/koprukoy-gol.jpg" alt="Göl kıyısından Köprüköy ve Çeşnigir Köprüsü." loading="lazy">' +
+    h += '<section class="section"><div class="container village"><img ' + kSet(B + 'images/koprukoy-gol.jpg') + ' alt="Göl kıyısından Köprüköy ve Çeşnigir Köprüsü." loading="lazy">' +
       '<div><div class="sec-head"><h2>Köyümüz Köprüköy</h2></div>' +
       '<p>Köyümüz adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır. Selçuklu döneminden kalan on iki gözlü bu taş köprü, yüzyıllarca Ankara ile Kırşehir arasındaki yolun geçiş noktası oldu.</p>' +
       '<p class="muted">Kapulukaya Baraj Gölü kıyısında, Keskin\'e 25 km, Kırıkkale\'ye 37 km uzaklıktayız.</p>' +
@@ -553,7 +567,7 @@
     var list = byDate(data.pazar, -1), dtel = C.telHref(data.dernek.telefon);
     var body = list.length ? '<div class="cards">' + list.map(function (x) {
       var src = img(x.foto);
-      return '<article class="box mk"' + ek('pazar', data.pazar.indexOf(x)) + '>' + (src ? '<img src="' + esc(src) + '" alt="' + esc(x.baslik) + '" loading="lazy">' : '') +
+      return '<article class="box mk"' + ek('pazar', data.pazar.indexOf(x)) + '>' + (src ? '<img ' + kSrc(src) + ' alt="' + esc(x.baslik) + '" loading="lazy">' : '') +
         '<div class="box-pad"><div class="news-meta">' + (x.tur ? '<span class="' + C.badgeClass(x.tur) + '">' + esc(x.tur) + '</span>' : '') + '<span>' + esc(C.longDate(x.tarih)) + '</span></div>' +
         '<h3><a class="ev-link" href="#/ilan/' + esc(iid(x)) + '"><b>' + esc(x.baslik) + '</b></a></h3>' + (x.fiyat ? '<div class="mk-price">' + esc(x.fiyat) + ' ₺</div>' : '') +
         (x.aciklama ? '<p>' + esc(x.aciklama) + '</p>' : '') + (x.kisi ? '<p class="muted">' + esc(x.kisi) + '</p>' : '') +
@@ -583,7 +597,7 @@
     return list.map(function (x) {
       var src = img(x.foto), id = esc(rid(x));
       return '<article class="box mk rh"' + ek('rehber', data.rehber.indexOf(x)) + '>' +
-        (src ? '<a class="rh-img" href="#/isletme/' + id + '" tabindex="-1" aria-hidden="true"><img src="' + esc(src) + '" alt="" loading="lazy"></a>' : '') +
+        (src ? '<a class="rh-img" href="#/isletme/' + id + '" tabindex="-1" aria-hidden="true"><img ' + kSrc(src) + ' alt="" loading="lazy"></a>' : '') +
         '<div class="box-pad">' + (x.tur ? '<div class="news-meta"><span class="badge">' + esc(x.tur) + '</span></div>' : '') +
         '<h3><a class="ev-link" href="#/isletme/' + id + '"><b>' + esc(x.baslik) + '</b></a></h3>' + rAdres(x) +
         (x.aciklama ? '<p class="rh-acik">' + esc(excerpt(x.aciklama, 160)) + '</p>' : '') + (x.kisi ? '<p class="muted rh-kisi">' + esc(x.kisi) + '</p>' : '') +
@@ -871,7 +885,7 @@
 
   function para(t) { return '<p>' + t + '</p>'; }
   function figure(file, alt, cap) {
-    return '<figure class="fig"><img src="' + B + 'images/' + file + '" alt="' + alt + '" loading="lazy"><figcaption>' + cap + '</figcaption></figure>';
+    return '<figure class="fig"><img ' + kSet(B + 'images/' + file) + ' alt="' + alt + '" loading="lazy"><figcaption>' + cap + '</figcaption></figure>';
   }
 
   /* Tarihçe kaynakları: [ad, adres] bağlantılı, düz yazı bağlantısız (arşiv künyesi, basılı kitap) */
@@ -956,7 +970,7 @@
   }
   function pageTarih() {
     var stats = [['800 yıla yakın', 'köprünün tahmini yaşı'], ['1777', 'köyümüzün adının geçtiği ilk kayıt'], ['50 kadar', 'Osmanlı\'da geçit bekçisi'], ['113 m', 'köprünün boyu']];
-    return '<div class="t-kapak"><img src="' + B + 'images/kanyon-kopru.jpg" alt="Tarihi Çeşnigir Köprüsü, Kızılırmak\'ın yeşil suyundaki yansımasıyla (Köprüköy, Keskin, Kırıkkale)." fetchpriority="high">' +
+    return '<div class="t-kapak"><img ' + kSet(B + 'images/kanyon-kopru.jpg') + ' alt="Tarihi Çeşnigir Köprüsü, Kızılırmak\'ın yeşil suyundaki yansımasıyla (Köprüköy, Keskin, Kırıkkale)." fetchpriority="high">' +
       '<div class="t-kapak-yazi"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › Tarihimiz</div>' +
       '<h1>Tarihimiz</h1><p>Kızılırmak\'ın en dar yerinde, yedi yüzyılı aşkın bir köprü ve onun bekçilerinin kurduğu köy.</p></div></div>' +
       '<span class="t-kapak-kredi">' + credit(EG, 'Cesnigir_paradise3.jpg') + '</span></div>' +
@@ -1012,14 +1026,14 @@
       /* 4. Atatürk */
       tBolum(3, 'Atatürk köyümüzden geçti',
         '<p class="t-giris">26 Aralık 1919, Cuma. Mustafa Kemal Paşa ve Heyet-i Temsiliye, Ankara\'ya giden yolun son günlerinde köyümüzden geçti.</p>' +
-        '<figure class="fig"><img src="' + B + 'images/ataturk-yol-haritasi.jpg" alt="Harita: Mustafa Kemal Paşa\'nın 18-27 Aralık 1919\'da Sivas\'tan Kayseri, Mucur, Hacıbektaş, Kırşehir, Kaman, Köprüköy, Bala ve Beynam üzerinden Ankara\'ya yolculuğu." loading="lazy" style="aspect-ratio:auto;object-fit:contain">' +
+        '<figure class="fig"><img ' + kSet(B + 'images/ataturk-yol-haritasi.jpg') + ' alt="Harita: Mustafa Kemal Paşa\'nın 18-27 Aralık 1919\'da Sivas\'tan Kayseri, Mucur, Hacıbektaş, Kırşehir, Kaman, Köprüköy, Bala ve Beynam üzerinden Ankara\'ya yolculuğu." loading="lazy" style="aspect-ratio:auto;object-fit:contain">' +
         '<figcaption>Sivas\'tan Ankara\'ya yolculuk, 18–27 Aralık 1919. Konumlar yaklaşıktır. <a href="' + B + 'images/ataturk-yol-haritasi.jpg" target="_blank" rel="noopener">Haritayı büyüt</a></figcaption></figure>' +
         para('Heyet 18 Aralık\'ta Sivas\'tan yola çıktı; Kayseri, Mucur, Hacıbektaş ve Kırşehir\'den sonra 25 Aralık gecesini Kaman\'da geçirdi. Kaman\'da Paşa\'yı ağırlayan Ali Çavuş\'un yeğeni Mehmet Bektaş\'ın anlattığına göre, Paşa yolda nerede kalabileceğini sorunca Ali Çavuş şöyle demiştir:') +
         tAlinti('"Köprü köyünde Hacı Ali Ağa\'nın odasında kalırsınız."', 'Kaman\'da Ali Çavuş, Aralık 1919') +
         para('Ertesi gün heyet, Keskinli süvarilerin korumasında <b>İğdebeli–Köprüköy yolunu</b> kullanarak Kızılırmak\'ı geçti ve Bala\'ya ulaştı. Irmağın muhtemelen köyümüzdeki Çeşnigir Köprüsü\'nden geçildiği düşünülür; kaynaklar köprünün adını ayrıca anmaz. Geceyi Beynam köyünde geçiren heyet, 27 Aralık 1919\'da Ankara\'ya girdi.') +
         '<div class="pair">' +
-        '<figure class="fig"><img src="' + B + 'images/ataturk-karsilama-1919.jpg" alt="Kalpaklı ve paltolu kalabalık arasında yürüyen Mustafa Kemal Paşa ve heyet, eski bir arşiv fotoğrafı." loading="lazy" style="aspect-ratio:auto"><figcaption>Millî Mücadele yıllarından bir karşılama. Arşiv fotoğrafı.</figcaption></figure>' +
-        '<figure class="fig"><img src="' + B + 'images/ataturk-karsilama-tablo.jpg" alt="Davul zurna ve kalabalık bir halkın heyeti karşıladığı renkli bir tablo." loading="lazy" style="aspect-ratio:auto"><figcaption>Heyetin halk tarafından karşılanışını canlandıran bir tablo.</figcaption></figure></div>' +
+        '<figure class="fig"><img ' + kSet(B + 'images/ataturk-karsilama-1919.jpg') + ' alt="Kalpaklı ve paltolu kalabalık arasında yürüyen Mustafa Kemal Paşa ve heyet, eski bir arşiv fotoğrafı." loading="lazy" style="aspect-ratio:auto"><figcaption>Millî Mücadele yıllarından bir karşılama. Arşiv fotoğrafı.</figcaption></figure>' +
+        '<figure class="fig"><img ' + kSet(B + 'images/ataturk-karsilama-tablo.jpg') + ' alt="Davul zurna ve kalabalık bir halkın heyeti karşıladığı renkli bir tablo." loading="lazy" style="aspect-ratio:auto"><figcaption>Heyetin halk tarafından karşılanışını canlandıran bir tablo.</figcaption></figure></div>' +
         '<details class="box box-pad t-acilir"><summary>Yolculuk gün gün</summary>' +
         rows([['18 Aralık', 'Sivas\'tan hareket'], ['19–21 Aralık', 'Kayseri'], ['21 Aralık', 'Mucur'], ['22 Aralık', 'Hacıbektaş'], ['23 Aralık', 'Yeniden Mucur'], ['24 Aralık', 'Kırşehir'], ['25 Aralık', 'Kaman'],
           ['26 Aralık', '<b>Köprüköy</b>, Bala; gece Beynam köyü'], ['27 Aralık', 'Ankara']]) + '</details>' +
@@ -1051,7 +1065,7 @@
         })() +
         '<ul class="timeline">' + TARIH.map(function (t) {
           var foto = (t[3] || []).map(function (f) {
-            return '<a class="t-foto" href="' + B + 'images/' + f[0] + '" target="_blank" rel="noopener"><img src="' + B + 'images/' + f[0] + '" alt="' + esc(f[1]) + '" loading="lazy"><span>' + esc(f[1]) + '</span></a>';
+            return '<a class="t-foto" href="' + B + 'images/' + f[0] + '" target="_blank" rel="noopener"><img ' + kSrc(B + 'images/' + f[0]) + ' alt="' + esc(f[1]) + '" loading="lazy"><span>' + esc(f[1]) + '</span></a>';
           }).join('');
           return '<li><b>' + t[0] + '</b>' + t[1] + (foto ? '<span class="t-fotos">' + foto + '</span>' : '') + srcHtml(t[2]) + '</li>';
         }).join('') + '</ul>' +
@@ -1153,7 +1167,7 @@
       var isaret = {};
       yerler.forEach(function (y) {
         var ikon = L.divIcon({ className: 'gh-pin' + (y.i < 0 ? ' gh-kopru' : ''), html: '<span><i>' + (y.i < 0 ? '★' : y.i + 1) + '</i></span>', iconSize: [40, 40], iconAnchor: [20, 40], popupAnchor: [0, -38], tooltipAnchor: [0, -40] });
-        var resim = '<img src="' + B + 'images/' + y.foto + '" alt="" width="260" height="173">';
+        var resim = '<img ' + kSrc(B + 'images/' + y.foto) + ' alt="" width="260" height="173">';
         var mk = L.marker(y.konum, { icon: ikon, title: y.ad, alt: y.ad, riseOnHover: true }).addTo(m);
         if (hover) {
           mk.bindTooltip('<div class="gh-onizle">' + resim + '<b>' + esc(y.ad) + '</b><small>Tıklayın: ' + y.yazi.toLocaleLowerCase('tr') + '</small></div>', { direction: 'top', className: 'gh-tip', opacity: 1 });
@@ -1185,15 +1199,15 @@
 
   function placesSection() {
     return '<section class="section alt"><div class="container"><div class="sec-head"><h2>Görülecek Yerler</h2></div>' +
-      '<figure class="fig" style="margin-bottom:24px"><img class="wide" src="' + B + 'images/mesire.jpg" alt="Çeşnigir Kanyonu mesire alanının tepeden görünüşü: Kızılırmak kıyısında seyir terası, yürüyüş yolları ve tekne iskelesi." loading="lazy"></figure>' +
+      '<figure class="fig" style="margin-bottom:24px"><img class="wide" ' + kSet(B + 'images/mesire.jpg') + ' alt="Çeşnigir Kanyonu mesire alanının tepeden görünüşü: Kızılırmak kıyısında seyir terası, yürüyüş yolları ve tekne iskelesi." loading="lazy"></figure>' +
       '<div class="cards">' + GEZI.map(function (g, i) {
         var kredi = g[4] ? credit(g[3], g[4]) : (g[3] ? '<span class="kredi">Fotoğraf: ' + g[3] + '</span>' : '');
-        return '<article class="box mk gezi-kart" id="yer-' + (i + 1) + '"><span class="gezi-no" aria-hidden="true">' + (i + 1) + '</span><img src="' + B + 'images/' + g[2] + '" alt="' + esc(g[5] || g[0]) + '" loading="lazy">' +
+        return '<article class="box mk gezi-kart" id="yer-' + (i + 1) + '"><span class="gezi-no" aria-hidden="true">' + (i + 1) + '</span><img ' + kSrc(B + 'images/' + g[2]) + ' alt="' + esc(g[5] || g[0]) + '" loading="lazy">' +
           '<div class="box-pad"><h3>' + g[0] + '</h3><p>' + g[1] + '</p>' + kredi + '</div></article>';
       }).join('') + '</div>' +
       '<div class="pair" style="margin-top:28px">' +
-      '<figure class="fig"><img src="' + B + 'images/kanyon-kopru.jpg" alt="Tarihi Çeşnigir Köprüsü, Kızılırmak\'ın yeşil suyundaki yansımasıyla (Köprüköy, Kırıkkale)." loading="lazy"><figcaption>Köprünün kıyıdan görünüşü. ' + credit(EG, 'Cesnigir_paradise3.jpg') + '</figcaption></figure>' +
-      '<figure class="fig"><img src="' + B + 'images/kanyon-teras.jpg" alt="Çeşnigir Kanyonu: Kızılırmak\'ın kayalar arasından geçtiği vadi ve seyir terası." loading="lazy"><figcaption>Kanyon ve seyir terası. ' + credit(EG, 'Cesnigir_paradise2.jpg') + '</figcaption></figure></div>' +
+      '<figure class="fig"><img ' + kSet(B + 'images/kanyon-kopru.jpg') + ' alt="Tarihi Çeşnigir Köprüsü, Kızılırmak\'ın yeşil suyundaki yansımasıyla (Köprüköy, Kırıkkale)." loading="lazy"><figcaption>Köprünün kıyıdan görünüşü. ' + credit(EG, 'Cesnigir_paradise3.jpg') + '</figcaption></figure>' +
+      '<figure class="fig"><img ' + kSet(B + 'images/kanyon-teras.jpg') + ' alt="Çeşnigir Kanyonu: Kızılırmak\'ın kayalar arasından geçtiği vadi ve seyir terası." loading="lazy"><figcaption>Kanyon ve seyir terası. ' + credit(EG, 'Cesnigir_paradise2.jpg') + '</figcaption></figure></div>' +
       '<p class="muted small" style="margin-top:20px">Kaynak: <a href="https://www.turkiyegazetesi.com.tr/gundem/bakan-kurumdan-tarihi-bolgede-tekne-turu-717166" target="_blank" rel="noopener">Türkiye Gazetesi</a> · <a href="https://www.discovercappadocia.com/hiking/cesnigir-bridge-koprukoy-hasandede/85" target="_blank" rel="noopener">Discover Cappadocia</a> · <a href="https://en.wikipedia.org/wiki/B%C3%BCkl%C3%BCkale" target="_blank" rel="noopener">Vikipedi, Büklükale</a> · <a href="https://cnnturk.com/yasam/galeri/dogal-agri-kesici-etkisini-duyan-buraya-kosuyor-turkiyenin-her-yerinden-ziyaretci-akini-var-hem-sifa-dagitiyor-hem-de-tarihi-sulu-magara-2182485" target="_blank" rel="noopener">CNN Türk</a></p>' +
       '</div></section>';
   }
@@ -1689,7 +1703,7 @@
         k = k * k * (3 - 2 * k);   // başta ve sonda yumuşak
       }
       k = Math.round(k * 100) / 100;
-      if (k !== hfLast) { hfLast = k; document.documentElement.style.setProperty('--hf', k); }
+      if (k !== hfLast) { hfLast = k; document.querySelector('.header').style.setProperty('--hf', k); }   // yalnız başlıkta: kaydırırken bütün sayfa yeniden hesaplanmaz (zayıf telefonlarda akıcı)
     });
   }
 
@@ -1814,6 +1828,10 @@
   }
 
   function bind() {
+    // telefon hafızası (sw.js): fotoğraflar ve yazı tipleri tekrar girişte yeniden inmez. Yalnız gerçek adreste, panelde değil.
+    if (!E && 'serviceWorker' in navigator && /(^|\.)cesnigirder\.org$/.test(location.hostname)) {
+      window.addEventListener('load', function () { navigator.serviceWorker.register(B + 'sw.js').catch(function () { /* yok say */ }); });
+    }
     window.addEventListener('hashchange', route);
     // sayfadan çıkılırken büyük canlı görüntü açık kaldıysa kaydırma kilidini bırak
     window.addEventListener('hashchange', function () { if (!document.querySelector('.live-mini.big') && $('viewer').hidden) document.body.style.overflow = ''; });
