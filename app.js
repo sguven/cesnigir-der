@@ -1781,7 +1781,7 @@
   // RADYO_GOSTER: Keskin FM'den izin gelene kadar radyo kapalı (ana sayfadaki düğme ve sağ alttaki küçük düğme görünmez).
   // İzin gelince true yapın ve sayfalardaki app.js?v= ekini değiştirin.
   var RADYO_GOSTER = true;
-  var RADYO = 'https://keskinfm.com/api/stream', RADYO_SITE = 'https://keskinfm.com', rAudio = null, rSt = 'idle', rNo = 0;
+  var RADYO = 'https://keskinfm.com/api/stream', rAudio = null, rSt = 'idle', rNo = 0;
   var R_TX = { idle: 'Canlı radyo · dinlemek için dokunun', load: 'Bağlanıyor…', play: 'Çalıyor · durdurmak için dokunun', err: 'Yayına şu an ulaşılamıyor, biraz sonra deneyin' };
   var R_IC = '<svg class="r-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5Z"/></svg>' +
     '<svg class="r-stop" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>';
@@ -1789,8 +1789,7 @@
   function radyoHtml() {
     if (!RADYO_GOSTER) return '';
     return '<div class="radyo"><button type="button" class="radyo-btn" id="radyoBtn" data-st="' + rSt + '" aria-pressed="' + radyoOn() + '">' +
-      '<span class="radyo-ic">' + R_IC + '</span><span class="radyo-tx"><b>Keskin FM 102.1</b><small aria-live="polite">' + R_TX[rSt] + '</small></span></button>' +
-      '<a class="radyo-src" href="' + RADYO_SITE + '" target="_blank" rel="noopener">Yayın: keskinfm.com</a></div>';
+      '<span class="radyo-ic">' + R_IC + '</span><span class="radyo-tx"><b>Keskin FM 102.1</b><small aria-live="polite">' + R_TX[rSt] + '</small></span></button></div>';
   }
   // Radyo bir kez açıldıktan sonra sağ alttaki küçük düğme kaybolmaz: çalarken durdurur, durmuşken yeniden başlatır
   // (sayfa yenilense de aynı sekmede kalır).

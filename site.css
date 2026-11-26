@@ -236,7 +236,6 @@ main:focus{outline:none}
 .radyo-btn[data-st="play"] .radyo-ic{background:var(--green)}
 .radyo-btn[data-st="load"] .radyo-ic{animation:livePulse 1.2s ease-in-out infinite}
 .radyo-btn[data-st="err"] small{color:#B3261E;font-weight:600}
-.radyo-src{display:block;margin-top:5px;font-size:14px;color:var(--ink2);text-align:right}
 /* radyo bir kez açılınca sağ altta kalan küçük düğme (durdur / yeniden çal): kaydırırken ve her sayfada görünür; "Yukarı" düğmesi onun üstüne çıkar */
 .radyo-pill{position:fixed;z-index:26;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:7px;
   min-height:42px;padding:0 13px 0 9px;border:0;border-radius:99px;background:var(--bordo);color:#fff;font:inherit;font-weight:700;font-size:15px;cursor:pointer;
@@ -254,7 +253,7 @@ main:focus{outline:none}
 @keyframes rBar{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
 body.radyo-acik .to-top{bottom:calc(max(12px,env(safe-area-inset-bottom)) + 52px)}
 @media (prefers-reduced-motion:reduce){ .r-bars i{animation:none;transform:scaleY(.7)} }
-@media (max-width:900px){ .radyo-btn{min-height:66px} .radyo-tx b{font-size:19px} .radyo-tx small{font-size:16px} .radyo-src{text-align:center} }
+@media (max-width:900px){ .radyo-btn{min-height:66px} .radyo-tx b{font-size:19px} .radyo-tx small{font-size:16px} }
 @media (prefers-reduced-motion:reduce){ .radyo-btn{transition:none} .radyo-btn:active{transform:none} .radyo-btn[data-st="load"] .radyo-ic{animation:none} }
 @media print{ .radyo,.radyo-pill{display:none!important} }
 
@@ -744,11 +743,10 @@ button.cal-day:hover{filter:brightness(.93)}
 #icerik .loading{min-height:100vh;min-height:100svh}
 /* küçük bağlantılar parmakla rahat dokunulacak kadar büyük (en az 44 piksel) */
 @media (max-width:900px){
-  .crumb a,.sec-head a,.radyo-src,.footer-bottom a,#footContact a{display:inline-flex;align-items:center;min-height:44px}
+  .crumb a,.sec-head a,.footer-bottom a,#footContact a{display:inline-flex;align-items:center;min-height:44px}
   .f-links li{padding:0}
   .f-links a{display:flex;align-items:center;min-height:44px}
   .ev-link{display:inline-block;padding:6px 0}
-  .radyo-src{display:flex;justify-content:center}
 }
 
 /* Ana sayfa: Sizden Gelenler önizlemesi (son 3 yazı + "Siz de yazın") */
