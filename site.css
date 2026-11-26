@@ -775,6 +775,14 @@ button.cal-day:hover{filter:brightness(.93)}
 .bu-in{max-width:760px}
 .f-bu{margin-top:10px}
 .f-bu a{font-weight:700}
+/* Sizden Gelenler: yazılar gelene kadar yer ayrılı; alttaki kurallar kutusu aşağı zıplamaz */
+#mList{min-height:50vh}
+/* telefonda başlığın arkasındaki bulanıklaştırma kapalı: kaydırırken her karede yeniden hesaplanıyor, zayıf telefonlarda takılma yapıyordu */
+@media (max-width:900px){ .header{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(255,255,255,.9)} }
+/* Fotoğraflar sekmeleri dar telefonda (360 px) ekrandan taşmasın: gerekirse iki satıra iner */
+.f-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:420px){ .f-tab{white-space:normal;text-align:center;line-height:1.2;padding:4px 8px;flex-wrap:wrap} }
+@media (max-width:900px){ .m-son-head a{display:inline-flex;align-items:center;min-height:44px} }
 
 /* Esnaf Rehberi tür düğmeleri: sayıyla, telefonda biraz daha küçük */
 .rh-filters button small{font-size:.85em;font-weight:600;opacity:.75;margin-left:2px}

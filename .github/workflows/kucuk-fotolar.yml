@@ -1,0 +1,54 @@
+# Yeni yüklenen fotoğrafların telefon için küçük kopyalarını üretir (images/kucuk/, araclar/kucuk-fotolar.py).
+# Panelden fotoğraf yüklenince kendiliğinden çalışır; kopya hazır olana kadar site büyük fotoğrafı gösterir.
+name: Küçük fotoğraflar
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'images/**'
+      - '!images/kucuk/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: kucuk-fotolar
+  cancel-in-progress: false
+
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Küçük kopyaları üret
+        run: |
+          pip install --quiet pillow
+          python3 araclar/kucuk-fotolar.py
+
+      - name: Yayınla
+        id: yayin
+        run: |
+          git add -A -- images/kucuk
+          if git diff --cached --quiet; then echo "Yeni küçük fotoğraf yok"; echo "push=0" >> "$GITHUB_OUTPUT"; exit 0; fi
+          git config user.name "Küçük fotoğraflar (otomatik)"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "Küçük fotoğraflar üretildi"
+          for i in 1 2 3; do
+            if git pull -q --rebase origin main && git push -q origin HEAD:main; then echo "push=1" >> "$GITHUB_OUTPUT"; exit 0; fi
+            echo "Push denemesi $i başarısız, tekrar deneniyor"; sleep 5
+          done
+          exit 1
+
+      - name: Siteyi yeniden yayınlat
+        if: steps.yayin.outputs.push == '1'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" > /dev/null && echo "Pages yeniden yayınlanıyor"

@@ -144,6 +144,14 @@ Ana sayfada canlı görüntünün altındaki "Keskin FM 102.1" düğmesi, radyon
 Bu adres Keskin FM'in kendi sitesinin kullandığı adrestir; radyo adresi değiştirirse düğme "Yayına şu an ulaşılamıyor" der, `RADYO` değerini
 yeni adresle değiştirmek yeter. Düğmeyi kaldırmak için `pageHome` içindeki `radyoHtml()` çağrısını silin.
 
+## Telefon hızı
+
+- Listelerde ve kartlarda fotoğrafların küçük kopyaları (`images/kucuk/`, en uzun kenar 800 px) gösterilir; dokununca büyük hâli açılır.
+  Kopyaları `python3 araclar/kucuk-fotolar.py` üretir; panelden fotoğraf yüklenince GitHub'daki "Küçük fotoğraflar" görevi kendiliğinden çalıştırır.
+  Kopya henüz yoksa site büyük fotoğrafı gösterir.
+- `sw.js` (telefon hafızası) yalnız fotoğrafları ve yazı tiplerini telefonda saklar; sayfalara, `data/` dosyalarına, `app.js` ve `site.css`'e dokunmaz.
+  Kapatma yolu dosyanın başında yazılı.
+
 ## Sürüm eki
 
 Sayfalardaki `site.css?v=…`, `app.js?v=…` gibi ekler, yeni sürüm yayınlanınca telefonda eski dosyanın kalmamasını sağlar.
