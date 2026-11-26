@@ -1117,7 +1117,7 @@
   var GEZI_KONUM = [
     [39.5795, 33.4305],   // Çeşnigir Kanyonu Mesire Alanı
     [39.5820, 33.4306],   // Seyir Terasları (Serhat'ın uydu görüntüsünden, köprünün ~130 m kuzeyi)
-    [39.5822, 33.4298],   // Kanyonda Tekne Turu (iskele)
+    [39.5815, 33.4301],   // Kanyonda Tekne Turu (iskele; Serhat haritada işaretledi)
     [39.5802, 33.4312],   // Yürüyüş ve Bisiklet Yolu (köprüye inen merdiven)
     [39.5802, 33.4302],   // Kapulukaya Baraj Gölü Kıyısı (köprünün güneyi, köy tarafı)
     [39.5824, 33.4287],   // Büklükale Ören Yeri (uydu görüntüsünden, köprünün ~170 m kuzeyi)
