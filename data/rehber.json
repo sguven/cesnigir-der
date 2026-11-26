@@ -2,6 +2,27 @@
   {
     "tur": "Hizmetler",
     "tarih": "2026-11-26",
+    "baslik": "Özkardesler oto kurtarma",
+    "aciklama": "Oto kurtarma çekici hizmeti",
+    "adres": "Ankara merkez sanayi",
+    "kisi": "Yaşar erdem",
+    "telefon": "05310288793",
+    "foto": "images/yuklenen/2026-11-26-075512-2ufg1.jpg",
+    "fotolar": [
+      {
+        "foto": "images/yuklenen/2026-11-26-075515-34ps1.jpg"
+      },
+      {
+        "foto": "images/yuklenen/2026-11-26-075517-4j6zy.jpg"
+      },
+      {
+        "foto": "images/yuklenen/2026-11-26-075520-5ioul.jpg"
+      }
+    ]
+  },
+  {
+    "tur": "Hizmetler",
+    "tarih": "2026-11-26",
     "baslik": "Altın oto kurtarma yol yardım",
     "aciklama": "7/24 Oto kurtarma ve yol yardım hizmetleri.",
     "adres": "Kırıkkale",
