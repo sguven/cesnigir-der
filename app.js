@@ -1116,11 +1116,11 @@
      Köprü ve kanyondaki noktalar yaklaşık konumdur; düzeltmek için buradaki sayıları değiştirmek yeterli. */
   var GEZI_KONUM = [
     [39.5795, 33.4305],   // Çeşnigir Kanyonu Mesire Alanı
-    [39.5772, 33.4282],   // Seyir Terasları
+    [39.5820, 33.4306],   // Seyir Terasları (Serhat'ın uydu görüntüsünden, köprünün ~130 m kuzeyi)
     [39.5822, 33.4298],   // Kanyonda Tekne Turu (iskele)
     [39.5802, 33.4312],   // Yürüyüş ve Bisiklet Yolu (köprüye inen merdiven)
-    [39.5850, 33.4322],   // Kapulukaya Baraj Gölü Kıyısı
-    [39.5835, 33.4255],   // Büklükale Ören Yeri
+    [39.5802, 33.4302],   // Kapulukaya Baraj Gölü Kıyısı (köprünün güneyi, köy tarafı)
+    [39.5824, 33.4287],   // Büklükale Ören Yeri (uydu görüntüsünden, köprünün ~170 m kuzeyi)
     [39.6650, 33.5900]    // Sulu Mağara (Keskin, Altıntaş Mahallesi)
   ];
   var KOPRU_YER = { ad: 'Tarihi Çeşnigir Köprüsü', konum: [39.58083, 33.42944], foto: 'kanyon-kopru.jpg', link: '#/tarihimiz', yazi: 'Köprünün tarihçesini oku' };
@@ -1181,7 +1181,7 @@
         isaret[y.i] = mk;
       });
       // köy ve kanyondaki noktalar başta görünsün; Sulu Mağara (Keskin) düğmesiyle gidilir
-      m.fitBounds(L.latLngBounds(yerler.filter(function (y) { return y.i < 6; }).map(function (y) { return y.konum; })), { padding: [40, 40], maxZoom: 15 });
+      m.fitBounds(L.latLngBounds(yerler.filter(function (y) { return y.i < 6; }).map(function (y) { return y.konum; })), { padding: [50, 50], maxZoom: 17 });
       kutu.addEventListener('click', function (e) {
         var b = e.target.closest && e.target.closest('[data-gh-git]');
         if (b) { m.closePopup(); geziDetay(+b.getAttribute('data-gh-git')); }
