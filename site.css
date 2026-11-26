@@ -775,3 +775,7 @@ button.cal-day:hover{filter:brightness(.93)}
 .bu-in{max-width:760px}
 .f-bu{margin-top:10px}
 .f-bu a{font-weight:700}
+
+/* Esnaf Rehberi tür düğmeleri: sayıyla, telefonda biraz daha küçük */
+.rh-filters button small{font-size:.85em;font-weight:600;opacity:.75;margin-left:2px}
+@media (max-width:640px){ .rh-filters{gap:6px} .rh-filters button{min-height:44px;padding:0 12px;font-size:16px} }

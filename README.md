@@ -125,6 +125,8 @@ kartvizit ya da dükkân fotoğrafıyla, adresi, telefonu (Ara / WhatsApp) ve va
 - Yönetici panelden de doğrudan ekleyebilir (**Yeni işletme ekle**), yayındaki kaydı **Düzenle** / **Sil** ile değiştirir.
 - Paylaşım bağlantısı `https://cesnigirder.org/r/…` (WhatsApp ve Facebook önizlemesinde kartvizit çıkar).
 - Türler `ortak.js` içinde `REHBER_TURLERI`; değişirse `araclar/supabase-meydan.sql`'deki liste de değişmeli.
+  Kasım 2026'da türler işe göre yenilendi (Oto Tamir & Parça, Elektrik & Tesisat…); eski türler `C.rehberTur` ile yenisine çevrilir.
+  Var olan veritabanında bir kez `araclar/supabase-rehber-turleri.sql` çalıştırılmalı.
 
 ## Kısa paylaşım bağlantıları
 

@@ -120,7 +120,8 @@ revoke all on function public.pazar_sel_kontrol() from public, anon, authenticat
 -- Yönetici onaylayınca panel kaydı sitenin dosyasına (data/rehber.json) yazar ve isteği buradan siler.
 create table if not exists public.rehber_istekleri (
   id bigint generated always as identity primary key,
-  tur text not null default 'Dükkân' check (tur in ('Dükkân', 'Restoran', 'Sanayi', 'Okul', 'Hizmet', 'Diğer')),
+  tur text not null default 'Diğer' check (tur in ('Oto Tamir & Parça', 'Elektrik & Tesisat', 'İnşaat & Hırdavat', 'Sanayi & Makine', 'Yeme-İçme & Gıda',
+    'Tarım & Hayvancılık', 'Kuaför & Güzellik', 'Sağlık', 'Eğitim', 'Nakliye', 'Hizmetler', 'Diğer', 'Dükkân', 'Restoran', 'Sanayi', 'Okul', 'Hizmet')),
   baslik text not null check (char_length(btrim(baslik)) between 3 and 120),
   aciklama text check (char_length(aciklama) <= 2000),
   adres text check (char_length(adres) <= 200),

@@ -75,7 +75,7 @@
     rehber: {
       file: 'data/rehber.json', one: 'işletme', edit: 'İşletmeyi Düzenle', big: 'Bu kaydı düzenle', addLabel: 'Esnaf Rehberine İşletme Ekle', page: 'isletme', list: 'rehber', autoDate: true,
       fields: [
-        { name: 'tur', label: 'İşletmenin türü', type: 'choice', opts: C.REHBER_TURLERI, required: true, def: 'Dükkân' },
+        { name: 'tur', label: 'İşletmenin türü', type: 'choice', opts: C.REHBER_TURLERI, required: true, def: '' },
         { name: 'baslik', label: 'İşletmenin adı', type: 'text', required: true, placeholder: 'Örnek: Köprü Lokantası' },
         { name: 'aciklama', label: 'Ne iş yapıyor?', type: 'textarea' },
         { name: 'adres', label: 'Adres', type: 'text', placeholder: 'Örnek: Sanayi Sitesi 3. Sokak No: 12, Keskin' },
@@ -597,7 +597,7 @@
     }, Promise.resolve()).then(function () {
       busy('Yayınlanıyor…');
       item = clean(ilan ? { tur: x.tur, tarih: C.todayIso(), baslik: x.baslik, fiyat: x.fiyat, aciklama: x.aciklama, kisi: x.ad, telefon: x.telefon, foto: paths[0] } :
-        { tur: x.tur, tarih: C.todayIso(), baslik: x.baslik, aciklama: x.aciklama, adres: x.adres, kisi: x.ad, telefon: x.telefon, link: C.linkUrl(x.link), foto: paths[0] });
+        { tur: C.rehberTur(x.tur), tarih: C.todayIso(), baslik: x.baslik, aciklama: x.aciklama, adres: x.adres, kisi: x.ad, telefon: x.telefon, link: C.linkUrl(x.link), foto: paths[0] });
       if (paths.length > 1) item.fotolar = paths.slice(1).map(function (p) { return { foto: p }; });
       return updateJson(COLS[col].file, function (data) { return [item].concat(C.arr(data)); }, 'Panel: ' + COLS[col].one + ' eklendi (ziyaretçinin isteği) – ' + x.baslik);
     }).then(function (list) {
