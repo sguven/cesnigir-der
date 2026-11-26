@@ -11,10 +11,9 @@
   var ETKINLIK_TURLERI = ['Düğün', 'Nişan', 'Mevlit', 'Toplantı', 'Etkinlik'];
   var PAZAR_TURLERI = ['Satılık', 'Aranıyor', 'Yardım isteği'];
   // Esnaf Rehberi (işletme kartları) türleri: işin ne olduğuna göre. Değişirse araclar/supabase-meydan.sql'deki liste de değişmeli.
-  var REHBER_TURLERI = ['Oto Tamir & Parça', 'Elektrik & Tesisat', 'İnşaat & Hırdavat', 'Sanayi & Makine', 'Yeme-İçme & Gıda',
-    'Tarım & Hayvancılık', 'Kuaför & Güzellik', 'Sağlık', 'Eğitim', 'Nakliye', 'Hizmetler', 'Diğer'];
+  var REHBER_TURLERI = ['Otomotiv', 'Sanayi & İnşaat', 'Tarım & Hayvancılık', 'Gıda & Yeme-İçme', 'Hizmetler', 'Diğer'];
   // Eski türler (Kasım 2026'ya kadar): gönderilmiş ama henüz onaylanmamış kayıtlar bunlarla gelebilir
-  var REHBER_ESKI = { 'Dükkân': 'Diğer', 'Restoran': 'Yeme-İçme & Gıda', 'Sanayi': 'Sanayi & Makine', 'Okul': 'Eğitim', 'Hizmet': 'Hizmetler' };
+  var REHBER_ESKI = { 'Dükkân': 'Diğer', 'Restoran': 'Gıda & Yeme-İçme', 'Sanayi': 'Sanayi & İnşaat', 'Okul': 'Hizmetler', 'Hizmet': 'Hizmetler' };
   function rehberTur(t) { return REHBER_TURLERI.indexOf(t) >= 0 ? t : REHBER_ESKI[t] || 'Diğer'; }
 
   function slug(s) {
