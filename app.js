@@ -584,7 +584,7 @@
      Kayıtlar data/rehber.json'da durur (tur, baslik = işletmenin adı, aciklama, adres, kisi, telefon, link, foto, fotolar).
      Kartvizit bütün görünsün diye kart fotoğrafı kırpılmaz. Ziyaretçi kendi işletmesini "İşletmenizi ekleyin" formuyla gönderir (aşağıda). */
   var rKat = 'Tümü';
-  function rShare(x) { return { key: 'r', id: rid(x), tur: x.tur, title: x.baslik, det: x.adres || '', photo: img(x.foto) }; }
+  function rShare(x) { return { key: 'r', id: rid(x), tur: C.rehberTur(x.tur), title: x.baslik, det: x.adres || '', photo: img(x.foto) }; }
   function rMesaj(x) { return 'Merhaba, ' + (x.baslik || 'işletmenizi') + ' kaydını Çeşnigir-Der sitesinde gördüm.'; }
   function rLink(x, big) {
     var u = C.linkUrl(x.link); if (!u) return '';
@@ -593,22 +593,24 @@
   }
   function rAdres(x) { return x.adres ? '<p class="rh-adres">' + icon('pin') + '<span>' + esc(x.adres) + '</span></p>' : ''; }
   function rListHtml() {
-    var all = byDate(data.rehber, -1), list = rKat === 'Tümü' ? all : all.filter(function (x) { return x.tur === rKat; });
+    var all = byDate(data.rehber, -1), list = rKat === 'Tümü' ? all : all.filter(function (x) { return C.rehberTur(x.tur) === rKat; });
     return list.map(function (x) {
       var src = img(x.foto), id = esc(rid(x));
       return '<article class="box mk rh"' + ek('rehber', data.rehber.indexOf(x)) + '>' +
         (src ? '<a class="rh-img" href="#/isletme/' + id + '" tabindex="-1" aria-hidden="true"><img ' + kSrc(src) + ' alt="" loading="lazy"></a>' : '') +
-        '<div class="box-pad">' + (x.tur ? '<div class="news-meta"><span class="badge">' + esc(x.tur) + '</span></div>' : '') +
+        '<div class="box-pad">' + (x.tur ? '<div class="news-meta"><span class="badge">' + esc(C.rehberTur(x.tur)) + '</span></div>' : '') +
         '<h3><a class="ev-link" href="#/isletme/' + id + '"><b>' + esc(x.baslik) + '</b></a></h3>' + rAdres(x) +
         (x.aciklama ? '<p class="rh-acik">' + esc(excerpt(x.aciklama, 160)) + '</p>' : '') + (x.kisi ? '<p class="muted rh-kisi">' + esc(x.kisi) + '</p>' : '') +
         '<div class="rh-alt">' + mkContact(x, rMesaj(x)) + shareButtons(rShare(x)) + '</div></div></article>';
     }).join('');
   }
   function pageRehber() {
-    var kats = C.REHBER_TURLERI.filter(function (t) { return data.rehber.some(function (x) { return x.tur === t; }); });
+    var say = {}; data.rehber.forEach(function (x) { var t = C.rehberTur(x.tur); say[t] = (say[t] || 0) + 1; });
+    var kats = C.REHBER_TURLERI.filter(function (t) { return say[t]; });
+    say['Tümü'] = data.rehber.length;
     if (kats.indexOf(rKat) < 0) rKat = 'Tümü';
-    var body = data.rehber.length ? (kats.length > 1 ? '<div class="filters" role="group" aria-label="İşletme türü">' + ['Tümü'].concat(kats).map(function (t) {
-      return '<button type="button" data-r-kat="' + esc(t) + '" aria-pressed="' + (t === rKat) + '">' + esc(t) + '</button>';
+    var body = data.rehber.length ? (kats.length > 1 ? '<div class="filters rh-filters" role="group" aria-label="İşletme türü">' + ['Tümü'].concat(kats).map(function (t) {
+      return '<button type="button" data-r-kat="' + esc(t) + '" aria-pressed="' + (t === rKat) + '">' + esc(t) + ' <small>' + say[t] + '</small></button>';
     }).join('') + '</div>' : '') + '<div class="cards" id="rList">' + rListHtml() + '</div>' :
       '<div class="box empty"><b>Henüz kayıtlı işletme yok</b><span id="rBos">Yakında burada köylülerimizin işletmeleri yer alacak.</span></div>';
     if (!E) setTimeout(function () { iHazirla('rehber'); }, 0);
@@ -622,7 +624,7 @@
     var harita = x.adres ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(x.adres) : '';
     return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/rehber">Esnaf Rehberi</a></div></div></div>' +
       '<section class="section"><div class="container"><article class="article"' + ek('rehber', data.rehber.indexOf(x)) + '>' +
-      (x.tur ? '<div class="news-meta"><span class="badge">' + esc(x.tur) + '</span></div>' : '') +
+      (x.tur ? '<div class="news-meta"><span class="badge">' + esc(C.rehberTur(x.tur)) + '</span></div>' : '') +
       '<h1>' + esc(x.baslik) + '</h1>' +
       (src ? '<button type="button" class="article-img rh-kart" data-photo="' + esc(src) + '" data-cap="' + esc(x.baslik) + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(src) + '" alt="' + esc(x.baslik) + '"></button>' : '') +
       (ekF.length ? '<div class="mk-fotos">' + ekF.map(function (s, i) {
@@ -665,7 +667,7 @@
   function iForm(tur) {
     var K = ISTEK[tur], y = function (t) { return '<span class="i-yardim">' + t + '</span>'; };
     return '<form class="m-form" data-i-form="' + tur + '" novalidate>' +
-      '<label class="m-l">' + K.turL + '<select name="tur">' + K.turler.map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label>' +
+      '<label class="m-l">' + K.turL + '<select name="tur">' + (tur === 'rehber' ? '<option value="">Lütfen seçin</option>' : '') + K.turler.map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label>' +
       '<label class="m-l">' + K.baslikL + '<input name="baslik" maxlength="120" placeholder="' + esc(K.baslikP) + '"></label>' +
       (tur === 'ilan' ? '<label class="m-l">Fiyat (TL)<input name="fiyat" maxlength="30" inputmode="numeric" placeholder="Örnek: 150">' + y('Fiyat yoksa boş bırakın.') + '</label>' : '') +
       '<label class="m-l">' + K.aciklamaL + '<textarea name="aciklama" rows="4" maxlength="2000" placeholder="' + esc(K.aciklamaP) + '"></textarea></label>' +
@@ -704,6 +706,7 @@
     var tur = f.getAttribute('data-i-form'), K = ISTEK[tur], v = {}, err = f.querySelector('.m-err'), btn = f.querySelector('button[type=submit]');
     ['tur', 'baslik', 'fiyat', 'aciklama', 'adres', 'link', 'ad', 'telefon', 'web'].forEach(function (n) { v[n] = f.elements[n] ? f.elements[n].value.trim() : ''; });
     function hata(t, n) { err.textContent = t; err.hidden = false; if (n && f.elements[n]) f.elements[n].focus(); }
+    if (!v.tur) return hata('Lütfen işletmenizin türünü seçin. Uygun tür yoksa "Diğer"i seçin.', 'tur');
     if (v.baslik.length < 3) return hata(K.baslikH, 'baslik');
     if (v.ad.length < 3) return hata('Lütfen adınızı ve soyadınızı yazın.', 'ad');
     if (!/^[0-9+ ()\-]+$/.test(v.telefon) || v.telefon.replace(/\D/g, '').length < 10 || !C.telHref(v.telefon)) return hata('Lütfen telefon numaranızı başında 0 ile yazın. Örnek: 0555 123 45 67', 'telefon');

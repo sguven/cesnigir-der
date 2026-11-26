@@ -10,7 +10,11 @@
   var DUYURU_TURLERI = ['Vefat', 'Düğün', 'Nişan', 'Mevlit', 'Toplantı', 'Duyuru', 'Haber', 'Tarihten'];
   var ETKINLIK_TURLERI = ['Düğün', 'Nişan', 'Mevlit', 'Toplantı', 'Etkinlik'];
   var PAZAR_TURLERI = ['Satılık', 'Aranıyor', 'Yardım isteği'];
-  var REHBER_TURLERI = ['Dükkân', 'Restoran', 'Sanayi', 'Okul', 'Hizmet', 'Diğer'];   // Esnaf Rehberi (işletme kartları)
+  // Esnaf Rehberi (işletme kartları) türleri: işin ne olduğuna göre. Değişirse araclar/supabase-meydan.sql'deki liste de değişmeli.
+  var REHBER_TURLERI = ['Otomotiv', 'Sanayi & İnşaat', 'Tarım & Hayvancılık', 'Gıda & Yeme-İçme', 'Hizmetler', 'Diğer'];
+  // Eski türler (Kasım 2026'ya kadar): gönderilmiş ama henüz onaylanmamış kayıtlar bunlarla gelebilir
+  var REHBER_ESKI = { 'Dükkân': 'Diğer', 'Restoran': 'Gıda & Yeme-İçme', 'Sanayi': 'Sanayi & İnşaat', 'Okul': 'Hizmetler', 'Hizmet': 'Hizmetler' };
+  function rehberTur(t) { return REHBER_TURLERI.indexOf(t) >= 0 ? t : REHBER_ESKI[t] || 'Diğer'; }
 
   function slug(s) {
     return String(s || '').toLocaleLowerCase('tr')
@@ -349,7 +353,7 @@
 
   (typeof window !== 'undefined' ? window : globalThis).CD = {
     AY: AY, AY_KISA: AY_KISA, GUN: GUN,
-    DUYURU_TURLERI: DUYURU_TURLERI, ETKINLIK_TURLERI: ETKINLIK_TURLERI, PAZAR_TURLERI: PAZAR_TURLERI, REHBER_TURLERI: REHBER_TURLERI,
+    DUYURU_TURLERI: DUYURU_TURLERI, ETKINLIK_TURLERI: ETKINLIK_TURLERI, PAZAR_TURLERI: PAZAR_TURLERI, REHBER_TURLERI: REHBER_TURLERI, rehberTur: rehberTur,
     slug: slug, badgeClass: badgeClass, esc: esc, pad: pad, normIso: normIso, parts: parts,
     todayIso: todayIso, addDays: addDays, daysBetween: daysBetween, longDate: longDate, relDate: relDate,
     SHARE_COLS: SHARE_COLS, shareId: shareId, sharePath: sharePath, shareVer: shareVer, sharePage: sharePage,
