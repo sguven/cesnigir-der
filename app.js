@@ -353,7 +353,8 @@
       '</div><aside>' + wxBox() +
       '<div class="sec-head"' + ed('ekle:etkinlikler') + '><h2>Yaklaşan Günler</h2></div>' + calendar() +
       '<div class="box" style="margin-top:14px">' + (ev.length ? ev.map(evRowSade).join('') : '<div class="empty">Yaklaşan bir gün yok.</div>') + '</div>' +
-      '<p style="margin:10px 0 0"><a href="#/etkinlikler" style="font-weight:700">Tüm takvim ›</a></p>' +
+      '<p style="margin:10px 0 0;display:flex;flex-wrap:wrap;gap:6px 18px"><a href="#/etkinlikler" style="font-weight:700">Tüm takvim ›</a>' +
+      (E ? '' : '<a href="#/etkinlikler/ekle" style="font-weight:700">Etkinliğinizi ekleyin ›</a>') + '</p>' +
       '</aside></div></section>';
 
     var g = data.galeri.slice(0, 6);
@@ -431,8 +432,10 @@
       h += evRow(e);
     });
     if (cur) h += '</div>';
+    if (!E) setTimeout(function () { iHazirla('etkinlik'); }, 0);
     return band('Etkinlikler', 'Düğün, nişan, mevlit, toplantılar ve resmî günler.') +
-      '<section class="section"><div class="container" style="max-width:860px"' + ed('ekle:etkinlikler') + '>' + chips + (h || '<div class="box empty"><b>Yaklaşan bir gün yok</b></div>') + '</div></section>';
+      '<section class="section"><div class="container" style="max-width:860px"' + ed('ekle:etkinlikler') + '>' + (E ? '' : '<div id="eYeni" hidden></div>') + chips +
+      (h || '<div class="box empty"><b>Yaklaşan bir gün yok</b><span id="eBos"></span></div>') + '</div></section>';
   }
 
   // Tek etkinliğin sayfası: paylaşılan bağlantı buraya gelir (geçmiş etkinlikler de açılır)
@@ -661,11 +664,31 @@
       aciklamaL: 'Ne iş yapıyorsunuz?', aciklamaP: 'Örnek: Ev yemekleri, gözleme, kahvaltı. Her gün 08.00-22.00 arası açık.', telY: 'Müşteriler sizi bu numaradan arar.', gonder: 'Gönder',
       fotoL: 'Kartvizitinizin ya da dükkânınızın fotoğrafı',
       not: 'Kaydınız dernek yönetimi onayladıktan sonra sitede görünür. Yazdığınız bütün bilgiler (ad, telefon, adres) herkese açık olur. Yayın ücretsizdir.',
-      ilk: 'İlk kaydı siz ekleyin: yukarıdaki "İşletmenizi ekleyin" düğmesine dokunun.', tamam: 'Teşekkürler, kaydınız alındı.', nerede: 'Esnaf Rehberi sayfasında', yine: 'Bir işletme daha ekle', fotosuz: 'kaydınızı' }
+      ilk: 'İlk kaydı siz ekleyin: yukarıdaki "İşletmenizi ekleyin" düğmesine dokunun.', tamam: 'Teşekkürler, kaydınız alındı.', nerede: 'Esnaf Rehberi sayfasında', yine: 'Bir işletme daha ekle', fotosuz: 'kaydınızı' },
+    // Etkinlik: düğün, nişan, mevlit… Ziyaretçi kendi gününü bildirir; onaylanınca data/etkinlikler.json'a yazılır ve takvimde görünür.
+    etkinlik: { tablo: '/etkinlik_istekleri', kutu: 'eYeni', bos: 'eBos', dugme: 'Etkinliğinizi ekleyin', baslikH: 'Lütfen kimin ya da neyin olduğunu yazın. Örnek: Ali ile Ayşe\'nin düğünü',
+      telY: 'Yalnız dernek yönetimi görür, sitede yayınlanmaz. Gerekirse sizi arayıp sorarız.', gonder: 'Gönder',
+      not: 'Etkinliğiniz dernek yönetimi onayladıktan sonra takvimde görünür. Telefon numaranız yayınlanmaz.',
+      ilk: 'Düğün, nişan ya da mevlidinizi takvime eklemek için yukarıdaki "Etkinliğinizi ekleyin" düğmesine dokunun.', tamam: 'Teşekkürler, etkinliğiniz alındı.', nerede: 'Etkinlikler sayfasında ve takvimde', yine: 'Bir etkinlik daha ekle', fotosuz: 'etkinliğinizi' }
   };
-  var iVar = { ilan: null, rehber: null };   // null: henüz bakılmadı · true: istek alınabiliyor · false: kurulum yok
+  // Ziyaretçinin seçebileceği türler: "Etkinlik" seçeneği formda "Diğer" diye görünür
+  var E_TUR = C.ETKINLIK_TURLERI.map(function (t) { return [t, t === 'Etkinlik' ? 'Diğer' : t]; });
+  var iVar = { ilan: null, rehber: null, etkinlik: null };   // null: henüz bakılmadı · true: istek alınabiliyor · false: kurulum yok
   function iForm(tur) {
     var K = ISTEK[tur], y = function (t) { return '<span class="i-yardim">' + t + '</span>'; };
+    if (tur === 'etkinlik') return '<form class="m-form" data-i-form="etkinlik" data-en-cok="1" novalidate>' +
+      '<label class="m-l">Ne olacak?<select name="tur">' + E_TUR.map(function (t) { return '<option value="' + esc(t[0]) + '">' + esc(t[1]) + '</option>'; }).join('') + '</select></label>' +
+      '<label class="m-l">Kimin / neyin?<input name="baslik" maxlength="120" placeholder="Örnek: Ali ile Ayşe\'nin düğünü"></label>' +
+      '<label class="m-l">Hangi gün?<input name="tarih" type="date" min="' + C.todayIso() + '" max="' + C.addDays(C.todayIso(), 730) + '"></label>' +
+      '<label class="m-l">Saat<input name="saat" maxlength="40" placeholder="Örnek: 14.00 ya da öğleden sonra">' + y('Bilmiyorsanız boş bırakın.') + '</label>' +
+      '<label class="m-l">Yer<input name="yer" maxlength="80" placeholder="Örnek: Köprüköy, düğün salonu">' + y('Bilmiyorsanız boş bırakın.') + '</label>' +
+      '<p class="m-l" style="margin:0 0 -6px">Davetiye ya da afiş fotoğrafı</p>' + mFotoAlan(false, 1) +
+      '<label class="m-l">Adınız ve soyadınız<input name="ad" autocomplete="name" maxlength="60" value="' + esc(mAd()) + '"></label>' +
+      '<label class="m-l">Telefon numaranız<input name="telefon" type="tel" autocomplete="tel" inputmode="tel" maxlength="25" placeholder="0555 123 45 67">' + y(K.telY) + '</label>' +
+      '<label class="m-hp" aria-hidden="true">Web sitesi<input name="web" tabindex="-1" autocomplete="off"></label>' +
+      '<p class="m-err" role="alert" hidden></p>' +
+      '<button type="submit" class="btn">' + icon('pen') + K.gonder + '</button>' +
+      '<p class="muted small m-note">' + K.not + '</p></form>';
     return '<form class="m-form" data-i-form="' + tur + '" novalidate>' +
       '<label class="m-l">' + K.turL + '<select name="tur">' + (tur === 'rehber' ? '<option value="">Lütfen seçin</option>' : '') + K.turler.map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label>' +
       '<label class="m-l">' + K.baslikL + '<input name="baslik" maxlength="120" placeholder="' + esc(K.baslikP) + '"></label>' +
@@ -685,6 +708,7 @@
     var K = ISTEK[tur], b = $(K.kutu); if (!b || !iVar[tur]) return;
     if (!b.firstChild) b.innerHTML = '<details class="m-new' + (tur === 'rehber' ? ' m-new-kucuk' : '') + '"><summary class="btn">' + icon('pen') + K.dugme + '</summary><div class="box box-pad">' + iForm(tur) + '</div></details>';
     b.hidden = false;
+    if (tur === 'etkinlik' && /^#\/etkinlikler\/ekle/.test(location.hash)) { var d = b.querySelector('details'); if (d && !d.open) { d.open = true; b.scrollIntoView({ block: 'start' }); } }
     var bos = $(K.bos); if (bos) bos.textContent = K.ilk;
   }
   function iHazirla(tur) {
@@ -704,10 +728,15 @@
     if (!f) return;
     e.preventDefault();
     var tur = f.getAttribute('data-i-form'), K = ISTEK[tur], v = {}, err = f.querySelector('.m-err'), btn = f.querySelector('button[type=submit]');
-    ['tur', 'baslik', 'fiyat', 'aciklama', 'adres', 'link', 'ad', 'telefon', 'web'].forEach(function (n) { v[n] = f.elements[n] ? f.elements[n].value.trim() : ''; });
+    ['tur', 'baslik', 'fiyat', 'aciklama', 'adres', 'link', 'tarih', 'saat', 'yer', 'ad', 'telefon', 'web'].forEach(function (n) { v[n] = f.elements[n] ? f.elements[n].value.trim() : ''; });
     function hata(t, n) { err.textContent = t; err.hidden = false; if (n && f.elements[n]) f.elements[n].focus(); }
     if (!v.tur) return hata('Lütfen işletmenizin türünü seçin. Uygun tür yoksa "Diğer"i seçin.', 'tur');
     if (v.baslik.length < 3) return hata(K.baslikH, 'baslik');
+    if (tur === 'etkinlik') {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(v.tarih)) return hata('Lütfen etkinliğin gününü seçin.', 'tarih');
+      if (v.tarih < C.todayIso()) return hata('Seçtiğiniz gün geçmiş. Lütfen bugün ya da ileri bir gün seçin.', 'tarih');
+      if (v.tarih > C.addDays(C.todayIso(), 730)) return hata('Seçtiğiniz gün çok ileride. Lütfen tarihi kontrol edin.', 'tarih');
+    }
     if (v.ad.length < 3) return hata('Lütfen adınızı ve soyadınızı yazın.', 'ad');
     if (!/^[0-9+ ()\-]+$/.test(v.telefon) || v.telefon.replace(/\D/g, '').length < 10 || !C.telHref(v.telefon)) return hata('Lütfen telefon numaranızı başında 0 ile yazın. Örnek: 0555 123 45 67', 'telefon');
     var link = iLink(v.link);
@@ -728,6 +757,7 @@
     if (v.aciklama) body.aciklama = v.aciklama;
     if (v.adres) body.adres = v.adres;
     if (link) body.link = link;
+    if (tur === 'etkinlik') { body.tarih = v.tarih; if (v.saat) body.saat = v.saat; if (v.yer) body.yer = v.yer; }
     mFotoGonder(fotos, btn).then(function (yollar) {
       if (yollar.length) { body.fotolar = yollar; btn.textContent = 'Gönderiliyor…'; }
       return C.sb(K.tablo, { method: 'POST', headers: { Prefer: 'return=minimal' }, body: body });
@@ -1282,17 +1312,20 @@
   }
   var KAMERA = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/></svg>';
   // zorunlu: fotoğraf gönderme formu (fotoğrafsız gönderilemez, fotoğraf sütunu kontrolüne bağlı değil)
-  function mFotoAlan(zorunlu) {
+  // enCok: bu formda en çok kaç fotoğraf (verilmezse C.MEYDAN.fotoEnCok); formun data-en-cok değeriyle aynı olmalı
+  function mFotoAlan(zorunlu, enCok) {
+    var n = enCok || C.MEYDAN.fotoEnCok;
     return '<div class="m-foto"' + (C.MEYDAN.fotoYok && !zorunlu ? ' hidden' : '') + '><div class="m-foto-list" aria-live="polite"></div>' +
-      '<label class="btn btn-light m-foto-btn">' + KAMERA + '<span>Fotoğraf ekle</span><input type="file" class="m-file" accept="image/*" multiple></label>' +
-      '<p class="muted small m-note">' + (zorunlu ? 'Telefonunuzun galerisinden seçebilir ya da kamerayla çekebilirsiniz. Bir seferde en fazla ' : 'İsterseniz en fazla ') + C.MEYDAN.fotoEnCok + ' fotoğraf ekleyebilirsiniz.</p></div>';
+      '<label class="btn btn-light m-foto-btn">' + KAMERA + '<span>Fotoğraf ekle</span><input type="file" class="m-file" accept="image/*"' + (n > 1 ? ' multiple' : '') + '></label>' +
+      '<p class="muted small m-note">' + (n === 1 ? 'İsterseniz bir fotoğraf ekleyebilirsiniz.' : (zorunlu ? 'Telefonunuzun galerisinden seçebilir ya da kamerayla çekebilirsiniz. Bir seferde en fazla ' : 'İsterseniz en fazla ') + n + ' fotoğraf ekleyebilirsiniz.') + '</p></div>';
   }
+  function mEnCok(f) { return +(f && f.getAttribute('data-en-cok')) || C.MEYDAN.fotoEnCok; }
   function mFotoCiz(f) {
     var a = f._fotos || [], list = f.querySelector('.m-foto-list'), btn = f.querySelector('.m-foto-btn');
     list.innerHTML = a.map(function (x, i) {
       return '<div class="m-foto-kutu"><img src="' + x.url + '" alt="Eklenen fotoğraf ' + (i + 1) + '"><button type="button" data-mf-sil="' + i + '" aria-label="Fotoğraf ' + (i + 1) + ' kaldır">' + icon('x') + 'Kaldır</button></div>';
     }).join('');
-    btn.hidden = a.length >= C.MEYDAN.fotoEnCok;
+    btn.hidden = a.length >= mEnCok(f);
     btn.querySelector('span').textContent = a.length ? 'Bir fotoğraf daha ekle' : 'Fotoğraf ekle';
   }
   // Fotoğrafı uzun kenarı 1600 nokta olacak biçimde küçültür (telefon fotoğrafı 5-10 MB'tan 300-400 KB'a iner)
@@ -1315,7 +1348,7 @@
     if (!inp.classList || !inp.classList.contains('m-file')) return;
     var f = inp.closest('form'), err = f.querySelector('.m-err'), a = f._fotos = f._fotos || [], lbl = f.querySelector('.m-foto-btn span');
     var files = Array.prototype.slice.call(inp.files || []).filter(function (x) { return /^image\//.test(x.type) || /\.(jpe?g|png|webp|heic|heif)$/i.test(x.name); });
-    var bos = C.MEYDAN.fotoEnCok - a.length, fazla = files.length > bos, bozuk = 0;
+    var enCok = mEnCok(f), bos = enCok - a.length, fazla = files.length > bos, bozuk = 0;
     inp.value = '';
     if (!files.length) return;
     err.hidden = true; lbl.textContent = 'Fotoğraf hazırlanıyor…';
@@ -1324,7 +1357,7 @@
     }, Promise.resolve()).then(function () {
       mFotoCiz(f);
       if (bozuk) { err.textContent = bozuk > 1 ? 'Bazı fotoğraflar açılamadı. Başka fotoğraf seçin.' : 'Bu fotoğraf açılamadı. Başka bir fotoğraf seçin.'; err.hidden = false; }
-      else if (fazla) { err.textContent = 'En fazla ' + C.MEYDAN.fotoEnCok + ' fotoğraf eklenebilir; ilk ' + C.MEYDAN.fotoEnCok + ' tanesi alındı.'; err.hidden = false; }
+      else if (fazla) { err.textContent = enCok === 1 ? 'Yalnız bir fotoğraf eklenebilir; ilki alındı.' : 'En fazla ' + enCok + ' fotoğraf eklenebilir; ilk ' + enCok + ' tanesi alındı.'; err.hidden = false; }
     });
   });
   function mForm(tur, konuId, yk) {
