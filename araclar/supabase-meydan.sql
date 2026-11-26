@@ -1,4 +1,4 @@
--- Köy Meydanı (forum, fotoğraflı yazı ve cevaplar), yorumlar (haber, etkinlik, fotoğraf), Market ilan istekleri, Esnaf Rehberi istekleri ve fotoğraf istekleri · Supabase veritabanı kurulumu
+-- Köy Meydanı (forum, fotoğraflı yazı ve cevaplar), yorumlar (haber, etkinlik, fotoğraf), Market ilan istekleri, Esnaf Rehberi istekleri fotoğraf ve etkinlik istekleri · Supabase veritabanı kurulumu
 -- Supabase → SQL Editor'de bir kez çalıştırılır. Tekrar çalıştırmak zararsızdır (var olanı bozmaz).
 --
 -- Kurallar:
@@ -195,6 +195,52 @@ drop trigger if exists foto_istek_sel on public.foto_istekleri;
 create trigger foto_istek_sel before insert on public.foto_istekleri for each row execute function public.foto_sel_kontrol();
 revoke all on function public.foto_sel_kontrol() from public, anon, authenticated;
 
+-- Etkinlik istekleri: ziyaretçi Etkinlikler sayfasından kendi düğününü, nişanını, mevlidini ya da başka bir gününü bildirir (isterse davetiye fotoğrafıyla).
+-- Yönetici onaylayınca panel etkinliği sitenin dosyasına (data/etkinlikler.json) yazar ve isteği buradan siler. Telefon yalnız yöneticiye görünür.
+create table if not exists public.etkinlik_istekleri (
+  id bigint generated always as identity primary key,
+  tur text not null default 'Düğün' check (tur in ('Düğün', 'Nişan', 'Mevlit', 'Toplantı', 'Etkinlik')),
+  baslik text not null check (char_length(btrim(baslik)) between 3 and 120),
+  tarih date not null,
+  saat text check (char_length(saat) <= 40),
+  yer text check (char_length(yer) <= 80),
+  ad text not null check (char_length(btrim(ad)) between 3 and 60),
+  telefon text not null check (char_length(telefon) between 10 and 25 and telefon ~ '^[0-9+ ()-]+$'),
+  fotolar text[] not null default '{}' check (
+    cardinality(fotolar) <= 1 and array_to_string(fotolar, ',') ~ '^([0-9]{4}-[0-9]{2}/[0-9a-f-]{36}[.]jpg(,|$))*$'),
+  created_at timestamptz not null default now()
+);
+alter table public.etkinlik_istekleri enable row level security;
+revoke all on public.etkinlik_istekleri from anon, authenticated;
+grant select (id) on public.etkinlik_istekleri to anon, authenticated;
+grant insert (tur, baslik, tarih, saat, yer, ad, telefon, fotolar) on public.etkinlik_istekleri to anon, authenticated;
+drop policy if exists "istekler okunmaz" on public.etkinlik_istekleri;
+create policy "istekler okunmaz" on public.etkinlik_istekleri for select to anon, authenticated using (false);
+drop policy if exists "etkinlik onaya gonderilir" on public.etkinlik_istekleri;
+create policy "etkinlik onaya gonderilir" on public.etkinlik_istekleri for insert to anon, authenticated with check (true);
+
+create or replace function public.etkinlik_sel_kontrol() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  if (select count(*) from public.etkinlik_istekleri where created_at > now() - interval '10 minutes') >= 15
+   or (select count(*) from public.etkinlik_istekleri) >= 200 then
+    raise exception 'Şu anda çok fazla etkinlik gönderildi. Lütfen biraz sonra tekrar deneyin.';
+  end if;
+  -- Türkiye saatine göre bugünden önceki ya da iki yıldan sonraki günler alınmaz
+  if new.tarih < (now() at time zone 'Europe/Istanbul')::date or new.tarih > (now() at time zone 'Europe/Istanbul')::date + 730 then
+    raise exception 'Etkinliğin günü geçmiş ya da çok ileride. Lütfen tarihi kontrol edin.';
+  end if;
+  new.ad := btrim(new.ad);
+  new.baslik := btrim(new.baslik);
+  new.telefon := btrim(new.telefon);
+  new.saat := nullif(btrim(new.saat), '');
+  new.yer := nullif(btrim(new.yer), '');
+  return new;
+end $$;
+drop trigger if exists etkinlik_istek_sel on public.etkinlik_istekleri;
+create trigger etkinlik_istek_sel before insert on public.etkinlik_istekleri for each row execute function public.etkinlik_sel_kontrol();
+revoke all on function public.etkinlik_sel_kontrol() from public, anon, authenticated;
+
 alter table public.forum_konular enable row level security;
 alter table public.forum_cevaplar enable row level security;
 alter table public.yorumlar enable row level security;
@@ -294,7 +340,7 @@ begin
 end $$;
 revoke all on function public.forum_yetki(text) from public, anon, authenticated;
 
--- Panel: onay bekleyenler (yazılar, cevaplar, yorumlar, Market, Esnaf Rehberi ve fotoğraf istekleri)
+-- Panel: onay bekleyenler (yazılar, cevaplar, yorumlar, Market, Esnaf Rehberi, fotoğraf ve etkinlik istekleri)
 create or replace function public.forum_bekleyenler(anahtar text) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 begin
@@ -309,7 +355,8 @@ begin
                            from public.yorumlar y where y.durum = 'bekliyor'), '[]'::jsonb),
     'ilanlar', coalesce((select jsonb_agg(to_jsonb(i) order by i.created_at) from public.pazar_istekleri i), '[]'::jsonb),
     'rehber', coalesce((select jsonb_agg(to_jsonb(r) order by r.created_at) from public.rehber_istekleri r), '[]'::jsonb),
-    'fotolar', coalesce((select jsonb_agg(to_jsonb(f) order by f.created_at) from public.foto_istekleri f), '[]'::jsonb));
+    'fotolar', coalesce((select jsonb_agg(to_jsonb(f) order by f.created_at) from public.foto_istekleri f), '[]'::jsonb),
+    'etkinlikler', coalesce((select jsonb_agg(to_jsonb(e) order by e.created_at) from public.etkinlik_istekleri e), '[]'::jsonb));
 end $$;
 
 -- Panel: onayla / sil / sabitle
@@ -342,6 +389,9 @@ begin
     else raise exception 'bilinmeyen işlem'; end if;
   elsif tur = 'foto' then
     if islem = 'sil' then delete from public.foto_istekleri where id = kayit;
+    else raise exception 'bilinmeyen işlem'; end if;
+  elsif tur = 'etkinlik' then
+    if islem = 'sil' then delete from public.etkinlik_istekleri where id = kayit;
     else raise exception 'bilinmeyen işlem'; end if;
   else
     raise exception 'bilinmeyen tür';
