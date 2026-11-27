@@ -184,11 +184,13 @@ sayfası yazar; kaydın aramaya açık tam sayfası o gece üretilir.
 ## Instagram paylaşımı
 
 Derneğin Instagram hesabına sitedeki yeni kayıtlar (duyuru, haber, vefat ve düğün ilanı, etkinlik, pazar ilanı) otomatik paylaşılır:
-bir zamanlanmış görev Türkiye saatiyle 08.40, 12.40 ve 20.40'ta çalışır, her seferinde en çok 2 kaydı akışa (tek görsel ya da kaydırmalı gönderi)
-ve hikâyeye atar. Önce panelden girilenler, sonra bölge haberleri paylaşılır.
+bir zamanlanmış görev Türkiye saatiyle 08.40, 12.40 ve 20.40'ta çalışır ve her seferinde **tek kaydı** akışa ve hikâyeye atar.
 
-- `node araclar/instagram.js bekleyen` paylaşılmamış kayıtları listeler; `hazirla [adet]` görselleri (`images/instagram/`, akış 1080x1350 ve
-  hikâye 1080x1920) ve açıklamayı üretir; `isaretle <kimlik>…` paylaşılanı `data/instagram.json`'a yazar.
+- Yalnızca yeni eklenenler paylaşılır: bir kayıt ilk görüldükten sonra 20 saat içinde sırası gelmezse bir daha paylaşılmaz.
+- Önce panelden girilenler, panel kaydı yoksa gece eklenen bölge haberlerinden rastgele biri. Örnek: 4 haber ve 1 panel kaydı olan günde
+  sabah panel kaydı, öğlen ve akşam birer haber paylaşılır; kalan 2 haber paylaşılmaz.
+- `node araclar/instagram.js bekleyen` o an paylaşılabilecekleri listeler; `hazirla` sıradaki kaydı seçip görsellerini (`images/instagram/`,
+  akış 1080x1350 ve hikâye 1080x1920) ve açıklamasını üretir; `isaretle <kimlik>…` paylaşılanı `data/instagram.json`'a yazar.
 - Bir kaydın paylaşılmasını istemiyorsanız kimliğini `isaretle` ile önceden işaretleyin. Başlığı ya da tarihi değişen kayıt yeni sayılır.
 - Paylaşım Windsor.ai bağlantısıyla yapılır (Instagram hesap kimliği `17841441974005717`).
 

@@ -1,13 +1,17 @@
 /* Sitedeki yeni kayıtları (duyuru, haber, vefat/düğün ilanı, etkinlik, pazar ilanı) Instagram için hazırlar.
    Günde üç kez çalışan "Çeşnigir-Der · Instagram paylaşımı" zamanlanmış görevi kullanır.
 
-     node araclar/instagram.js bekleyen            henüz paylaşılmamış kayıtları sıralı listeler (JSON)
-     node araclar/instagram.js hazirla [adet]      sıradaki [adet] kaydın (varsayılan 2) görsellerini üretir, açıklamayı yazar (JSON)
+     node araclar/instagram.js bekleyen            bu çalışmada paylaşılabilecek kayıtları listeler (JSON)
+     node araclar/instagram.js hazirla             sıradaki TEK kaydı seçer, görsellerini üretir, açıklamayı yazar (JSON)
      node araclar/instagram.js isaretle <kimlik>…  kayıtları paylaşıldı diye işaretler (data/instagram.json)
 
+   Kural (Serhat, 27 Kasım 2026): her çalışmada tek kayıt paylaşılır. Yalnızca yeni eklenenler paylaşılır: bir kayıt ilk görüldüğü
+   andan sonra TAZE_SAAT saat içinde paylaşılmazsa bir daha paylaşılmaz (eski kayıtlar akışa dökülmez). Önce panelden girilenler
+   (dosyadaki sırayla), panel kaydı yoksa bölge haberlerinden rastgele biri seçilir. Örnek: sabah 4 haber ve 1 panel kaydı varsa
+   sabah panel kaydı, öğlen 4 haberden biri, akşam kalan 3 haberden biri paylaşılır; kalan 2 haber paylaşılmaz.
+
    Görseller images/instagram/ altına yazılır: <kimlik>-gonderi.jpg (1080x1350, akış) ve <kimlik>-hikaye.jpg (1080x1920, hikâye).
-   Instagram görseli raw.githubusercontent.com adresinden çeker: dosyalar main'e gönderildikten sonra paylaşılır.
-   Sıra: önce panelden girilenler (vefat, düğün, duyuru, etkinlik, ilan), sonra bölge haberleri; dosyadaki sırayla (en yeni önce). */
+   Instagram görseli raw.githubusercontent.com adresinden çeker: dosyalar main'e gönderildikten sonra paylaşılır. */
 var fs = require('fs'), path = require('path');
 var root = path.join(__dirname, '..');
 require(path.join(root, 'ortak.js'));
@@ -41,9 +45,24 @@ function kayitlar() {
   });
   return out;
 }
+var TAZE_SAAT = 20;   // sabah görülen kayıt ertesi sabahki çalışmada artık eski sayılır
+function kaydet(s) { fs.writeFileSync(STATE, JSON.stringify(s, null, 2) + '\n'); }
+// Yeni kayıtların ilk görülme anını yazar; paylaşılmamış ve hâlâ taze olanları döndürür: önce panel kayıtları, sonra haberler.
 function bekleyen() {
-  var s = state().paylasilan, all = kayitlar().filter(function (k) { return !s[k.kimlik]; });
-  return all.filter(function (k) { return k.panel; }).concat(all.filter(function (k) { return !k.panel; }));
+  var s = state(), now = Date.now(), all = kayitlar(), degisti = false;
+  s.gorulen = s.gorulen || {};
+  all.forEach(function (k) { if (!s.paylasilan[k.kimlik] && !s.gorulen[k.kimlik]) { s.gorulen[k.kimlik] = new Date(now).toISOString(); degisti = true; } });
+  Object.keys(s.gorulen).forEach(function (id) {            // dosya büyümesin: paylaşılanları ve 30 günden eskileri at
+    if (s.paylasilan[id] || now - Date.parse(s.gorulen[id]) > 30 * 864e5) { delete s.gorulen[id]; degisti = true; }
+  });
+  if (degisti) kaydet(s);
+  var taze = all.filter(function (k) { return !s.paylasilan[k.kimlik] && now - Date.parse(s.gorulen[k.kimlik]) < TAZE_SAAT * 36e5; });
+  return taze.filter(function (k) { return k.panel; }).concat(taze.filter(function (k) { return !k.panel; }));
+}
+function sec() {
+  var b = bekleyen(), panel = b.filter(function (k) { return k.panel; });
+  if (panel.length) return [panel[0]];
+  return b.length ? [b[Math.floor(Math.random() * b.length)]] : [];
 }
 
 function etiketler(k) {
@@ -101,8 +120,8 @@ function kartHtml(k, hikaye) {
     '<div class="ayak"><b>ÇEŞNİGİR-DER</b><span>cesnigirder.org</span></div><div class="dip"></div></body></html>';
 }
 
-async function hazirla(adet) {
-  var list = bekleyen().slice(0, adet);
+async function hazirla() {
+  var list = sec();
   if (!list.length) { console.log(JSON.stringify({ kayitlar: [] })); return; }
   fs.mkdirSync(OUT, { recursive: true });
   var { chromium } = require('playwright'), br = await chromium.launch();
@@ -131,12 +150,13 @@ var cmd = process.argv[2];
 if (cmd === 'bekleyen') {
   console.log(JSON.stringify(bekleyen().map(function (k) { return { kimlik: k.kimlik, tur: k.x.tur || '', baslik: k.key === 'e' ? k.x.ad : k.x.baslik, panel: k.panel }; }), null, 2));
 } else if (cmd === 'hazirla') {
-  hazirla(Math.max(1, Math.min(10, +process.argv[3] || 2))).catch(function (e) { console.error(e); process.exit(1); });
+  hazirla().catch(function (e) { console.error(e); process.exit(1); });
 } else if (cmd === 'isaretle') {
   var s = state(), now = new Date().toISOString();
   process.argv.slice(3).forEach(function (id) { s.paylasilan[id] = s.paylasilan[id] || now; });
-  fs.writeFileSync(STATE, JSON.stringify(s, null, 2) + '\n');
+  if (s.gorulen) process.argv.slice(3).forEach(function (id) { delete s.gorulen[id]; });
+  kaydet(s);
   console.log(Object.keys(s.paylasilan).length + ' kayıt işaretli');
 } else {
-  console.log('Kullanım: node araclar/instagram.js bekleyen | hazirla [adet] | isaretle <kimlik>…');
+  console.log('Kullanım: node araclar/instagram.js bekleyen | hazirla | isaretle <kimlik>…');
 }
