@@ -901,8 +901,8 @@
       '<li><span>Kuruluş</span>Aralık 2025</li>' +
       '<li><span>Açılış töreni</span>6 Eylül 2026</li>' +
       (mail ? '<li><span>E-posta</span><a href="mailto:' + esc(mail) + '">' + esc(mail) + '</a></li>' : '') +
-      (instagram(d) ? '<li><span>Instagram</span><a href="' + instagram(d).url + '" target="_blank" rel="noopener">' + esc(instagram(d).ad) + '</a></li>' : '') +
-      (facebook(d) ? '<li><span>Facebook</span><a href="' + esc(facebook(d)) + '" target="_blank" rel="noopener">Grubumuza katılın</a></li>' : '') +
+      (instagram(d) ? '<li><span>Instagram</span><a href="' + instagram(d).url + '" target="_blank" rel="noopener">Instagram hesabımız</a></li>' : '') +
+      (facebook(d) ? '<li><span>Facebook</span><a href="' + esc(facebook(d)) + '" target="_blank" rel="noopener">Facebook grubumuz</a></li>' : '') +
       '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li>' +
       '<li><span>Konum</span><a href="' + MAP + '" target="_blank" rel="noopener">Haritada aç</a></li>' +
       '</ul></div>' + (kasa || (E ? '<div' + ed('dernek:kasa') + ' style="margin-top:20px"></div>' : '')) + '</aside></div></section>' +
@@ -1778,10 +1778,10 @@
     // Bağlantılar: hepsi aynı biçimde, simgeli birer satır
     var ig = instagram(d), fb = facebook(d), dis = ' target="_blank" rel="noopener"';
     f += '<ul class="f-links">' +
-      '<li><a href="' + MAP + '"' + dis + '>' + FI.harita + 'Haritada göster</a></li>' +
-      (ig ? '<li><a href="' + ig.url + '"' + dis + '>' + FI.instagram + 'Instagram: ' + esc(ig.ad) + '</a></li>' : '') +
+      '<li><a href="' + MAP + '"' + dis + '>' + FI.harita + 'Haritada yerimiz</a></li>' +
+      (ig ? '<li><a href="' + ig.url + '"' + dis + '>' + FI.instagram + 'Instagram hesabımız</a></li>' : '') +
       (fb ? '<li><a href="' + esc(fb) + '"' + dis + '>' + FI.facebook + 'Facebook grubumuz</a></li>' : '') +
-      '<li><a href="#/bize-ulasin">' + FI.mesaj + 'Bize Ulaşın: mesaj gönderin</a></li></ul>';
+      '<li><a href="#/bize-ulasin">' + FI.mesaj + 'Bize yazın</a></li></ul>';
     $('footContact').innerHTML = f;
     $('yil').textContent = new Date().getFullYear();
     ziyaretSayaci();
