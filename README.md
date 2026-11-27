@@ -181,6 +181,17 @@ Bu dosyalar elle düzenlenmez; hepsini şu komut üretir (içerik, `index.html`,
 Gece çalışan bölge haberleri görevi komutu her gece çalıştırır. Yönetim paneli yeni bir kaydı yayınlarken yalnızca basit bir paylaşım
 sayfası yazar; kaydın aramaya açık tam sayfası o gece üretilir.
 
+## Instagram paylaşımı
+
+Derneğin Instagram hesabına sitedeki yeni kayıtlar (duyuru, haber, vefat ve düğün ilanı, etkinlik, pazar ilanı) otomatik paylaşılır:
+bir zamanlanmış görev Türkiye saatiyle 08.40, 12.40 ve 20.40'ta çalışır, her seferinde en çok 2 kaydı akışa (tek görsel ya da kaydırmalı gönderi)
+ve hikâyeye atar. Önce panelden girilenler, sonra bölge haberleri paylaşılır.
+
+- `node araclar/instagram.js bekleyen` paylaşılmamış kayıtları listeler; `hazirla [adet]` görselleri (`images/instagram/`, akış 1080x1350 ve
+  hikâye 1080x1920) ve açıklamayı üretir; `isaretle <kimlik>…` paylaşılanı `data/instagram.json`'a yazar.
+- Bir kaydın paylaşılmasını istemiyorsanız kimliğini `isaretle` ile önceden işaretleyin. Başlığı ya da tarihi değişen kayıt yeni sayılır.
+- Paylaşım Windsor.ai bağlantısıyla yapılır (Instagram hesap kimliği `17841441974005717`).
+
 ## Bölge haberleri ve kapak görselleri
 
 Her gece bir zamanlanmış görev Köprüköy, Keskin, Kırıkkale ve Ankara'dan köylüyü ilgilendiren yeni haber ve duyuruları `data/duyurular.json`'a ekler
