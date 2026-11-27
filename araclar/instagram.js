@@ -95,6 +95,7 @@ function aciklama(list) {
   return (govde + '\n\n' + et.slice(0, 6).join(' ')).slice(0, 2150);
 }
 
+var LOGO = 'data:image/png;base64,' + fs.readFileSync(path.join(root, 'images', 'logo-160.png')).toString('base64');   // derneğin sarı logosu
 function kartHtml(k, hikaye) {
   var x = k.x, baslik = k.key === 'e' ? x.ad : x.baslik, tur = String(x.tur || (k.key === 'i' ? 'İlan' : 'Duyuru')).toLocaleUpperCase('tr');
   var alt = k.key === 'e' ? [tarihYazi(x.tarih), x.saat, x.yer].filter(Boolean).join(' · ')
@@ -114,12 +115,13 @@ function kartHtml(k, hikaye) {
     'h1{font-family:"Lora",Merriweather,Georgia,serif;font-weight:700;font-size:' + fs0 + 'px;line-height:1.18;margin-top:28px;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}' +
     '.alt{margin-top:24px;font-size:34px;color:#5A4C40;font-weight:500}' +
     '.ayak{position:absolute;left:0;right:0;bottom:' + (hikaye ? 350 : 0) + 'px;height:118px;background:#7A2E1C;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 64px;font-size:34px}' +
+    '.ayak .ad{display:flex;align-items:center;gap:22px}.ayak img{width:92px;height:92px;display:block}' +
     '.ayak b{font-family:"Lora",Georgia,serif;font-size:42px;letter-spacing:.02em}' +
     '.dip{position:absolute;left:0;right:0;bottom:0;height:' + (hikaye ? 350 : 0) + 'px;background:#5A1F12}' +
     '</style></head><body><div class="ust"></div><div class="foto"><div class="bg" style="background-image:url(\'' + foto + '\')"></div>' +
     '<img src="' + foto + '" onload="if(this.naturalWidth/this.naturalHeight>1.25)this.className=\'dol\'"></div>' +
     '<div class="govde"><span class="tur">' + esc(tur) + '</span><h1>' + esc(baslik) + '</h1>' + (alt ? '<div class="alt">' + esc(alt) + '</div>' : '') + '</div>' +
-    '<div class="ayak"><b>ÇEŞNİGİR-DER</b><span>cesnigirder.org</span></div><div class="dip"></div></body></html>';
+    '<div class="ayak"><div class="ad"><img src="' + LOGO + '"><b>ÇEŞNİGİR-DER</b></div><span>cesnigirder.org</span></div><div class="dip"></div></body></html>';
 }
 
 async function hazirla() {
