@@ -70,20 +70,22 @@ function etiketler(k) {
   e.push(k.key === 'e' ? '#köyetkinlikleri' : k.key === 'i' ? '#köypazarı' : t === 'vefat' ? '#vefat' : t === 'tarihten' ? '#tarih' : '#köyhaberleri');
   return e.join(' ');
 }
+// Instagram açıklamasında bağlantıya dokunulamaz: elle yazılabilsin diye sitenin kısa, yalın adresi verilir
+var DETAY = 'Ayrıntılar için: cesnigirder.org';
 function metin(k) {
   var x = k.x, tur = String(x.tur || (k.key === 'i' ? 'İlan' : '')).toLocaleUpperCase('tr'), a = [];
   if (k.key === 'e') {
     a.push((tur ? tur + ': ' : '') + x.ad);
     a.push([tarihYazi(x.tarih), x.saat, x.yer].filter(Boolean).join(' · '));
-    a.push('Ayrıntılar: ' + k.adres);
+    a.push(DETAY);
   } else if (k.key === 'i') {
     a.push((tur ? tur + ': ' : '') + x.baslik + (x.fiyat ? ' · ' + x.fiyat + ' ₺' : ''));
     if (x.aciklama) a.push(kisalt(x.aciklama, 400));
-    a.push('İlanın tamamı: ' + k.adres);
+    a.push(DETAY);
   } else {
     a.push((tur ? tur + ': ' : '') + x.baslik);
     if (x.metin) a.push(kisalt(x.metin, 520));
-    a.push('Devamı: ' + k.adres + (x.kaynak && x.link ? '\nKaynak: ' + x.kaynak : ''));
+    a.push((x.kaynak && x.link ? 'Kaynak: ' + x.kaynak + '\n' : '') + DETAY);
   }
   return a.join('\n\n');
 }
