@@ -91,6 +91,12 @@
     return (d.baskan ? '<li><span>Dernek Başkanı</span>' + person(d.baskan, noTel ? '' : d.telefon) + '</li>' : (!noTel && d.telefon ? '<li><span>Dernek Başkanı</span>' + person('', d.telefon) + '</li>' : '')) +
       (d.baskan2 ? '<li><span>Başkan Yardımcısı</span>' + person(d.baskan2, noTel ? '' : d.telefon2) + '</li>' : (!noTel && d.telefon2 ? '<li><span>Başkan Yardımcısı</span>' + person('', d.telefon2) + '</li>' : ''));
   }
+  /* Derneğin Instagram hesabı (panelde Dernek Bilgileri > Instagram adresi). "instagram.com/x", "@x" ya da tam adres yazılabilir. */
+  var IG_SVG = '<svg class="ig-i" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/></svg>';
+  function instagram(d) {
+    var t = String(d.instagram || '').trim().replace(/^@/, '').replace(/^(https?:\/\/)?(www\.)?instagram\.com\//i, '').replace(/[/?#].*$/, '');
+    return /^[\w.]{2,30}$/.test(t) ? { url: 'https://www.instagram.com/' + t + '/', ad: '@' + t } : null;
+  }
   function people(d) {
     return ((d.baskan || d.telefon) ? person(d.baskan, d.telefon) : '') + ((d.baskan2 || d.telefon2) ? person(d.baskan2, d.telefon2) : '');
   }
@@ -881,6 +887,7 @@
       '<li><span>Kuruluş</span>Aralık 2025</li>' +
       '<li><span>Açılış töreni</span>6 Eylül 2026</li>' +
       (mail ? '<li><span>E-posta</span><a href="mailto:' + esc(mail) + '">' + esc(mail) + '</a></li>' : '') +
+      (instagram(d) ? '<li><span>Instagram</span><a href="' + instagram(d).url + '" target="_blank" rel="noopener">' + esc(instagram(d).ad) + '</a></li>' : '') +
       '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li>' +
       '<li><span>Konum</span><a href="' + MAP + '" target="_blank" rel="noopener">Haritada aç</a></li>' +
       '</ul></div>' + (kasa || (E ? '<div' + ed('dernek:kasa') + ' style="margin-top:20px"></div>' : '')) + '</aside></div></section>' +
@@ -1754,6 +1761,8 @@
     f += people(d);
     if (/@/.test(d.eposta || '')) f += '<div><a href="mailto:' + esc(d.eposta) + '">' + esc(d.eposta) + '</a></div>';
     f += '<div><a href="' + MAP + '" target="_blank" rel="noopener">Haritada göster</a></div>';
+    var ig = instagram(d);
+    if (ig) f += '<div><a class="f-ig" href="' + ig.url + '" target="_blank" rel="noopener">' + IG_SVG + 'Instagram: ' + esc(ig.ad) + '</a></div>';
     f += '<div class="f-bu"><a href="#/bize-ulasin">✉ Bize Ulaşın: mesaj gönderin</a></div>';
     $('footContact').innerHTML = f;
     $('yil').textContent = new Date().getFullYear();
