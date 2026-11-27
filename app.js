@@ -1778,7 +1778,7 @@
     // Bağlantılar: hepsi aynı biçimde, simgeli birer satır
     var ig = instagram(d), fb = facebook(d), dis = ' target="_blank" rel="noopener"';
     f += '<ul class="f-links">' +
-      '<li><a href="' + MAP + '"' + dis + '>' + FI.harita + 'Dernek binamız</a></li>' +
+      '<li><a href="' + MAP + '"' + dis + '>' + FI.harita + 'Haritada yerimiz</a></li>' +
       (ig ? '<li><a href="' + ig.url + '"' + dis + '>' + FI.instagram + 'Instagram hesabımız</a></li>' : '') +
       (fb ? '<li><a href="' + esc(fb) + '"' + dis + '>' + FI.facebook + 'Facebook grubumuz</a></li>' : '') +
       '<li><a href="#/bize-ulasin">' + FI.mesaj + 'Bize yazın</a></li></ul>';
