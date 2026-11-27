@@ -92,10 +92,24 @@
       (d.baskan2 ? '<li><span>Başkan Yardımcısı</span>' + person(d.baskan2, noTel ? '' : d.telefon2) + '</li>' : (!noTel && d.telefon2 ? '<li><span>Başkan Yardımcısı</span>' + person('', d.telefon2) + '</li>' : ''));
   }
   /* Derneğin Instagram hesabı (panelde Dernek Bilgileri > Instagram adresi). "instagram.com/x", "@x" ya da tam adres yazılabilir. */
-  var IG_SVG = '<svg class="ig-i" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/></svg>';
+  /* İletişim satırlarının simgeleri (sayfanın altı): hepsi aynı boyda, aynı çizgiyle */
+  function svgI(body, fill) { return '<svg class="f-i" aria-hidden="true" viewBox="0 0 24 24" fill="' + (fill ? 'currentColor' : 'none') + '" stroke="' + (fill ? 'none' : 'currentColor') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + body + '</svg>'; }
+  var FI = {
+    harita: svgI('<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>'),
+    instagram: svgI('<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/>'),
+    facebook: svgI('<path d="M13.5 22v-8h2.7l.4-3.1h-3.1V8.9c0-.9.3-1.5 1.6-1.5h1.7V4.6c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.4-4 4.1v2.3H7.7V14h2.7v8h3.1Z"/>', true),
+    mesaj: svgI('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>')
+  };
+  /* Derneğin Instagram hesabı (panelde Dernek Bilgileri > Instagram adresi). "instagram.com/x", "@x" ya da tam adres yazılabilir. */
   function instagram(d) {
     var t = String(d.instagram || '').trim().replace(/^@/, '').replace(/^(https?:\/\/)?(www\.)?instagram\.com\//i, '').replace(/[/?#].*$/, '');
     return /^[\w.]{2,30}$/.test(t) ? { url: 'https://www.instagram.com/' + t + '/', ad: '@' + t } : null;
+  }
+  /* Derneğin Facebook adresi (sayfa ya da grup; panelde Dernek Bilgileri > Facebook adresi) */
+  function facebook(d) {
+    var t = String(d.facebook || '').trim();
+    if (t && !/^https?:\/\//i.test(t)) t = 'https://' + t;
+    return /^https:\/\/([\w-]+\.)?(facebook\.com|fb\.com|fb\.me)\/[^\s"<>]*$/i.test(t) ? t : '';
   }
   function people(d) {
     return ((d.baskan || d.telefon) ? person(d.baskan, d.telefon) : '') + ((d.baskan2 || d.telefon2) ? person(d.baskan2, d.telefon2) : '');
@@ -888,6 +902,7 @@
       '<li><span>Açılış töreni</span>6 Eylül 2026</li>' +
       (mail ? '<li><span>E-posta</span><a href="mailto:' + esc(mail) + '">' + esc(mail) + '</a></li>' : '') +
       (instagram(d) ? '<li><span>Instagram</span><a href="' + instagram(d).url + '" target="_blank" rel="noopener">' + esc(instagram(d).ad) + '</a></li>' : '') +
+      (facebook(d) ? '<li><span>Facebook</span><a href="' + esc(facebook(d)) + '" target="_blank" rel="noopener">Grubumuza katılın</a></li>' : '') +
       '<li><span>Adres</span>' + esc(d.adres || 'Köprüköy, Keskin / Kırıkkale') + '</li>' +
       '<li><span>Konum</span><a href="' + MAP + '" target="_blank" rel="noopener">Haritada aç</a></li>' +
       '</ul></div>' + (kasa || (E ? '<div' + ed('dernek:kasa') + ' style="margin-top:20px"></div>' : '')) + '</aside></div></section>' +
@@ -1760,10 +1775,13 @@
     if (d.adres) f += '<div>' + esc(d.adres) + '</div>';
     f += people(d);
     if (/@/.test(d.eposta || '')) f += '<div><a href="mailto:' + esc(d.eposta) + '">' + esc(d.eposta) + '</a></div>';
-    f += '<div><a href="' + MAP + '" target="_blank" rel="noopener">Haritada göster</a></div>';
-    var ig = instagram(d);
-    if (ig) f += '<div><a class="f-ig" href="' + ig.url + '" target="_blank" rel="noopener">' + IG_SVG + 'Instagram: ' + esc(ig.ad) + '</a></div>';
-    f += '<div class="f-bu"><a href="#/bize-ulasin">✉ Bize Ulaşın: mesaj gönderin</a></div>';
+    // Bağlantılar: hepsi aynı biçimde, simgeli birer satır
+    var ig = instagram(d), fb = facebook(d), dis = ' target="_blank" rel="noopener"';
+    f += '<ul class="f-links">' +
+      '<li><a href="' + MAP + '"' + dis + '>' + FI.harita + 'Haritada göster</a></li>' +
+      (ig ? '<li><a href="' + ig.url + '"' + dis + '>' + FI.instagram + 'Instagram: ' + esc(ig.ad) + '</a></li>' : '') +
+      (fb ? '<li><a href="' + esc(fb) + '"' + dis + '>' + FI.facebook + 'Facebook grubumuz</a></li>' : '') +
+      '<li><a href="#/bize-ulasin">' + FI.mesaj + 'Bize Ulaşın: mesaj gönderin</a></li></ul>';
     $('footContact').innerHTML = f;
     $('yil').textContent = new Date().getFullYear();
     ziyaretSayaci();
