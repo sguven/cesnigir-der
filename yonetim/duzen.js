@@ -96,6 +96,7 @@
       { name: 'telefon2', label: 'Başkan yardımcısının telefonu', type: 'tel', placeholder: '0555 123 45 67' },
       { name: 'whatsapp', label: 'WhatsApp numarası', type: 'tel', help: 'Telefonla aynıysa boş bırakın.' },
       { name: 'eposta', label: 'E-posta', type: 'email' },
+      { name: 'instagram', label: 'Instagram adresi', type: 'text', placeholder: 'instagram.com/cesnigirder', help: 'Sayfanın altında ve Hakkımızda\'da görünür. Yoksa boş bırakın.' },
       { name: 'adres', label: 'Adres', type: 'text' }
     ] },
     hakkimizda: { title: 'Hakkımızda Yazısı', help: 'Paragrafları boş bir satırla ayırın.', fields: [

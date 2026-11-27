@@ -398,6 +398,7 @@ body.radyo-acik .to-top{bottom:calc(max(12px,env(safe-area-inset-bottom)) + 52px
 .f-links a,.footer a{color:#fff}
 .f-links li{padding:4px 0}
 #footContact div{padding:3px 0}
+.f-ig{display:inline-flex;align-items:center;gap:7px}.f-ig .ig-i{width:20px;height:20px;flex:none}
 .footer-bottom{border-top:1px solid #4A3A2C;padding-top:16px;padding-bottom:22px;font-size:16px}
 .ziyaret{display:block;margin-top:6px;font-size:15px;color:#CDBBA6}
 @media (max-width:800px){ .footer-in{grid-template-columns:1fr;gap:22px} .footer-in>div+div{border-left:0;padding-left:0;border-top:1px solid #4A3A2C;padding-top:20px} }
