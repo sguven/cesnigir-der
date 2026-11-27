@@ -70,8 +70,10 @@ function etiketler(k) {
   e.push(k.key === 'e' ? '#köyetkinlikleri' : k.key === 'i' ? '#köypazarı' : t === 'vefat' ? '#vefat' : t === 'tarihten' ? '#tarih' : '#köyhaberleri');
   return e.join(' ');
 }
-// Instagram açıklamasında bağlantıya dokunulamaz: elle yazılabilsin diye sitenin kısa, yalın adresi verilir
-var DETAY = 'Ayrıntılar için: cesnigirder.org';
+// Instagram açıklamasında bağlantıya dokunulamaz: okuyanı profildeki (biyografideki) bağlantıya yönlendiririz,
+// elle yazılabilsin diye sitenin kısa, yalın adresi de verilir (Serhat, 27 Kasım 2026)
+var DETAY = 'Ayrıntılar profildeki linkte 👉 cesnigirder.org';         // etkinlik, pazar ilanı
+var DETAY_HABER = 'Haberin tamamı profildeki linkte 👉 cesnigirder.org';   // duyuru, haber, vefat…
 function metin(k) {
   var x = k.x, tur = String(x.tur || (k.key === 'i' ? 'İlan' : '')).toLocaleUpperCase('tr'), a = [];
   if (k.key === 'e') {
@@ -85,7 +87,7 @@ function metin(k) {
   } else {
     a.push((tur ? tur + ': ' : '') + x.baslik);
     if (x.metin) a.push(kisalt(x.metin, 520));
-    a.push((x.kaynak && x.link ? 'Kaynak: ' + x.kaynak + '\n' : '') + DETAY);
+    a.push((x.kaynak && x.link ? 'Kaynak: ' + x.kaynak + '\n' : '') + DETAY_HABER);
   }
   return a.join('\n\n');
 }
