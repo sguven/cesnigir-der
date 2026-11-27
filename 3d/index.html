@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="tr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Köprüköy 3D: köyü ve Çeşnigir Köprüsü'nü 3 boyutlu gezin · Çeşnigir-Der</title>
+<link rel="canonical" href="https://cesnigirder.org/3d/">
+<meta name="description" content="Köprüköy (Keskin, Kırıkkale) ve tarihi Çeşnigir Köprüsü'nün 3 boyutlu modeli. Köyün sokaklarında yürüyün, yukarıdan uçun ya da Toros'la dolaşın.">
+<meta name="theme-color" content="#7A2E1C">
+<meta property="og:title" content="Köprüköy 3D: köyü 3 boyutlu gezin">
+<meta property="og:description" content="Köprüköy ve Çeşnigir Köprüsü'nün 3 boyutlu modeli: yürüyün, uçun ya da Toros'la dolaşın.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Çeşnigir-Der">
+<meta property="og:url" content="https://cesnigirder.org/3d/">
+<meta property="og:image" content="https://cesnigirder.org/images/koprukoy-3d-buyuk.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../images/logo-160.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<!--
+  Köprüköy 3D sayfası.
+  3D modelin kendisi ayrı depoda durur (github.com/sguven/koprukoy-3d) ve oradan güncellenir; bu sayfa onu tam ekran açar.
+  Model büyük (yaklaşık 25 MB) olduğu için kendiliğinden yüklenmez: ziyaretçi "Başlat"a dokununca iner.
+  Sitenin diğer sayfalarına hiçbir yük eklemez.
+-->
+<style>
+  :root{--bordo:#7A2E1C;--bordo-dark:#5E2214;--cream:#FAF6EF;--ink:#231A14;--ink2:#5A4C40;--line:#E2D6C3}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#1b1410;color:var(--ink);font-family:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+  .bar{flex:none;display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 12px;padding-top:max(6px,env(safe-area-inset-top));
+    padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));background:var(--bordo);color:#fff}
+  .bar a{color:#fff;text-decoration:none;font-weight:700;font-size:18px;display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 6px;border-radius:8px}
+  .bar a:active{background:rgba(255,255,255,.15)}
+  .bar b{margin-left:auto;font-size:18px;white-space:nowrap}
+  .bar .tam{display:none;margin-left:6px;font-size:16px;border:1.5px solid rgba(255,255,255,.7)}
+  .bar.acik .tam{display:inline-flex}
+  main{position:relative;flex:1;min-height:0}
+  iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#cfc7b8}
+  .giris{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:18px;
+    background:#3a2e26 url(../images/koprukoy-3d-buyuk.jpg) center/cover no-repeat}
+  .kart{width:100%;max-width:520px;background:var(--cream);border-radius:14px;padding:22px 20px;box-shadow:0 10px 30px rgba(0,0,0,.35);
+    margin-bottom:max(0px,env(safe-area-inset-bottom))}
+  .kart h1{font-family:Merriweather,Georgia,serif;font-size:25px;line-height:1.25;margin:0 0 10px;color:var(--bordo)}
+  .kart p{margin:0 0 12px;font-size:18px;line-height:1.5}
+  .kart .not{font-size:16px;color:var(--ink2)}
+  .basla{display:flex;width:100%;align-items:center;justify-content:center;min-height:58px;margin-top:6px;border:0;border-radius:10px;
+    background:var(--bordo);color:#fff;font:inherit;font-size:21px;font-weight:700;cursor:pointer}
+  .basla:active{background:var(--bordo-dark);transform:scale(.98)}
+  .yeni{display:block;text-align:center;margin-top:12px;color:var(--bordo);font-weight:700;font-size:16px}
+</style>
+</head>
+<body>
+<header class="bar" id="bar">
+  <a href="../" aria-label="Çeşnigir-Der ana sayfasına dön">‹ Siteye dön</a>
+  <b>Köprüköy 3D</b>
+  <a class="tam" id="tam" href="https://sguven.github.io/koprukoy-3d/" target="_blank" rel="noopener">Tam ekran</a>
+</header>
+<main id="alan">
+  <div class="giris" id="giris">
+    <div class="kart">
+      <h1>Köyümüzü 3 boyutlu gezin</h1>
+      <p>Köprüköy'ün sokakları, evleri ve tarihi Çeşnigir Köprüsü. Köyün içinde yürüyün, yukarıdan uçun ya da beyaz Toros'la dolaşın.</p>
+      <p class="not">Model büyüktür (yaklaşık 25 MB). Wi-Fi'de açmanızı öneririz. Açılması telefona göre yarım dakika kadar sürebilir.</p>
+      <button type="button" class="basla" id="basla">Başlat</button>
+      <a class="yeni" href="https://sguven.github.io/koprukoy-3d/" target="_blank" rel="noopener">Yeni sekmede aç</a>
+    </div>
+  </div>
+</main>
+<script>
+(function () {
+  var ADRES = 'https://sguven.github.io/koprukoy-3d/';
+  var bar = document.getElementById('bar'), alan = document.getElementById('alan');
+  function ac() {
+    var f = document.createElement('iframe');
+    f.src = ADRES;
+    f.title = 'Köprüköy 3D modeli';
+    f.allow = 'fullscreen; autoplay; gyroscope; accelerometer; xr-spatial-tracking';
+    f.setAttribute('allowfullscreen', '');
+    alan.innerHTML = '';
+    alan.appendChild(f);
+    bar.classList.add('acik');
+    f.addEventListener('load', function () { try { f.focus(); } catch (e) {} });
+  }
+  document.getElementById('basla').addEventListener('click', ac);
+  if (/[?&]bas(la)?\b/.test(location.search)) ac();   // ?basla ile doğrudan açılır
+
+  // Ziyaretçi sayacı (yalnız gerçek adreste)
+  if (/(^|\.)cesnigirder\.org$/.test(location.hostname)) {
+    var s = document.createElement('script');
+    s.async = true; s.src = 'https://gc.zgo.at/count.js';
+    s.setAttribute('data-goatcounter', 'https://cesnifirder.goatcounter.com/count');
+    document.head.appendChild(s);
+  }
+})();
+</script>
+</body></html>
