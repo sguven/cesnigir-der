@@ -1,5 +1,41 @@
 [
   {
+    "tur": "Duyuru",
+    "tarih": "2026-11-27",
+    "baslik": "Kırıkkale'de terk edilmiş araçları muhtarlığa bildirin",
+    "metin": "Kırıkkale'de sokaklarda ve ortak alanlarda uzun süredir bırakılmış, artık kullanılamayan hurda araçların muhtarlıklara bildirilmesi istendi. Çağrı, İçişleri Bakanlığının 9 Kasım tarihli yazısına dayanıyor.\n\nKabahatler Kanunu'na göre kullanılamaz aracı ya da parçalarını sokakta, kamuya ait yerde bırakan kişiye idari para cezası verilebiliyor; aracın kaldırılma masrafı da sahibinden alınabiliyor. Bildirimlerin doğrudan muhtarlık gibi yetkili yerlere yapılması, aracın plakası ya da fotoğrafının sosyal medyada paylaşılmaması isteniyor.\n\nKöy yolunda, harman yerinde ya da köy meydanında yıllardır duran hurda bir araç varsa muhtarımıza haber vermek yeterli.",
+    "foto": "images/gorsel-hurda-arac-muhtarlik.jpg",
+    "kaynak": "Haber 71",
+    "link": "https://www.haber71.net/kirikkale-hurda-araclar-muhtarliklara-bildirim-2026/"
+  },
+  {
+    "tur": "Duyuru",
+    "tarih": "2026-11-27",
+    "baslik": "Kuzu ve oğlak desteğinde son gün 1 Aralık",
+    "metin": "Kırıkkale İl Tarım ve Orman Müdürlüğünün takvimine göre 2026 yılı kuzu ve oğlak desteğinin birinci dönem başvuruları 1 Aralık Salı günü mesai bitiminde sona eriyor. Başvurular 1 Eylül'de başlamıştı. Aynı duyuru buzağı ve malak desteğinin birinci dönemini de kapsıyor.\n\nBakanlığın 24 Kasım'da yayımlanan tebliğine göre destek için hayvanın destek yılı içinde doğmuş olması, küpelenip TÜRKVET'e kaydedilmiş olması ve en az 120 günlük (dört aylık) olması gerekiyor. 1 Aralık tarihi yeni bir başvuru ya da süre uzatması değil; şartları sağlamak da ödemeyi tek başına garanti etmiyor.\n\nKuzusu, oğlağı ya da buzağısı olan üreticilerimiz kayıtlarını 1 Aralık mesai bitimine kadar tarım müdürlüğünden kontrol ettirmeli.",
+    "foto": "images/gorsel-kuzu-oglak-destegi.jpg",
+    "kaynak": "Haber 71",
+    "link": "https://www.haber71.net/kuzu-oglak-destegi-kayit-120-gun-kirikkale-1-aralik-2026/"
+  },
+  {
+    "tur": "Duyuru",
+    "tarih": "2026-11-26",
+    "baslik": "Kırıkkale'ye 1 Aralık'ta kar bekleniyor",
+    "metin": "Meteoroloji Genel Müdürlüğünün 5 günlük tahminine göre Kırıkkale'de hava önümüzdeki günlerde belirgin şekilde soğuyacak. Hafta sonu parçalı bulutlu geçecek; cumartesi 4 ile 12, pazar 4 ile 11 derece arasında sıcaklık bekleniyor.\n\nPazartesi (30 Kasım) en yüksek sıcaklık 7 dereceye düşecek. Salı (1 Aralık) ise kar yağışı bekleniyor; sıcaklığın 0 ile 2 derece arasında olacağı tahmin ediliyor.\n\nKöyde hayvan barınaklarını, su borularını ve yakacağı şimdiden hazırlamak, 1 Aralık'ta yola çıkacakların da yol durumunu sorarak çıkması iyi olur.",
+    "foto": "images/gorsel-kar-uyarisi-kirikkale.jpg",
+    "kaynak": "Manşet Gazetesi",
+    "link": "https://mansetgazetesi.net/kirikkaleye-kar-geliyor-meteoroloji-tarih-verdi"
+  },
+  {
+    "tur": "Haber",
+    "tarih": "2026-11-26",
+    "baslik": "Keskin'de kış tedbirleri toplantısı yapıldı",
+    "metin": "Keskin Kaymakamı İlhan Kayatürk başkanlığında 26 Kasım'da Kış Tedbirleri Toplantısı yapıldı. Toplantıya Belediye Başkan Vekili Gürsel Demirel ile kurum müdürleri ve ilgili personel katıldı.\n\nToplantıda kış aylarında ulaşımın aksamaması, vatandaşların can ve mal güvenliğinin korunması için alınacak tedbirler ve kurumların kışta nasıl birlikte çalışacağı konuşuldu. Haberde alınan kararların ayrıntısı verilmedi.\n\nKarda kapanan köy yolu ya da acil bir durum olursa muhtarımız aracılığıyla kaymakamlığa ve ilgili kurumlara hemen haber vermek önemli.",
+    "foto": "images/gorsel-kis-hazirligi-keskin.jpg",
+    "kaynak": "Yeni Gün Gazetesi",
+    "link": "https://www.yenigungazetesi.com.tr/keskin-haberleri/keskinde-kis-hazirligi-icin-harekete-gecildi-onemli-kararlar-alindi-184779h"
+  },
+  {
     "tur": "Haber",
     "tarih": "2026-11-25",
     "baslik": "Yahşihan'da yeni sağlık müdürlüğü binası yapılıyor",
