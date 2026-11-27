@@ -164,10 +164,10 @@
   {
     "tur": "Tarihten",
     "tarih": "2026-11-22",
-    "olay_tarihi": "26 Aralık 1919",
     "baslik": "Atatürk'ün köyümüzden geçişi (1919)",
     "metin": "Bundan 107 yıl önce, Millî Mücadele'nin ilk aylarında Mustafa Kemal Paşa köyümüzden geçti. Paşa ve Heyet-i Temsiliye, 18 Aralık 1919'da Sivas'tan Ankara'ya doğru yola çıkmıştı. Kayseri, Mucur, Hacıbektaş ve Kırşehir'den sonra 25 Aralık gecesini Kaman'da geçirdiler.\n\nYerel kaynaklara göre heyet, 26 Aralık Cuma günü Keskinli süvarilerin korumasında İğdebeli–Köprüköy yolunu kullanarak Kızılırmak'ı geçti ve Bala'ya ulaştı. Geceyi Beynam köyünde geçirip 27 Aralık 1919'da Ankara'ya girdi. Irmağın muhtemelen köyümüzdeki Çeşnigir Köprüsü'nden geçildiği düşünülmektedir.\n\nKaman'da Paşa'yı ağırlayan Ali Çavuş'un yeğeni Mehmet Bektaş'ın anlattığına göre, Paşa yolda nerede kalabileceğini sorunca Ali Çavuş ona \"Köprü köyünde Hacı Ali Ağa'nın odasında kalırsınız\" demiştir.\n\nAyrıntılar Hakkımızda sayfasında. Hacı Ali Ağa'nın odasını ya da bu geçişe dair bir hatırayı bilen büyüklerimiz derneğimize ulaşırsa çok seviniriz.",
     "foto": "images/ataturk-karsilama-1919.jpg",
+    "olay_tarihi": "26 Aralık 1919",
     "kaynak": "Vikipedi (Balâ); Atatürk Ansiklopedisi; G. Çaykıran, ATAM Dergisi; Sırrı Kardeş, Heyet-i Temsiliye ve Mustafa Kemal Kırşehir'de (1950)",
     "link": "https://ataturkansiklopedisi.gov.tr/detay/385/Mustafa-Kemal-Pa%C5%9Fa%E2%80%99n%C4%B1n-Ankara%E2%80%99ya-Geli%C5%9Fi-(27-Aral%C4%B1k-1919)",
     "foto_aciklama": "Mustafa Kemal Paşa ve heyetin Millî Mücadele yıllarında karşılanışı, arşiv fotoğrafı",
@@ -182,8 +182,7 @@
         "aciklama": "Heyetin halk tarafından karşılanışını canlandıran bir tablo."
       }
     ],
-    "eski_id": "2026-11-22-ataturk-koyumuzden-gecti-26-aralik-1919",
-    "sabit": "Evet"
+    "eski_id": "2026-11-22-ataturk-koyumuzden-gecti-26-aralik-1919"
   },
   {
     "tur": "Haber",
