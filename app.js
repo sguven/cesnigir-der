@@ -1757,6 +1757,40 @@
     f += '<div class="f-bu"><a href="#/bize-ulasin">✉ Bize Ulaşın: mesaj gönderin</a></div>';
     $('footContact').innerHTML = f;
     $('yil').textContent = new Date().getFullYear();
+    ziyaretSayaci();
+  }
+
+  /* Sayfanın altında "Toplam ziyaretçi: 1.234". Sayı GoatCounter'dan gelir, her açılışta güncellenir.
+     Sayfa yüklendikten sonra istenir (siteyi yavaşlatmaz); alınamazsa hiç görünmez.
+     GoatCounter ayarlarında "Allow adding visitor counts on your website" açık olmalı. */
+  var zsIstendi = false;
+  function ziyaretSayaci() {
+    if (zsIstendi || E || !window.fetch) return;
+    zsIstendi = true;
+    var yer = document.querySelector('.footer-bottom');
+    if (!yer) return;
+    function goster(n) {
+      var el = $('ziyaret');
+      if (!el) { yer.insertAdjacentHTML('beforeend', '<span id="ziyaret" class="ziyaret"></span>'); el = $('ziyaret'); }
+      el.textContent = 'Toplam ziyaretçi: ' + n.toLocaleString('tr-TR');
+    }
+    var eski = 0;
+    try { eski = +localStorage.getItem('cd_ziyaret') || 0; } catch (e) {}
+    if (eski) goster(eski);   // son bilinen sayı hemen görünsün, yenisi gelince değişir
+    function iste() {
+      fetch('https://cesnifirder.goatcounter.com/counter/TOTAL.json', { cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+        .then(function (j) {
+          var n = parseInt(String(j.count || '').replace(/\D/g, ''), 10);
+          if (!n) return;
+          if (n < eski) n = eski;
+          goster(n);
+          try { localStorage.setItem('cd_ziyaret', String(n)); } catch (e) {}
+        })
+        .catch(function () {});
+    }
+    if (document.readyState === 'complete') setTimeout(iste, 1500);
+    else window.addEventListener('load', function () { setTimeout(iste, 1500); });
   }
 
   /* ---------- fotoğraf görüntüleyici ---------- */
