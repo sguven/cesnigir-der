@@ -326,14 +326,6 @@
     }).join('') + '</div></nav>';
   }
 
-  /* Köprüköy 3D: ayrı sayfada (3d/) açılır; model ancak orada "Başlat"a dokununca iner, buradaki kart yalnız küçük bir resim ve bağlantıdır. */
-  function kart3d(baslik) {
-    return '<a class="kart3d" href="' + B + '3d/"><img src="' + B + 'images/koprukoy-3d.jpg" width="640" height="335" loading="lazy" alt="Köprüköy\'ün 3 boyutlu modeli: kırmızı kiremitli evler, ağaçlar ve köy yolları.">' +
-      '<span class="kart3d-yazi"><b>' + (baslik || 'Köyümüzü 3 boyutlu gezin') + '</b>' +
-      '<span>Köprüköy\'ün sokakları, evleri ve Çeşnigir Köprüsü. Yürüyün, yukarıdan uçun ya da Toros\'la dolaşın.</span>' +
-      '<span class="btn">Köprüköy 3D\'yi aç ›</span></span></a>';
-  }
-
   /* ---------- sayfalar ---------- */
   function pageHome() {
     var d = data.dernek, news = duyuruSirali().slice(0, 4), ev = upcoming(45).slice(0, 4);
@@ -373,8 +365,8 @@
       '<div><div class="sec-head"><h2>Köyümüz Köprüköy</h2></div>' +
       '<p>Köyümüz adını Kızılırmak üzerindeki tarihi Çeşnigir Köprüsü\'nden alır. Selçuklu döneminden kalan on iki gözlü bu taş köprü, yüzyıllarca Ankara ile Kırşehir arasındaki yolun geçiş noktası oldu.</p>' +
       '<p class="muted">Kapulukaya Baraj Gölü kıyısında, Keskin\'e 25 km, Kırıkkale\'ye 37 km uzaklıktayız.</p>' +
-      '<div class="btn-row"><a class="btn btn-light" href="#/tarihimiz">Köyümüz ve tarihçe</a><a class="btn btn-light" href="#/gezilecek-yerler">Gezilecek yerler</a></div></div></div>' +
-      '<div class="container" style="margin-top:24px">' + kart3d() + '</div></section>';
+      '<div class="btn-row"><a class="btn btn-light" href="#/tarihimiz">Köyümüz ve tarihçe</a><a class="btn btn-light" href="#/gezilecek-yerler">Gezilecek yerler</a>' +
+      '<a class="btn btn-light" href="' + B + '3d/">Köyü 3D gezin</a></div></div></div></section>';
     return h;
   }
 
@@ -1036,7 +1028,6 @@
         tSonraki(1)) +
 
       '<div class="t-ara-kutu">' + biliyorKutu() + '</div>' +
-      '<div class="container" style="margin-bottom:28px">' + kart3d('Köprüyü ve köyü 3 boyutlu gezin') + '</div>' +
 
       /* 2. Köprüden önce */
       tBolum(1, 'Köprüden önce: 5.000 yıllık bir geçit',
