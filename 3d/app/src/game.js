@@ -170,11 +170,7 @@ export function createGame(ctx) {
 
   // ------------------------------------------------------------------ sound (synthesised)
   let ac = null;
-  // death voice clip ("başaramadın abi") — fetched up front, decoded once the AudioContext exists
-  const deathFetch = fetch(new URL('../audio/basaramadin.mp3', import.meta.url)).then(r => r.ok ? r.arrayBuffer() : null).catch(() => null);
-  let deathDec = null;
-  const getDeath = () => deathDec || (deathDec = deathFetch.then(a => a ? new Promise(res => ac.decodeAudioData(a, res, () => res(null))) : null));
-  const playDeath = (buf) => { if (!buf || G.dead <= 0) return; const s = ac.createBufferSource(), g = ac.createGain(); s.buffer = buf; g.gain.value = 1; s.connect(g); g.connect(ac.destination); s.start(); };
+  // v1.35 (owner): no voice clip on death any more (the "başaramadın" clip was removed)
   const noiseBufs = new Map();
   const noiseBuf = (dur, decay) => {
     const nk = dur + '|' + decay; let buf = noiseBufs.get(nk);
@@ -188,15 +184,12 @@ export function createGame(ctx) {
       if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
       if (ac.state === 'suspended') ac.resume();
       for (const [dur, decay] of [[0.5, 1.8], [0.25, 2.2], [0.12, 3], [0.08, 4], [0.18, 2.5], [0.1, 3], [0.5, 2.5]]) noiseBuf(dur, decay);
-      getDeath();
     } catch (e) { /* no audio */ }
   };
   const sound = (kind, dist = 0, weapon = 'ak47') => {
     try {
       if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
       if (ac.state === 'suspended') ac.resume();
-      if (kind === 'death') { getDeath().then(playDeath); return; }
-      getDeath();
       const t = ac.currentTime, att = 1 / (1 + dist / 30);
       const noise = (dur, cutoff, gain, decay = 2.5, delay = 0) => {
         const buf = noiseBuf(dur, decay);   // v1.0: one noise buffer per shape, made once
@@ -868,7 +861,7 @@ export function createGame(ctx) {
     if (G.god) dmg = Math.min(dmg, G.health - 1);   // benchmark run (src/bench.js): hit, never killed
     G.health -= dmg; G.hurt = 1;
     if (G.health > 0) sound('hurt');
-    else { G.health = 0; G.dead = 3.5; G.deaths++; setScope(false); sound('death'); feed(from.name ? `${esc(from.name)} seni vurdu — ${from.what || WEAPONS[from.weapon].name}` : from.what); mpDied(from); }
+    else { G.health = 0; G.dead = 3.5; G.deaths++; setScope(false); feed(from.name ? `${esc(from.name)} seni vurdu — ${from.what || WEAPONS[from.weapon].name}` : from.what); mpDied(from); }
   }
   // v1.25 (owner: "after dying we should come back somewhere else in the village every time"): a respawn after death
   // picks a random spot on the village's roads at least 45 m from every living bot and player (the farthest of 40
