@@ -316,7 +316,7 @@ body:not(.is-touch)[data-mode="game"] .hint { right: auto; left: 50%; transform:
 
 <div class="topbar">
   <button class="gear siteBtn" id="siteBtn" hidden aria-label="Çeşnigir-Der sitesine dön">‹ Site</button>
-  <div class="brand"><h1>Köprüköy</h1><div class="sub">Keskin · Kırıkkale, Türkiye — 3D v1.30</div></div>
+  <div class="brand"><h1>Köprüköy</h1><div class="sub">Keskin · Kırıkkale, Türkiye — 3D v1.31</div></div>
   <div class="modes" id="modes" role="tablist" aria-label="Gezinme şekli">
     <button data-mode="orbit" class="on" title="Köye yukarıdan bakın">Bakış</button>
     <button data-mode="walk" title="Köyün içinde yürüyün">Yürü</button>
@@ -344,7 +344,16 @@ body:not(.is-touch)[data-mode="game"] .hint { right: auto; left: 50%; transform:
     </div>
   </div>
   <div id="gameGroup" hidden>
-    <div class="group-title">Bot sayısı</div>
+    <div class="group-title">Silah</div>
+    <div class="row" id="primaryWpn">
+      <button class="pbtn on" data-wpn="ak47">AK-47</button>
+      <button class="pbtn" data-wpn="m4a1">M4A1</button>
+      <button class="pbtn" data-wpn="mp5">MP5</button>
+      <button class="pbtn" data-wpn="awp">AWP</button>
+      <button class="pbtn" data-wpn="m3">M3</button>
+      <button class="pbtn" data-wpn="m249">M249</button>
+    </div>
+    <div class="group-title" style="margin-top:12px">Bot sayısı</div>
     <div class="row" id="botCount">
       <button class="pbtn" data-bots="4">4 bot</button>
       <button class="pbtn on" data-bots="8">8 bot</button>
@@ -354,14 +363,6 @@ body:not(.is-touch)[data-mode="game"] .hint { right: auto; left: 50%; transform:
       <button class="pbtn" data-bots="100">100</button>
     </div>
     <div hidden>
-    <div class="row" id="primaryWpn" style="margin-top:8px">
-      <button class="pbtn on" data-wpn="ak47">AK-47</button>
-      <button class="pbtn" data-wpn="m4a1">M4A1</button>
-      <button class="pbtn" data-wpn="mp5">MP5</button>
-      <button class="pbtn" data-wpn="awp">AWP</button>
-      <button class="pbtn" data-wpn="m3">M3</button>
-      <button class="pbtn" data-wpn="m249">M249</button>
-    </div>
     <div class="row" id="difficulty" style="margin-top:8px">
       <button class="pbtn" data-diff="0.6">Kolay</button>
       <button class="pbtn on" data-diff="1">Normal</button>
@@ -1125,7 +1126,7 @@ function setMode(m) {
   document.getElementById('hud').classList.toggle('show', m === 'car');
   document.getElementById('musicBtn').hidden = m !== 'car';   // v1.29: the Toros music button only in the Toros
   document.getElementById('gearBtn').hidden = m !== 'orbit' && m !== 'game';
-  document.getElementById('gearBtn').textContent = m === 'game' ? '🤖 Bot sayısı' : '📍 Yerler';
+  document.getElementById('gearBtn').textContent = m === 'game' ? '🔫 Silah · Bot' : '📍 Yerler';
   if (m !== 'orbit' && m !== 'game') { document.getElementById('panel').classList.add('hidden'); document.getElementById('gearBtn').setAttribute('aria-expanded', 'false'); }
   document.getElementById('minimap').classList.toggle('show', m !== 'orbit'); mmD = 0; drawMinimapTop();   // size is read again on the next draw
   document.body.dataset.mode = m;
@@ -1182,7 +1183,7 @@ function go(name, instant = false) {
   anim = { from, to, t0: performance.now(), dur: 1500 };
 }
 document.querySelectorAll('#views .pbtn').forEach(b => b.addEventListener('click', () => { go(b.dataset.view); document.getElementById('panel').classList.add('hidden'); document.getElementById('gearBtn').setAttribute('aria-expanded', 'false'); }));
-document.querySelectorAll('#primaryWpn .pbtn').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('#primaryWpn .pbtn').forEach(o => o.classList.toggle('on', o === b)); if (game) game.setPrimary(b.dataset.wpn); }));
+document.querySelectorAll('#primaryWpn .pbtn').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('#primaryWpn .pbtn').forEach(o => o.classList.toggle('on', o === b)); if (game) game.setPrimary(b.dataset.wpn); document.getElementById('panel').classList.add('hidden'); document.getElementById('gearBtn').setAttribute('aria-expanded', 'false'); }));
 document.querySelectorAll('#difficulty .pbtn').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('#difficulty .pbtn').forEach(o => o.classList.toggle('on', o === b)); if (game) game.setDifficulty(+b.dataset.diff); }));
 function setGamePreset(q) {
   if (!GAME_PRESETS[q]) return;
