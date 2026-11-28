@@ -183,12 +183,15 @@ export function createBotCrowd({ url, guns, makeFlash, parent }) {
       let legTarget = 0, back = false;
       if (v > 0.3) {
         let a = Math.atan2(across, along);             // the direction of the step, relative to the facing (+ = to the left)
-        if (Math.abs(a) > Math.PI * 0.6) { back = true; a = Math.atan2(Math.sin(a + Math.PI), Math.cos(a + Math.PI)); }
+        // v1.32: with some hysteresis: a player stepping diagonally backwards on a phone's stick sat on the 0.6π line and
+        // the hips flipped from one side to the other several times a second
+        if (Math.abs(a) > Math.PI * (S.back ? 0.55 : 0.65)) { back = true; a = Math.atan2(Math.sin(a + Math.PI), Math.cos(a + Math.PI)); }
         legTarget = Math.max(-1.1, Math.min(1.1, a));
       }
       S.legYaw += (legTarget - S.legYaw) * (1 - Math.exp(-dt * 8));
       S.crouchW += ((s.crouch ? 1 : 0) - S.crouchW) * (1 - Math.exp(-dt * 7));
       const stride = S.crouchW > 0.5 ? CROUCH_STRIDE : strideAt(v);
+      if (v > 0.3) S.back = back;
       S.phase = (S.phase + (back ? -1 : 1) * v * dt / stride + 1) % 1;
       const w = S.w; w[0] = w[1] = w[2] = w[3] = 0;
       if (v < 0.15) w[0] = 1;
@@ -209,40 +212,49 @@ export function createBotCrowd({ url, guns, makeFlash, parent }) {
       root.updateMatrixWorld(true);
       _q2.setFromAxisAngle(UP, -S.legYaw / 3);
       rotateBoneWorld(bone.spine_01, _q2); rotateBoneWorld(bone.spine_02, _q2); rotateBoneWorld(bone.spine_03, _q2);
+      // v1.32: s.aimYaw (other players): where the view looks, when the body (s.yaw) lags behind it; the spine takes the
+      // difference (at most ~1 rad) and the gun, the arms and the chest's bend follow the view
+      let ay = s.yaw;
+      if (s.aimYaw !== undefined) {
+        let tw = s.aimYaw - s.yaw; tw = Math.atan2(Math.sin(tw), Math.cos(tw)); tw = Math.max(-1, Math.min(1, tw));
+        ay = s.yaw + tw; _q2.setFromAxisAngle(UP, tw / 3);
+        rotateBoneWorld(bone.spine_01, _q2); rotateBoneWorld(bone.spine_02, _q2); rotateBoneWorld(bone.spine_03, _q2);
+      }
+      const ax = Math.sin(ay), az = Math.cos(ay);
       const pitch = s.aim ? Math.max(-0.7, Math.min(0.7, s.pitch)) : 0;
-      _q2.setFromAxisAngle(_v1.set(-fz, 0, fx), pitch * 0.35);   // about the bot's right: a positive angle lifts the chest
+      _q2.setFromAxisAngle(_v1.set(-az, 0, ax), pitch * 0.35);   // about the bot's right: a positive angle lifts the chest
       rotateBoneWorld(bone.spine_02, _q2); rotateBoneWorld(bone.spine_03, _q2);
       // ---- gun: butt in the right shoulder, aimed (or pointing at the ground in front on patrol)
       S.kick = Math.max(0, S.kick - dt * 9);
       const rel = s.reloadK >= 0 ? Math.sin(Math.min(1, s.reloadK) * Math.PI) : 0;
       const ready = S.aimW;   // 0 = low ready, 1 = aimed
       const dip = (1 - ready) * 0.5 + rel * 0.45 - S.kick * 0.08;
-      qYaw.setFromAxisAngle(UP, s.yaw);
+      qYaw.setFromAxisAngle(UP, ay);
       qPitch.setFromAxisAngle(_v1.set(1, 0, 0), -pitch * ready + dip);
       qAcross.setFromAxisAngle(UP, (1 - ready) * 0.38 + rel * 0.25);
       qGun.copy(qYaw).multiply(qAcross).multiply(qPitch).multiply(FLIP);   // FLIP: the weapon models point along -Z
       const shR = bone.upperarm_r.getWorldPosition(_v2), chest = bone.spine_03.getWorldPosition(_v3), neck = bone.neck_01.getWorldPosition(_v4);
       if (G.butt) {
         // the shoulder pocket: a little inside the shoulder joint and in front of it, a little lower on patrol
-        tmpP.copy(shR).lerp(neck, 0.3).addScaledVector(_v5.set(fx, 0, fz), -0.06 - S.kick * 0.04);
+        tmpP.copy(shR).lerp(neck, 0.3).addScaledVector(_v5.set(ax, 0, az), -0.06 - S.kick * 0.04);
         tmpP.y -= 0.02 + (1 - ready) * 0.08;
         gunPos.copy(G.butt).multiplyScalar(G.scale || 1).applyQuaternion(qGun); gunPos.subVectors(tmpP, gunPos);
       } else {
         // a pistol: held out in both hands at chest height
-        tmpP.copy(chest).lerp(neck, 0.6).addScaledVector(_v5.set(fx, 0, fz), 0.42 - S.kick * 0.05 - (1 - ready) * 0.12);
-        tmpP.addScaledVector(_v5.set(-fz, 0, fx), -0.03); tmpP.y -= (1 - ready) * 0.18;
+        tmpP.copy(chest).lerp(neck, 0.6).addScaledVector(_v5.set(ax, 0, az), 0.42 - S.kick * 0.05 - (1 - ready) * 0.12);
+        tmpP.addScaledVector(_v5.set(-az, 0, ax), -0.03); tmpP.y -= (1 - ready) * 0.18;
         gunPos.copy(G.grip).multiplyScalar(G.scale || 1).applyQuaternion(qGun); gunPos.subVectors(tmpP, gunPos);
       }
       gun.position.copy(gunPos); gun.quaternion.copy(qGun); gun.updateMatrixWorld(true);
       // ---- arms reach the gun: right hand on the grip, left on the handguard (or on the magazine while reloading)
       // (solveArm works in _v1.._v6: the targets live in tmpP, the poles are made before the call)
       const tR = tmpP.copy(G.grip).applyMatrix4(gun.matrixWorld);
-      const poleR = _v6.copy(shR).add(_v1.set(-fz * 0.35 - fx * 0.25, -1, fx * 0.35 - fz * 0.25));
+      const poleR = _v6.copy(shR).add(_v1.set(-az * 0.35 - ax * 0.25, -1, ax * 0.35 - az * 0.25));
       solveArm(bone.upperarm_r, bone.lowerarm_r, bone.hand_r, tR, poleR);
       const tL = tmpP.copy(rel > 0.05 ? G.mag || G.fore : G.fore).applyMatrix4(gun.matrixWorld);
       if (rel > 0.05) tL.y -= rel * 0.12;
       const shL = bone.upperarm_l.getWorldPosition(_v2);
-      const poleL = _v6.copy(shL).add(_v1.set(fz * 0.45 - fx * 0.1, -1, -fx * 0.45 - fz * 0.1));
+      const poleL = _v6.copy(shL).add(_v1.set(az * 0.45 - ax * 0.1, -1, -ax * 0.45 - az * 0.1));
       solveArm(bone.upperarm_l, bone.lowerarm_l, bone.hand_l, tL, poleL);
       // the left hand keeps the stance's grip (it cradles the handguard); the right one is turned so that its fingers
       // wrap the pistol grip, across to the left and a little forward
