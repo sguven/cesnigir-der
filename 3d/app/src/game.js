@@ -273,15 +273,78 @@ export function createGame(ctx) {
     let tc = 1, hit = null;
     for (let i = 1; i <= n; i++) {
       const t = i / n, x = ax + (bx - ax) * t, y = ay + (by - ay) * t, z = az + (bz - az) * t, h = terrH(x, z);
-      if (y < h || inBuilding(x, y, z)) { tc = t; _hit.t = t * L; _hit.x = x; _hit.y = Math.max(y, h); _hit.z = z; hit = _hit; break; }   // shared result
+      if (y < h || inBuilding(x, y, z)) { tc = t; _hit.t = t * L; _hit.x = x; _hit.y = Math.max(y, h); _hit.z = z; _hit.solid = false; _hit.f0 = (i - 1) / n; _hit.f1 = t; hit = _hit; break; }   // shared result
     }
     const S = solidsOf();
     if (S && S.ready) {
       const f = S.segmentHit(ax, ay, az, ax + (bx - ax) * tc, ay + (by - ay) * tc, az + (bz - az) * tc);
-      if (f >= 0) { const t = f * tc; _hit.t = t * L; _hit.x = ax + (bx - ax) * t; _hit.y = ay + (by - ay) * t; _hit.z = az + (bz - az) * t; return _hit; }
+      if (f >= 0) { const t = f * tc; _hit.t = t * L; _hit.x = ax + (bx - ax) * t; _hit.y = ay + (by - ay) * t; _hit.z = az + (bz - az) * t; _hit.solid = true; return _hit; }
     }
     return hit;
   };
+
+  // v1.34 (owner: "bullet marks on the walls"): where exactly a round met a wall or the ground, and which way that
+  // surface faces. trace() steps a metre at a time, so its point can be up to a metre inside a house; this walks back
+  // to the surface (10 halvings of the last step) and takes the face of the building box it went into, or the slope
+  // of the ground. Walls, fences and trunks of the collision grid (src/solids.js) face back towards the shooter.
+  // Only called for a round that hit something, so it costs nothing while nobody fires.
+  const _imp = { x: 0, y: 0, z: 0, nx: 0, ny: 1, nz: 0, ground: false };
+  const boxAt = (x, z) => {
+    const L = grid.get(gkey(Math.floor(x / GC), Math.floor(z / GC))); if (!L) return -1;
+    for (const k of L) { const dx = x - B[k], dz = z - B[k + 1], c = Math.cos(B[k + 2]), s = Math.sin(B[k + 2]); if (Math.abs(dx * c - dz * s) < B[k + 3] + 0.02 && Math.abs(dx * s + dz * c) < B[k + 4] + 0.02) return k; }
+    return -1;
+  };
+  const wallSeen = new Map(), _wr = new THREE.Raycaster(), _wo = new THREE.Vector3(), _wd = new THREE.Vector3(), _wl = [];
+  let wallMeshes = null;
+  const WALL_MESH = /Duvar|whitewash|derWall|redWall|limestone|plinth|pilaster|Stone|brick|wall/i;
+  function wallThere(x, y, z, nx, nz) {
+    if (!wallMeshes) {   // the drawn walls of the village, with their world bounding spheres (once)
+      wallMeshes = [];
+      scene.traverse(o => { if (o.isMesh && WALL_MESH.test(o.name) && o.geometry && o.geometry.attributes.position) { let p = o.parent; while (p && p !== group) p = p.parent; if (p) return; if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere(); o.updateWorldMatrix(true, false); const sp = o.geometry.boundingSphere.clone().applyMatrix4(o.matrixWorld); wallMeshes.push({ o, sp }); } });
+    }
+    _wl.length = 0;
+    for (const w of wallMeshes) { const dx = w.sp.center.x - x, dy = w.sp.center.y - y, dz = w.sp.center.z - z, r = w.sp.radius + 1; if (dx * dx + dy * dy + dz * dz < r * r) _wl.push(w.o); }
+    if (!_wl.length) return false;
+    _wr.set(_wo.set(x + nx * 0.5, y, z + nz * 0.5), _wd.set(-nx, 0, -nz)); _wr.near = 0; _wr.far = 0.9;
+    return _wr.intersectObjects(_wl, false).length > 0;
+  }
+  function impact(ax, ay, az, bx, by, bz, hit) {
+    const dx = bx - ax, dy = by - ay, dz = bz - az, L = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1;
+    let f0 = hit.f0, f1 = hit.f1;
+    if (hit.solid) {
+      // the collision grid is coarse (a tree counts up to a few metres, a whole cell at a time), so its point is not a
+      // surface anyone sees. A mark is left only when a house wall or the ground is right behind it.
+      const fh = hit.t / L, step = 0.25 / L; f0 = -1;
+      for (let f = fh; f <= fh + 1.5 / L; f += step) { const x = ax + dx * f, y = ay + dy * f, z = az + dz * f; if (y < terrH(x, z) || inBuilding(x, y, z)) { f0 = Math.max(0, f - step); f1 = f; break; } }
+      if (f0 < 0) return null;
+    }
+    for (let i = 0; i < 10; i++) {
+      const f = (f0 + f1) / 2, x = ax + dx * f, y = ay + dy * f, z = az + dz * f;
+      if (y < terrH(x, z) || inBuilding(x, y, z)) f1 = f; else f0 = f;
+    }
+    const x = ax + dx * f1, y = ay + dy * f1, z = az + dz * f1, h = terrH(x, z);
+    _imp.x = x; _imp.y = y; _imp.z = z;
+    if (y < h + 0.12) {   // the ground: its slope
+      const e = 0.5, gx = (terrH(x + e, z) - terrH(x - e, z)) / (2 * e), gz = (terrH(x, z + e) - terrH(x, z - e)) / (2 * e), nl = Math.sqrt(gx * gx + 1 + gz * gz);
+      _imp.nx = -gx / nl; _imp.ny = 1 / nl; _imp.nz = -gz / nl; _imp.y = Math.max(y, surfaceAt(x, z, y + 0.4).y); _imp.ground = true;
+      return _imp;
+    }
+    const k = boxAt(x, z); if (k < 0) return null;
+    const c = Math.cos(B[k + 2]), s = Math.sin(B[k + 2]), ox = x - B[k], oz = z - B[k + 1], lx = ox * c - oz * s, lz = ox * s + oz * c;
+    if (h + WALL_H - y < 0.1) return null;   // the top of the box is not a roof anyone sees
+    if (B[k + 3] - Math.abs(lx) < B[k + 4] - Math.abs(lz)) { const sx = Math.sign(lx) || 1; _imp.nx = c * sx; _imp.nz = -s * sx; }
+    else { const sz = Math.sign(lz) || 1; _imp.nx = s * sz; _imp.nz = c * sz; }
+    _imp.ny = 0; _imp.ground = false;
+    if (_imp.nx * dx + _imp.nz * dz > 0) return null;   // (a face turned away from the shot: a corner case, no mark)
+    // a building box is only the footprint: a box with trees in it, a porch or an open shed has faces where no wall is
+    // drawn, and a mark there would hang in the air. So the drawn walls are asked with a 1 m ray at the mark (a few ms),
+    // once for each face of each box: remembered as soon as a wall is found, given up after three misses (a window).
+    const key = k * 4 + (Math.round(Math.atan2(_imp.nx, _imp.nz) * 2 / Math.PI) & 3);
+    let seen = wallSeen.get(key) || 0;
+    if (seen < 3) { if (wallThere(x, y, z, _imp.nx, _imp.nz)) seen = 9; else { seen++; wallSeen.set(key, seen); return null; } wallSeen.set(key, seen); }
+    if (seen !== 9) return null;
+    return _imp;
+  }
 
   // ---- road graph for roaming: lanes of the layout, junctions = endpoints within 4 m of each other
   const lanes = (village && village.roads ? village.roads : []).filter(r => r.line && r.line.length > 1 && !/^d260/.test(r.id)).map(r => ({ id: r.id, line: r.line, w: r.w }));
@@ -559,12 +622,13 @@ export function createGame(ctx) {
         const falloff = Math.max(0.6, 1 - dist / 400), dmg = Math.round(W.dmg * falloff * (0.85 + rnd() * 0.3));
         hurtPlayer(dmg, b); tracer(muzzle, _v2.set(hx, hy, hz));
       } else if (wall) {
+        markHit(muzzle.x, muzzle.y, muzzle.z, hx, hy, hz, wall, 0.12);
         tracer(muzzle, _v2.set(wall.x, wall.y, wall.z)); puff(wall.x, wall.y, wall.z, 0.5);
       } else {
         // a miss: the round passes close by and hits the ground or a wall behind
         const dir = _v2.set(ex - muzzle.x + (rnd() - 0.5) * 3, P.y + EYE - 0.3 - muzzle.y + (rnd() - 0.5) * 2, ez - muzzle.z + (rnd() - 0.5) * 3).normalize();
         const end = _v3.copy(muzzle).addScaledVector(dir, 120), w = trace(muzzle.x, muzzle.y, muzzle.z, end.x, end.y, end.z, 2.0);
-        if (w) end.set(w.x, w.y, w.z);
+        if (w) { markHit(muzzle.x, muzzle.y, muzzle.z, end.x, end.y, end.z, w, 0.12); end.set(w.x, w.y, w.z); }
         tracer(muzzle, end); if (w) puff(end.x, end.y, end.z, 0.5); if (dist < 40) sound('whiz');
       }
     }
@@ -637,6 +701,35 @@ export function createGame(ctx) {
     const u = l.userData, h = Math.min(1, u.seg + k * (1 + u.seg)), t = Math.max(0, h - u.seg), p = l.geometry.attributes.position;
     p.setXYZ(0, u.ax + u.dx * t, u.ay + u.dy * t, u.az + u.dz * t); p.setXYZ(1, u.ax + u.dx * h, u.ay + u.dy * h, u.az + u.dz * h); p.needsUpdate = true;
   }
+  // v1.34: bullet holes: one instanced mesh of small dark marks (a single draw call however many), a ring of 40 on a
+  // phone (80 on a computer) where the newest takes over the oldest. They stay for the round and go with it.
+  const HOLES = isTouch ? 40 : 80;
+  const holeTex = (() => {
+    const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d');
+    let g = x.createRadialGradient(32, 32, 2, 32, 32, 30); g.addColorStop(0, 'rgba(60,52,44,0.55)'); g.addColorStop(0.55, 'rgba(70,62,52,0.25)'); g.addColorStop(1, 'rgba(70,62,52,0)');
+    x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+    x.strokeStyle = 'rgba(40,34,28,0.5)'; x.lineWidth = 1.5;   // a few cracks
+    for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 + (i % 2) * 0.4, r0 = 8, r1 = 14 + (i * 7) % 11; x.beginPath(); x.moveTo(32 + Math.cos(a) * r0, 32 + Math.sin(a) * r0); x.lineTo(32 + Math.cos(a + 0.15) * r1, 32 + Math.sin(a + 0.15) * r1); x.stroke(); }
+    g = x.createRadialGradient(32, 32, 0, 32, 32, 9); g.addColorStop(0, 'rgba(12,10,8,1)'); g.addColorStop(0.7, 'rgba(20,16,12,0.95)'); g.addColorStop(1, 'rgba(20,16,12,0)');
+    x.fillStyle = g; x.beginPath(); x.arc(32, 32, 9, 0, Math.PI * 2); x.fill();
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  })();
+  const holes = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: holeTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, toneMapped: false }), HOLES);
+  holes.count = 0; holes.frustumCulled = false; holes.renderOrder = -1;   // (before the see-through leaves, so a tree in front hides them)
+  holes.name = 'Game_BulletHoles'; group.add(holes);
+  let holeI = 0;
+  const _hm = new THREE.Matrix4(), _hq = new THREE.Quaternion(), _hq2 = new THREE.Quaternion(), _hn = new THREE.Vector3(), _hp = new THREE.Vector3(), _hs = new THREE.Vector3(), _hz = new THREE.Vector3(0, 0, 1);
+  function hole(im, size) {
+    _hn.set(im.nx, im.ny, im.nz); _hq.setFromUnitVectors(_hz, _hn); _hq2.setFromAxisAngle(_hz, rnd() * Math.PI * 2); _hq.multiply(_hq2);
+    _hp.set(im.x + im.nx * 0.015, im.y + im.ny * 0.015, im.z + im.nz * 0.015); _hs.set(size, size, 1);
+    holes.setMatrixAt(holeI, _hm.compose(_hp, _hq, _hs)); holeI = (holeI + 1) % HOLES; holes.count = Math.min(HOLES, holes.count + 1); holes.instanceMatrix.needsUpdate = true;
+  }
+  function clearHoles() { holes.count = 0; holeI = 0; }
+  // a round that stopped at `hit` on its way a→b leaves a mark there (when it is close enough to be seen)
+  function markHit(ax, ay, az, bx, by, bz, hit, size) {
+    if ((hit.x - P.x) * (hit.x - P.x) + (hit.z - P.z) * (hit.z - P.z) > 90 * 90) return;
+    const im = impact(ax, ay, az, bx, by, bz, hit); if (im) hole(im, size * (0.85 + rnd() * 0.3));
+  }
   function puff(x, y, z, size = 0.6, m = puffMat) {
     const s = puffs[puffI]; puffI = (puffI + 1) % PUFFS;
     s.material.color.copy(m.color); s.material.opacity = m.opacity;
@@ -704,7 +797,11 @@ export function createGame(ctx) {
     }
     const end = _v5.copy(o).addScaledVector(dir, bestB ? bestT : W.range);
     const wall = trace(o.x, o.y, o.z, end.x, end.y, end.z, 1.0);
-    if (wall) { end.set(wall.x, wall.y, wall.z); if (pe < 3) puff(end.x, end.y, end.z, pellets > 1 ? 0.35 : 0.6); }
+    if (wall) {
+      const im = (wall.x - o.x) * (wall.x - o.x) + (wall.z - o.z) * (wall.z - o.z) < 90 * 90 ? impact(o.x, o.y, o.z, end.x, end.y, end.z, wall) : null;
+      if (im) { hole(im, (pellets > 1 ? 0.08 : 0.13) * (0.85 + rnd() * 0.3)); end.set(im.x, im.y, im.z); } else end.set(wall.x, wall.y, wall.z);   // the dust where the hole is
+      if (pe < 3) puff(end.x, end.y, end.z, pellets > 1 ? 0.35 : 0.6);
+    }
     else if (bestB) {
       const falloff = pellets > 1 ? Math.max(0.2, 1 - bestT / W.range) : Math.max(0.5, 1 - bestT / (W.fall || 500)), dmg = Math.round(W.dmg * falloff * (bestHead ? W.head : 1) * (0.92 + rnd() * 0.16));
       puff(end.x, end.y, end.z, 0.45, bloodMat);
@@ -1015,7 +1112,7 @@ export function createGame(ctx) {
       const wn = WEAPONS[m.w] ? WEAPONS[m.w].name : '';
       if (m.by === G.mp.id) { G.kills++; const pay = payKill(m.hd); sound('kill', 0, m.hd ? 'head' : ''); hitMark('kill'); feed(`${esc(b.name)} ${m.hd ? 'kafadan vuruldu' : 'vuruldu'} — ${wn} <i>+${pay} ₺</i>`); }
       else { const k = remotes.get(m.by); feed(`${esc(k ? k.name : cleanName(m.bn))} → ${esc(b.name)}${wn ? ' — ' + wn : ''}`); }
-    } else if (m.t === 'b' && G.mode === 'takim' && !G.isHost && b && b.pid === hostId()) onBots(m);
+    } else if (m.t === 'b' && !G.isHost && b && b.pid === hostId()) onBots(m);   // v1.34: the host's bots in both rooms
     else if (m.t === 'bh' && G.isHost && b && Number.isFinite(m.dmg)) {   // a team mate hit one of my bots
       const bot = G.bots.find(o => !o.remote && o.id === m.idx); if (!bot || bot.dead > 0) return;
       bot.hp -= Math.max(0, Math.min(500, m.dmg));
@@ -1025,7 +1122,7 @@ export function createGame(ctx) {
       if (sh && !sh.dead) { sh.dead = 1; sh.firing = false; if (sh.char) sh.char.die(); }
       if (m.by === G.mp.id) { G.kills++; const pay = payKill(m.hd); sound('kill', 0, m.hd ? 'head' : ''); hitMark('kill'); feed(`${nm} ${m.hd ? 'kafadan vuruldu' : 'vuruldu'} — ${wn} <i>+${pay} ₺</i>`); }
       else { const k = remotes.get(m.by); feed(`${esc(k ? k.name : '?')} → ${nm}${wn ? ' — ' + wn : ''}`); }
-    } else if (m.t === 'bc' && G.isHost && Number.isFinite(m.n)) { const n = Math.max(0, Math.min(100, m.n | 0)); setBots(n); document.querySelectorAll('#botCount .pbtn').forEach(o => o.classList.toggle('on', +o.dataset.bots === n)); }
+    } else if (m.t === 'bc' && G.isHost && b && Number.isFinite(m.n)) { const n = Math.max(0, Math.min(100, m.n | 0)); setBots(n); botUi(n); botSendT = 0; feed(`${esc(b.name)} bot sayısını ${n} yaptı`); }
     else if (m.t === 'bye' && b) removeRemote(b);
     else if (m.t === 'hi' && G.mp) sendState();   // a newcomer: let them see us straight away
   }
@@ -1086,7 +1183,10 @@ export function createGame(ctx) {
     for (const s of shadows) if (s) { group.remove(s.mesh); if (s.char) s.char.dispose(); }
     G.bots = G.bots.filter(o => !o.shadow); shadows.length = 0;
   }
+  // v1.34: the room's bot count is the host's, and everybody's bot count buttons show it
+  function botUi(n) { document.querySelectorAll('#botCount .pbtn').forEach(o => o.classList.toggle('on', +o.dataset.bots === n)); }
   function onBots(m) {
+    if (Number.isFinite(m.bc) && m.bc !== G.botCount) { G.botCount = Math.max(0, Math.min(100, m.bc | 0)); botUi(G.botCount); }
     const n = Math.min(MAX_BOTS - remotes.size, m.n | 0), a = m.a; if (!Array.isArray(a)) return;
     while (shadows.length > n) { const s = shadows.pop(); if (s) { group.remove(s.mesh); if (s.char) s.char.dispose(); G.bots = G.bots.filter(o => o !== s); } }
     for (let i = 0; i < n; i++) {
@@ -1112,12 +1212,14 @@ export function createGame(ctx) {
     const r2 = (v) => Math.round(v * 100) / 100, a = [];
     const ai = G.bots.filter(o => !o.remote).sort((p, q) => p.id - q.id);
     for (const b of ai) a.push(r2(b.x), r2(b.y), r2(b.z), r2(b.yaw), b.dead > 0 ? 1 : 0, b.flashT > -0.35 && b.dead <= 0 ? 1 : 0, Math.max(0, BOT_GUNS.indexOf(b.weapon)));
-    G.mp.send({ t: 'b', ts: r2(nowS()), n: ai.length, a });
+    G.mp.send({ t: 'b', ts: r2(nowS()), n: ai.length, bc: G.botCount, a });
   }
   // who runs the bots: decided again whenever someone comes or goes
+  // v1.34: in both rooms (Kapışma has bots too now, they go for whoever is nearest). A player who joins keeps their own
+  // bots where they are until the others have had a moment to say they are here (they used to vanish on joining and
+  // come back elsewhere when nobody else was in the room); then the longest-present player's bots are the ones shown.
   function teamTick(dt) {
-    if (G.mode !== 'takim') return;
-    const host = G.time - G.joinG > 1.5 && hostId() === G.mp.id;   // give the others a moment to say they are here
+    const host = G.time - G.joinG > 1.5 ? hostId() === G.mp.id : G.isHost;
     if (host !== G.isHost) {
       G.isHost = host;
       if (host) {   // take the bots over where they stand
@@ -1138,7 +1240,7 @@ export function createGame(ctx) {
       <p>Şu an oyunda olan herkesle aynı köyde oynarsınız. Birbirinizi adınızla görürsünüz.</p>
       <div class="modes2" id="ghMpMode">
         <button type="button" data-m="takim" class="on"><b>🤝 Takım: birlikte botlara karşı</b><span>Aynı takımdasınız. Oyuncular birbirini VURAMAZ, botlarla savaşırsınız.</span></button>
-        <button type="button" data-m="pvp"><b>⚔️ Kapışma: herkes birbirine karşı</b><span>Oyuncular birbirini vurur ve öldürür. Bot yok.</span></button>
+        <button type="button" data-m="pvp"><b>⚔️ Kapışma: herkes birbirine karşı</b><span>Oyuncular birbirini vurur ve öldürür. Botlar da sahada, herkese saldırır.</span></button>
       </div>
       <label>Adınız<input id="ghMpName" maxlength="16" autocomplete="nickname" placeholder="Örn. Serhat" required></label>
       <div class="row"><button type="button" id="ghMpNo">Vazgeç</button><button type="submit" id="ghMpGo">Katıl</button></div>
@@ -1162,9 +1264,9 @@ export function createGame(ctx) {
     try {
       const net = await joinRoom(ROOMS[G.mode], onMsg);
       if (!G.on) { net.close(); return; }
-      G.mp = net; G.joinT = Date.now(); G.joinG = G.time; G.isHost = false; setAi(0); mpDlg.style.display = 'none'; mpSendT = 0;
+      G.mp = net; G.joinT = Date.now(); G.joinG = G.time; G.isHost = true; mpDlg.style.display = 'none'; mpSendT = 0;
       G.roundOver = false; respawnPlayer(); net.send({ t: 'hi' }); sendState();
-      feed(G.mode === 'takim' ? 'Takım odasına katıldınız: birlikte botlara karşı. Takım arkadaşlarınız haritada mavi.' : 'Kapışma odasına katıldınız: oyuncular birbirini vurur. Rakipler haritada mavi.'); drawPlayers();
+      feed(G.mode === 'takim' ? 'Takım odasına katıldınız: birlikte botlara karşı. Takım arkadaşlarınız haritada mavi.' : 'Kapışma odasına katıldınız: oyuncular birbirini vurur, botlar da herkese saldırır. Rakipler haritada mavi.'); drawPlayers();
     } catch (err) {
       console.warn('birlikte oyna', err); el('ghMpMsg').textContent = 'Bağlanamadı. İnternet bağlantınızı kontrol edip tekrar deneyin.';
     } finally { mpConnecting = false; el('ghMpGo').disabled = false; }
@@ -1190,7 +1292,7 @@ export function createGame(ctx) {
       h = rows.map(r => `<div class="${r.me ? 'me' : ''}"><span>${esc(r.name)}</span><b>${r.k} : ${r.d}</b></div>`).join('');
       if (!remotes.size) h += '<div class="wait">Başka oyuncu bekleniyor…</div>';
       const nb = G.isHost ? G.bots.filter(o => !o.remote).length : shadows.length;
-      h = `<div class="mode">${G.mode === 'takim' ? 'Takım · ' + nb + ' bot · oyuncular birbirini vuramaz' : 'Kapışma · oyuncular birbirini vurur'}</div>` + h;
+      h = `<div class="mode">${G.mode === 'takim' ? 'Takım · ' + nb + ' bot · oyuncular birbirini vuramaz' : 'Kapışma · ' + nb + ' bot · oyuncular birbirini vurur'}</div>` + h;
     }
     if (h !== listHtml) { listHtml = h; mpList.innerHTML = h; mpList.style.display = h ? 'block' : 'none'; }
   }
@@ -1210,15 +1312,16 @@ export function createGame(ctx) {
   function newRound() {
     G.kills = 0; G.deaths = 0; G.roundT = 300; G.roundOver = false; G.dead = 0; G.feed = [];
     G.money = 800; G.armor = 0; G.nades.he = 1; G.nades.smoke = 1; G.secondary = 'deagle'; G.primary = G.basePrimary || G.primary; arm.reset();
-    respawnPlayer();
+    respawnPlayer(); clearHoles();
     for (const b of G.bots) if (!b.remote) respawnBot(b);
   }
   function stop() {
-    mpLeave(); arm.stop(); look.assist = 1; G.on = false; group.visible = false; hud.style.display = 'none'; for (const b of touchBtns) b.classList.remove('show'); setScope(false); vm.visible = false; for (const l of tracers) l.visible = false; for (const p of puffs) p.visible = false; G.firing = false; fireId = null; touchIn.jump = false; if (cross) { cross.classList.remove('off'); cross.style.removeProperty('--gap'); } hudCache.clear(); for (const k in hudNum) delete hudNum[k];
+    mpLeave(); arm.stop(); look.assist = 1; G.on = false; group.visible = false; hud.style.display = 'none'; for (const b of touchBtns) b.classList.remove('show'); setScope(false); vm.visible = false; for (const l of tracers) l.visible = false; for (const p of puffs) p.visible = false; clearHoles(); G.firing = false; fireId = null; touchIn.jump = false; if (cross) { cross.classList.remove('off'); cross.style.removeProperty('--gap'); } hudCache.clear(); for (const k in hudNum) delete hudNum[k];
   }
   /** Loading: show (then hide again) one of everything the game draws, so a frame rendered in between prepares it all. */
   function warm(on) {
     group.visible = on; vm.visible = on; vmFlash.visible = on;
+    if (on && holes.count === 0) { holes.setMatrixAt(0, _hm.makeScale(0, 0, 0)); holes.count = 1; holes.instanceMatrix.needsUpdate = true; } else if (!on && holes.count === 1 && holeI === 0) holes.count = 0;   // v1.34: the holes' shader too
     for (const k in models) models[k].visible = on || (G.on && k === G.weapon);
     for (const l of tracers) l.visible = on; for (const p of puffs) p.visible = on;
     for (const k in IM) { IM[k].count = on ? 1 : 0; IM[k].visible = on; }
@@ -1227,8 +1330,8 @@ export function createGame(ctx) {
   }
   function setBots(n) {
     G.botCount = n;
-    if (G.mp && G.mode === 'takim' && !G.isHost) { G.mp.send({ t: 'bc', n }); return; }   // the room's host runs the bots: ask them
-    if (G.mp && G.mode === 'pvp') return;   // players against players: no bots
+    if (G.mp && (!G.isHost || hostId() !== G.mp.id)) { G.mp.send({ t: 'bc', n }); return; }   // the room's host runs the bots: ask them (also in my first moments in the room)
+    if (G.mp) botSendT = 0;   // the others see the new count straight away
     setAi(n);
   }
   function setAi(n) {

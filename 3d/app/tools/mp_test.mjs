@@ -35,6 +35,12 @@ await clk(A, '#ghMp'); await wait(300); await A.screenshot({ path: out + '/1-pen
 // ---- co-op
 await join(A, 'Ali', 'takim'); await wait(2500); await join(B, 'Veli', 'takim'); await wait(4000);
 console.log('A', await st(A)); console.log('B', await st(B));
+// v1.34: the bot count is the room's: B (not the host) asks for 4, A sets it, both pages buttons show 4; then A picks 12
+const ui = (pg) => pg.evaluate(() => (document.querySelector('#botCount .pbtn.on') || {}).dataset?.bots);
+await B.evaluate(() => window.__kk.game().setBots(4)); await wait(2500);
+console.log('bots after B asks 4: A', (await st(A)).ai, 'ui', await ui(A), '| B shadows', (await st(B)).shadows, 'ui', await ui(B));
+await A.evaluate(() => { document.querySelector('#botCount .pbtn[data-bots="12"]')?.click() || window.__kk.game().setBots(12); }); await wait(2500);
+console.log('bots after A sets 12: A', (await st(A)).ai, 'ui', await ui(A), '| B shadows', (await st(B)).shadows, 'ui', await ui(B));
 // Put B looking at A from 12 m
 const [ax, az] = sp; await place(A, ax, az, 0); await place(B, ax + 0, az + 12, 0);   // yaw 0 looks to -z
 await wait(2500);
