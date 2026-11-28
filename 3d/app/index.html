@@ -114,6 +114,13 @@ body.is-touch #perf { left: 50%; transform: translateX(-50%); bottom: calc(4px +
 .crosshair .cd { left: -1px; top: -1px; width: 2px; height: 2px; }
 body.is-touch .crosshair { --len: 11px; --th: 3px; }
 body.is-touch .crosshair .cd { left: -1.5px; top: -1.5px; width: 3px; height: 3px; }
+/* v1.33: hit marker (src/game.js hitMark): four short diagonal strokes round the crosshair, above the scope */
+#hitMark { position: fixed; z-index: 32; left: 50%; top: 50%; width: 30px; height: 30px; transform: translate(-50%,-50%); opacity: 0; pointer-events: none; }
+#hitMark i { position: absolute; left: 50%; top: 50%; width: 8px; height: 2px; margin: -1px 0 0 -4px; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.7); border-radius: 1px; }
+#hitMark i:nth-child(1) { transform: rotate(45deg) translateX(-11px); } #hitMark i:nth-child(2) { transform: rotate(135deg) translateX(-11px); }
+#hitMark i:nth-child(3) { transform: rotate(225deg) translateX(-11px); } #hitMark i:nth-child(4) { transform: rotate(315deg) translateX(-11px); }
+#hitMark.head i { background: #ff5a3c; } #hitMark.kill i { background: #ff2b1c; width: 11px; height: 3px; margin: -1.5px 0 0 -5.5px; }
+body.is-touch #hitMark i { height: 3px; margin-top: -1.5px; }
 
 /* dokunmatik kontroller */
 .touch { position: fixed; inset: auto 0 0 0; height: 0; pointer-events: none; }
@@ -316,7 +323,7 @@ body:not(.is-touch)[data-mode="game"] .hint { right: auto; left: 50%; transform:
 
 <div class="topbar">
   <button class="gear siteBtn" id="siteBtn" hidden aria-label="Çeşnigir-Der sitesine dön">‹ Site</button>
-  <div class="brand"><h1>Köprüköy</h1><div class="sub">Keskin · Kırıkkale, Türkiye — 3D v1.31</div></div>
+  <div class="brand"><h1>Köprüköy</h1><div class="sub">Keskin · Kırıkkale, Türkiye — 3D v1.33</div></div>
   <div class="modes" id="modes" role="tablist" aria-label="Gezinme şekli">
     <button data-mode="orbit" class="on" title="Köye yukarıdan bakın">Bakış</button>
     <button data-mode="walk" title="Köyün içinde yürüyün">Yürü</button>

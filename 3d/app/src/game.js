@@ -19,18 +19,20 @@ import { snapPush, snapSample, snapReset } from './mpsnap.js';
 const BOT_NAMES = ['Keskinli', 'Kırıkkaleli', 'Çeşnigir', 'Kapulukaya', 'Hırka', 'Köprübaşı', 'Kızılırmak', 'Bozkır', 'Karakeçili', 'Ceritler', 'Yeşilyurt', 'Göçeri'];
 const botName = (i) => BOT_NAMES[i % BOT_NAMES.length] + (i >= BOT_NAMES.length ? ' ' + (Math.floor(i / BOT_NAMES.length) + 1) : '');
 // dmg = body damage at close range, head = multiplier, rate = shots per second, spread in radians (standing),
-// kick = camera kick per shot (degrees), climb = how fast the spread grows while holding the trigger
+// kick = camera kick per shot (degrees), climb = how fast the spread grows while holding the trigger.
+// v1.33 (weapon polish): recover = seconds for the bloom to settle once the trigger rests, draw = seconds to bring the
+// gun up after a swap, fall = metres over which a round loses all its punch (never below half: see fire()).
 export const WEAPONS = {
-  ak47:  { name: 'AK-47',        slot: 1, dmg: 36, head: 4.0, rate: 10.0, mag: 30, reserve: 90,  reload: 2.5, spread: 0.0045, moveSpread: 0.022, kick: 1.3, climb: 0.0028, auto: true,  range: 260, botAcc: 0.30 },
-  m4a1:  { name: 'M4A1',         slot: 1, dmg: 33, head: 4.0, rate: 11.0, mag: 30, reserve: 90,  reload: 3.1, spread: 0.0035, moveSpread: 0.018, kick: 1.0, climb: 0.0020, auto: true,  range: 260, botAcc: 0.33 },
-  mp5:   { name: 'MP5 Navy',     slot: 1, dmg: 26, head: 4.0, rate: 13.3, mag: 30, reserve: 120, reload: 2.6, spread: 0.0060, moveSpread: 0.014, kick: 0.6, climb: 0.0012, auto: true,  range: 180, botAcc: 0.27 },
-  awp:   { name: 'AWP',          slot: 1, dmg: 115, head: 4.0, rate: 0.68, mag: 10, reserve: 30,  reload: 3.6, spread: 0.0012, moveSpread: 0.06,  kick: 2.6, climb: 0,      auto: false, range: 400, botAcc: 0.55, scope: true },
-  deagle:{ name: 'Desert Eagle', slot: 2, dmg: 54, head: 4.0, rate: 3.3,  mag: 7,  reserve: 35,  reload: 2.2, spread: 0.0070, moveSpread: 0.024, kick: 2.2, climb: 0.004,  auto: false, range: 200, botAcc: 0.32 },
-  knife: { name: 'Bıçak',        slot: 3, dmg: 40, head: 2.0, rate: 1.4,  mag: Infinity, reserve: 0, reload: 0, spread: 0, moveSpread: 0, kick: 0.3, climb: 0, auto: true, range: 2.3, melee: true },
+  ak47:  { name: 'AK-47',        slot: 1, dmg: 36, head: 4.0, rate: 10.0, mag: 30, reserve: 90,  reload: 2.5, spread: 0.0040, moveSpread: 0.022, kick: 1.15, climb: 0.0030, auto: true,  range: 260, botAcc: 0.30, recover: 0.45, draw: 0.38, fall: 520 },
+  m4a1:  { name: 'M4A1',         slot: 1, dmg: 33, head: 4.0, rate: 11.0, mag: 30, reserve: 90,  reload: 3.1, spread: 0.0032, moveSpread: 0.018, kick: 0.9,  climb: 0.0021, auto: true,  range: 260, botAcc: 0.33, recover: 0.4,  draw: 0.38, fall: 560 },
+  mp5:   { name: 'MP5 Navy',     slot: 1, dmg: 26, head: 4.0, rate: 13.3, mag: 30, reserve: 120, reload: 2.6, spread: 0.0060, moveSpread: 0.012, kick: 0.6,  climb: 0.0013, auto: true,  range: 180, botAcc: 0.27, recover: 0.3,  draw: 0.3,  fall: 300 },
+  awp:   { name: 'AWP',          slot: 1, dmg: 115, head: 4.0, rate: 0.68, mag: 10, reserve: 30,  reload: 3.6, spread: 0.0010, moveSpread: 0.06,  kick: 2.6,  climb: 0,      auto: false, range: 400, botAcc: 0.55, scope: true, recover: 0.3, draw: 0.55, fall: 4000 },
+  deagle:{ name: 'Desert Eagle', slot: 2, dmg: 54, head: 4.0, rate: 2.8,  mag: 7,  reserve: 35,  reload: 2.2, spread: 0.0045, moveSpread: 0.024, kick: 2.4,  climb: 0.0095, maxHeat: 0.035, auto: false, range: 200, botAcc: 0.32, recover: 0.4,  draw: 0.3,  fall: 320 },
+  knife: { name: 'Bıçak',        slot: 3, dmg: 50, head: 1.6, rate: 2.0,  mag: Infinity, reserve: 0, reload: 0, spread: 0, moveSpread: 0, kick: 0.3, climb: 0, auto: true, range: 2.4, melee: true, recover: 0.1, draw: 0.2, fall: 1e9 },
   // v1.25: three more guns, sold in the shop (Güvendioğlu Market became the gun shop in the Game)
-  glock: { name: 'Glock-18',     slot: 2, dmg: 25, head: 4.0, rate: 6.5,  mag: 20, reserve: 120, reload: 2.0, spread: 0.0060, moveSpread: 0.018, kick: 0.9, climb: 0.002,  auto: false, range: 150, botAcc: 0.25 },
-  m3:    { name: 'Pompalı M3',   slot: 1, dmg: 19, head: 2.0, rate: 1.15, mag: 8,  reserve: 32,  reload: 3.0, spread: 0.045,  moveSpread: 0.06,  kick: 3.2, climb: 0,      auto: false, range: 45,  botAcc: 0.3, pellets: 9 },
-  m249:  { name: 'M249',         slot: 1, dmg: 31, head: 4.0, rate: 12.5, mag: 100, reserve: 200, reload: 4.6, spread: 0.0055, moveSpread: 0.03, kick: 0.85, climb: 0.0022, auto: true,  range: 260, botAcc: 0.3 },
+  glock: { name: 'Glock-18',     slot: 2, dmg: 25, head: 4.0, rate: 6.5,  mag: 20, reserve: 120, reload: 2.0, spread: 0.0055, moveSpread: 0.016, kick: 0.9,  climb: 0.0025, auto: false, range: 150, botAcc: 0.25, recover: 0.3,  draw: 0.28, fall: 260 },
+  m3:    { name: 'Pompalı M3',   slot: 1, dmg: 19, head: 2.0, rate: 1.15, mag: 8,  reserve: 32,  reload: 3.0, spread: 0.045,  moveSpread: 0.06,  kick: 3.2,  climb: 0,      auto: false, range: 45,  botAcc: 0.3, pellets: 9, recover: 0.3, draw: 0.4, fall: 45 },
+  m249:  { name: 'M249',         slot: 1, dmg: 31, head: 4.0, rate: 12.5, mag: 100, reserve: 200, reload: 4.6, spread: 0.0055, moveSpread: 0.03, kick: 0.85, climb: 0.0022, auto: true,  range: 260, botAcc: 0.3, recover: 0.5, draw: 0.5, fall: 520 },
 };
 // shop prices (Turkish lira of the game); the knife is free and always with you
 export const PRICES = { glock: 200, deagle: 650, mp5: 1500, m3: 1700, ak47: 2700, m4a1: 3100, awp: 4750, m249: 5200, he: 300, smoke: 300, armor: 650, ammo: 100 };
@@ -226,7 +228,16 @@ export function createGame(ctx) {
       else if (kind === 'heal') { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(660, t); o.frequency.linearRampToValueAtTime(990, t + 0.12); g.gain.setValueAtTime(0.06, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.2); } else if (kind === 'hit') { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'triangle'; o.frequency.value = 1500; g.gain.setValueAtTime(0.14, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.07); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.08); }
       else if (kind === 'headshot') { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(900, t); o.frequency.exponentialRampToValueAtTime(1800, t + 0.08); g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.15); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.16); }
       else if (kind === 'hurt') { thump(140, 60, 0.22, 0.3); noise(0.1, 900, 0.2, 3); }
-      else if (kind === 'reload') { for (let i = 0; i < 2; i++) { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'square'; o.frequency.value = 800 + i * 400; g.gain.setValueAtTime(0.07, t + i * 0.55); g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.55 + 0.05); o.connect(g); g.connect(ac.destination); o.start(t + i * 0.55); o.stop(t + i * 0.55 + 0.06); } }
+      else if (kind === 'reload') {   // v1.33: magazine out, magazine in, bolt / slide, spread over the gun's own reload time
+        const R = (WEAPONS[weapon] && WEAPONS[weapon].reload) || 1.2;
+        click(420, R * 0.12, 0.06); noise(0.05, 1500, 0.06, 4, R * 0.12);
+        click(950, R * 0.62, 0.08); noise(0.04, 2500, 0.07, 4, R * 0.62);
+        click(700, R * 0.86, 0.07); click(1250, R * 0.86 + 0.07, 0.06);
+      }
+      else if (kind === 'kill') {   // v1.33: a kill: a bright two-note ding (higher for a head shot)
+        const f0 = weapon === 'head' ? 1320 : 990;
+        for (let i = 0; i < 2; i++) { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'sine'; o.frequency.value = f0 * (i ? 1.5 : 1); g.gain.setValueAtTime(0.16, t + i * 0.07); g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.07 + 0.18); o.connect(g); g.connect(ac.destination); o.start(t + i * 0.07); o.stop(t + i * 0.07 + 0.2); }
+      }
       else if (kind === 'swap') { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'square'; o.frequency.value = 600; g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.05); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.06); }
       else if (kind === 'whiz') { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(2200, t); o.frequency.exponentialRampToValueAtTime(600, t + 0.12); g.gain.setValueAtTime(0.06, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.13); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.14); }
     } catch (e) { /* no audio */ }
@@ -426,7 +437,7 @@ export function createGame(ctx) {
   function killBot(b, head, by, what) {   // by: another player in the "together against the bots" room (v1.24), else me
     b.dead = 6; b.state = 'dead'; b.hp = 0; if (b.char) b.char.die();
     const w = by && WEAPONS[by.w] ? by.w : G.weapon;
-    if (!by) { G.kills++; const pay = payKill(head); feed(`${b.name} ${head ? 'kafadan vuruldu' : 'vuruldu'} — ${what || WEAPONS[w].name} <i>+${pay} ₺</i>`); sound(head ? 'headshot' : 'hit'); }
+    if (!by) { G.kills++; const pay = payKill(head); feed(`${b.name} ${head ? 'kafadan vuruldu' : 'vuruldu'} — ${what || WEAPONS[w].name} <i>+${pay} ₺</i>`); sound('kill', 0, head ? 'head' : ''); hitMark('kill'); }
     else feed(`${esc(by.name)} → ${b.name} — ${WEAPONS[w].name}`);
     if (G.mp && G.isHost) G.mp.send({ t: 'bk', idx: b.id, by: by ? by.pid : G.mp.id, hd: head ? 1 : 0, w });
   }
@@ -534,7 +545,7 @@ export function createGame(ctx) {
       if (b.burst <= 0) b.burst = W.auto ? (b.state === 'chase' ? 2 + Math.floor(rnd() * 3) : 3 + Math.floor(rnd() * 4)) : 1;
       b.burst--; b.mag--; b.cd = b.burst > 0 ? 1 / W.rate : (W.auto ? 0.5 + rnd() * 0.9 : 0.4 + rnd() * 0.5);
       b.flashT = 0.05; sound('shot', dist, b.weapon);
-      const playerMoving = kd('KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight');   // (keyboard only, as before)
+      const playerMoving = isMoving();   // v1.33: the joystick counts too (it was the keyboard only, so phones were easier to hit)
       let p = W.botAcc * G.difficulty * Math.max(0.25, 1 - dist / 170);
       if (playerMoving) p *= 0.65; if (moving) p *= 0.7; if (b.crouch) p *= 1.2; if (b.aimT < b.reaction + 0.4) p *= 1.15;
       if (b.char) b.char.fired();
@@ -584,7 +595,7 @@ export function createGame(ctx) {
   // v1.25: real-size guns from side profiles, held by gloved hands (src/gunmodels.js)
   const models = {}; for (const k in WEAPONS) { models[k] = viewGun(k); models[k].visible = false; vm.add(models[k]); }
   const nadeVm = { he: viewGrenade('he'), smoke: viewGrenade('smoke') }; for (const k in nadeVm) { nadeVm[k].visible = false; vmScene.add(nadeVm[k]); }
-  const vmFlash = flashSprite(0.2); vm.add(vmFlash);
+  const vmFlash = flashSprite(0.2); vmFlash.material = M.flash.clone(); vm.add(vmFlash);   // (own material: it turns at each shot)
   // where each gun rests in front of the eye [x, y, z, yaw]
   const REST = { ak47: [0.17, -0.17, -0.45, 0], m4a1: [0.17, -0.18, -0.46, 0.01], mp5: [0.16, -0.165, -0.42, 0.01], awp: [0.17, -0.18, -0.44, 0], m3: [0.17, -0.17, -0.44, 0], m249: [0.18, -0.19, -0.46, 0.01],
     deagle: [0.11, -0.125, -0.44, 0.06], glock: [0.11, -0.12, -0.42, 0.06], knife: [0.17, -0.17, -0.36, -0.35] };
@@ -596,12 +607,12 @@ export function createGame(ctx) {
   }
   function setWeapon(k) {
     if (k === G.weapon || G.dead > 0) return;
-    G.lastWeapon = G.weapon; G.weapon = k; G.swapT = 0.32; G.reloading = 0; G.heat = 0; setScope(false); sound('swap');
+    G.lastWeapon = G.weapon; G.weapon = k; G.swapT = G.swapDur = WEAPONS[k].draw || 0.32; G.reloading = 0; G.heat = 0; G.shotN = 0; setScope(false); sound('swap');
     for (const m in models) models[m].visible = m === k;
   }
   function setScope(on) {
     if (on === G.scoped) return;
-    G.scoped = on; camera.fov = on ? 14 : look.fov; camera.updateProjectionMatrix(); el('ghScope').style.display = on ? 'block' : 'none'; vm.visible = !on && G.on; scopeBtn.classList.toggle('on', on); scopeBtn.textContent = on ? '✕ KAPAT' : 'DÜRBÜN';
+    G.scoped = on; G.scopeT = 0; camera.fov = on ? 14 : look.fov; camera.updateProjectionMatrix(); el('ghScope').style.display = on ? 'block' : 'none'; vm.visible = !on && G.on; scopeBtn.classList.toggle('on', on); scopeBtn.textContent = on ? '✕ KAPAT' : 'DÜRBÜN';
   }
   // v1.1: tracers and dust / blood puffs are fixed rings of objects that stay in the scene (hidden when idle), each
   // puff with its own material made once: a shot allocates nothing, adds nothing to the scene and compiles no shader.
@@ -612,10 +623,19 @@ export function createGame(ctx) {
     const l = new THREE.Line(g, tracerMat); l.frustumCulled = false; l.visible = false; l.userData.t = 0; group.add(l); tracers.push(l);
   }
   for (let i = 0; i < PUFFS; i++) { const s = new THREE.Sprite(puffMat.clone()); s.visible = false; s.frustumCulled = false; s.userData.t = 0; group.add(s); puffs.push(s); }
+  // v1.33: a tracer is a short streak that flies from the muzzle to where the round landed (it was the whole line,
+  // shown for one or two frames), so the eye can follow a shot, yours or one aimed at you
+  const SEG = 6;
   function tracer(a, b) {
     const l = tracers[tracerI]; tracerI = (tracerI + 1) % TRACERS;
-    const p = l.geometry.attributes.position; p.setXYZ(0, a.x, a.y, a.z); p.setXYZ(1, b.x, b.y, b.z); p.needsUpdate = true;
-    l.visible = true; l.userData.t = 0.05;
+    const u = l.userData, dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z, d = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1;
+    u.ax = a.x; u.ay = a.y; u.az = a.z; u.dx = dx; u.dy = dy; u.dz = dz; u.seg = Math.min(1, SEG / d);
+    u.t = 0; u.life = Math.max(0.05, Math.min(0.22, d / 650));
+    setSeg(l, 0); l.visible = true;
+  }
+  function setSeg(l, k) {
+    const u = l.userData, h = Math.min(1, u.seg + k * (1 + u.seg)), t = Math.max(0, h - u.seg), p = l.geometry.attributes.position;
+    p.setXYZ(0, u.ax + u.dx * t, u.ay + u.dy * t, u.az + u.dz * t); p.setXYZ(1, u.ax + u.dx * h, u.ay + u.dy * h, u.az + u.dz * h); p.needsUpdate = true;
   }
   function puff(x, y, z, size = 0.6, m = puffMat) {
     const s = puffs[puffI]; puffI = (puffI + 1) % PUFFS;
@@ -623,27 +643,49 @@ export function createGame(ctx) {
     s.position.set(x, y, z); s.scale.setScalar(size); s.visible = true; s.userData.t = 0.35;
   }
   function updateFx(dt) {
-    for (let i = 0; i < TRACERS; i++) { const l = tracers[i]; if (l.visible && (l.userData.t -= dt) <= 0) l.visible = false; }
+    for (let i = 0; i < TRACERS; i++) { const l = tracers[i]; if (!l.visible) continue; const u = l.userData; u.t += dt; if (u.t >= u.life) l.visible = false; else setSeg(l, u.t / u.life); }
     for (let i = 0; i < PUFFS; i++) { const s = puffs[i]; if (!s.visible) continue; const t = s.userData.t -= dt; s.scale.multiplyScalar(1 + dt * 4); s.material.opacity = Math.max(0, t * 2); if (t <= 0) s.visible = false; }
   }
+  // v1.33: the spread now, as the crosshair shows it: standing to moving eases in (no jump), the bloom of held fire,
+  // in the air much worse, and the AWP's scope needs a moment to settle after it goes up
+  function curSpread(W) {
+    if (W.melee) return 0;
+    if (W.scope && !G.scoped) return 0.08;
+    let sp = W.spread + (W.moveSpread - W.spread) * (G.moveK || 0) + G.heat;
+    if (Math.abs(P.vy || 0) > 1.5) sp += 0.03;
+    if (W.scope) sp += Math.max(0, 0.22 - (G.scopeT || 0)) * 0.2;
+    return sp;
+  }
+  const DEG = Math.PI / 180;
   function fire() {
     const W = WEAPONS[G.weapon], A = G.ammo[G.weapon];
     if (G.dead > 0 || G.roundOver || G.reloading > 0 || G.fireCd > 0 || G.swapT > 0 || G.shopOpen || G.throwT > 0) return;
     if (!W.auto && G.fired) return;   // semi-automatic: one shot per click
     if (!W.melee && A.mag <= 0) { reload(); return; }
     if (!W.melee) A.mag--;
-    G.fired = true; G.fireQueue = 0; G.fireCd = 1 / W.rate; G.kick = 1; G.lastShot = G.time; sound('shot', 0, G.weapon);
-    if (!W.melee) { vmFlash.visible = true; vmFlash.position.copy(models[G.weapon].userData.muzzle); vmFlash.scale.setScalar(0.12 + rnd() * 0.12); }
+    // v1.33: the rate is kept on a slow frame. The wait was cut to 0 at each frame and started again at the shot, so at
+    // 30 frames a second the AK fired 7.5 rounds a second instead of 10; now the leftover of a held trigger carries over.
+    const cd = 1 / W.rate, held = W.auto && G.firing && G.fireCd > -0.05;
+    const gap = G.time - G.lastShot;
+    G.fired = true; G.fireQueue = 0; G.fireCd = held ? G.fireCd + cd : cd; G.kick = 1; G.lastShot = G.time; sound('shot', 0, G.weapon);
+    if (!W.melee) { vmFlash.visible = true; vmFlash.position.copy(models[G.weapon].userData.muzzle); vmFlash.scale.setScalar(0.12 + rnd() * 0.12); vmFlash.material.rotation = rnd() * 6.283; }
     // v1.25: the recoil is no longer a jump of the view: each shot adds to a kick that the view takes up over ~50 ms,
-    // and once the trigger is let go the view settles back most of the way (G.rq / G.rqBack in update)
-    const kickR = W.kick * Math.PI / 180 * (0.75 + rnd() * 0.4); G.rq += kickR; G.rqT = 0;
-    P.yaw += (rnd() - 0.5) * W.kick * Math.PI / 180 * 0.35;
-    const moving = isMoving();
+    // and once the trigger is let go the view settles back most of the way (G.rq / G.rqBack in update).
+    // v1.33: a learnable pattern instead of pure chance: the first rounds of a burst climb straight up, then the climb
+    // levels off and the muzzle wanders left and right. On a touch screen the kick is gentler (a thumb cannot pull the
+    // view down like a mouse).
+    if (gap > Math.max(0.3, 1.5 * cd)) { G.shotN = 0; G.recSeed = rnd() * 6.283; }
+    const n = G.shotN = (G.shotN || 0) + 1, tk = isTouch ? 0.7 : 1;
+    const vert = n <= 3 ? 1 : Math.max(0.35, 1 - (n - 3) * 0.09);
+    G.rq += W.kick * DEG * tk * vert * (0.88 + rnd() * 0.24); G.rqT = 0;
+    const side = n <= 3 ? (rnd() - 0.5) * 0.25 : Math.sin(n * 0.5 + (G.recSeed || 0)) * 0.6 + (rnd() - 0.5) * 0.3;
+    P.yaw += side * W.kick * DEG * tk * 0.45;
     const camDir = camera.getWorldDirection(_v1), right = _v2.crossVectors(camDir, camera.up).normalize(), up = _v3.crossVectors(right, camDir).normalize();
     const o = _v4.copy(camera.position);
-    let spread = (moving ? W.moveSpread : W.spread) + G.heat; if (W.scope && !G.scoped) spread = 0.08;
+    const spread = curSpread(W);
+    G.heat = Math.min(W.maxHeat || W.climb * 8, G.heat + W.climb);
+    if (W.melee) { stab(W, o, camDir); return; }
     const pellets = W.pellets || 1, cx = camDir.x, cy = camDir.y, cz = camDir.z, rx = right.x, ry = right.y, rz = right.z, ux = up.x, uy = up.y, uz = up.z;
-    G.heat = Math.min(W.climb * 8, G.heat + W.climb);
     let hits = null;   // shotgun: damage summed per bot, so nine pellets make one hit sound and one kill
     for (let pe = 0; pe < pellets; pe++) {
     const dir = _v1.set(cx, cy, cz);
@@ -662,32 +704,64 @@ export function createGame(ctx) {
     }
     const end = _v5.copy(o).addScaledVector(dir, bestB ? bestT : W.range);
     const wall = trace(o.x, o.y, o.z, end.x, end.y, end.z, 1.0);
-    if (wall) { end.set(wall.x, wall.y, wall.z); if (!W.melee && (pe < 3)) puff(end.x, end.y, end.z, pellets > 1 ? 0.35 : 0.6); }
+    if (wall) { end.set(wall.x, wall.y, wall.z); if (pe < 3) puff(end.x, end.y, end.z, pellets > 1 ? 0.35 : 0.6); }
     else if (bestB) {
-      const falloff = W.melee ? 1 : pellets > 1 ? Math.max(0.2, 1 - bestT / W.range) : Math.max(0.5, 1 - bestT / 500), dmg = Math.round(W.dmg * falloff * (bestHead ? W.head : 1) * (0.9 + rnd() * 0.2));
+      const falloff = pellets > 1 ? Math.max(0.2, 1 - bestT / W.range) : Math.max(0.5, 1 - bestT / (W.fall || 500)), dmg = Math.round(W.dmg * falloff * (bestHead ? W.head : 1) * (0.92 + rnd() * 0.16));
       puff(end.x, end.y, end.z, 0.45, bloodMat);
       if (!hits) hits = new Map(); const h = hits.get(bestB) || { dmg: 0, head: false }; h.dmg += dmg; h.head = h.head || bestHead; hits.set(bestB, h);
     }
-    if (!W.melee && pe < 3) { const muzzle = _v2.copy(models[G.weapon].userData.muzzle).applyMatrix4(models[G.weapon].matrixWorld).applyMatrix4(vmToWorld()); tracer(muzzle, end); }
+    if (pe < 3) { const muzzle = _v2.copy(models[G.weapon].userData.muzzle).applyMatrix4(models[G.weapon].matrixWorld).applyMatrix4(vmToWorld()); tracer(muzzle, end); }
     }
     if (hits) for (const [b, h] of hits) damageBot(b, h.dmg, h.head, WEAPONS[G.weapon].name);
     { const mv = models[G.weapon].userData.moving; if (mv.slide || mv.pump || mv.bolt) G.actionT = 1; }
     // bots within earshot turn towards the gunfire
-    if (!W.melee) for (const b of G.bots) { if (b.dead <= 0 && !b.hasLos && len2(b.x - P.x, b.z - P.z) < (G.weapon === 'awp' ? 160 : 90) && rnd() < 0.7) alertBot(b, P.x + (rnd() - 0.5) * 8, P.z + (rnd() - 0.5) * 8); }
+    for (const b of G.bots) { if (b.dead <= 0 && !b.hasLos && len2(b.x - P.x, b.z - P.z) < (G.weapon === 'awp' ? 160 : 90) && rnd() < 0.7) alertBot(b, P.x + (rnd() - 0.5) * 8, P.z + (rnd() - 0.5) * 8); }
+  }
+  // v1.33: the knife swings through a wedge in front of you instead of a thin line (on a phone it almost never landed):
+  // the nearest person within reach and ~35° of the view, not behind a wall. From behind it is a kill.
+  function stab(W, o, dir) {
+    let best = null, bestD = Infinity;
+    const hx = dir.x, hz = dir.z, hl = Math.sqrt(hx * hx + hz * hz) || 1;
+    for (let i = 0; i < G.bots.length; i++) {
+      const b = G.bots[i]; if (b.dead > 0) continue;
+      const dx = b.x - o.x, dz = b.z - o.z, d = Math.sqrt(dx * dx + dz * dz);
+      if (d > W.range + 0.35 || d >= bestD) continue;
+      const dy = b.y + 1.2 - o.y; if (Math.abs(dy) > 1.6) continue;
+      if (d > 0.5 && (dx * hx + dz * hz) / (d * hl) < 0.82) continue;
+      best = b; bestD = d;
+    }
+    if (!best) return;
+    const cyH = best.y + 1.72 * best.mesh.scale.y, cyB = best.y + 1.05 * best.mesh.scale.y;
+    if (trace(o.x, o.y, o.z, best.x, cyB, best.z, 0.3)) return;
+    // where the blade goes: the view's pitch picks the head or the body
+    const aimY = o.y + dir.y / hl * bestD, head = Math.abs(aimY - cyH) < Math.abs(aimY - cyB);
+    const fx = Math.sin(best.yaw || 0), fz = Math.cos(best.yaw || 0), back = (fx * (o.x - best.x) + fz * (o.z - best.z)) / (bestD || 1) < -0.35;
+    const dmg = back ? 120 : Math.round(W.dmg * (head ? W.head : 1));
+    puff(best.x, head ? cyH : cyB, best.z, 0.4, bloodMat);
+    damageBot(best, dmg, head, W.name);
+  }
+  // v1.33: hit marker: a white cross round the crosshair for a hit, red for a head shot, bigger and red for a kill
+  const hm = document.createElement('div'); hm.id = 'hitMark'; hm.setAttribute('aria-hidden', 'true'); hm.innerHTML = '<i></i><i></i><i></i><i></i>'; document.body.appendChild(hm);
+  let hmAnim = null;
+  function hitMark(kind) {
+    if (!G.on) return;
+    hm.className = kind;
+    if (hmAnim) hmAnim.cancel();
+    try { hmAnim = hm.animate([{ opacity: 1, transform: 'translate(-50%,-50%) scale(1.35)' }, { opacity: 1, transform: 'translate(-50%,-50%) scale(1)', offset: 0.25 }, { opacity: 0, transform: 'translate(-50%,-50%) scale(1)' }], { duration: kind === 'kill' ? 480 : 260, easing: 'ease-out' }); } catch (_) { hmAnim = null; }
   }
   // the view-model camera sits at the world camera: a point in the view model's frame -> world
   const _vmw = new THREE.Matrix4();
   function vmToWorld() { vmCam.position.set(0, 0, 0); vmCam.updateMatrixWorld(); return _vmw.copy(camera.matrixWorld); }
   function damageBot(b, dmg, head, what) {
     if (b.dead > 0) return;
-    if (b.remote) { sound(head ? 'headshot' : 'hit'); mpHit(b, dmg, head); return; }   // another player (they take the damage on their side) or a bot run by the room's host
-    b.hp -= dmg; sound(head ? 'headshot' : 'hit');
+    if (b.remote) { const foe = b.shadow || G.mode === 'pvp'; sound(head ? 'headshot' : 'hit'); if (foe) hitMark(head ? 'head' : 'hit'); mpHit(b, dmg, head); return; }   // another player (they take the damage on their side) or a bot run by the room's host
+    b.hp -= dmg; if (b.hp > 0) { sound(head ? 'headshot' : 'hit'); hitMark(head ? 'head' : 'hit'); }
     if (b.hp <= 0) killBot(b, head, null, what); else { if (b.char) b.char.hit(); alertBot(b, P.x, P.z); b.hasLos = true; b.seen = 6; b.aimT = b.reaction; }
   }
   function reload() {
     const W = WEAPONS[G.weapon], A = G.ammo[G.weapon];
     if (W.melee || G.reloading > 0 || A.mag >= W.mag || A.reserve <= 0 || G.dead > 0) return;
-    G.reloading = W.reload; setScope(false); sound('reload');
+    G.reloading = W.reload; setScope(false); sound('reload', 0, G.weapon);
   }
   function hurtPlayer(dmg, from) {
     if (botTarget) { if (G.mp) G.mp.send({ t: 'h', to: botTarget.pid, dmg, w: from.weapon, bn: from.name }); return; }   // v1.24: my bot shot a team mate
@@ -719,7 +793,7 @@ export function createGame(ctx) {
     if (random) { P.yaw = rnd() * Math.PI * 2; P.pitch = 0; for (const k in WEAPONS) G.ammo[k] = { mag: WEAPONS[k].mag, reserve: WEAPONS[k].reserve }; }
     else resetAmmo();
     if (G.nades.he < 1) G.nades.he = 1;   // one hand grenade with every life
-    G.weapon = G.primary; G.lastWeapon = G.secondary; for (const m in models) models[m].visible = m === G.weapon; G.swapT = 0.3;
+    G.weapon = G.primary; G.lastWeapon = G.secondary; for (const m in models) models[m].visible = m === G.weapon; G.swapT = G.swapDur = 0.3;
   }
   function payKill(head) { const pay = 300 + (head ? 100 : 0); G.money = Math.min(16000, G.money + pay); return pay; }
   function feed(msg) { G.feedSeq = (G.feedSeq || 0) + 1; G.feed.unshift({ msg, t: 5 }); if (G.feed.length > 5) G.feed.pop(); }
@@ -820,10 +894,9 @@ export function createGame(ctx) {
     if (changed('mag', W.melee ? -1 : A.mag)) setText('ghMag', W.melee ? '—' : String(A.mag));
     if (changed('res', W.melee ? -1 : A.reserve)) setText('ghRes', W.melee ? '' : `/ ${A.reserve}`);
     setText('ghRel', G.reloading > 0 ? 'dolduruluyor' : (!W.melee && A.mag === 0 ? (isTouch ? 'DOLDUR\'a basın' : 'R: doldur') : ''));
-    if (changed('slots', G.primary + '|' + G.secondary + '|' + G.weapon)) {
-      const sh = [G.primary, G.secondary, 'knife'].map((k, i) => `<span data-w="${k}" class="${k === G.weapon ? 'on' : ''}">${isTouch ? '' : (i + 1) + ' '}${WEAPONS[k].name}</span>`).join('');
-      if (sh !== slotsHtml) { el('ghSlots').innerHTML = sh; slotsHtml = sh; }
-    }
+    // v1.33: no weapon row on the screen any more (owner: the Desert Eagle and knife buttons go); the gun in the hand is
+    // named over the ammo. The keys 1 / 2 / 3 / Q still switch on a computer, and an empty gun falls back by itself.
+    if (slotsHtml !== '') { el('ghSlots').innerHTML = ''; slotsHtml = ''; }
     // v1.20.1: FIRE greys out while it cannot shoot (dead, reloading, swapping, the AWP's bolt), so a press that does
     // nothing is no longer a mystery
     if (isTouch) { const wait = G.dead > 0 || G.roundOver || G.reloading > 0 || G.swapT > 0 || G.fireCd > 0.15; if (changed('fireWait', wait)) fireBtn.classList.toggle('wait', wait); }
@@ -831,7 +904,7 @@ export function createGame(ctx) {
     // crosshair: hidden behind the scope or while dead; the gap opens with the real spread (moving, holding the trigger)
     if (cross) {
       const off = G.scoped || G.dead > 0 || G.roundOver; if (changed('crossOff', off)) cross.classList.toggle('off', off);
-      const sp = W.melee ? 0 : (W.scope && !G.scoped ? 0.08 : (isMoving() ? W.moveSpread : W.spread) + G.heat);
+      const sp = curSpread(W);
       const gap = Math.round((3 + Math.min(60, Math.tan(sp) / Math.tan(camera.fov * Math.PI / 360) * innerHeight / 2)) * 10);
       if (changed('gap', gap)) cross.style.setProperty('--gap', (gap / 10).toFixed(1) + 'px');
     }
@@ -940,7 +1013,7 @@ export function createGame(ctx) {
       if (G.dead <= 0) { const a = Math.atan2(b.x - P.x, b.z - P.z); G.hitFrom = a; }
     } else if (m.t === 'k' && b) {
       const wn = WEAPONS[m.w] ? WEAPONS[m.w].name : '';
-      if (m.by === G.mp.id) { G.kills++; const pay = payKill(m.hd); sound(m.hd ? 'headshot' : 'hit'); feed(`${esc(b.name)} ${m.hd ? 'kafadan vuruldu' : 'vuruldu'} — ${wn} <i>+${pay} ₺</i>`); }
+      if (m.by === G.mp.id) { G.kills++; const pay = payKill(m.hd); sound('kill', 0, m.hd ? 'head' : ''); hitMark('kill'); feed(`${esc(b.name)} ${m.hd ? 'kafadan vuruldu' : 'vuruldu'} — ${wn} <i>+${pay} ₺</i>`); }
       else { const k = remotes.get(m.by); feed(`${esc(k ? k.name : cleanName(m.bn))} → ${esc(b.name)}${wn ? ' — ' + wn : ''}`); }
     } else if (m.t === 'b' && G.mode === 'takim' && !G.isHost && b && b.pid === hostId()) onBots(m);
     else if (m.t === 'bh' && G.isHost && b && Number.isFinite(m.dmg)) {   // a team mate hit one of my bots
@@ -950,7 +1023,7 @@ export function createGame(ctx) {
     } else if (m.t === 'bk' && !G.isHost && b) {
       const sh = shadows[m.idx], nm = sh ? sh.name : botName(m.idx), wn = WEAPONS[m.w] ? WEAPONS[m.w].name : '';
       if (sh && !sh.dead) { sh.dead = 1; sh.firing = false; if (sh.char) sh.char.die(); }
-      if (m.by === G.mp.id) { G.kills++; const pay = payKill(m.hd); sound(m.hd ? 'headshot' : 'hit'); feed(`${nm} ${m.hd ? 'kafadan vuruldu' : 'vuruldu'} — ${wn} <i>+${pay} ₺</i>`); }
+      if (m.by === G.mp.id) { G.kills++; const pay = payKill(m.hd); sound('kill', 0, m.hd ? 'head' : ''); hitMark('kill'); feed(`${nm} ${m.hd ? 'kafadan vuruldu' : 'vuruldu'} — ${wn} <i>+${pay} ₺</i>`); }
       else { const k = remotes.get(m.by); feed(`${esc(k ? k.name : '?')} → ${nm}${wn ? ' — ' + wn : ''}`); }
     } else if (m.t === 'bc' && G.isHost && Number.isFinite(m.n)) { const n = Math.max(0, Math.min(100, m.n | 0)); setBots(n); document.querySelectorAll('#botCount .pbtn').forEach(o => o.classList.toggle('on', +o.dataset.bots === n)); }
     else if (m.t === 'bye' && b) removeRemote(b);
@@ -1174,8 +1247,19 @@ export function createGame(ctx) {
     if (!G.roundOver && !G.mp) { G.roundT -= dt; if (G.roundT <= 0) { G.roundOver = true; el('ghEndTxt').textContent = `${G.kills} vuruş · ${G.deaths} ölüm`; setScope(false); } }
     if (G.dead > 0) { G.dead -= dt; if (G.dead <= 0) respawnPlayer(true); }
     G.spawnSafe = Math.max(0, G.spawnSafe - dt);
-    G.hurt = Math.max(0, G.hurt - dt * 1.6); G.fireCd = Math.max(0, G.fireCd - dt); G.swapT = Math.max(0, G.swapT - dt); G.heat = Math.max(0, G.heat - dt * 0.02);
+    G.hurt = Math.max(0, G.hurt - dt * 1.6); G.fireCd = Math.max(-0.05, G.fireCd - dt); G.swapT = Math.max(0, G.swapT - dt);
     const W = WEAPONS[G.weapon], A = G.ammo[G.weapon];
+    // v1.33: the bloom settles quickly once the trigger rests (it took over a second), slowly while still firing
+    { const resting = G.time - G.lastShot > 1.2 / W.rate; G.heat = Math.max(0, G.heat - dt * (resting ? (W.maxHeat || W.climb * 8 || 0.01) / (W.recover || 0.4) : 0.02)); }
+    G.moveK = (G.moveK || 0) + ((isMoving() ? 1 : 0) - (G.moveK || 0)) * Math.min(1, dt * 7);
+    G.scopeT = (G.scopeT || 0) + dt;
+    // v1.33: an empty magazine reloads by itself a moment after the last round (no need to find DOLDUR mid-fight)
+    if (!W.melee && A.mag <= 0 && A.reserve > 0 && G.reloading <= 0 && G.swapT <= 0 && G.dead <= 0 && G.time - G.lastShot > 0.3 && !(G.throwT > 0) && !G.shopOpen) reload();
+    // v1.33: a gun with no rounds left at all hands over to the pistol (or the knife), since there are no buttons for them
+    if (!W.melee && A.mag <= 0 && A.reserve <= 0 && G.reloading <= 0 && G.swapT <= 0 && G.dead <= 0 && G.time - G.lastShot > 0.3 && !(G.throwT > 0)) {
+      const s2 = G.ammo[G.secondary], k = G.weapon !== G.secondary && s2 && s2.mag + s2.reserve > 0 ? G.secondary : 'knife';
+      setWeapon(k); feed(`Mermi bitti: ${WEAPONS[k].name} elinde`);
+    }
     if (G.reloading > 0) { G.reloading -= dt; if (G.reloading <= 0) { const need = W.mag - A.mag, take = Math.min(need, A.reserve); A.mag += take; A.reserve -= take; G.reloading = 0; } }
     G.fireQueue = Math.max(0, (G.fireQueue || 0) - dt);
     // v1.25: recoil taken up smoothly, then most of it given back once the trigger rests
@@ -1203,7 +1287,7 @@ export function createGame(ctx) {
     G.lastYaw = P.yaw; G.lastPitch = P.pitch;
     const sk = Math.min(1, dt * 10); G.swayX = (G.swayX || 0) + (Math.max(-0.05, Math.min(0.05, -dyaw * 0.6)) - (G.swayX || 0)) * sk; G.swayY = (G.swayY || 0) + (Math.max(-0.04, Math.min(0.04, -dpit * 0.6)) - (G.swayY || 0)) * sk;
     const rel = G.reloading > 0 ? Math.sin(Math.min(Math.PI, (W.reload - G.reloading) / W.reload * Math.PI)) : 0;
-    const sw = Math.min(1, G.swapT / 0.32), swap = sw * sw;
+    const sw = Math.min(1, G.swapT / (G.swapDur || 0.32)), swap = sw * sw;
     const th = G.throwT > 0 ? Math.sin(Math.min(1, (0.55 - G.throwT) / 0.55) * Math.PI) : 0;
     const rest = REST[G.weapon], rx = rest[0], ry = rest[1], rz = rest[2];
     const kz = G.kick * G.kick, run = moving && isRunning() ? 1 : 0;
