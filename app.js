@@ -676,7 +676,7 @@
 
   // İlan sahibine ulaşma düğmeleri ve ilanın paylaşım bilgisi
   function mkContact(x, mesaj) {
-    var tel = C.telHref(x.telefon), wa = C.waHref(x.telefon, mesaj || (x.baslik || '') + ' ilanı için yazıyorum.');
+    var tel = C.telHref(x.telefon), wa = C.waHref(x.telefon, mesaj || 'Merhaba, Çeşnigir-Der sitesindeki (cesnigirder.org) ' + (x.baslik ? '"' + x.baslik + '" ilanınız' : 'ilanınız') + ' için yazıyorum.');
     return (tel || wa) ? '<div class="btn-row" style="margin-top:6px">' + (tel ? '<a class="btn" href="tel:' + esc(tel) + '">' + icon('phone') + 'Ara</a>' : '') +
       (wa ? '<a class="btn btn-green" href="' + esc(wa) + '" target="_blank" rel="noopener">' + icon('wa') + 'WhatsApp\'tan yaz</a>' : '') + '</div>' : '';
   }
@@ -723,7 +723,7 @@
      Kartvizit bütün görünsün diye kart fotoğrafı kırpılmaz. Ziyaretçi kendi işletmesini "İşletmenizi ekleyin" formuyla gönderir (aşağıda). */
   var rKat = 'Tümü';
   function rShare(x) { return { key: 'r', id: rid(x), tur: C.rehberTur(x.tur), title: x.baslik, det: x.adres || '', photo: img(x.foto) }; }
-  function rMesaj(x) { return 'Merhaba, ' + (x.baslik || 'işletmenizi') + ' kaydını Çeşnigir-Der sitesinde gördüm.'; }
+  function rMesaj(x) { return 'Merhaba, Çeşnigir-Der sitesinin (cesnigirder.org) Esnaf Rehberi\'nde ' + (x.baslik ? '"' + x.baslik + '" kaydınızı' : 'işletmenizi') + ' gördüm, yazıyorum.'; }
   function rLink(x, big) {
     var u = C.linkUrl(x.link); if (!u) return '';
     var insta = /instagram\.com/i.test(u), fb = /facebook\.com/i.test(u);
