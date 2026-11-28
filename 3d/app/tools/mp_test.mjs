@@ -3,7 +3,7 @@
 // room. Needs `npm i --no-save three@0.170.0` and playwright resolvable from the repo. Usage: node tools/mp_test.mjs
 // (screenshots in /tmp/mp_shots; set OUT to change)
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path'; import { chromium } from 'playwright';
-const REPO = '/home/user/koprukoy-3d', THREE_DIR = path.join(REPO, 'node_modules/three'), out = process.env.OUT || '/tmp/mp_shots'; fs.mkdirSync(out, { recursive: true });
+const REPO = process.env.REPO || new URL('..', import.meta.url).pathname, THREE_DIR = path.join(REPO, 'node_modules/three'), out = process.env.OUT || '/tmp/mp_shots'; fs.mkdirSync(out, { recursive: true });
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.glb': 'model/gltf-binary', '.jpg': 'image/jpeg', '.png': 'image/png', '.json': 'application/json', '.webp': 'image/webp', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg' };
 const server = http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]);

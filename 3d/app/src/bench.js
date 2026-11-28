@@ -52,11 +52,11 @@ export function createBench(ctx) {
   const { cfg, renderer, camera, P, touchIn, surfaceAt, setMode, getGame, perf } = ctx;
   const MAXF = 40000, gl = renderer.getContext(), mem = !!performance.memory, heapNow = () => performance.memory.usedJSHeapSize, px = new Uint8Array(4);
   const real = new Float32Array(MAXF), js = new Float32Array(MAXF), simMs = new Float32Array(MAXF), renMs = new Float32Array(MAXF), tAt = new Float32Array(MAXF);
-  const flags = new Uint8Array(MAXF), progAt = new Uint8Array(MAXF), posAt = new Float32Array(MAXF * 2);
+  const callsAt = new Uint16Array(MAXF), flags = new Uint8Array(MAXF), progAt = new Uint8Array(MAXF), posAt = new Float32Array(MAXF * 2);
   const tagAt = new Map();   // frame → tags (only frames where something scripted happened)
   let active = false, done = false, n = 0, t = 0, wp = 1, heading = 0, stuck = 0, bestD = 1e9, bestT = 0, scriptI = 0, fireOn = false, shots = 0;
   let calls = 0, tris = 0, shadowN = 0, shadowCalls = 0, shadowTris = 0, heap0 = 0, heapPrev = 0, alloc = 0, gcDrops = 0, prog0 = 0, progPrev = 0, minRes = 1, resSum = 0, enterMs = 0, autoWas = true, wall0 = 0;
-  let pendingTags = null, overlay = null, rndWas = null, eyePrev = null, eyeJolts = 0, eyeMax = 0;
+  let solidsAt = null, pendingTags = null, overlay = null, rndWas = null, eyePrev = null, eyeJolts = 0, eyeMax = 0;
   const firsts = {};   // tag → frame index of its first occurrence
   const mark = (tag) => { (pendingTags || (pendingTags = [])).push(tag); if (!(tag in firsts)) firsts[tag] = n; };
 
@@ -112,7 +112,7 @@ export function createBench(ctx) {
     if (cfg.sync) { gl.finish(); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); tEnd = performance.now(); }
     const info = renderer.info.render, progs = renderer.info.programs.length;
     real[n] = frameMs; js[n] = tEnd - t0; simMs[n] = tRender - t0; renMs[n] = tEnd - tRender; tAt[n] = t; posAt[n * 2] = P.x; posAt[n * 2 + 1] = P.z;
-    calls += info.calls; tris += info.triangles;
+    calls += info.calls; tris += info.triangles; callsAt[n] = Math.min(65535, info.calls);
     if (shadowRedrawn) { shadowN++; shadowCalls += info.calls; shadowTris += info.triangles; }
     let fl = (shadowRedrawn ? 1 : 0) | (cullChanged ? 2 : 0);
     progAt[n] = Math.min(255, Math.max(0, progs - progPrev)); progPrev = progs;
@@ -121,6 +121,7 @@ export function createBench(ctx) {
     const ey = camera.position.y; if (eyePrev !== null) { const d = Math.abs(ey - eyePrev); if (d > 0.05 && d < 1.5) eyeJolts++; if (d < 1.5 && d > eyeMax) eyeMax = d; } eyePrev = ey;
     flags[n] = fl; if (pendingTags) { tagAt.set(n, pendingTags); pendingTags = null; }
     minRes = Math.min(minRes, perf.scale); resSum += perf.scale;
+    if (solidsAt === null && ctx.solidsReady && ctx.solidsReady()) solidsAt = r2(t);
     if (cfg.marks) performance.mark('kkf' + n);
     n++;
   }
@@ -149,6 +150,10 @@ export function createBench(ctx) {
       enterMs: r2(enterMs), events, eye: { joltsOver5cm: eyeJolts, maxStepCm: r2(eyeMax * 100) },
       resolution: { min: r2(minRes), mean: r2(resSum / (n || 1)), pixelRatio: r2(renderer.getPixelRatio()), size: [innerWidth, innerHeight] },
       shadowMap: renderer.shadowMap.enabled ? ctx.shadowMapSize() : 0,
+      // v1.28: the run in 10 s slices (main-thread p50 / p95 / frames over 33 ms / draw calls), so work that ends part-way (e.g. the
+      // collision grid still being built in the background) shows apart from the steady state
+      slices: (() => { const o = []; for (let s0 = 0; s0 < t; s0 += 10) { const v = []; let dc = 0; for (let i = 0; i < n; i++) if (tAt[i] >= s0 && tAt[i] < s0 + 10) { v.push(main[i]); dc += callsAt[i]; } if (!v.length) continue; const nv = v.length; v.sort((x, y) => x - y); o.push([s0, r2(v[nv >> 1]), r2(v[Math.floor(nv * 0.95)]), v.filter(x => x > 33).length, Math.round(dc / nv)]); } return o; })(),
+      solidsReadyAt: solidsAt,
       longest: order.map(i => ({ frame: i, t: r2(tAt[i]), ms: r2(main[i]), js: r2(js[i]), sim: r2(simMs[i]), render: r2(renMs[i]), at: [Math.round(posAt[i * 2]), Math.round(posAt[i * 2 + 1])], tags: tagsOf(i) })),
       gpu: dev ? gl.getParameter(dev.UNMASKED_RENDERER_WEBGL) : 'unknown', ua: navigator.userAgent,
     };

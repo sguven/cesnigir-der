@@ -256,7 +256,58 @@ part of the saving on a phone.
   per cent of the load. `model/koprukoy.glb` (21.9 MB, the Blender export) is linked from the README and not used
   by the site.
 
+## v1.28 the Game again
+
+Since v1.1 the bots became skinned people (v1.19), the walls became solid (v1.18) and the sky got clouds (v1.21). Run
+again on the v1.1 route in phone emulation (`MOBILE=1 BOTS=20`, CPU ×4, draw calls stubbed), old and new **at the
+same time** on the same machine (it drifts by tens of per cent from one hour to the next):
+
+| Phone emulation, 20 bots | before | after |
+|---|---|---|
+| Main thread p50 / p95 / p99 | 12.0 / 32.5 / 41.2 ms | 10.7 / 28.6 / 40.5 ms |
+| Frames over 33 ms / over 50 ms | 269 / 25 | 167 / 26 |
+| Garbage made | 38.9 MB/s | 14.2 MB/s |
+| GC heap drops | 233 | 116 |
+| Draw calls, average | 194 | 188 |
+| Collision grid ready (game time) | 39.6 s | 34.5 s (4 ms a frame instead of 8 on a phone while moving) |
+| 80–90 s of the route (school): frames over 33 ms, draw calls | 133, 313 | 55, 291 |
+
+What it was:
+
+- **The parked Toros.** A draw-call count by object at the school found the Toros (body 47 pieces, chrome, wheels and
+  the 12-piece cabin: ~65 draw calls) drawn every frame from 739 m away whenever it was inside the view. It is now
+  hidden beyond 150 m and its cabin beyond 25 m (both are compiled with everything else while "Loading…" is up, so
+  coming near does not stall a frame).
+- **The collision grid** ([`src/solids.js`](../src/solids.js)). A profile of its build (5.7 s on a computer,
+  so ~4× that at 8 ms a frame on a phone, ~40 s into a Game started right away) showed most of the time in the
+  sampling loop and in `terrH`. Samples per material: 46 M for `V_trim` from 200 k triangles (230 a triangle),
+  29 M for `V_metal`, 14 M for `V_plinth` from 10 k triangles (1340 a triangle). The grid of samples was
+  (edge 1 / 20 cm) × (edge 2 / 20 cm), quadratic in the length of a thin sliver. Now: every 20 cm along the longest
+  edge and every 20 cm of the triangle's height across it, plus the two shorter edges (a wall's top edge is often one
+  of them); the ground under a sample is interpolated from the triangle's corners (asked per sample only where a
+  triangle touches the bridge deck). Built in 2.4–3.0 s instead of 5.7 s. Compared on 200 000 random points and
+  20 000 random lines of fire with the old grid: 0.15 % of points differ in "tall solid", the lines of fire differ in
+  7 of 20 000 (3 blocked only by the old, 4 only by the new): sampling noise in both directions, no holes.
+  The garbage it made (numbers passed through function calls are boxed) was 3.4 of the 3.9 GB allocated in a run.
+- **`bridgeDeckY()`** made a two-element array per call (the player, every bot and the grid ask it).
+
+**Playing together** ([`src/mpsnap.js`](../src/mpsnap.js), [`tools/mp_smooth_sim.mjs`](../tools/mp_smooth_sim.mjs)).
+Not measurable here (the cloud machine cannot reach Supabase), so simulated: a player runs a route with sharp turns
+and stops, messages go out over a network with 60–180 ms latency and 5 % spikes of +250 ms, the page draws at 60 fps.
+
+| 60 s, 60 fps | old (guess ahead, 6/s) | new (play back, 6/s) | new (play back, 10/s) |
+|---|---|---|---|
+| Frames sliding or snapping (drawn faster than 9 m/s) | 1081 | 50 | 45 |
+| Change of drawn speed per frame, p95 / p99 | 4.3 / 15.1 m/s | 1.3 / 6.1 m/s | 1.3 / 6.9 m/s |
+| Drawn behind the real player by | ~190 ms (±0.36 m off the path) | ~350 ms (±0.11 m) | ~290 ms (±0.12 m) |
+
+The hit is decided on the shooter's screen as before, so drawing the others a little in the past costs no hits.
+
 ## Still open
+
+- **Bots on a phone** are ~5 draw calls each (head, hair, beard, outfit parts are separate skinned meshes) and the
+  route's busiest view still has ~290 draw calls. Merging each bot's parts into one mesh would be the next step.
+
 
 - **Real frame times.** None of the acceptance numbers could be confirmed without a GPU. `#bench=50` on the target
   laptop and phone gives them in two minutes.
