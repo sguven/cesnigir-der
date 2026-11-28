@@ -146,7 +146,7 @@ body[data-mode="car"] .joyzone .jlabel { width: 184px; bottom: calc(126px + var(
 #tReload { right: calc(142px + var(--sr)); bottom: calc(30px + var(--sb)); width: 62px; height: 62px; }
 #tJump { right: calc(36px + var(--sr)); bottom: calc(40px + var(--sb)); width: 76px; height: 76px; }   /* v1.27: where FIRE was (a tap on the view fires now) */
 #tScope { right: calc(142px + var(--sr)); bottom: calc(106px + var(--sb)); width: 62px; height: 62px; }
-#tScope.on { background: rgba(162,72,47,0.85); }
+#tScope.on { background: rgba(162,72,47,0.92); border-color: #fff; }
 /* v1.25: grenades, money, first aid, the gun shop */
 .nbtn { flex-direction: column; gap: 1px; font-size: 11px; } .nbtn b { font: 800 15px var(--display); } .nbtn.empty { opacity: 0.4; }
 #tNadeHe { right: calc(46px + var(--sr)); bottom: calc(132px + var(--sb)); width: 56px; height: 56px; }   /* v1.27: above JUMP, clear of the ammo */
@@ -170,8 +170,9 @@ body[data-mode="car"] .joyzone .jlabel { width: 184px; bottom: calc(126px + var(
 @media (max-width: 560px) { #ghShop .gs-grid { grid-template-columns: repeat(3, 1fr); } }
 #gameHud .gh-ammo { flex-direction: column; align-items: flex-end; gap: 0; } #gameHud .gh-ammo small { font: 700 13px var(--display); letter-spacing: 0.1em; opacity: 0.85; } #gameHud .gh-ammo div { display: flex; align-items: baseline; gap: 8px; }
 #gameHud .gh-slots { position: absolute; right: 24px; bottom: 96px; display: flex; gap: 6px; font: 600 12px var(--display); } #gameHud .gh-slots span { background: rgba(30,27,23,0.5); padding: 3px 8px; border-radius: 6px; opacity: 0.6; } #gameHud .gh-slots span.on { opacity: 1; background: rgba(162,72,47,0.8); }
-#gameHud .gh-scope { position: absolute; inset: 0; display: none; background: radial-gradient(circle at center, rgba(0,0,0,0) 0, rgba(0,0,0,0) 38vmin, rgba(0,0,0,0.97) 39vmin); }
-#gameHud .gh-scope i { position: absolute; left: 50%; top: 50%; width: 76vmin; height: 76vmin; transform: translate(-50%, -50%); background: linear-gradient(#000, #000) center / 100% 1px no-repeat, linear-gradient(#000, #000) center / 1px 100% no-repeat; }
+/* v1.30: the scope sits under the touch buttons and the joystick (z 30), so they stay visible and DÜRBÜN can close it */
+#ghScope { position: fixed; inset: 0; z-index: 19; pointer-events: none; display: none; background: radial-gradient(circle at center, rgba(0,0,0,0) 0, rgba(0,0,0,0) 38vmin, rgba(0,0,0,0.97) 39vmin); }
+#ghScope i { position: absolute; left: 50%; top: 50%; width: 76vmin; height: 76vmin; transform: translate(-50%, -50%); background: linear-gradient(#000, #000) center / 100% 1px no-repeat, linear-gradient(#000, #000) center / 1px 100% no-repeat; }
 #gameHud { position: fixed; inset: 0; z-index: 31; pointer-events: none; display: none; font-family: var(--display); color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.7); }
 #gameHud .gh-top { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); display: flex; gap: 22px; font: 800 24px var(--display); background: rgba(30,27,23,0.55); padding: 6px 18px; border-radius: 10px; letter-spacing: 0.04em; }
 #gameHud .gh-feed { position: absolute; top: 120px; left: 50%; transform: translateX(-50%); font: 600 14px var(--display); text-align: center; }
@@ -315,7 +316,7 @@ body:not(.is-touch)[data-mode="game"] .hint { right: auto; left: 50%; transform:
 
 <div class="topbar">
   <button class="gear siteBtn" id="siteBtn" hidden aria-label="Çeşnigir-Der sitesine dön">‹ Site</button>
-  <div class="brand"><h1>Köprüköy</h1><div class="sub">Keskin · Kırıkkale, Türkiye — 3D v1.29</div></div>
+  <div class="brand"><h1>Köprüköy</h1><div class="sub">Keskin · Kırıkkale, Türkiye — 3D v1.30</div></div>
   <div class="modes" id="modes" role="tablist" aria-label="Gezinme şekli">
     <button data-mode="orbit" class="on" title="Köye yukarıdan bakın">Bakış</button>
     <button data-mode="walk" title="Köyün içinde yürüyün">Yürü</button>

@@ -600,7 +600,7 @@ export function createGame(ctx) {
   }
   function setScope(on) {
     if (on === G.scoped) return;
-    G.scoped = on; camera.fov = on ? 14 : look.fov; camera.updateProjectionMatrix(); el('ghScope').style.display = on ? 'block' : 'none'; vm.visible = !on && G.on; scopeBtn.classList.toggle('on', on);
+    G.scoped = on; camera.fov = on ? 14 : look.fov; camera.updateProjectionMatrix(); el('ghScope').style.display = on ? 'block' : 'none'; vm.visible = !on && G.on; scopeBtn.classList.toggle('on', on); scopeBtn.textContent = on ? '✕ KAPAT' : 'DÜRBÜN';
   }
   // v1.1: tracers and dust / blood puffs are fixed rings of objects that stay in the scene (hidden when idle), each
   // puff with its own material made once: a shot allocates nothing, adds nothing to the scene and compiles no shader.
@@ -736,6 +736,7 @@ export function createGame(ctx) {
     <div class="gh-dead" id="ghDead"><div><b>BAŞARAMADIN ABİ</b><span id="ghDeadTxt">yeniden doğuyorsun…</span></div></div>
     <div class="gh-end" id="ghEnd"><div><b>TUR BİTTİ</b><span id="ghEndTxt"></span><small>${isTouch ? 'Dokun: yeni tur' : 'Enter: yeni tur'}</small></div></div>`;
   document.body.appendChild(hud);
+  document.body.appendChild(hud.querySelector('#ghScope'));   // v1.30: out of the HUD, below the touch buttons (see index.html)
   const el = (id) => document.getElementById(id);
   const mkBtn = (id, label, cls) => { const d = document.createElement('div'); d.className = 'tc pad ' + cls; d.id = id; d.textContent = label; document.body.appendChild(d); return d; };
   const fireBtn = mkBtn('tFire', 'ATEŞ', ''), reloadBtn = mkBtn('tReload', 'DOLDUR', 'gbtn'), jumpBtn = mkBtn('tJump', 'ZIPLA', 'gbtn'), scopeBtn = mkBtn('tScope', 'DÜRBÜN', 'gbtn');
