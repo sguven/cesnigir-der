@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -65,6 +65,7 @@ body[data-mode="game"] .siteBtn { display: none; }   /* v1.24: in the Game a tap
 .modes button:disabled { opacity: 0.35; cursor: not-allowed; }
 .modes button:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .spacer { flex: 1; }
+.gear.on { background: #2b2620; color: #f8f4ec; }
 .gear { pointer-events: auto; font: 600 14px var(--body); border: 1px solid var(--line); background: var(--paper); border-radius: 10px; padding: 10px 12px; cursor: pointer; color: var(--ink); }
 
 .panel { position: fixed; z-index: 45; top: 74px; left: 12px; width: 300px; max-height: calc(100% - 90px); overflow: auto; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 6px 24px rgba(40, 30, 20, 0.12); }
@@ -314,42 +315,44 @@ body:not(.is-touch)[data-mode="game"] .hint { right: auto; left: 50%; transform:
 
 <div class="topbar">
   <button class="gear siteBtn" id="siteBtn" hidden aria-label="Çeşnigir-Der sitesine dön">‹ Site</button>
-  <div class="brand"><h1>Köprüköy</h1><div class="sub">Keskin · Kırıkkale, Türkiye — 3D v1.27</div></div>
-  <div class="modes" id="modes" role="tablist" aria-label="Navigation mode">
-    <button data-mode="orbit" class="on">Orbit</button>
-    <button data-mode="walk" title="Walk through the village">Walk</button>
-    <button data-mode="fly" title="Fly over the village">Fly</button>
-    <button data-mode="car" title="Drive the Renault 12 Toros">Toros</button>
-    <button data-mode="game" title="Deathmatch against bots in the village">Game</button>
+  <div class="brand"><h1>Köprüköy</h1><div class="sub">Keskin · Kırıkkale, Türkiye — 3D v1.29</div></div>
+  <div class="modes" id="modes" role="tablist" aria-label="Gezinme şekli">
+    <button data-mode="orbit" class="on" title="Köye yukarıdan bakın">Bakış</button>
+    <button data-mode="walk" title="Köyün içinde yürüyün">Yürü</button>
+    <button data-mode="fly" title="Köyün üstünde uçun">Uç</button>
+    <button data-mode="car" title="Renault 12 Toros'u sürün">Toros</button>
+    <button data-mode="game" title="Köyde botlara karşı çatışma oyunu">Oyun</button>
   </div>
   <div class="spacer"></div>
-  <button class="gear fsbtn" id="fsBtn" hidden aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-  <button class="gear" id="gearBtn" aria-expanded="false">Settings</button>
+  <button class="gear fsbtn" id="fsBtn" hidden aria-label="Tam ekran" title="Tam ekran"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  <button class="gear" id="musicBtn" hidden aria-pressed="false" title="Müzik">🎵 Müzik</button>
+  <button class="gear" id="gearBtn" aria-expanded="false">📍 Yerler</button>
 </div>
 
 <aside class="panel hidden" id="panel">
   <div id="viewGroup">
-    <div class="group-title">Viewpoint</div>
+    <div class="group-title">Nereye bakalım?</div>
     <div class="row" id="views">
-      <button class="pbtn" data-view="genel">Overview</button>
-      <button class="pbtn" data-view="kopru">Bridge</button>
-      <button class="pbtn" data-view="gezi">Promenade</button>
-      <button class="pbtn" data-view="kanyon">Canyon</button>
-      <button class="pbtn" data-view="cennet">Çeşnigir park</button>
-      <button class="pbtn" data-view="detay">Village centre</button>
-      <button class="pbtn" data-view="tepe">Top-down</button>
+      <button class="pbtn" data-view="genel">Genel</button>
+      <button class="pbtn" data-view="kopru">Köprü</button>
+      <button class="pbtn" data-view="gezi">Gezi yolu</button>
+      <button class="pbtn" data-view="kanyon">Kanyon</button>
+      <button class="pbtn" data-view="cennet">Çeşnigir parkı</button>
+      <button class="pbtn" data-view="detay">Köy merkezi</button>
+      <button class="pbtn" data-view="tepe">Tepeden</button>
     </div>
   </div>
   <div id="gameGroup" hidden>
-    <div class="group-title">Game</div>
+    <div class="group-title">Bot sayısı</div>
     <div class="row" id="botCount">
-      <button class="pbtn" data-bots="4">4 bots</button>
-      <button class="pbtn on" data-bots="8">8 bots</button>
-      <button class="pbtn" data-bots="12">12 bots</button>
+      <button class="pbtn" data-bots="4">4 bot</button>
+      <button class="pbtn on" data-bots="8">8 bot</button>
+      <button class="pbtn" data-bots="12">12 bot</button>
       <button class="pbtn" data-bots="25">25</button>
       <button class="pbtn" data-bots="50">50</button>
       <button class="pbtn" data-bots="100">100</button>
     </div>
+    <div hidden>
     <div class="row" id="primaryWpn" style="margin-top:8px">
       <button class="pbtn on" data-wpn="ak47">AK-47</button>
       <button class="pbtn" data-wpn="m4a1">M4A1</button>
@@ -359,73 +362,76 @@ body:not(.is-touch)[data-mode="game"] .hint { right: auto; left: 50%; transform:
       <button class="pbtn" data-wpn="m249">M249</button>
     </div>
     <div class="row" id="difficulty" style="margin-top:8px">
-      <button class="pbtn" data-diff="0.6">Easy</button>
+      <button class="pbtn" data-diff="0.6">Kolay</button>
       <button class="pbtn on" data-diff="1">Normal</button>
-      <button class="pbtn" data-diff="1.5">Hard</button>
+      <button class="pbtn" data-diff="1.5">Zor</button>
     </div>
     <div class="row" id="gameQuality" style="margin-top:8px;align-items:center">
-      <span style="font:600 12px var(--body);opacity:.7">Performance</span>
-      <button class="pbtn on" data-q="auto" title="Balanced shadows, full view distance, automatic resolution">Auto</button>
-      <button class="pbtn" data-q="smooth" title="Low shadows, hazy beyond ~600 m, no far grass or small details, lower resolution">Smooth</button>
-      <button class="pbtn" data-q="quality" title="Full-size shadows and resolution">Quality</button>
+      <span style="font:600 12px var(--body);opacity:.7">Performans</span>
+      <button class="pbtn on" data-q="auto" title="Dengeli gölgeler, tam görüş mesafesi, otomatik çözünürlük">Otomatik</button>
+      <button class="pbtn" data-q="smooth" title="Az gölge, 600 m ötesi puslu, uzakta çimen ve küçük ayrıntı yok, düşük çözünürlük">Akıcı</button>
+      <button class="pbtn" data-q="quality" title="Tam gölge ve tam çözünürlük">Kaliteli</button>
     </div>
-    <p class="note">5-minute deathmatch. Keys: 1 / 2 / 3 weapons, R reload, right mouse AWP scope, G hand grenade, F smoke grenade, B gun shop (Güvendioğlu Market). Health comes back at the SAĞLIK post in front of the municipality.</p>
+    <p class="note">5 dakikalık çatışma. Tuşlar: 1 / 2 / 3 silahlar, R şarjör doldur, farenin sağ tuşu AWP dürbünü, G el bombası, F sis bombası, B silahçı (Güvendioğlu Market). Canınız belediyenin önündeki SAĞLIK noktasında dolar.</p>
+    </div>
   </div>
-  <div id="carGroup" hidden>
+  <div hidden><!-- v1.29: no settings panel any more (owner): these stay at their defaults -->
+  <div id="carGroup">
     <div class="group-title">Toros</div>
     <div class="row" id="colors"></div>
     <div class="row" style="margin-top:8px">
-      <label class="chip"><input type="checkbox" id="optRack"> Roof rack</label>
-      <label class="chip"><input type="checkbox" id="optLights"> Headlights</label>
-      <label class="chip"><input type="checkbox" id="optSound" checked> Engine sound</label>
-      <label class="chip"><input type="checkbox" id="optMusic" checked> Music</label>
+      <label class="chip"><input type="checkbox" id="optRack"> Üst bagaj</label>
+      <label class="chip"><input type="checkbox" id="optLights"> Farlar</label>
+      <label class="chip"><input type="checkbox" id="optSound" checked> Motor sesi</label>
+      <label class="chip"><input type="checkbox" id="optMusic"> Müzik</label>
     </div>
   </div>
   <div>
-    <div class="group-title">Show</div>
+    <div class="group-title">Göster</div>
     <div class="row">
-      <label class="chip"><input type="checkbox" id="lyBina" checked> Buildings</label>
-      <label class="chip"><input type="checkbox" id="lyAgac" checked> Trees and rocks</label>
-      <label class="chip"><input type="checkbox" id="lyYol" checked> Roads</label>
-      <label class="chip"><input type="checkbox" id="lyEtiket" checked> Labels</label>
-      <label class="chip" title="Wind, birds, water and insects, depending on where you are"><input type="checkbox" id="optAmb" checked> Nature sounds</label>
+      <label class="chip"><input type="checkbox" id="lyBina" checked> Binalar</label>
+      <label class="chip"><input type="checkbox" id="lyAgac" checked> Ağaçlar ve kayalar</label>
+      <label class="chip"><input type="checkbox" id="lyYol" checked> Yollar</label>
+      <label class="chip"><input type="checkbox" id="lyEtiket" checked> Yer adları</label>
+      <label class="chip" title="Bulunduğunuz yere göre rüzgâr, kuş, su ve böcek sesleri"><input type="checkbox" id="optAmb" checked> Doğa sesleri</label>
     </div>
   </div>
   <!-- v1.21: the rarely used settings fold away -->
-  <details class="adv">
-    <summary>More settings</summary>
-    <label class="chip" style="width:100%;justify-content:space-between;margin-top:10px"><span>Look sensitivity <b id="sensVal">1.0×</b></span>
-      <input type="range" id="optSens" min="0.3" max="3" step="0.1" value="1" style="flex:1;margin-left:10px" aria-label="Mouse and touch look sensitivity"></label>
-    <label class="chip" style="width:100%;justify-content:space-between;margin-top:8px"><span>Field of view <b id="fovVal">55°</b></span>
-      <input type="range" id="optFov" min="55" max="90" step="1" value="55" style="flex:1;margin-left:10px" aria-label="Field of view on foot"></label>
+  <details class="adv" open>
+    <summary>Diğer ayarlar</summary>
+    <label class="chip" style="width:100%;justify-content:space-between;margin-top:10px"><span>Bakış hızı <b id="sensVal">1.0×</b></span>
+      <input type="range" id="optSens" min="0.3" max="3" step="0.1" value="1" style="flex:1;margin-left:10px" aria-label="Fare ve parmakla bakış hızı"></label>
+    <label class="chip" style="width:100%;justify-content:space-between;margin-top:8px"><span>Görüş açısı <b id="fovVal">55°</b></span>
+      <input type="range" id="optFov" min="55" max="90" step="1" value="55" style="flex:1;margin-left:10px" aria-label="Yürürken görüş açısı"></label>
     <div class="row" style="margin-top:8px">
-      <label class="chip"><input type="checkbox" id="optTP" checked> Walk in third person</label>
-      <label class="chip"><input type="checkbox" id="optFps"> Show FPS</label>
-      <label class="chip"><input type="checkbox" id="optAutoRes" checked> Auto resolution</label>
+      <label class="chip"><input type="checkbox" id="optTP" checked> Yürürken kişiyi göster</label>
+      <label class="chip"><input type="checkbox" id="optFps"> FPS göster</label>
+      <label class="chip"><input type="checkbox" id="optAutoRes" checked> Otomatik çözünürlük</label>
     </div>
   </details>
+  </div>
   <div hidden><!-- sun: disabled for now, fixed at 15:00 -->
-    <div class="group-title">Sun</div>
-    <label class="chip" style="width:100%;justify-content:space-between"><span>Time <b id="sunVal">15:00</b></span>
-      <input type="range" id="sun" min="6" max="20" step="0.25" value="15" style="flex:1;margin-left:10px" aria-label="Time of day"></label>
+    <div class="group-title">Güneş</div>
+    <label class="chip" style="width:100%;justify-content:space-between"><span>Saat <b id="sunVal">15:00</b></span>
+      <input type="range" id="sun" min="6" max="20" step="0.25" value="15" style="flex:1;margin-left:10px" aria-label="Günün saati"></label>
   </div>
 </aside>
 
-<div class="hud" id="hud"><div class="speedo"><b id="spd">0</b><span id="gearTxt">km/h · N</span></div></div>
+<div class="hud" id="hud"><div class="speedo"><b id="spd">0</b><span id="gearTxt">km/sa · N</span></div></div>
 <div class="hint" id="hint"></div>
 
 <!-- dokunmatik -->
-<div class="tc joyzone" id="joyZone" aria-hidden="true"><div class="jlabel" id="joyLabel">MOVE</div><div class="joy" id="joy"><i id="joyKnob"></i></div></div>
+<div class="tc joyzone" id="joyZone" aria-hidden="true"><div class="jlabel" id="joyLabel">YÜRÜ</div><div class="joy" id="joy"><i id="joyKnob"></i></div></div>
 <div class="tc pad" id="tLeft">◀</div>
 <div class="tc pad" id="tRight">▶</div>
-<div class="tc pad" id="tGas">GAS</div>
-<div class="tc pad" id="tBrake">BRAKE</div>
+<div class="tc pad" id="tGas">GAZ</div>
+<div class="tc pad" id="tBrake">FREN</div>
 <div class="tc pad" id="tUp">▲</div>
 <div class="tc pad" id="tDn">▼</div>
-<div class="tc pad" id="tCam">CAMERA</div>
-<div class="tc pad" id="tView">VIEW</div>
-<div class="tc pad gbtn" id="tWalkJump">JUMP</div>
-<div id="loading" style="position:fixed;inset:0;display:grid;place-items:center;font:600 20px var(--display);letter-spacing:.04em">Loading model…</div>
+<div class="tc pad" id="tCam">KAMERA</div>
+<div class="tc pad" id="tView">KAMERA</div>
+<div class="tc pad gbtn" id="tWalkJump">ZIPLA</div>
+<div id="loading" style="position:fixed;inset:0;display:grid;place-items:center;font:600 20px var(--display);letter-spacing:.04em">Model yükleniyor…</div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -452,7 +458,7 @@ import { createAvatar } from './src/avatar.js';
 import { createSolids } from './src/solids.js';
 import { parseBench, createBench } from './src/bench.js';
 
-const POIS = [{"id": "kopru", "label": "Çeşnigir Bridge", "kind": "tarihi", "pos": [-377, 16, -277]}, {"id": "viyaduk", "label": "D.260 viaduct", "kind": "yol", "pos": [-539, 22, -105]}, {"id": "d260a", "label": "D.260", "kind": "yon", "pos": [-951, 35, -319]}, {"id": "d260b", "label": "D.260", "kind": "yon", "pos": [154, 36, 568]}, {"id": "karakecili", "label": "To Karakeçili", "kind": "yon", "pos": [-825, 21, -209]}, {"id": "gezi", "label": "Promenade", "kind": "yer", "pos": [-267, 14, -57]}, {"id": "seyir", "label": "Viewpoint rock", "kind": "yer", "pos": [-292, 24, -338]}, {"id": "iskele", "label": "Boat pier", "kind": "yer", "pos": [-262, 9, -393]}, {"id": "cennet", "label": "Çeşnigir park", "kind": "yer", "pos": [-262, 12, -340]}, {"id": "kanyon", "label": "Çeşnigir Canyon", "kind": "yer", "pos": [-277, 55, -602]}, {"id": "nehir", "label": "Kızılırmak · Kapulukaya Reservoir", "kind": "su", "pos": [-318, 8, 331]}];
+const POIS = [{"id": "kopru", "label": "Çeşnigir Köprüsü", "kind": "tarihi", "pos": [-377, 16, -277]}, {"id": "viyaduk", "label": "D.260 viyadüğü", "kind": "yol", "pos": [-539, 22, -105]}, {"id": "d260a", "label": "D.260", "kind": "yon", "pos": [-951, 35, -319]}, {"id": "d260b", "label": "D.260", "kind": "yon", "pos": [154, 36, 568]}, {"id": "karakecili", "label": "Karakeçili yönü", "kind": "yon", "pos": [-825, 21, -209]}, {"id": "gezi", "label": "Gezi yolu", "kind": "yer", "pos": [-267, 14, -57]}, {"id": "seyir", "label": "Seyir kayası", "kind": "yer", "pos": [-292, 24, -338]}, {"id": "iskele", "label": "Tekne iskelesi", "kind": "yer", "pos": [-262, 9, -393]}, {"id": "cennet", "label": "Çeşnigir parkı", "kind": "yer", "pos": [-262, 12, -340]}, {"id": "kanyon", "label": "Çeşnigir Kanyonu", "kind": "yer", "pos": [-277, 55, -602]}, {"id": "nehir", "label": "Kızılırmak · Kapulukaya Barajı", "kind": "su", "pos": [-318, 8, 331]}];
 const isTouch = matchMedia('(pointer: coarse)').matches;
 const LITE = location.hash === '#lite';
 document.body.classList.toggle('is-touch', isTouch); document.body.dataset.mode = 'orbit';
@@ -750,7 +756,7 @@ loadAll().then(gltf => {
   document.getElementById('loading').remove(); sceneReady = true;
   if (thirdPerson) setTimeout(getAvatar, 1500);   // v1.18: fetch the walking character in the background
   setTimeout(buildSolids, 800);
-}).catch(err => { document.getElementById('loading').textContent = 'The model could not be loaded. Please reload the page.'; console.error(err); });
+}).catch(err => { document.getElementById('loading').textContent = 'Model yüklenemedi. Lütfen sayfayı yenileyin.'; console.error(err); });
 
 // v1.1: one frame, still behind "Loading…", that draws the whole map from above with every distance-culled detail,
 // the bots, weapons and effects switched on and the shadow map stretched over all of it. Whatever the renderer
@@ -857,7 +863,7 @@ function setThirdPerson(on) {
   }
 }
 const colorsEl = document.getElementById('colors');
-COLORS.forEach(([n, c], i) => { const b = document.createElement('button'); b.className = 'swatch' + (i ? '' : ' on'); b.style.background = '#' + c.toString(16).padStart(6, '0'); b.title = n; b.setAttribute('aria-label', 'Colour: ' + n); b.onclick = () => { paint.color.setHex(c); colorsEl.querySelectorAll('.swatch').forEach(s => s.classList.remove('on')); b.classList.add('on'); }; colorsEl.appendChild(b); });
+COLORS.forEach(([n, c], i) => { const b = document.createElement('button'); b.className = 'swatch' + (i ? '' : ' on'); b.style.background = '#' + c.toString(16).padStart(6, '0'); b.title = n; b.setAttribute('aria-label', 'Renk: ' + n); b.onclick = () => { paint.color.setHex(c); colorsEl.querySelectorAll('.swatch').forEach(s => s.classList.remove('on')); b.classList.add('on'); }; colorsEl.appendChild(b); });
 
 // ---------- vehicle physics ----------
 const CS = { x: 0, z: 0, y: 0, vy: 0, h: 0, v: 0, steer: 0, pitch: 0, roll: 0, spin: 0, safe: null, safeT: 0, dead: 0, cam: 0, gear: 1, rpm: 900 };
@@ -913,7 +919,7 @@ function carStep(dt) {
   // wheel contacts
   const c = Math.cos(CS.h), s = Math.sin(CS.h), pts = [[WB / 2, -TRACK / 2], [WB / 2, TRACK / 2], [-WB / 2, -TRACK / 2], [-WB / 2, TRACK / 2]];
   const hs = pts.map(([lx, lz]) => surfaceAt(CS.x + lx * c + lz * s, CS.z - lx * s + lz * c, CS.y + 0.3));
-  if (hs.filter(q => q.water).length >= 2) { CS.dead = 1.6; CS.v = 0; toast('The Toros drove into the water!'); }
+  if (hs.filter(q => q.water).length >= 2) { CS.dead = 1.6; CS.v = 0; toast('Toros suya girdi!'); }
   const gy = (hs[0].y + hs[1].y + hs[2].y + hs[3].y) / 4;
   const tp = Math.atan2((hs[0].y + hs[1].y) / 2 - (hs[2].y + hs[3].y) / 2, WB), tr = Math.atan2((hs[1].y + hs[3].y) / 2 - (hs[0].y + hs[2].y) / 2, TRACK);
   if (gy < CS.y - 0.08) { CS.vy -= 9.81 * dt; CS.y += CS.vy * dt; if (CS.y <= gy) { CS.y = gy; CS.vy = 0; } }
@@ -939,7 +945,7 @@ const spdEl = document.getElementById('spd'), gearEl = document.getElementById('
 function updateHud() {
   const v = Math.round(Math.abs(CS.v) * 3.6), g = CS.v < -0.3 ? 'R' : Math.abs(CS.v) < 0.3 ? 'N' : String(CS.gear);
   if (v !== hudSpd) { hudSpd = v; spdEl.textContent = v; }
-  if (g !== hudGear) { hudGear = g; gearEl.textContent = `km/h · ${g}`; }
+  if (g !== hudGear) { hudGear = g; gearEl.textContent = `km/sa · ${g}`; }
 }
 // motor sesi (v1.8: src/engine.js — firing pulses, exhaust rasp and pipe resonances instead of the muffled v1.7 hum)
 let audio = null;
@@ -964,9 +970,10 @@ function updateRadio() {
   else if (!on && !radio.paused) radio.pause();
 }
 document.getElementById('optMusic').addEventListener('change', updateRadio);
+{ const mb = document.getElementById('musicBtn'), om = document.getElementById('optMusic');
+  mb.addEventListener('click', () => { om.checked = !om.checked; mb.classList.toggle('on', om.checked); mb.setAttribute('aria-pressed', String(om.checked)); mb.textContent = om.checked ? '🎵 Müzik açık' : '🎵 Müzik'; updateRadio(); }); }
 // v1.21: nature sounds (src/ambience.js). Browsers only allow sound after a tap / key press, so the first one starts it.
 const optAmb = document.getElementById('optAmb');
-try { optAmb.checked = localStorage.getItem('kk_amb') !== '0'; } catch (_) {}
 optAmb.addEventListener('change', () => { try { localStorage.setItem('kk_amb', optAmb.checked ? '1' : '0'); } catch (_) {} });
 const kickAudio = () => { if (!optAmb.checked && mode !== 'car') return; initAudio(); if (audio && audio.ac.state === 'suspended') audio.ac.resume(); };
 for (const ev of ['pointerdown', 'keydown', 'touchend']) addEventListener(ev, kickAudio, { passive: true });
@@ -1100,12 +1107,12 @@ dom.addEventListener('wheel', e => { if (!tpActive()) return; e.preventDefault()
 // ---------- modlar ----------
 let carYawOff = 0, carPitchOff = 0, game = null, rotateTold = false;
 const HINTS = {
-  orbit: isTouch ? '1 finger: move · 2 fingers: pinch to zoom, twist to rotate, slide up/down to tilt · Double-tap: zoom in' : 'Drag: move · Wheel: zoom · Right-drag or Ctrl+drag: rotate / tilt · Double-click: zoom in',
-  walk: 'Click, then look with the mouse · WASD: walk · Shift: run · Space: jump · V: third person · Esc: release cursor',
-  walkTP: isTouch ? 'Left thumb: walk (push to the rim to run) · Drag right side: turn the camera · JUMP: jump (over walls too) · VIEW: first person' : 'Click, then turn the camera with the mouse · WASD: walk · Shift: run · Ctrl+Shift: sprint · Space: jump · Wheel: zoom · V: first person · Esc: cursor',
-  fly: 'Click, then look with the mouse · WASD: fly · E/Q: up/down · Shift: fast',
-  car: isTouch ? 'Left thumb: steer (a light push turns a little) · GAS / BRAKE (hold BRAKE to reverse) · Drag right side: look around · CAMERA: switch view' : '↑/W gas · ↓/S brake/reverse · ←/→ steer · Space handbrake · C camera · L headlights',
-  game: isTouch ? 'Left thumb: move (push to the rim to run) · Tap the screen: fire · Hold: keep firing · Drag: aim · Tap a weapon to switch · BOMBA / SİS: throw' : 'Click to aim · WASD move · Shift run · Mouse 1 fire · Mouse 2 scope (AWP) · 1/2/3, Q, wheel: weapons · R reload · G grenade · F smoke · B shop · Esc: cursor',
+  orbit: isTouch ? 'Tek parmak: kaydır · İki parmak: açıp kapatarak yakınlaş, çevirerek döndür, yukarı/aşağı kaydırarak eğ · Çift dokun: yakınlaş' : 'Sürükle: kaydır · Tekerlek: yakınlaş · Sağ tuşla ya da Ctrl ile sürükle: döndür / eğ · Çift tıkla: yakınlaş',
+  walk: 'Tıklayın, sonra fareyle bakın · WASD: yürü · Shift: koş · Boşluk: zıpla · V: kişiyi göster · Esc: fareyi bırak',
+  walkTP: isTouch ? 'Sol başparmak: yürü (kenara kadar iterseniz koşar) · Sağ tarafı sürükle: etrafa bak · ZIPLA: zıpla (duvarların üstünden de) · KAMERA: kendi gözünden bak' : 'Tıklayın, sonra fareyle etrafa bakın · WASD: yürü · Shift: koş · Ctrl+Shift: hızlı koş · Boşluk: zıpla · Tekerlek: yakınlaş · V: kendi gözünden bak · Esc: fareyi bırak',
+  fly: 'Tıklayın, sonra fareyle bakın · WASD: uç · E/Q: yukarı/aşağı · Shift: hızlı',
+  car: isTouch ? 'Sol başparmak: direksiyon (hafif iterseniz az döner) · GAZ / FREN (geri gitmek için FREN\'e basılı tutun) · Sağ tarafı sürükle: etrafa bak · KAMERA: bakışı değiştir' : '↑/W gaz · ↓/S fren/geri · ←/→ direksiyon · Boşluk el freni · C kamera · L farlar',
+  game: isTouch ? 'Sol başparmak: yürü (kenara kadar iterseniz koşar) · Ekrana dokun: ateş · Basılı tut: sürekli ateş · Sürükle: nişan al · Silaha dokun: değiştir · BOMBA / SİS: at' : 'Nişan için tıklayın · WASD yürü · Shift koş · Sol tık ateş · Sağ tık dürbün (AWP) · 1/2/3, Q, tekerlek: silahlar · R doldur · G bomba · F sis · B silahçı · Esc: fareyi bırak',
 };
 document.getElementById('hint').textContent = HINTS.orbit;
 function setMode(m) {
@@ -1115,7 +1122,10 @@ function setMode(m) {
   controls.enabled = m === 'orbit';
   document.getElementById('hint').textContent = HINTS[m];
   document.getElementById('hud').classList.toggle('show', m === 'car');
-  document.getElementById('carGroup').hidden = m !== 'car';   // Toros settings only appear inside the Toros
+  document.getElementById('musicBtn').hidden = m !== 'car';   // v1.29: the Toros music button only in the Toros
+  document.getElementById('gearBtn').hidden = m !== 'orbit' && m !== 'game';
+  document.getElementById('gearBtn').textContent = m === 'game' ? '🤖 Bot sayısı' : '📍 Yerler';
+  if (m !== 'orbit' && m !== 'game') { document.getElementById('panel').classList.add('hidden'); document.getElementById('gearBtn').setAttribute('aria-expanded', 'false'); }
   document.getElementById('minimap').classList.toggle('show', m !== 'orbit'); mmD = 0; drawMinimapTop();   // size is read again on the next draw
   document.body.dataset.mode = m;
   document.getElementById('cross').style.display = m === 'walk' || m === 'fly' || m === 'game' ? 'block' : 'none';
@@ -1123,7 +1133,7 @@ function setMode(m) {
   document.getElementById('viewGroup').hidden = m !== 'orbit';   // v1.21: viewpoints only where they apply (they switch to Orbit)
   const show = (ids, on) => ids.forEach(id => document.getElementById(id).classList.toggle('show', on && isTouch));
   show(['joyZone'], m === 'walk' || m === 'fly' || m === 'game' || m === 'car'); show(['tUp', 'tDn'], m === 'fly'); show(['tGas', 'tBrake', 'tCam'], m === 'car');
-  endJoy(null); document.getElementById('joyLabel').textContent = m === 'car' ? 'STEER' : 'MOVE';
+  endJoy(null); document.getElementById('joyLabel').textContent = m === 'car' ? 'DİREKSİYON' : 'YÜRÜ';
   if (document.pointerLockElement && m !== 'walk' && m !== 'fly') document.exitPointerLock();
   if (m === 'walk' || m === 'fly' || m === 'game') {
     // start from the current view
@@ -1138,7 +1148,7 @@ function setMode(m) {
   if (m === 'walk' && thirdPerson) getAvatar();
   syncAvatar(m === 'walk');
   if (m === 'game') { if (!game) game = createGame({ scene, camera, P, D, terrH, surfaceAt, surfaceInto, pushOut, look: LOOK, kd, isTouch, touchIn, EYE, village: VILLAGE, solids: () => solids }); game.start();
-    if (isTouch && innerHeight > innerWidth && !rotateTold) { rotateTold = true; toast('Turn your phone sideways for the best view'); toastT = 3.5; } }
+    if (isTouch && innerHeight > innerWidth && !rotateTold) { rotateTold = true; toast('Daha iyi görmek için telefonu yan çevirin'); toastT = 3.5; } }
   else if (prev === 'game' && game) game.stop();
   // on foot the field of view is the player's setting; orbit and the Toros keep 55°
   eyeY = null; const fovNow = m === 'walk' || m === 'fly' || m === 'game' ? LOOK.fov : stdFov(); if (camera.fov !== fovNow) { camera.fov = fovNow; camera.updateProjectionMatrix(); }
@@ -1170,7 +1180,7 @@ function go(name, instant = false) {
   if (instant || matchMedia('(prefers-reduced-motion: reduce)').matches) { camera.position.copy(to.p); controls.target.copy(to.t); return; }
   anim = { from, to, t0: performance.now(), dur: 1500 };
 }
-document.querySelectorAll('#views .pbtn').forEach(b => b.addEventListener('click', () => go(b.dataset.view)));
+document.querySelectorAll('#views .pbtn').forEach(b => b.addEventListener('click', () => { go(b.dataset.view); document.getElementById('panel').classList.add('hidden'); document.getElementById('gearBtn').setAttribute('aria-expanded', 'false'); }));
 document.querySelectorAll('#primaryWpn .pbtn').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('#primaryWpn .pbtn').forEach(o => o.classList.toggle('on', o === b)); if (game) game.setPrimary(b.dataset.wpn); }));
 document.querySelectorAll('#difficulty .pbtn').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('#difficulty .pbtn').forEach(o => o.classList.toggle('on', o === b)); if (game) game.setDifficulty(+b.dataset.diff); }));
 function setGamePreset(q) {
@@ -1202,7 +1212,7 @@ fsBtn.addEventListener('click', async () => {
 });
 const panel = document.getElementById('panel'), gearBtn = document.getElementById('gearBtn');
 gearBtn.addEventListener('click', () => { const h = panel.classList.toggle('hidden'); gearBtn.setAttribute('aria-expanded', String(!h)); });
-if (!isTouch && innerWidth > 900) { panel.classList.remove('hidden'); gearBtn.setAttribute('aria-expanded', 'true'); }
+
 
 // ---------- mini harita ----------
 // v1.12: the map image is a canvas inside the round frame, placed with a CSS transform every frame (smooth, and done
@@ -1257,7 +1267,7 @@ const perf = createPerfMeter(renderer, document.getElementById('perf'), basePixe
   let lostT = 0;
   const note = document.createElement('div');
   note.style.cssText = 'position:fixed;inset:0;display:none;place-items:center;z-index:60;background:rgba(20,20,20,.35);color:#fff;font:600 18px var(--display);letter-spacing:.04em;pointer-events:none';
-  note.textContent = 'Restoring the view…'; document.body.appendChild(note);
+  note.textContent = 'Görüntü geri geliyor…'; document.body.appendChild(note);
   renderer.domElement.addEventListener('webglcontextlost', e => {
     e.preventDefault(); note.style.display = 'grid'; console.warn('[gl] context lost');
     clearTimeout(lostT); lostT = setTimeout(() => location.reload(), 5000);
@@ -1270,7 +1280,7 @@ const perf = createPerfMeter(renderer, document.getElementById('perf'), basePixe
 const loadPref = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : v === '1'; } catch (_) { return d; } };
 const savePref = (k, v) => { try { localStorage.setItem(k, v ? '1' : '0'); } catch (_) {} };
 for (const [id, k, set] of [['optFps', 'kk_fps', v => { perf.visible = v; }], ['optAutoRes', 'kk_autores', v => { perf.auto = v; }]]) {
-  const el = document.getElementById(id); el.checked = loadPref(k, el.checked); set(el.checked);
+  const el = document.getElementById(id); el.checked = id === 'optFps' ? /[?&]fps=1/.test(location.search) : true; set(el.checked);   // v1.29: no settings panel; ?fps=1 shows the meter
   el.addEventListener('change', e => { set(e.target.checked); savePref(k, e.target.checked); });
 }
 for (const [id, key, lab, fmt, set] of [
