@@ -967,7 +967,7 @@ export function createGame(ctx) {
     G.weapon = null; setWeapon(k);
   }
   let hintT = null;
-  const arm = createArmory({ group, camera, P, G, EYE, terrH, surfaceAt, inBuilding, trace, sound, puff, feed, damageBot, hurtPlayer, alertBot, isTouch, WEAPONS, PRICES, equip, hud,
+  const arm = createArmory({ group, camera, P, G, EYE, terrH, surfaceAt, inBuilding, trace, sound, puff, feed, damageBot, hurtPlayer, alertBot, isTouch, WEAPONS, PRICES, equip, hud, roads: D.roads, village,
     bots: () => G.bots, onShop: () => { hudCache.delete('ghShopHint'); },
     hint: (t) => feed(t) });
   let slotsHtml = '';
@@ -1101,7 +1101,12 @@ export function createGame(ctx) {
   function mpDied(from) { if (G.mp) G.mp.send({ t: 'k', by: from && from.pid ? from.pid : '', bn: from ? from.name : '', w: from ? from.weapon : '', hd: from && from.head ? 1 : 0 }); sendState(); }
   function onMsg(m) {
     if (!G.mp || !m || typeof m.i !== 'string') return;
-    if (m.t === 's') { if ([m.x, m.y, m.z, m.r].every(Number.isFinite)) onRemoteState(m); return; }
+    if (m.t === 's') {
+      if ([m.x, m.y, m.z, m.r].every(Number.isFinite)) onRemoteState(m);
+      // v1.34: the health posts of the room's host, so everyone sees the same random ones
+      if (Number.isInteger(m.hs) && m.hs > 0 && m.hs !== arm.healSeed() && remotes.has(m.i) && hostId() === m.i) arm.placeRandom(m.hs);
+      return;
+    }
     const b = remotes.get(m.i);
     if (m.t === 'h' && m.to === G.mp.id && b && Number.isFinite(m.dmg)) {
       if (G.mode === 'takim' && !m.bn) return;
@@ -1131,7 +1136,7 @@ export function createGame(ctx) {
   function sendState() {
     if (!G.mp) return;
     const r2 = (v) => Math.round(v * 100) / 100;
-    G.mp.send({ t: 's', ts: r2(nowS()), n: myName, x: r2(P.x), y: r2(P.y), z: r2(P.z), r: r2(P.yaw + Math.PI), p: r2(P.pitch), w: G.weapon, d: G.dead > 0 ? 1 : 0, f: G.firing && G.dead <= 0 ? 1 : 0, k: G.kills, de: G.deaths, jt: G.joinT });
+    G.mp.send({ t: 's', ts: r2(nowS()), n: myName, x: r2(P.x), y: r2(P.y), z: r2(P.z), r: r2(P.yaw + Math.PI), p: r2(P.pitch), w: G.weapon, d: G.dead > 0 ? 1 : 0, f: G.firing && G.dead <= 0 ? 1 : 0, k: G.kills, de: G.deaths, jt: G.joinT, hs: arm.healSeed() });
   }
   const _lp = new THREE.Vector3();
   function mpUpdate(dt) {
