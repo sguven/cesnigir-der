@@ -15,6 +15,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="../images/logo-160.png">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<!-- iPhone'da sayfa tam ekran olamıyor; "Ana Ekrana Ekle" ile eklenince tarayıcı çubukları olmadan açılır -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Köprüköy 3D">
 <!--
   Köprüköy 3D sayfası.
   3D modelin kendisi bu sitenin içindedir (3d/app/) ve burada güncellenir; bu sayfa onu tam ekran açar.
@@ -54,6 +60,9 @@
   .soru .kart{margin:0;text-align:center}
   .soru .ikinci{display:flex;width:100%;align-items:center;justify-content:center;min-height:54px;margin-top:10px;border:1.5px solid var(--bordo);border-radius:10px;
     background:#fff;color:var(--bordo);font:inherit;font-size:19px;font-weight:700;cursor:pointer}
+  .iphone{display:none;margin:12px 0 0;padding:10px 12px;border-radius:10px;background:#F1E7D6;font-size:16px;line-height:1.45;color:var(--ink)}
+  body.ios .iphone{display:block}
+  body.tamyok .bar .tam{display:none}
   .yeni{display:block;text-align:center;margin-top:12px;color:var(--bordo);font-weight:700;font-size:16px}
 </style>
 </head>
@@ -70,6 +79,7 @@
       <p>Köprüköy'ün sokakları, evleri ve tarihi Çeşnigir Köprüsü. Köyün içinde yürüyün, yukarıdan uçun ya da beyaz Toros'la dolaşın.</p>
       <p class="not">Model büyüktür (yaklaşık 25 MB). Wi-Fi'de açmanızı öneririz. Açılması telefona göre yarım dakika kadar sürebilir.</p>
       <button type="button" class="basla" id="basla">Başlat</button>
+      <p class="iphone"><b>iPhone'da tam ekran için:</b> Safari'nin alttaki Paylaş düğmesine (kare ve yukarı ok) dokunun, "Ana Ekrana Ekle"yi seçin. Sonra ana ekrandaki Köprüköy 3D simgesinden açın; tarayıcı çubukları olmadan açılır.</p>
       <a class="yeni" href="app/" target="_blank" rel="noopener">Yeni sekmede aç</a>
     </div>
   </div>
@@ -82,6 +92,11 @@
   // kaybolur. Tam ekrandan çıkınca (geri tuşu ya da modeldeki "Siteye dön") ana sayfaya dönülür.
   var dokunmatik = window.matchMedia && matchMedia('(pointer: coarse)').matches;
   var kok = document.documentElement, tamGirildi = false;
+  var tamVar = !!(kok.requestFullscreen || kok.webkitRequestFullscreen);   // iPhone Safari'de yok
+  var uygulama = (window.matchMedia && matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches) || navigator.standalone === true;
+  var ios = /iPhone|iPod/.test(navigator.userAgent);
+  if (!tamVar) document.body.classList.add('tamyok');
+  if (ios && !uygulama) document.body.classList.add('ios');
   function tamEkranMi() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
   function tamEkranaGec() {
     var f = kok.requestFullscreen || kok.webkitRequestFullscreen;
@@ -118,6 +133,8 @@
   });
   function ac(e) {
     var tam = !!e && dokunmatik && tamEkranaGec();
+    // tam ekran olamıyorsa (iPhone) ya da ana ekrandan açıldıysa: sitenin üst çubuğu gizlenir, model bütün alanı kaplar
+    if (!tam && (uygulama || (dokunmatik && !tamVar))) { document.body.classList.add('tamekran'); tam = true; }
     var f = document.createElement('iframe');
     f.src = ADRES + '?site=1' + (tam ? '&tam=1' : '');
     f.title = 'Köprüköy 3D modeli';
