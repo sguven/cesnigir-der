@@ -191,7 +191,7 @@ export function createPerfMeter(renderer, el, base, size = () => [innerWidth, in
       }
       if (shown) {
         const i = renderer.info.render;
-        el.textContent = `${Math.round(fps)} FPS · ${ms.toFixed(1)} ms · p95 ${p95.toFixed(1)} ms · ${i.calls} draws · ${(i.triangles / 1e6).toFixed(2)} M tris · shadow ${sh}/s · res ${Math.round(scale * 100)}%`;
+        el.textContent = `${Math.round(fps)} FPS · ${ms.toFixed(1)} ms · p95 ${p95.toFixed(1)} ms · ${i.calls} çizim · ${(i.triangles / 1e6).toFixed(2)} M üçgen · gölge ${sh}/sn · çözünürlük %${Math.round(scale * 100)}`;
       }
     },
   };

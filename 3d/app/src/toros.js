@@ -10,7 +10,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 export const WB = 2.44, TRACK = 1.36, WR = 0.29;
-export const COLORS = [['White', 0xe9e7e3], ['Red', 0x9e2420], ['Beige', 0xd6c59c], ['Grey', 0x8f9497], ['Brown', 0x6a4a33], ['Blue', 0x2f4f7a]];
+export const COLORS = [['Beyaz', 0xe9e7e3], ['Kırmızı', 0x9e2420], ['Bej', 0xd6c59c], ['Gri', 0x8f9497], ['Kahverengi', 0x6a4a33], ['Mavi', 0x2f4f7a]];
 
 function canvasTex(w, h, draw) {
   const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);

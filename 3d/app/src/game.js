@@ -26,7 +26,7 @@ export const WEAPONS = {
   mp5:   { name: 'MP5 Navy',     slot: 1, dmg: 26, head: 4.0, rate: 13.3, mag: 30, reserve: 120, reload: 2.6, spread: 0.0060, moveSpread: 0.014, kick: 0.6, climb: 0.0012, auto: true,  range: 180, botAcc: 0.27 },
   awp:   { name: 'AWP',          slot: 1, dmg: 115, head: 4.0, rate: 0.68, mag: 10, reserve: 30,  reload: 3.6, spread: 0.0012, moveSpread: 0.06,  kick: 2.6, climb: 0,      auto: false, range: 400, botAcc: 0.55, scope: true },
   deagle:{ name: 'Desert Eagle', slot: 2, dmg: 54, head: 4.0, rate: 3.3,  mag: 7,  reserve: 35,  reload: 2.2, spread: 0.0070, moveSpread: 0.024, kick: 2.2, climb: 0.004,  auto: false, range: 200, botAcc: 0.32 },
-  knife: { name: 'Knife',        slot: 3, dmg: 40, head: 2.0, rate: 1.4,  mag: Infinity, reserve: 0, reload: 0, spread: 0, moveSpread: 0, kick: 0.3, climb: 0, auto: true, range: 2.3, melee: true },
+  knife: { name: 'Bıçak',        slot: 3, dmg: 40, head: 2.0, rate: 1.4,  mag: Infinity, reserve: 0, reload: 0, spread: 0, moveSpread: 0, kick: 0.3, climb: 0, auto: true, range: 2.3, melee: true },
   // v1.25: three more guns, sold in the shop (Güvendioğlu Market became the gun shop in the Game)
   glock: { name: 'Glock-18',     slot: 2, dmg: 25, head: 4.0, rate: 6.5,  mag: 20, reserve: 120, reload: 2.0, spread: 0.0060, moveSpread: 0.018, kick: 0.9, climb: 0.002,  auto: false, range: 150, botAcc: 0.25 },
   m3:    { name: 'Pompalı M3',   slot: 1, dmg: 19, head: 2.0, rate: 1.15, mag: 8,  reserve: 32,  reload: 3.0, spread: 0.045,  moveSpread: 0.06,  kick: 3.2, climb: 0,      auto: false, range: 45,  botAcc: 0.3, pellets: 9 },
@@ -738,7 +738,7 @@ export function createGame(ctx) {
   document.body.appendChild(hud);
   const el = (id) => document.getElementById(id);
   const mkBtn = (id, label, cls) => { const d = document.createElement('div'); d.className = 'tc pad ' + cls; d.id = id; d.textContent = label; document.body.appendChild(d); return d; };
-  const fireBtn = mkBtn('tFire', 'FIRE', ''), reloadBtn = mkBtn('tReload', 'RELOAD', 'gbtn'), jumpBtn = mkBtn('tJump', 'JUMP', 'gbtn'), scopeBtn = mkBtn('tScope', 'SCOPE', 'gbtn');
+  const fireBtn = mkBtn('tFire', 'ATEŞ', ''), reloadBtn = mkBtn('tReload', 'DOLDUR', 'gbtn'), jumpBtn = mkBtn('tJump', 'ZIPLA', 'gbtn'), scopeBtn = mkBtn('tScope', 'DÜRBÜN', 'gbtn');
   // v1.25: one tap throws a grenade straight along the view (the count is on the button)
   const heBtn = mkBtn('tNadeHe', '', 'gbtn nbtn'), smokeBtn = mkBtn('tNadeSmoke', '', 'gbtn nbtn');
   heBtn.innerHTML = 'BOMBA<b id="tHeN">1</b>'; smokeBtn.innerHTML = 'SİS<b id="tSmN">1</b>';
@@ -817,7 +817,7 @@ export function createGame(ctx) {
     if (changed('wpn', G.weapon)) setText('ghWpn', W.name);
     if (changed('mag', W.melee ? -1 : A.mag)) setText('ghMag', W.melee ? '—' : String(A.mag));
     if (changed('res', W.melee ? -1 : A.reserve)) setText('ghRes', W.melee ? '' : `/ ${A.reserve}`);
-    setText('ghRel', G.reloading > 0 ? 'reloading' : (!W.melee && A.mag === 0 ? 'R: reload' : ''));
+    setText('ghRel', G.reloading > 0 ? 'dolduruluyor' : (!W.melee && A.mag === 0 ? (isTouch ? 'DOLDUR\'a basın' : 'R: doldur') : ''));
     if (changed('slots', G.primary + '|' + G.secondary + '|' + G.weapon)) {
       const sh = [G.primary, G.secondary, 'knife'].map((k, i) => `<span data-w="${k}" class="${k === G.weapon ? 'on' : ''}">${isTouch ? '' : (i + 1) + ' '}${WEAPONS[k].name}</span>`).join('');
       if (sh !== slotsHtml) { el('ghSlots').innerHTML = sh; slotsHtml = sh; }
