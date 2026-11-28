@@ -368,7 +368,7 @@
     hakkimizda: '<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14a5 5 0 0 1 5 6"/>'
   };
   function quickLinks() {
-    var L = [['duyurular', 'Duyurular'], ['etkinlikler', 'Etkinlikler'], ['meydan', 'Sizden Gelenler'], ['fotograflar', 'Fotoğraflar'], ['pazar', 'Market'], ['rehber', 'Esnaf Rehberi'], ['gezilecek-yerler', 'Gezilecek Yerler'], ['tarihimiz', 'Tarihimiz'], ['hakkimizda', 'Hakkımızda']];
+    var L = [['duyurular', 'Duyurular'], ['etkinlikler', 'Etkinlikler'], ['meydan', 'Sizden Gelenler'], ['fotograflar', 'Fotoğraf & Video'], ['pazar', 'Market'], ['rehber', 'Esnaf Rehberi'], ['gezilecek-yerler', 'Gezilecek Yerler'], ['tarihimiz', 'Tarihimiz'], ['hakkimizda', 'Hakkımızda']];
     return '<nav class="quick" aria-label="Kısayollar"><div class="container quick-in">' + L.map(function (x) {
       return '<a href="#/' + x[0] + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + QI[x[0]] + '</svg><span>' + x[1] + '</span></a>';
     }).join('') + '</div></nav>';
@@ -521,12 +521,12 @@
     var sekme = '<nav class="f-tabs' + (bol.length > 2 ? ' uc' : '') + '" aria-label="Fotoğraf ve video bölümleri">' + bol.map(function (k) {
       return '<a class="f-tab" href="#/fotograflar/' + k + '"' + (k === kat ? ' aria-current="page"' : '') + '>' + (k === 'video' ? 'Videolar' : FOTO_KAT[k][1]) + ' <small>(' + say[k] + ')</small></a>';
     }).join('') + '</nav>';
-    if (kat === 'video') return band('Videolar', 'Köyümüzden ve derneğimizden videolar. İzlemek için videoya dokunun.') +
+    if (kat === 'video') return band('Fotoğraf & Video', 'Köyümüzden ve derneğimizden videolar. İzlemek için videoya dokunun.') +
       '<section class="section"><div class="container"' + ed('ekle:videolar') + '>' + sekme +
       (say.video ? videoList(data.videolar) : '<div class="box empty"><b>Henüz video yok</b>Yeni videolar burada görünecek.</div>') + '</div></section>';
     var list = data.galeri.filter(function (x) { return fKat(x) === kat; });
     if (!E) setTimeout(fHazirla, 0);
-    return band('Fotoğraflar', 'Köyümüzden ve derneğimizden kareler. Büyütmek için fotoğrafa dokunun; altındaki "Yorumlar" düğmesiyle yorum yazabilirsiniz.') +
+    return band('Fotoğraf & Video', 'Köyümüzden ve derneğimizden kareler. Büyütmek için fotoğrafa dokunun; altındaki "Yorumlar" düğmesiyle yorum yazabilirsiniz.') +
       '<section class="section"><div class="container"' + ed('ekle:galeri') + '>' + sekme +
       (E ? '' : '<div id="fYeni" hidden></div>') +
       (list.length ? galleryGrid(list, '', kat) : '<div class="box empty"><b>Bu bölümde henüz fotoğraf yok</b>Yeni fotoğraflar burada görünecek.</div>') + '</div></section>';
@@ -1334,7 +1334,7 @@
       sss('Ankara\'dan günübirlik gidilir mi?', 'Evet. Köprüköy Ankara\'ya yaklaşık 113 km uzaklıktadır; köprü, kanyon, seyir terası ve tekne turu bir günde gezilebilir.') +
       sss('En güzel fotoğraf ne zaman çekilir?', 'Gün batımında köprü sudaki yansımasıyla birlikte görünür. Sisli sabahlarda vadiyi kaplayan sis de görülmeye değerdir.') +
       sss('Yakında başka nereler gezilir?', 'Köprünün karşı kıyısındaki Büklükale ören yeri, Keskin\'deki Sulu Mağara ve yakınındaki Ceritkale Kanyonu.') +
-      '</div><div class="btn-row" style="margin-top:20px"><a class="btn btn-light" href="#/tarihimiz">Köyün ve köprünün tarihçesi</a><a class="btn btn-light" href="#/fotograflar">Fotoğraflar</a></div></div></section>';
+      '</div><div class="btn-row" style="margin-top:20px"><a class="btn btn-light" href="#/tarihimiz">Köyün ve köprünün tarihçesi</a><a class="btn btn-light" href="#/fotograflar">Fotoğraf ve video</a></div></div></section>';
   }
 
   /* ---------- Sizden Gelenler (forum) ----------
@@ -1693,7 +1693,7 @@
     var kat = fKat(x), list = data.galeri.filter(function (y) { return fKat(y) === kat; }), i = list.indexOf(x), gi = data.galeri.indexOf(x);
     var n = list.length, prev = list[(i - 1 + n) % n], next = list[(i + 1) % n], cap = x.aciklama || '';
     fotoSekme = kat;
-    return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/fotograflar">Fotoğraflar</a> › <a href="#/fotograflar/' + kat + '">' + FOTO_KAT[kat][1] + '</a></div></div></div>' +
+    return '<div class="page-band"><div class="container"><div class="crumb"><a href="#/">Ana Sayfa</a> › <a href="#/fotograflar">Fotoğraf &amp; Video</a> › <a href="#/fotograflar/' + kat + '">' + FOTO_KAT[kat][1] + '</a></div></div></div>' +
       '<section class="section"><div class="container"><article class="article" data-gk="' + kat + '">' +
       '<button type="button" class="article-img" data-gal="' + gi + '" aria-label="Fotoğrafı büyüt"><img src="' + esc(img(x.foto)) + '" alt="' + esc(fAlt(x)) + '" style="aspect-ratio:auto;object-fit:contain"></button>' +
       (cap ? '<h1 class="f-cap">' + esc(cap) + '</h1>' : '<h1 class="f-cap">' + FOTO_KAT[kat][0] + ' · ' + (i + 1) + ' / ' + n + '</h1>') +
@@ -1729,7 +1729,7 @@
     'gezilecek-yerler': 'Çeşnigir Köprüsü ve Kanyonu: Kırıkkale\'de gezilecek yerler · Köprüköy',
     duyurular: 'Köprüköy, Keskin ve Kırıkkale haberleri ve duyurular · Çeşnigir-Der',
     etkinlikler: 'Köprüköy etkinlik takvimi: düğün, mevlit ve özel günler · Çeşnigir-Der',
-    fotograflar: 'Köprüköy ve Çeşnigir Köprüsü fotoğrafları · Çeşnigir-Der',
+    fotograflar: 'Köprüköy ve Çeşnigir Köprüsü fotoğrafları ve videoları · Çeşnigir-Der',
     meydan: 'Sizden Gelenler: Köprüköylülerin yazıları, hatıraları ve selamları · Çeşnigir-Der',
     rehber: 'Esnaf Rehberi: Köprüköylülerin dükkân ve işletmeleri · Çeşnigir-Der',
     'bize-ulasin': 'Bize Ulaşın: dernek yönetimine mesaj gönderin · Çeşnigir-Der'
