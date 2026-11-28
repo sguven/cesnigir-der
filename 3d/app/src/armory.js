@@ -1,5 +1,5 @@
-// v1.25 Game extras: hand grenades and smoke grenades, the first-aid post in front of the old municipality where
-// health comes back, and the gun shop in Güvendioğlu Market across the square (money from kills buys guns, grenades,
+// v1.25 Game extras: hand grenades and smoke grenades, the first-aid posts where health comes back (v1.34: the
+// municipality, every mosque and random spots), and the gun shop in Güvendioğlu Market across the square (money from kills buys guns, grenades,
 // a steel vest and ammunition).
 //
 // Kept light for phones: every effect is a fixed pool of sprites made at start (nothing is created during a fight, no
@@ -167,26 +167,70 @@ export function createArmory(o) {
     return false;
   }
 
-  // ---------------------------------------------------------------- first-aid post (Kızılay) in front of the municipality
+  // ---------------------------------------------------------------- first-aid posts (Kızılay)
+  // v1.34 (owner: "more health spots, random, the mosques for sure"): the post in front of the municipality, one by
+  // every mosque, and EXTRA more on random road spots spread over the village (at least SPACING m apart). The random
+  // ones come from a seed: a new one every game, and in "Birlikte oyna" everyone takes the room host's seed (sent with
+  // the position messages, see src/game.js), so all players see the same posts.
+  // Phones: one shared set of geometries/materials, 4 meshes a post; posts farther than 140 m are hidden.
+  const EXTRA = 7, SPACING = 70, SHOW_D = 140;
+  const crossTex = canvasTex(128, 128, (x) => { x.fillStyle = '#f4f2ec'; x.fillRect(0, 0, 128, 128); x.fillStyle = '#d6211a'; x.beginPath(); x.arc(58, 64, 40, 0, Math.PI * 2); x.fill(); x.fillStyle = '#f4f2ec'; x.beginPath(); x.arc(72, 64, 34, 0, Math.PI * 2); x.fill(); });
+  const signTex = canvasTex(256, 64, (x) => { x.fillStyle = '#d6211a'; x.fillRect(0, 0, 256, 64); x.fillStyle = '#fff'; x.font = 'bold 36px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('SAĞLIK', 128, 34); });
+  const ringGeo = new THREE.RingGeometry(HEAL.r - 0.25, HEAL.r, 40).rotateX(-Math.PI / 2);
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0x3fd36a, transparent: true, opacity: 0.6, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
+  const cabGeo = new THREE.BoxGeometry(0.5, 1.5, 0.9), cabMat = new THREE.MeshStandardMaterial({ color: 0xeeece6, roughness: 0.6 });
+  const faceGeo = new THREE.PlaneGeometry(0.7, 0.7), faceMat = new THREE.MeshBasicMaterial({ map: crossTex });
+  const signGeo = new THREE.PlaneGeometry(0.92, 0.23), signMat = new THREE.MeshBasicMaterial({ map: signTex });
   const heal = new THREE.Group(); heal.name = 'Game_FirstAid'; group.add(heal);
-  {
-    const gy = terrH(HEAL.x, HEAL.z);
-    const ring = new THREE.Mesh(new THREE.RingGeometry(HEAL.r - 0.25, HEAL.r, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x3fd36a, transparent: true, opacity: 0.6, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }));
-    ring.position.set(HEAL.x, surfaceAt(HEAL.x, HEAL.z, gy + 1).y + 0.04, HEAL.z); heal.add(ring); heal.userData.ring = ring;
-    const crossTex = canvasTex(128, 128, (x) => { x.fillStyle = '#f4f2ec'; x.fillRect(0, 0, 128, 128); x.fillStyle = '#d6211a'; x.beginPath(); x.arc(58, 64, 40, 0, Math.PI * 2); x.fill(); x.fillStyle = '#f4f2ec'; x.beginPath(); x.arc(72, 64, 34, 0, Math.PI * 2); x.fill(); });
-    const signTex = canvasTex(256, 64, (x) => { x.fillStyle = '#d6211a'; x.fillRect(0, 0, 256, 64); x.fillStyle = '#fff'; x.font = 'bold 36px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('SAĞLIK', 128, 34); });
-    const cab = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.5, 0.9), new THREE.MeshStandardMaterial({ color: 0xeeece6, roughness: 0.6 }));
-    const cx = HEAL.x - HEAL.r - 0.4, cy = surfaceAt(cx, HEAL.z, gy + 1).y;
-    cab.position.set(cx, cy + 0.75, HEAL.z); heal.add(cab);
-    const face = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.7), new THREE.MeshBasicMaterial({ map: crossTex })); face.rotation.y = Math.PI / 2; face.position.set(cx + 0.26, cy + 0.85, HEAL.z); heal.add(face);
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 0.23), new THREE.MeshBasicMaterial({ map: signTex })); sign.rotation.y = Math.PI / 2; sign.position.set(cx + 0.26, cy + 1.35, HEAL.z); heal.add(sign);
+  const posts = [];   // { x, z, g: THREE.Group }
+  function addPost(x, z) {
+    const g = new THREE.Group(), gy = terrH(x, z);
+    const ring = new THREE.Mesh(ringGeo, ringMat); ring.position.set(x, surfaceAt(x, z, gy + 1).y + 0.04, z); g.add(ring);
+    const cx = x - HEAL.r - 0.4, cy = surfaceAt(cx, z, gy + 1).y;
+    const cab = new THREE.Mesh(cabGeo, cabMat); cab.position.set(cx, cy + 0.75, z); g.add(cab);
+    const face = new THREE.Mesh(faceGeo, faceMat); face.rotation.y = Math.PI / 2; face.position.set(cx + 0.26, cy + 0.85, z); g.add(face);
+    const sign = new THREE.Mesh(signGeo, signMat); sign.rotation.y = Math.PI / 2; sign.position.set(cx + 0.26, cy + 1.35, z); g.add(sign);
+    heal.add(g); posts.push({ x, z, g });
   }
-  let healTick = 0;
+  const roads = o.roads || [];
+  const roadNear = (x, z, r) => { for (let k = 0; k < roads.length; k += 4) if (Math.abs(roads[k] - x) < r && Math.abs(roads[k + 1] - z) < r && Math.hypot(roads[k] - x, roads[k + 1] - z) < r) return true; return false; };
+  const clearGround = (x, z) => !surfaceAt(x, z).water && !inBuilding(x, terrH(x, z) + 1, z) && !inBuilding(x - HEAL.r - 0.4, terrH(x, z) + 1, z);
+  // fixed posts: the municipality, then each mosque (the open spot next to it nearest the building, by a road or path)
+  const fixed = [{ x: HEAL.x, z: HEAL.z }];
+  for (const b of (o.village && o.village.buildings) || []) {
+    if (b.kind !== 'mosque' && b.kind !== 'stone_mosque') continue;
+    const r0 = Math.max(b.w || 10, b.d || 10) / 2 + 3;
+    let spot = null;
+    for (let r = r0; r < r0 + 16 && !spot; r += 1.5) for (let i = 0; i < 24 && !spot; i++) {
+      const a = i / 24 * Math.PI * 2, x = b.x + Math.sin(a) * r, z = b.z + Math.cos(a) * r;
+      if (clearGround(x, z) && roadNear(x, z, 8)) spot = { x, z };
+    }
+    if (spot) fixed.push(spot);
+  }
+  for (const f of fixed) addPost(f.x, f.z);
+  // random posts: road samples inside the play area, away from the others
+  let healSeed = 0;
+  function placeRandom(seed) {
+    healSeed = seed >>> 0;
+    while (posts.length > fixed.length) { const p = posts.pop(); heal.remove(p.g); }
+    let a = healSeed || 1; const rr = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };   // mulberry32: same seed, same spots on every device
+    const n = roads.length / 4;
+    for (let tries = 0; tries < 600 && posts.length < fixed.length + EXTRA && n; tries++) {
+      const k = Math.floor(rr() * n) * 4, x = roads[k], z = roads[k + 1];
+      if (x < -60 || x > 760 || z < -300 || z > 780) continue;
+      if (posts.some(p => Math.hypot(p.x - x, p.z - z) < SPACING) || !clearGround(x, z)) continue;
+      addPost(x, z);
+    }
+  }
+  placeRandom(Math.floor(rnd() * 4294967295) + 1);
+  let healTick = 0, cullT = 0;
   function updateHeal(dt) {
-    const ring = heal.userData.ring; ring.material.opacity = 0.45 + 0.25 * Math.sin(G.time * 4);
+    ringMat.opacity = 0.45 + 0.25 * Math.sin(G.time * 4);
+    cullT -= dt; if (cullT <= 0) { cullT = 0.5; for (const p of posts) p.g.visible = Math.abs(p.x - P.x) < SHOW_D && Math.abs(p.z - P.z) < SHOW_D; }
     G.healing = false;
-    if (G.dead > 0 || G.roundOver) return;
-    if (Math.hypot(P.x - HEAL.x, P.z - HEAL.z) < HEAL.r && G.health < 100) {
+    if (G.dead > 0 || G.roundOver || G.health >= 100) return;
+    let on = false; for (const p of posts) if (Math.abs(p.x - P.x) < HEAL.r && Math.abs(p.z - P.z) < HEAL.r && Math.hypot(P.x - p.x, P.z - p.z) < HEAL.r) { on = true; break; }
+    if (on) {
       G.healing = true; G.healAcc = (G.healAcc || 0) + HEAL.rate * dt;
       const add = Math.floor(G.healAcc); if (add > 0) { G.healAcc -= add; G.health = Math.min(100, G.health + add); healTick += add; if (healTick >= 10) { healTick = 0; sound('heal'); } }
     }
@@ -278,7 +322,7 @@ export function createArmory(o) {
     for (const c of clouds) { c.t = 0; c.s.forEach(s => s.visible = false); }
     closeShop();
   }
-  function stop() { reset(); shopBtn.classList.remove('show'); wasNear = false; }
+  function stop() { reset(); shopBtn.classList.remove('show'); wasNear = false; placeRandom(Math.floor(rnd() * 4294967295) + 1); }   // new random health posts next game
   /** Loading: show one of everything so the first grenade compiles nothing. */
   function warm(on) {
     for (const n of nades) for (const k in n.m) n.m[k].visible = on;
@@ -287,10 +331,10 @@ export function createArmory(o) {
     if (on) for (const b of booms) b.fire.position.copy(camera.position);
   }
   function drawMinimap(mctx, toPx) {
-    const h = toPx(HEAL.x, HEAL.z); mctx.fillStyle = '#fff'; mctx.fillRect(h[0] - 5, h[1] - 5, 10, 10); mctx.fillStyle = '#d6211a'; mctx.fillRect(h[0] - 4, h[1] - 1.5, 8, 3); mctx.fillRect(h[0] - 1.5, h[1] - 4, 3, 8);
+    for (const p of posts) { const h = toPx(p.x, p.z); mctx.fillStyle = '#fff'; mctx.fillRect(h[0] - 5, h[1] - 5, 10, 10); mctx.fillStyle = '#d6211a'; mctx.fillRect(h[0] - 4, h[1] - 1.5, 8, 3); mctx.fillRect(h[0] - 1.5, h[1] - 4, 3, 8); }
     const s = toPx(SHOP.doorX + 2, SHOP.z); mctx.fillStyle = '#f2c35b'; mctx.beginPath(); mctx.arc(s[0], s[1], 4.5, 0, 6.283); mctx.fill(); mctx.fillStyle = '#1d1b19'; mctx.font = 'bold 7px sans-serif'; mctx.textAlign = 'center'; mctx.textBaseline = 'middle'; mctx.fillText('₺', s[0], s[1] + 0.5);
   }
   /** (tests and the benchmark) set off a grenade at a point */
   function blastAt(kind, x, y, z) { const n = nades[nadeI]; nadeI = (nadeI + 1) % NADES; n.kind = kind; n.p.set(x, y, z); explode(n); }
-  return { blastAt, throwNade, update, smokeBlocks, openShop, closeShop, reset, stop, warm, drawMinimap, nearShop, shopBtn, shopSign };
+  return { blastAt, throwNade, placeRandom, healSeed: () => healSeed, healPosts: () => posts.map(p => ({ x: p.x, z: p.z })), healFixed: fixed.length, update, smokeBlocks, openShop, closeShop, reset, stop, warm, drawMinimap, nearShop, shopBtn, shopSign };
 }
