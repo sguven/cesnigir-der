@@ -102,3 +102,16 @@ content:
       - { name: gelir, label: Gelir (TL), type: string }
       - { name: gider, label: Gider (TL), type: string }
       - { name: kasa, label: Kasadaki para (TL), type: string }
+
+  - name: videolar
+    label: Videolar
+    type: file
+    path: data/videolar.json
+    format: json
+    list: true
+    fields:
+      - { name: link, label: Videonun bağlantısı (YouTube / Instagram / Facebook), type: string, required: true }
+      - { name: baslik, label: Videonun adı, type: string, required: true }
+      - { name: aciklama, label: Açıklama, type: text }
+      - { name: foto, label: Kapak fotoğrafı (YouTube için gerekmez), type: image }
+      - { name: tarih, label: Tarih, type: date, options: { format: yyyy-MM-dd } }
