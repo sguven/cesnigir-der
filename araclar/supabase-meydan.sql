@@ -241,6 +241,42 @@ drop trigger if exists etkinlik_istek_sel on public.etkinlik_istekleri;
 create trigger etkinlik_istek_sel before insert on public.etkinlik_istekleri for each row execute function public.etkinlik_sel_kontrol();
 revoke all on function public.etkinlik_sel_kontrol() from public, anon, authenticated;
 
+-- Video istekleri: ziyaretçi Fotoğraf & Video sayfasının Videolar sekmesinden bir videonun bağlantısını gönderir (YouTube, Instagram, Facebook, TikTok).
+-- Video dosyası alınmaz, yalnız bağlantı. Yönetici onaylayınca panel videoyu sitenin dosyasına (data/videolar.json) yazar ve isteği buradan siler.
+create table if not exists public.video_istekleri (
+  id bigint generated always as identity primary key,
+  link text not null check (char_length(link) between 12 and 300 and link ~* '^https://([a-z0-9-]+[.])*(youtube[.]com|youtu[.]be|instagram[.]com|facebook[.]com|fb[.]watch|tiktok[.]com)/'),
+  baslik text not null check (char_length(btrim(baslik)) between 3 and 120),
+  aciklama text check (char_length(aciklama) <= 500),
+  ad text not null check (char_length(btrim(ad)) between 3 and 60),
+  created_at timestamptz not null default now()
+);
+alter table public.video_istekleri enable row level security;
+revoke all on public.video_istekleri from anon, authenticated;
+grant select (id) on public.video_istekleri to anon, authenticated;
+grant insert (link, baslik, aciklama, ad) on public.video_istekleri to anon, authenticated;
+drop policy if exists "istekler okunmaz" on public.video_istekleri;
+create policy "istekler okunmaz" on public.video_istekleri for select to anon, authenticated using (false);
+drop policy if exists "video onaya gonderilir" on public.video_istekleri;
+create policy "video onaya gonderilir" on public.video_istekleri for insert to anon, authenticated with check (true);
+
+create or replace function public.video_sel_kontrol() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  if (select count(*) from public.video_istekleri where created_at > now() - interval '10 minutes') >= 15
+   or (select count(*) from public.video_istekleri) >= 200 then
+    raise exception 'Şu anda çok fazla video gönderildi. Lütfen biraz sonra tekrar deneyin.';
+  end if;
+  new.link := btrim(new.link);
+  new.ad := btrim(new.ad);
+  new.baslik := btrim(new.baslik);
+  new.aciklama := nullif(btrim(new.aciklama), '');
+  return new;
+end $$;
+drop trigger if exists video_istek_sel on public.video_istekleri;
+create trigger video_istek_sel before insert on public.video_istekleri for each row execute function public.video_sel_kontrol();
+revoke all on function public.video_sel_kontrol() from public, anon, authenticated;
+
 alter table public.forum_konular enable row level security;
 alter table public.forum_cevaplar enable row level security;
 alter table public.yorumlar enable row level security;
@@ -340,7 +376,7 @@ begin
 end $$;
 revoke all on function public.forum_yetki(text) from public, anon, authenticated;
 
--- Panel: onay bekleyenler (yazılar, cevaplar, yorumlar, Market, Esnaf Rehberi, fotoğraf ve etkinlik istekleri)
+-- Panel: onay bekleyenler (yazılar, cevaplar, yorumlar, Market, Esnaf Rehberi, fotoğraf, etkinlik ve video istekleri)
 create or replace function public.forum_bekleyenler(anahtar text) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 begin
@@ -356,7 +392,8 @@ begin
     'ilanlar', coalesce((select jsonb_agg(to_jsonb(i) order by i.created_at) from public.pazar_istekleri i), '[]'::jsonb),
     'rehber', coalesce((select jsonb_agg(to_jsonb(r) order by r.created_at) from public.rehber_istekleri r), '[]'::jsonb),
     'fotolar', coalesce((select jsonb_agg(to_jsonb(f) order by f.created_at) from public.foto_istekleri f), '[]'::jsonb),
-    'etkinlikler', coalesce((select jsonb_agg(to_jsonb(e) order by e.created_at) from public.etkinlik_istekleri e), '[]'::jsonb));
+    'etkinlikler', coalesce((select jsonb_agg(to_jsonb(e) order by e.created_at) from public.etkinlik_istekleri e), '[]'::jsonb),
+    'videolar', coalesce((select jsonb_agg(to_jsonb(v) order by v.created_at) from public.video_istekleri v), '[]'::jsonb));
 end $$;
 
 -- Panel: onayla / sil / sabitle
@@ -392,6 +429,9 @@ begin
     else raise exception 'bilinmeyen işlem'; end if;
   elsif tur = 'etkinlik' then
     if islem = 'sil' then delete from public.etkinlik_istekleri where id = kayit;
+    else raise exception 'bilinmeyen işlem'; end if;
+  elsif tur = 'video' then
+    if islem = 'sil' then delete from public.video_istekleri where id = kayit;
     else raise exception 'bilinmeyen işlem'; end if;
   else
     raise exception 'bilinmeyen tür';

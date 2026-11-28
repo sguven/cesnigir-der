@@ -226,7 +226,8 @@
     else ic = '<a class="vid-ekran' + (kapak ? '' : ' bos') + '" href="' + esc(C.linkUrl(x.link) || '#') + '" target="_blank" rel="noopener" aria-label="Videoyu aç: ' + esc(ad) + '">' +
       (kapak ? '<img ' + kSrc(kapak) + ' alt="' + esc(ad) + '" loading="lazy">' : '') + OYNAT + '<span class="vid-site">' + esc(vSite(x.link) || 'Videoyu aç') + '</span></a>';
     return '<div class="vid"' + ek('videolar', i) + '>' + ic + '<div class="vid-yazi box-pad"><h3>' + esc(ad) + '</h3>' +
-      (x.aciklama ? '<p>' + esc(x.aciklama) + '</p>' : '') + (x.tarih ? '<small class="muted">' + esc(C.longDate(x.tarih)) + '</small>' : '') + '</div></div>';
+      (x.aciklama ? '<p>' + esc(x.aciklama) + '</p>' : '') +
+      ((x.tarih || x.gonderen) ? '<small class="muted">' + [x.tarih ? esc(C.longDate(x.tarih)) : '', x.gonderen ? 'Gönderen: ' + esc(x.gonderen) : ''].filter(Boolean).join(' · ') + '</small>' : '') + '</div></div>';
   }
   function videoList(list) { return '<div class="vids">' + list.map(videoCard).join('') + '</div>'; }
   // dokununca küçük resmin yerine YouTube oynatıcısı gelir ve çalmaya başlar
@@ -237,6 +238,80 @@
       'allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';
     b.parentNode.replaceChild(w, b);
   }
+
+  /* ---------- Ziyaretçinin video göndermesi ----------
+     Videolar sekmesindeki "Video gönderin" formu: ziyaretçi bir videonun bağlantısını (YouTube, Instagram, Facebook, TikTok), adını ve kendi adını yazar.
+     Video dosyası alınmaz. İstek video_istekleri tablosunda bekler (kurulum: araclar/supabase-video.sql); yönetici panelde onaylayınca
+     data/videolar.json'a yazılır (yonetim/duzen.js: videoYayinla). Tablo henüz kurulmadıysa form hiç gösterilmez. */
+  var vVar = null;   // null: henüz bakılmadı · true: istek alınabiliyor · false: kurulum yok
+  var VIDEO_I = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3V9Z"/></svg>';
+  function vForm() {
+    return '<form class="m-form" data-v-form novalidate>' +
+      '<label class="m-l">Videonun bağlantısı<input name="link" maxlength="300" inputmode="url" autocapitalize="none" autocomplete="off" placeholder="https://youtu.be/…">' +
+      '<span class="i-yardim">YouTube, Instagram, Facebook ya da TikTok\'ta videoyu açın, "Paylaş"a dokunun, "Bağlantıyı kopyala" deyin ve buraya yapıştırın.</span></label>' +
+      '<label class="m-l">Videoda ne var?<input name="baslik" maxlength="120" placeholder="Örnek: 1990 yılında köy düğünü"></label>' +
+      '<label class="m-l">Açıklama<textarea name="aciklama" rows="3" maxlength="500"></textarea><span class="i-yardim">İsterseniz boş bırakın.</span></label>' +
+      '<label class="m-l">Adınız ve soyadınız<input name="ad" autocomplete="name" maxlength="60" value="' + esc(mAd()) + '"></label>' +
+      '<label class="m-hp" aria-hidden="true">Web sitesi<input name="web" tabindex="-1" autocomplete="off"></label>' +
+      '<p class="m-err" role="alert" hidden></p>' +
+      '<button type="submit" class="btn">' + VIDEO_I + 'Videoyu gönder</button>' +
+      '<p class="muted small m-note">Video dernek yönetimi onayladıktan sonra sitede görünür. Adınız videonun altında yazar. Lütfen yalnız kendi çektiğiniz ya da paylaşmaya izniniz olan videoları gönderin.</p></form>';
+  }
+  function vCiz() {
+    var b = $('vYeni'); if (!b || !vVar) return;
+    if (!b.firstChild) b.innerHTML = '<details class="m-new"><summary class="btn">' + VIDEO_I + 'Video gönderin</summary><div class="box box-pad">' + vForm() + '</div></details>';
+    b.hidden = false;
+  }
+  function vHazirla() {
+    if (vVar !== null) { vCiz(); return; }
+    C.sb('/video_istekleri?select=id&limit=1').then(function () { vVar = true; vCiz(); }, function (e) { if (e && e.status !== 'net') vVar = false; });
+  }
+  // gönderilen bağlantı: başına https:// eklenir; yalnız YouTube, Instagram, Facebook ve TikTok kabul edilir
+  function vLink(t) {
+    t = String(t || '').trim().replace(/^http:\/\//i, 'https://');
+    if (!/^https:\/\//i.test(t)) t = 'https://' + t;
+    var u;
+    try { u = new URL(t); } catch (e) { return ''; }
+    if (u.port || !/(^|\.)(youtube\.com|youtu\.be|instagram\.com|facebook\.com|fb\.watch|tiktok\.com)$/.test(u.hostname)) return '';
+    return u.href.length <= 300 ? u.href : '';
+  }
+  document.addEventListener('submit', function (e) {
+    var f = e.target.closest && e.target.closest('form[data-v-form]');
+    if (!f) return;
+    e.preventDefault();
+    var v = {}, err = f.querySelector('.m-err'), btn = f.querySelector('button[type=submit]');
+    ['link', 'baslik', 'aciklama', 'ad', 'web'].forEach(function (n) { v[n] = f.elements[n] ? f.elements[n].value.trim() : ''; });
+    function hata(t, n) { err.textContent = t; err.hidden = false; if (n && f.elements[n]) f.elements[n].focus(); }
+    var link = vLink(v.link);
+    if (!v.link) return hata('Lütfen videonun bağlantısını yapıştırın.', 'link');
+    if (!link) return hata('Bu bağlantı kabul edilmedi. Yalnız YouTube, Instagram, Facebook ya da TikTok videolarının bağlantısı gönderilebilir.', 'link');
+    if (v.baslik.length < 3) return hata('Lütfen videoda ne olduğunu kısaca yazın. Örnek: 1990 yılında köy düğünü', 'baslik');
+    if (v.ad.length < 3) return hata('Lütfen adınızı ve soyadınızı yazın.', 'ad');
+    err.hidden = true;
+    mAdKaydet(v.ad);
+    var done = function () {
+      var t = document.createElement('div');
+      t.innerHTML = '<div class="m-thanks" role="status"><b>Teşekkürler, videonuz alındı.</b><p>Dernek yönetimi onayladıktan sonra Videolar bölümünde görünecek.</p>' +
+        '<button type="button" class="btn btn-light" data-v-again>Bir video daha gönder</button></div>';
+      f.parentNode.replaceChild(t.firstChild, f);
+    };
+    if (v.web) { done(); return; }   // yalnız otomatik programların doldurduğu gizli alan
+    var label = btn.innerHTML, body = { link: link, baslik: v.baslik, ad: v.ad };
+    if (v.aciklama) body.aciklama = v.aciklama;
+    btn.disabled = true; btn.textContent = 'Gönderiliyor…';
+    C.sb('/video_istekleri', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: body }).then(done).catch(function (er) {
+      btn.disabled = false; btn.innerHTML = label;
+      hata(er && er.status === 'net' ? 'İnternet bağlantısı yok gibi görünüyor. Bağlantınızı kontrol edip tekrar deneyin.' :
+        er && /çok fazla/.test(er.message || '') ? er.message : 'Gönderilemedi. Lütfen biraz sonra tekrar deneyin.' + (er && er.status ? ' (Hata ' + er.status + ')' : ''));
+    });
+  });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-v-again]');
+    if (!a) return;
+    var t = document.createElement('div'); t.innerHTML = vForm();
+    var f = t.firstChild; a.parentNode.parentNode.replaceChild(f, a.parentNode);
+    f.elements.link.focus();
+  });
 
   /* ---------- ana sayfa takvimi ----------
      Ay görünümü: köy etkinliği olan günler bordo, resmî ve dinî günler altın çerçeveli. Renkli güne dokununca
@@ -521,8 +596,10 @@
     var sekme = '<nav class="f-tabs' + (bol.length > 2 ? ' uc' : '') + '" aria-label="Fotoğraf ve video bölümleri">' + bol.map(function (k) {
       return '<a class="f-tab" href="#/fotograflar/' + k + '"' + (k === kat ? ' aria-current="page"' : '') + '>' + (k === 'video' ? 'Videolar' : FOTO_KAT[k][1]) + ' <small>(' + say[k] + ')</small></a>';
     }).join('') + '</nav>';
+    if (kat === 'video' && !E) setTimeout(vHazirla, 0);
     if (kat === 'video') return band('Fotoğraf & Video', 'Köyümüzden ve derneğimizden videolar. İzlemek için videoya dokunun.') +
       '<section class="section"><div class="container"' + ed('ekle:videolar') + '>' + sekme +
+      (E ? '' : '<div id="vYeni" hidden></div>') +
       (say.video ? videoList(data.videolar) : '<div class="box empty"><b>Henüz video yok</b>Yeni videolar burada görünecek.</div>') + '</div></section>';
     var list = data.galeri.filter(function (x) { return fKat(x) === kat; });
     if (!E) setTimeout(fHazirla, 0);
