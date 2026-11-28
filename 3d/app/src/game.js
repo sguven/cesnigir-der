@@ -1015,7 +1015,7 @@ export function createGame(ctx) {
       const wn = WEAPONS[m.w] ? WEAPONS[m.w].name : '';
       if (m.by === G.mp.id) { G.kills++; const pay = payKill(m.hd); sound('kill', 0, m.hd ? 'head' : ''); hitMark('kill'); feed(`${esc(b.name)} ${m.hd ? 'kafadan vuruldu' : 'vuruldu'} — ${wn} <i>+${pay} ₺</i>`); }
       else { const k = remotes.get(m.by); feed(`${esc(k ? k.name : cleanName(m.bn))} → ${esc(b.name)}${wn ? ' — ' + wn : ''}`); }
-    } else if (m.t === 'b' && G.mode === 'takim' && !G.isHost && b && b.pid === hostId()) onBots(m);
+    } else if (m.t === 'b' && !G.isHost && b && b.pid === hostId()) onBots(m);   // v1.34: the host's bots in both rooms
     else if (m.t === 'bh' && G.isHost && b && Number.isFinite(m.dmg)) {   // a team mate hit one of my bots
       const bot = G.bots.find(o => !o.remote && o.id === m.idx); if (!bot || bot.dead > 0) return;
       bot.hp -= Math.max(0, Math.min(500, m.dmg));
@@ -1025,7 +1025,7 @@ export function createGame(ctx) {
       if (sh && !sh.dead) { sh.dead = 1; sh.firing = false; if (sh.char) sh.char.die(); }
       if (m.by === G.mp.id) { G.kills++; const pay = payKill(m.hd); sound('kill', 0, m.hd ? 'head' : ''); hitMark('kill'); feed(`${nm} ${m.hd ? 'kafadan vuruldu' : 'vuruldu'} — ${wn} <i>+${pay} ₺</i>`); }
       else { const k = remotes.get(m.by); feed(`${esc(k ? k.name : '?')} → ${nm}${wn ? ' — ' + wn : ''}`); }
-    } else if (m.t === 'bc' && G.isHost && Number.isFinite(m.n)) { const n = Math.max(0, Math.min(100, m.n | 0)); setBots(n); document.querySelectorAll('#botCount .pbtn').forEach(o => o.classList.toggle('on', +o.dataset.bots === n)); }
+    } else if (m.t === 'bc' && G.isHost && b && Number.isFinite(m.n)) { const n = Math.max(0, Math.min(100, m.n | 0)); setBots(n); botUi(n); botSendT = 0; feed(`${esc(b.name)} bot sayısını ${n} yaptı`); }
     else if (m.t === 'bye' && b) removeRemote(b);
     else if (m.t === 'hi' && G.mp) sendState();   // a newcomer: let them see us straight away
   }
@@ -1086,7 +1086,10 @@ export function createGame(ctx) {
     for (const s of shadows) if (s) { group.remove(s.mesh); if (s.char) s.char.dispose(); }
     G.bots = G.bots.filter(o => !o.shadow); shadows.length = 0;
   }
+  // v1.34: the room's bot count is the host's, and everybody's bot count buttons show it
+  function botUi(n) { document.querySelectorAll('#botCount .pbtn').forEach(o => o.classList.toggle('on', +o.dataset.bots === n)); }
   function onBots(m) {
+    if (Number.isFinite(m.bc) && m.bc !== G.botCount) { G.botCount = Math.max(0, Math.min(100, m.bc | 0)); botUi(G.botCount); }
     const n = Math.min(MAX_BOTS - remotes.size, m.n | 0), a = m.a; if (!Array.isArray(a)) return;
     while (shadows.length > n) { const s = shadows.pop(); if (s) { group.remove(s.mesh); if (s.char) s.char.dispose(); G.bots = G.bots.filter(o => o !== s); } }
     for (let i = 0; i < n; i++) {
@@ -1112,12 +1115,14 @@ export function createGame(ctx) {
     const r2 = (v) => Math.round(v * 100) / 100, a = [];
     const ai = G.bots.filter(o => !o.remote).sort((p, q) => p.id - q.id);
     for (const b of ai) a.push(r2(b.x), r2(b.y), r2(b.z), r2(b.yaw), b.dead > 0 ? 1 : 0, b.flashT > -0.35 && b.dead <= 0 ? 1 : 0, Math.max(0, BOT_GUNS.indexOf(b.weapon)));
-    G.mp.send({ t: 'b', ts: r2(nowS()), n: ai.length, a });
+    G.mp.send({ t: 'b', ts: r2(nowS()), n: ai.length, bc: G.botCount, a });
   }
   // who runs the bots: decided again whenever someone comes or goes
+  // v1.34: in both rooms (Kapışma has bots too now, they go for whoever is nearest). A player who joins keeps their own
+  // bots where they are until the others have had a moment to say they are here (they used to vanish on joining and
+  // come back elsewhere when nobody else was in the room); then the longest-present player's bots are the ones shown.
   function teamTick(dt) {
-    if (G.mode !== 'takim') return;
-    const host = G.time - G.joinG > 1.5 && hostId() === G.mp.id;   // give the others a moment to say they are here
+    const host = G.time - G.joinG > 1.5 ? hostId() === G.mp.id : G.isHost;
     if (host !== G.isHost) {
       G.isHost = host;
       if (host) {   // take the bots over where they stand
@@ -1138,7 +1143,7 @@ export function createGame(ctx) {
       <p>Şu an oyunda olan herkesle aynı köyde oynarsınız. Birbirinizi adınızla görürsünüz.</p>
       <div class="modes2" id="ghMpMode">
         <button type="button" data-m="takim" class="on"><b>🤝 Takım: birlikte botlara karşı</b><span>Aynı takımdasınız. Oyuncular birbirini VURAMAZ, botlarla savaşırsınız.</span></button>
-        <button type="button" data-m="pvp"><b>⚔️ Kapışma: herkes birbirine karşı</b><span>Oyuncular birbirini vurur ve öldürür. Bot yok.</span></button>
+        <button type="button" data-m="pvp"><b>⚔️ Kapışma: herkes birbirine karşı</b><span>Oyuncular birbirini vurur ve öldürür. Botlar da sahada, herkese saldırır.</span></button>
       </div>
       <label>Adınız<input id="ghMpName" maxlength="16" autocomplete="nickname" placeholder="Örn. Serhat" required></label>
       <div class="row"><button type="button" id="ghMpNo">Vazgeç</button><button type="submit" id="ghMpGo">Katıl</button></div>
@@ -1162,9 +1167,9 @@ export function createGame(ctx) {
     try {
       const net = await joinRoom(ROOMS[G.mode], onMsg);
       if (!G.on) { net.close(); return; }
-      G.mp = net; G.joinT = Date.now(); G.joinG = G.time; G.isHost = false; setAi(0); mpDlg.style.display = 'none'; mpSendT = 0;
+      G.mp = net; G.joinT = Date.now(); G.joinG = G.time; G.isHost = true; mpDlg.style.display = 'none'; mpSendT = 0;
       G.roundOver = false; respawnPlayer(); net.send({ t: 'hi' }); sendState();
-      feed(G.mode === 'takim' ? 'Takım odasına katıldınız: birlikte botlara karşı. Takım arkadaşlarınız haritada mavi.' : 'Kapışma odasına katıldınız: oyuncular birbirini vurur. Rakipler haritada mavi.'); drawPlayers();
+      feed(G.mode === 'takim' ? 'Takım odasına katıldınız: birlikte botlara karşı. Takım arkadaşlarınız haritada mavi.' : 'Kapışma odasına katıldınız: oyuncular birbirini vurur, botlar da herkese saldırır. Rakipler haritada mavi.'); drawPlayers();
     } catch (err) {
       console.warn('birlikte oyna', err); el('ghMpMsg').textContent = 'Bağlanamadı. İnternet bağlantınızı kontrol edip tekrar deneyin.';
     } finally { mpConnecting = false; el('ghMpGo').disabled = false; }
@@ -1190,7 +1195,7 @@ export function createGame(ctx) {
       h = rows.map(r => `<div class="${r.me ? 'me' : ''}"><span>${esc(r.name)}</span><b>${r.k} : ${r.d}</b></div>`).join('');
       if (!remotes.size) h += '<div class="wait">Başka oyuncu bekleniyor…</div>';
       const nb = G.isHost ? G.bots.filter(o => !o.remote).length : shadows.length;
-      h = `<div class="mode">${G.mode === 'takim' ? 'Takım · ' + nb + ' bot · oyuncular birbirini vuramaz' : 'Kapışma · oyuncular birbirini vurur'}</div>` + h;
+      h = `<div class="mode">${G.mode === 'takim' ? 'Takım · ' + nb + ' bot · oyuncular birbirini vuramaz' : 'Kapışma · ' + nb + ' bot · oyuncular birbirini vurur'}</div>` + h;
     }
     if (h !== listHtml) { listHtml = h; mpList.innerHTML = h; mpList.style.display = h ? 'block' : 'none'; }
   }
@@ -1227,8 +1232,8 @@ export function createGame(ctx) {
   }
   function setBots(n) {
     G.botCount = n;
-    if (G.mp && G.mode === 'takim' && !G.isHost) { G.mp.send({ t: 'bc', n }); return; }   // the room's host runs the bots: ask them
-    if (G.mp && G.mode === 'pvp') return;   // players against players: no bots
+    if (G.mp && (!G.isHost || hostId() !== G.mp.id)) { G.mp.send({ t: 'bc', n }); return; }   // the room's host runs the bots: ask them (also in my first moments in the room)
+    if (G.mp) botSendT = 0;   // the others see the new count straight away
     setAi(n);
   }
   function setAi(n) {
