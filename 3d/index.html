@@ -47,6 +47,12 @@
   .basla:active{background:var(--bordo-dark);transform:scale(.98)}
   /* telefonda tam ekran: üst çubuk gizlenir, model bütün ekranı kaplar */
   body.tamekran .bar{display:none}
+  /* tam ekrandan kazara çıkılınca (ekran kenarından kaydırma, geri tuşu): oyunu kapatmadan sorulur */
+  .soru{position:fixed;inset:0;z-index:10;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(20,14,10,.6)}
+  .soru.acik{display:flex}
+  .soru .kart{margin:0;text-align:center}
+  .soru .ikinci{display:flex;width:100%;align-items:center;justify-content:center;min-height:54px;margin-top:10px;border:1.5px solid var(--bordo);border-radius:10px;
+    background:#fff;color:var(--bordo);font:inherit;font-size:19px;font-weight:700;cursor:pointer}
   .yeni{display:block;text-align:center;margin-top:12px;color:var(--bordo);font-weight:700;font-size:16px}
 </style>
 </head>
@@ -83,16 +89,30 @@
     return true;
   }
   function siteyeDon() { location.href = '../'; }
+  var cikiyor = false, soru = null;
+  // Tam ekrandan çıkınca site hemen açılmaz: ekranın kenarına dokunmak ya da kaydırmak da tam ekranı kapatabiliyor.
+  // Oyun arkada açık kalır, ziyaretçiye "Oyuna dön" / "Siteye dön" diye sorulur.
+  function soruGoster(ac) {
+    if (!soru) {
+      soru = document.createElement('div'); soru.className = 'soru';
+      soru.innerHTML = '<div class="kart"><h1>Tam ekrandan çıktınız</h1><button type="button" class="basla" id="donOyun">Oyuna dön</button>' +
+        '<button type="button" class="ikinci" id="donSite">‹ Siteye dön</button></div>';
+      document.body.appendChild(soru);
+      document.getElementById('donOyun').addEventListener('click', function () { soruGoster(false); tamEkranaGec(); });
+      document.getElementById('donSite').addEventListener('click', siteyeDon);
+    }
+    soru.classList.toggle('acik', ac);
+  }
   function tamDegisti() {
-    if (tamEkranMi()) { tamGirildi = true; document.body.classList.add('tamekran'); }
-    else { document.body.classList.remove('tamekran'); if (tamGirildi) siteyeDon(); }
+    if (tamEkranMi()) { tamGirildi = true; document.body.classList.add('tamekran'); if (soru) soruGoster(false); }
+    else { document.body.classList.remove('tamekran'); if (cikiyor) siteyeDon(); else if (tamGirildi) soruGoster(true); }
   }
   document.addEventListener('fullscreenchange', tamDegisti);
   document.addEventListener('webkitfullscreenchange', tamDegisti);
   // modelin içindeki "Siteye dön" düğmesi
   window.addEventListener('message', function (e) {
     if (e.origin !== 'https://sguven.github.io' || !e.data || e.data.kk !== 'siteyeDon') return;
-    if (tamEkranMi()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); }   // tamDegisti siteye götürür
+    if (tamEkranMi()) { cikiyor = true; (document.exitFullscreen || document.webkitExitFullscreen).call(document); }   // tamDegisti siteye götürür
     else siteyeDon();
   });
   function ac(e) {
