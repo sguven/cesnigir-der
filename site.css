@@ -682,7 +682,7 @@ button.cal-day:hover{filter:brightness(.93)}
   .logo img{width:48px;height:48px}
   .logo small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .nav{flex:1 1 100%;margin-left:0;justify-content:space-between}
-  .nav a{min-height:44px;padding:0 6px;font-size:17px}   /* 11 başlık (Bize Ulaşın ile) tek satıra sığsın; aradaki boşluğu space-between dağıtır */
+  .nav a{min-height:44px;padding:0 6px;font-size:17px}   /* 10 başlık tek satıra sığsın; aradaki boşluğu space-between dağıtır */
 }
 @media (min-width:1181px) and (max-width:1380px){
   .nav a{font-size:16px;padding:0 5px}
