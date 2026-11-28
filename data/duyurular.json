@@ -23,6 +23,15 @@
     "eski_id": "2026-11-22-ataturk-koyumuzden-gecti-26-aralik-1919"
   },
   {
+    "tur": "Duyuru",
+    "tarih": "2026-11-28",
+    "baslik": "Sitemizde Market bölümü: köyümüzün ürünleri burada",
+    "metin": "Sitemizin Market bölümünde köylülerimiz ve hemşehrilerimiz ilan verebilir. Bahçenizden çıkan sebze ve meyveyi, köy yumurtasını, peyniri, bulguru ya da satmak istediğiniz bir eşyayı burada duyurabilirsiniz.\n\nMarket'te üç tür ilan var:\nSatılık: satmak istediğiniz ürün ya da eşya.\nAranıyor: almak istediğiniz, aradığınız bir şey.\nYardım isteği: bir ihtiyacınız ya da yardım çağrınız.\n\nİlan vermek kolay. Market sayfasında \"İlan ver\" düğmesine dokunun. Ne sattığınızı ya da aradığınızı yazın; isterseniz fiyatını ve fotoğrafını ekleyin. Adınızı ve telefonunuzu yazıp gönderin. Dernek yönetimi onayladıktan sonra ilanınız sitede görünür. İlan vermek ücretsizdir.\n\nİlanda adınız ve telefonunuz görünür, ilgilenenler sizi doğrudan arar.\n\nİlk ilanı siz verin, köyümüzün ürünleri gurbetteki hemşehrilerimize de ulaşsın.",
+    "foto": "images/gorsel-market-bolumu.jpg",
+    "dugme_link": "#/pazar",
+    "dugme_yazi": "Market'e gidin"
+  },
+  {
     "tur": "Haber",
     "tarih": "2026-11-27",
     "baslik": "Keskin Devlet Hastanesi'nin çalışmaları görüşüldü",

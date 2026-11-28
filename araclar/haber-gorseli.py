@@ -18,6 +18,7 @@ Temalar (renk + simge):
   kultur  turuncu-kahve, yıldız  (festival, şenlik, kültür, spor)
   hava    gri-mavi, bulut        (hava durumu, kar, don uyarısı)
   duyuru  lacivert, hoparlör     (genel duyuru, diğer)
+  pazar   zeytin yeşili, sepet  (Market, alışveriş, ilan)
 Etiket kısa ve BÜYÜK harf (en fazla ~20 karakter), alt satır en fazla ~40 karakter.
 """
 import os, sys, html
@@ -37,6 +38,7 @@ ICONS = {
     'kultur': '<path d="M12 3.5l2.6 5.3 5.9.8-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"/>',
     'hava': '<path d="M7 18h10a4 4 0 0 0 .6-8 5.5 5.5 0 0 0-10.6 1.5A3.3 3.3 0 0 0 7 18z"/>',
     'duyuru': '<path d="M4 10v4h3l6 4V6L7 10z"/><path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a7.5 7.5 0 0 1 0 11"/>',
+    'pazar': '<path d="M3.5 10h17l-1.8 9.2a1.5 1.5 0 0 1-1.5 1.3H6.8a1.5 1.5 0 0 1-1.5-1.3z"/><path d="M8 10l3-6M16 10l-3-6"/><path d="M9 13.5v4M12 13.5v4M15 13.5v4"/>',
 }
 # (orta ton, kenar tonu) — mevcut görsellerle aynı aile
 COLORS = {
@@ -44,6 +46,7 @@ COLORS = {
     'ev': ('#7E3020', '#5C2013'), 'su': ('#1D5F86', '#123F5E'), 'elektrik': ('#2B3E6B', '#1A2849'),
     'saglik': ('#8A2433', '#651823'), 'egitim': ('#5A3A78', '#3F2757'), 'kultur': ('#8E4A1E', '#6A3413'),
     'hava': ('#4B6072', '#334452'), 'duyuru': ('#20365A', '#14233D'),
+    'pazar': ('#5B6B2A', '#414D1C'),
 }
 
 def main():

@@ -431,6 +431,8 @@
       '<div class="article-text">' + paras.map(function (s) { return '<p>' + esc(s) + '</p>'; }).join('') + '</div>' +
       ekFoto(false) +
       (p.kaynak ? '<p class="muted small">Kaynak: ' + esc(p.kaynak) + '</p>' : '') +
+      // dugme_link + dugme_yazi: duyurunun anlattığı site bölümüne götüren düğme (örnek: "#/pazar", "Market'e gidin")
+      (/^#\/[\w\/-]+$/.test(p.dugme_link || '') ? '<p style="margin:4px 0 14px"><a class="btn" href="' + esc(p.dugme_link) + '">' + esc(p.dugme_yazi || 'Sayfaya gidin') + ' ›</a></p>' : '') +
       '<div class="btn-row">' + shareButtons({ key: 'd', id: id, tur: p.tur, title: p.baslik, photo: src }, true) +
       (link ? '<a class="btn btn-light" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + icon('link') + 'Haberin kaynağı</a>' : '') +
       '<a class="btn btn-light" href="#/duyurular">‹ Tüm duyurular</a></div>' +
