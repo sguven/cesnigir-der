@@ -143,13 +143,13 @@ body[data-mode="car"] .joyzone .jlabel { width: 184px; bottom: calc(126px + var(
 #tFire.down { background: rgba(200,60,35,0.95); }
 #tFire.wait { background: rgba(90,80,72,0.6); border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.6); }
 #tReload { right: calc(142px + var(--sr)); bottom: calc(30px + var(--sb)); width: 62px; height: 62px; }
-#tJump { right: calc(44px + var(--sr)); bottom: calc(148px + var(--sb)); width: 62px; height: 62px; }
+#tJump { right: calc(36px + var(--sr)); bottom: calc(40px + var(--sb)); width: 76px; height: 76px; }   /* v1.27: where FIRE was (a tap on the view fires now) */
 #tScope { right: calc(142px + var(--sr)); bottom: calc(106px + var(--sb)); width: 62px; height: 62px; }
 #tScope.on { background: rgba(162,72,47,0.85); }
 /* v1.25: grenades, money, first aid, the gun shop */
 .nbtn { flex-direction: column; gap: 1px; font-size: 11px; } .nbtn b { font: 800 15px var(--display); } .nbtn.empty { opacity: 0.4; }
-#tNadeHe { right: calc(214px + var(--sr)); bottom: calc(134px + var(--sb)); width: 56px; height: 56px; }
-#tNadeSmoke { right: calc(276px + var(--sr)); bottom: calc(134px + var(--sb)); width: 56px; height: 56px; }
+#tNadeHe { right: calc(46px + var(--sr)); bottom: calc(132px + var(--sb)); width: 56px; height: 56px; }   /* v1.27: above JUMP, clear of the ammo */
+#tNadeSmoke { right: calc(46px + var(--sr)); bottom: calc(196px + var(--sb)); width: 56px; height: 56px; }
 #tShop { left: 50%; transform: translateX(-50%); bottom: calc(84px + var(--sb)); padding: 12px 22px; background: rgba(217,164,65,0.92); color: #1d1b19; border-color: #fff3d0; font-size: 16px; z-index: 31; }
 #gameHud .gh-money { font: 800 18px var(--display); color: #f2c35b; margin-left: 6px; } #gameHud .gh-armor { font: 700 13px var(--display); color: #b9c6d6; }
 #gameHud .gh-feed i { color: #f2c35b; font-style: normal; }
@@ -265,6 +265,37 @@ body:not(.is-touch)[data-mode="game"] .hint { right: auto; left: 50%; transform:
   #minimap { top: calc(62px + var(--st)); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* v1.27: phones held sideways with the browser's bars showing (iPhone Safari has no full screen): only ~230-400 px of
+   height. Everything gets smaller and is packed so that nothing overlaps: top row, then health / score, the thumb
+   buttons in two rows at the bottom right, the joystick resting at the bottom left clear of the "Birlikte oyna" button. */
+@media (orientation: landscape) and (max-height: 430px) {
+  body.is-touch[data-mode="game"] .topbar { top: calc(6px + var(--st)); gap: 6px; }
+  body.is-touch[data-mode="game"] .modes { padding: 2px; gap: 2px; }
+  body.is-touch[data-mode="game"] .modes button { padding: 6px 9px; font-size: 12px; }
+  body.is-touch[data-mode="game"] .gear { padding: 6px 9px; font-size: 12px; }
+  body.is-touch[data-mode="game"] #minimap { width: 70px; height: 70px; top: calc(44px + var(--st)); right: calc(8px + var(--sr)); }
+  body.is-touch[data-mode="game"] .joyzone { top: calc(44px + var(--st)); }
+  body.is-touch[data-mode="game"] .joy { left: calc(14px + var(--sl)); bottom: calc(10px + var(--sb)); width: 100px; height: 100px; }
+  body.is-touch[data-mode="game"] .joy i { width: 42px; height: 42px; }
+  body.is-touch[data-mode="game"] .joyzone .jlabel { display: none; }
+  body.is-touch #gameHud .gh-top { top: calc(42px + var(--st)); font-size: 14px; padding: 2px 10px; gap: 10px; }
+  body.is-touch #gameHud .gh-feed { top: calc(66px + var(--st)); font-size: 11px; }
+  body.is-touch #gameHud .gh-health { left: calc(10px + var(--sl)); top: calc(46px + var(--st)); font-size: 14px; gap: 6px; }
+  body.is-touch #gameHud .gh-bar { width: 70px; height: 8px; }
+  body.is-touch #gameHud .gh-money { font-size: 14px; }
+  body.is-touch #gameHud #ghMp { left: calc(10px + var(--sl)); top: calc(70px + var(--st)); font-size: 12px; padding: 5px 9px; }
+  body.is-touch #gameHud #ghPlayers { display: none !important; }   /* the button says how many; no room for the list */
+  #tJump { width: 60px; height: 60px; right: calc(12px + var(--sr)); bottom: calc(12px + var(--sb)); font-size: 11px; }
+  #tReload { width: 50px; height: 50px; right: calc(80px + var(--sr)); bottom: calc(10px + var(--sb)); font-size: 11px; }
+  #tScope { width: 50px; height: 50px; right: calc(80px + var(--sr)); bottom: calc(68px + var(--sb)); font-size: 11px; }
+  #tNadeHe { width: 50px; height: 50px; right: calc(136px + var(--sr)); bottom: calc(10px + var(--sb)); font-size: 10px; }
+  #tNadeSmoke { width: 50px; height: 50px; right: calc(192px + var(--sr)); bottom: calc(10px + var(--sb)); font-size: 10px; }
+  body.is-touch #gameHud .gh-ammo { right: calc(252px + var(--sr)); bottom: calc(46px + var(--sb)); font-size: 20px; }
+  body.is-touch #gameHud .gh-ammo small { font-size: 11px; }
+  body.is-touch #gameHud .gh-ammo span { font-size: 12px; }
+  body.is-touch #gameHud .gh-slots { right: calc(252px + var(--sr)); bottom: calc(8px + var(--sb)); gap: 4px; }
+  body.is-touch #gameHud .gh-slots span { font-size: 11px; padding: 7px 7px; }
+}
 </style>
 <script type="importmap">
 { "imports": {
@@ -283,7 +314,7 @@ body:not(.is-touch)[data-mode="game"] .hint { right: auto; left: 50%; transform:
 
 <div class="topbar">
   <button class="gear siteBtn" id="siteBtn" hidden aria-label="Çeşnigir-Der sitesine dön">‹ Site</button>
-  <div class="brand"><h1>Köprüköy</h1><div class="sub">Keskin · Kırıkkale, Türkiye — 3D v1.26</div></div>
+  <div class="brand"><h1>Köprüköy</h1><div class="sub">Keskin · Kırıkkale, Türkiye — 3D v1.27</div></div>
   <div class="modes" id="modes" role="tablist" aria-label="Navigation mode">
     <button data-mode="orbit" class="on">Orbit</button>
     <button data-mode="walk" title="Walk through the village">Walk</button>
@@ -1024,7 +1055,8 @@ addEventListener('pointercancel', e => { if (e.pointerId === lookId) lookId = nu
 // only left / right counts, and a light push steers a little (the curve is gentle around the middle).
 const joyZone = document.getElementById('joyZone'), joy = document.getElementById('joy'), knob = document.getElementById('joyKnob'); let joyId = null, joyCx = 0, joyCy = 0;
 const JOY_DEAD = 0.1;
-const joyDims = () => mode === 'car' ? { rx: 92, ry: 46, tx: 62, ty: 0 } : { rx: 64, ry: 64, tx: 40, ty: 40 };
+// v1.27: read from the stick's real size (smaller on a short screen held sideways)
+const joyDims = () => { const w = joy.offsetWidth || (mode === 'car' ? 184 : 128), h = joy.offsetHeight || (mode === 'car' ? 92 : 128); return mode === 'car' ? { rx: w / 2, ry: h / 2, tx: w / 2 - 30, ty: 0 } : { rx: w / 2, ry: h / 2, tx: w * 0.3125, ty: h * 0.3125 }; };
 function placeJoy() {
   const z = joyZone.getBoundingClientRect(), d = joyDims();
   joyCx = Math.max(z.left + d.rx + 6, Math.min(z.right - d.rx - 6, joyCx)); joyCy = Math.max(z.top + d.ry + 6, Math.min(z.bottom - d.ry - 6, joyCy));
@@ -1070,7 +1102,7 @@ const HINTS = {
   walkTP: isTouch ? 'Left thumb: walk (push to the rim to run) · Drag right side: turn the camera · JUMP: jump (over walls too) · VIEW: first person' : 'Click, then turn the camera with the mouse · WASD: walk · Shift: run · Ctrl+Shift: sprint · Space: jump · Wheel: zoom · V: first person · Esc: cursor',
   fly: 'Click, then look with the mouse · WASD: fly · E/Q: up/down · Shift: fast',
   car: isTouch ? 'Left thumb: steer (a light push turns a little) · GAS / BRAKE (hold BRAKE to reverse) · Drag right side: look around · CAMERA: switch view' : '↑/W gas · ↓/S brake/reverse · ←/→ steer · Space handbrake · C camera · L headlights',
-  game: isTouch ? 'Left thumb: move (push to the rim to run) · Drag right side or the FIRE button: aim · Tap a weapon to switch · BOMBA / SİS: throw' : 'Click to aim · WASD move · Shift run · Mouse 1 fire · Mouse 2 scope (AWP) · 1/2/3, Q, wheel: weapons · R reload · G grenade · F smoke · B shop · Esc: cursor',
+  game: isTouch ? 'Left thumb: move (push to the rim to run) · Tap the screen: fire · Hold: keep firing · Drag: aim · Tap a weapon to switch · BOMBA / SİS: throw' : 'Click to aim · WASD move · Shift run · Mouse 1 fire · Mouse 2 scope (AWP) · 1/2/3, Q, wheel: weapons · R reload · G grenade · F smoke · B shop · Esc: cursor',
 };
 document.getElementById('hint').textContent = HINTS.orbit;
 function setMode(m) {

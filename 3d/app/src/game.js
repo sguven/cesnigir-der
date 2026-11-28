@@ -752,6 +752,30 @@ export function createGame(ctx) {
   addEventListener('pointerup', fireUp); addEventListener('pointercancel', fireUp);
   fireBtn.addEventListener('pointermove', e => { if (e.pointerId !== fireId) return; const dx = e.clientX - fx0, dy = e.clientY - fy0; fx0 = e.clientX; fy0 = e.clientY; if (look.touchTurn) { look.touchTurn(dx, dy, e); return; } const k = 0.005 * look.sens * camera.fov / look.fov; P.yaw -= dx * k; P.pitch = Math.max(-1.45, Math.min(1.45, P.pitch - dy * k)); });
   for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) fireBtn.addEventListener(ev, fireUp);
+  // v1.27, touch screens: the owner asked for the FIRE button to go and a tap on the screen to fire. A finger on the view
+  // (the canvas, not a button or the joystick) that lifts again quickly without moving fires one shot; one that rests
+  // there for a moment keeps firing until it lifts, and can be dragged to aim meanwhile; one that starts moving straight
+  // away only turns the view, as before.
+  let tf = null;
+  const TAP_MOVE = 12, HOLD_MS = 200;
+  addEventListener('pointerdown', e => {
+    if (!isTouch || !G.on || e.pointerType === 'mouse' || tf || !(e.target && e.target.tagName === 'CANVAS')) return;
+    const t = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false, firing: false, timer: 0 };
+    t.timer = setTimeout(() => { if (tf === t && !t.moved && G.dead <= 0 && !G.roundOver) { t.firing = true; G.firing = true; G.fired = false; } }, HOLD_MS);
+    tf = t;
+  });
+  addEventListener('pointermove', e => {
+    if (!tf || e.pointerId !== tf.id || tf.firing || tf.moved) return;
+    if (Math.hypot(e.clientX - tf.x, e.clientY - tf.y) > TAP_MOVE) { tf.moved = true; clearTimeout(tf.timer); }
+  });
+  const tapUp = e => {
+    if (!tf || e.pointerId !== tf.id) return;
+    clearTimeout(tf.timer);
+    if (tf.firing) { G.firing = false; G.fired = false; }
+    else if (!tf.moved && e.type === 'pointerup' && G.on && G.dead <= 0) { G.fired = false; G.fireQueue = 0.35; fire(); }   // a tap: one shot (kept for a moment if the gun is not ready)
+    tf = null;
+  };
+  addEventListener('pointerup', tapUp); addEventListener('pointercancel', tapUp);
   const tap = (b, fn) => b.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); fn(); b.classList.add('down'); setTimeout(() => b.classList.remove('down'), 140); });
   tap(reloadBtn, () => reload());
   tap(heBtn, () => arm.throwNade('he')); tap(smokeBtn, () => arm.throwNade('smoke'));
@@ -879,7 +903,8 @@ export function createGame(ctx) {
   function mpHit(b, dmg, head) {
     if (!G.mp) return;
     if (b.shadow) G.mp.send({ t: 'bh', idx: b.id, dmg, hd: head ? 1 : 0, w: G.weapon });
-    else if (G.mode === 'pvp') G.mp.send({ t: 'h', to: b.pid, dmg, hd: head ? 1 : 0, w: G.weapon });   // team mates cannot hurt each other
+    else if (G.mode === 'pvp') G.mp.send({ t: 'h', to: b.pid, dmg, hd: head ? 1 : 0, w: G.weapon });
+    else if (G.time - (G.ffT || -9) > 4) { G.ffT = G.time; feed(`${esc(b.name)} takım arkadaşınız: Takım odasında oyuncular birbirini vuramaz`); }   // team mates cannot hurt each other
   }
   function mpDied(from) { if (G.mp) G.mp.send({ t: 'k', by: from && from.pid ? from.pid : '', bn: from ? from.name : '', w: from ? from.weapon : '', hd: from && from.head ? 1 : 0 }); sendState(); }
   function onMsg(m) {
@@ -1013,8 +1038,8 @@ export function createGame(ctx) {
       <b>Birlikte oyna</b>
       <p>Şu an oyunda olan herkesle aynı köyde oynarsınız. Birbirinizi adınızla görürsünüz.</p>
       <div class="modes2" id="ghMpMode">
-        <button type="button" data-m="takim" class="on"><b>Birlikte botlara karşı</b><span>Aynı takımdasınız, botlarla savaşırsınız</span></button>
-        <button type="button" data-m="pvp"><b>Herkes birbirine karşı</b><span>Oyuncular birbirini vurur, bot yok</span></button>
+        <button type="button" data-m="takim" class="on"><b>🤝 Takım: birlikte botlara karşı</b><span>Aynı takımdasınız. Oyuncular birbirini VURAMAZ, botlarla savaşırsınız.</span></button>
+        <button type="button" data-m="pvp"><b>⚔️ Kapışma: herkes birbirine karşı</b><span>Oyuncular birbirini vurur ve öldürür. Bot yok.</span></button>
       </div>
       <label>Adınız<input id="ghMpName" maxlength="16" autocomplete="nickname" placeholder="Örn. Serhat" required></label>
       <div class="row"><button type="button" id="ghMpNo">Vazgeç</button><button type="submit" id="ghMpGo">Katıl</button></div>
@@ -1040,7 +1065,7 @@ export function createGame(ctx) {
       if (!G.on) { net.close(); return; }
       G.mp = net; G.joinT = Date.now(); G.joinG = G.time; G.isHost = false; setAi(0); mpDlg.style.display = 'none'; mpSendT = 0;
       G.roundOver = false; respawnPlayer(); net.send({ t: 'hi' }); sendState();
-      feed(G.mode === 'takim' ? 'Takıma katıldınız. Takım arkadaşlarınız haritada mavi görünür.' : 'Oyuna katıldınız. Diğer oyuncular haritada mavi görünür.'); drawPlayers();
+      feed(G.mode === 'takim' ? 'Takım odasına katıldınız: birlikte botlara karşı. Takım arkadaşlarınız haritada mavi.' : 'Kapışma odasına katıldınız: oyuncular birbirini vurur. Rakipler haritada mavi.'); drawPlayers();
     } catch (err) {
       console.warn('birlikte oyna', err); el('ghMpMsg').textContent = 'Bağlanamadı. İnternet bağlantınızı kontrol edip tekrar deneyin.';
     } finally { mpConnecting = false; el('ghMpGo').disabled = false; }
@@ -1057,7 +1082,7 @@ export function createGame(ctx) {
   let listHtml = '';
   function drawPlayers() {
     const on = !!G.mp;
-    const btn = on ? `👥 ${remotes.size + 1} kişi · Ayrıl` : '👥 Birlikte oyna';
+    const btn = on ? `${G.mode === 'takim' ? '🤝 Takım' : '⚔️ Kapışma'} · ${remotes.size + 1} kişi · Ayrıl` : '👥 Birlikte oyna';
     if (mpBtn.textContent !== btn) mpBtn.textContent = btn;
     mpBtn.classList.toggle('on', on);
     let h = '';
@@ -1066,7 +1091,7 @@ export function createGame(ctx) {
       h = rows.map(r => `<div class="${r.me ? 'me' : ''}"><span>${esc(r.name)}</span><b>${r.k} : ${r.d}</b></div>`).join('');
       if (!remotes.size) h += '<div class="wait">Başka oyuncu bekleniyor…</div>';
       const nb = G.isHost ? G.bots.filter(o => !o.remote).length : shadows.length;
-      h = `<div class="mode">${G.mode === 'takim' ? 'Takım · ' + nb + ' bot' : 'Herkes birbirine karşı'}</div>` + h;
+      h = `<div class="mode">${G.mode === 'takim' ? 'Takım · ' + nb + ' bot · oyuncular birbirini vuramaz' : 'Kapışma · oyuncular birbirini vurur'}</div>` + h;
     }
     if (h !== listHtml) { listHtml = h; mpList.innerHTML = h; mpList.style.display = h ? 'block' : 'none'; }
   }
@@ -1076,7 +1101,7 @@ export function createGame(ctx) {
   // ------------------------------------------------------------------ lifecycle
   function start() {
     G.on = true; group.visible = true; hud.style.display = 'block';
-    if (isTouch) for (const b of [fireBtn, reloadBtn, jumpBtn, heBtn, smokeBtn]) b.classList.add('show');
+    if (isTouch) for (const b of [reloadBtn, jumpBtn, heBtn, smokeBtn]) b.classList.add('show');   // v1.27: no FIRE button: a tap on the view fires
     vm.visible = true; warmAudio();
     if (!G.bots.length) for (let i = 0; i < G.botCount; i++) G.bots.push(spawnBot(i));
     crowd.load().then(() => { for (const b of G.bots) attachChar(b); }).catch(e => console.warn('bot characters', e));
