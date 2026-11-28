@@ -2,7 +2,7 @@
    Günde üç kez çalışan "Çeşnigir-Der · Instagram paylaşımı" zamanlanmış görevi kullanır.
 
      node araclar/instagram.js bekleyen            bu çalışmada paylaşılabilecek kayıtları listeler (JSON)
-     node araclar/instagram.js hazirla             sıradaki TEK kaydı seçer, görsellerini üretir, açıklamayı yazar (JSON)
+     node araclar/instagram.js hazirla [kimlik]    sıradaki TEK kaydı (ya da verilen kaydı) seçer, görsellerini üretir, açıklamayı yazar (JSON)
      node araclar/instagram.js isaretle <kimlik>…  kayıtları paylaşıldı diye işaretler (data/instagram.json)
 
    Kural (Serhat, 27 Kasım 2026): her çalışmada tek kayıt paylaşılır. Yalnızca yeni eklenenler paylaşılır: bir kayıt ilk görüldüğü
@@ -101,7 +101,8 @@ var LOGO = 'data:image/png;base64,' + fs.readFileSync(path.join(root, 'images', 
 function kartHtml(k, hikaye) {
   var x = k.x, baslik = k.key === 'e' ? x.ad : x.baslik, tur = String(x.tur || (k.key === 'i' ? 'İlan' : 'Duyuru')).toLocaleUpperCase('tr');
   var alt = k.key === 'e' ? [tarihYazi(x.tarih), x.saat, x.yer].filter(Boolean).join(' · ')
-    : k.key === 'i' ? (x.fiyat ? x.fiyat + ' ₺' : '') : [tarihYazi(x.tarih), x.link ? x.kaynak : ''].filter(Boolean).join(' · ');
+    : k.key === 'i' ? (x.fiyat ? x.fiyat + ' ₺' : '') : x.olay_tarihi ? x.olay_tarihi   // "Tarihten" yazıları: olayın tarihi
+    : [tarihYazi(x.tarih), x.link ? x.kaynak : ''].filter(Boolean).join(' · ');
   var fp = x.foto && fs.existsSync(path.join(root, x.foto)) ? path.join(root, x.foto) : path.join(root, 'images', 'kapak-paylasim.jpg');
   var foto = 'data:image/' + (/\.png$/i.test(fp) ? 'png' : /\.webp$/i.test(fp) ? 'webp' : 'jpeg') + ';base64,' + fs.readFileSync(fp).toString('base64');
   var n = String(baslik || '').length, fs0 = hikaye ? (n > 90 ? 58 : n > 60 ? 66 : 76) : (n > 90 ? 50 : n > 60 ? 58 : 68);
@@ -126,8 +127,9 @@ function kartHtml(k, hikaye) {
     '<div class="ayak"><div class="ad"><img src="' + LOGO + '"><b>ÇEŞNİGİR-DER</b></div><span>cesnigirder.org</span></div><div class="dip"></div></body></html>';
 }
 
-async function hazirla() {
-  var list = sec();
+// kimlik verilirse sıradan bağımsız o kaydı hazırlar (elle yeniden paylaşım için, ör. Atatürk 1919 yazısı)
+async function hazirla(kimlik) {
+  var list = kimlik ? kayitlar().filter(function (k) { return k.kimlik === kimlik; }) : sec();
   if (!list.length) { console.log(JSON.stringify({ kayitlar: [] })); return; }
   fs.mkdirSync(OUT, { recursive: true });
   var { chromium } = require('playwright'), br = await chromium.launch();
@@ -156,7 +158,7 @@ var cmd = process.argv[2];
 if (cmd === 'bekleyen') {
   console.log(JSON.stringify(bekleyen().map(function (k) { return { kimlik: k.kimlik, tur: k.x.tur || '', baslik: k.key === 'e' ? k.x.ad : k.x.baslik, panel: k.panel }; }), null, 2));
 } else if (cmd === 'hazirla') {
-  hazirla().catch(function (e) { console.error(e); process.exit(1); });
+  hazirla(process.argv[3]).catch(function (e) { console.error(e); process.exit(1); });
 } else if (cmd === 'isaretle') {
   var s = state(), now = new Date().toISOString();
   process.argv.slice(3).forEach(function (id) { s.paylasilan[id] = s.paylasilan[id] || now; });
@@ -164,5 +166,5 @@ if (cmd === 'bekleyen') {
   kaydet(s);
   console.log(Object.keys(s.paylasilan).length + ' kayıt işaretli');
 } else {
-  console.log('Kullanım: node araclar/instagram.js bekleyen | hazirla | isaretle <kimlik>…');
+  console.log('Kullanım: node araclar/instagram.js bekleyen | hazirla [kimlik] | isaretle <kimlik>…');
 }
