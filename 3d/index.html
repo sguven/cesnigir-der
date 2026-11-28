@@ -45,6 +45,8 @@
   .basla{display:flex;width:100%;align-items:center;justify-content:center;min-height:58px;margin-top:6px;border:0;border-radius:10px;
     background:var(--bordo);color:#fff;font:inherit;font-size:21px;font-weight:700;cursor:pointer}
   .basla:active{background:var(--bordo-dark);transform:scale(.98)}
+  /* telefonda tam ekran: üst çubuk gizlenir, model bütün ekranı kaplar */
+  body.tamekran .bar{display:none}
   .yeni{display:block;text-align:center;margin-top:12px;color:var(--bordo);font-weight:700;font-size:16px}
 </style>
 </head>
@@ -69,9 +71,34 @@
 (function () {
   var ADRES = 'https://sguven.github.io/koprukoy-3d/';
   var bar = document.getElementById('bar'), alan = document.getElementById('alan');
-  function ac() {
+  // Telefonda (dokunmatik ekran) "Başlat"a dokununca sayfa tam ekrana geçer: tarayıcının adres çubuğu ve sekmeler
+  // kaybolur. Tam ekrandan çıkınca (geri tuşu ya da modeldeki "Siteye dön") ana sayfaya dönülür.
+  var dokunmatik = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+  var kok = document.documentElement, tamGirildi = false;
+  function tamEkranMi() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function tamEkranaGec() {
+    var f = kok.requestFullscreen || kok.webkitRequestFullscreen;
+    if (!f) return false;
+    try { var r = f.call(kok, { navigationUI: 'hide' }); if (r && r.catch) r.catch(function () { document.body.classList.remove('tamekran'); }); } catch (e) { return false; }
+    return true;
+  }
+  function siteyeDon() { location.href = '../'; }
+  function tamDegisti() {
+    if (tamEkranMi()) { tamGirildi = true; document.body.classList.add('tamekran'); }
+    else { document.body.classList.remove('tamekran'); if (tamGirildi) siteyeDon(); }
+  }
+  document.addEventListener('fullscreenchange', tamDegisti);
+  document.addEventListener('webkitfullscreenchange', tamDegisti);
+  // modelin içindeki "Siteye dön" düğmesi
+  window.addEventListener('message', function (e) {
+    if (e.origin !== 'https://sguven.github.io' || !e.data || e.data.kk !== 'siteyeDon') return;
+    if (tamEkranMi()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); }   // tamDegisti siteye götürür
+    else siteyeDon();
+  });
+  function ac(e) {
+    var tam = !!e && dokunmatik && tamEkranaGec();
     var f = document.createElement('iframe');
-    f.src = ADRES;
+    f.src = ADRES + '?site=1' + (tam ? '&tam=1' : '');
     f.title = 'Köprüköy 3D modeli';
     f.allow = 'fullscreen; autoplay; gyroscope; accelerometer; xr-spatial-tracking';
     f.setAttribute('allowfullscreen', '');
