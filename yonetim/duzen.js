@@ -84,6 +84,17 @@
         { name: 'link', label: 'Web sitesi ya da Instagram', type: 'text', placeholder: 'https://instagram.com/…', help: 'Yoksa boş bırakın. Adresin başında https:// olmalı.' },
         { name: 'foto', label: 'Kartvizit ya da dükkân fotoğrafı', type: 'photo' }
       ]
+    },
+    // Video siteye yüklenmez: YouTube (ya da Instagram, Facebook) bağlantısı yazılır. Fotoğraflar sayfasının "Videolar" sekmesinde görünür.
+    videolar: {
+      file: 'data/videolar.json', one: 'video', edit: 'Videoyu Düzenle', big: 'Bu videoyu düzenle', addLabel: 'Yeni Video Ekle', page: null, list: 'fotograflar/video', autoDate: true,
+      fields: [
+        { name: 'link', label: 'Videonun bağlantısı', type: 'url', required: true, placeholder: 'https://youtu.be/…',
+          help: 'YouTube\'da videoyu açın, "Paylaş"a dokunun, "Kopyala" deyin ve buraya yapıştırın. Instagram ya da Facebook videosunun bağlantısı da olur.' },
+        { name: 'baslik', label: 'Videonun adı', type: 'text', required: true, placeholder: 'Örnek: 2026 köy hayrından görüntüler' },
+        { name: 'aciklama', label: 'Açıklama', type: 'textarea', help: 'İsterseniz boş bırakın.' },
+        { name: 'foto', label: 'Kapak fotoğrafı', type: 'photo', help: 'YouTube videosunda gerekmez, resmi kendiliğinden gelir. Instagram ya da Facebook videosu için bir fotoğraf ekleyebilirsiniz.' }
+      ]
     }
   };
 
@@ -138,7 +149,8 @@
     x: '<path d="M6 6l12 12M18 6 6 18"/>',
     key: '<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M15 8l2 2"/>',
     pin: '<path d="M9 3h6l-1 6 4 3v2H6v-2l4-3-1-6Z"/><path d="M12 14v7"/>',
-    mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'
+    mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+    video: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3V9Z"/>'
   };
   function icon(n) {
     return '<svg class="ed-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[n] || '') + '</svg>';
@@ -280,7 +292,7 @@
       '<button type="button" class="ed-btn" data-act="edit" data-col="' + col + '" data-ix="' + ix + '">' + icon('edit') + (big ? c.big : 'Düzenle') + '</button>' +
       '<button type="button" class="ed-btn red" data-act="del" data-col="' + col + '" data-ix="' + ix + '">' + icon('trash') + 'Sil</button></div>');
   }
-  var ADD = { duyurular: 'Yeni duyuru ekle', etkinlikler: 'Yeni etkinlik ekle', pazar: 'Yeni market ilanı ekle', rehber: 'Yeni işletme ekle', galeri: 'Fotoğraf ekle' };
+  var ADD = { duyurular: 'Yeni duyuru ekle', etkinlikler: 'Yeni etkinlik ekle', pazar: 'Yeni market ilanı ekle', rehber: 'Yeni işletme ekle', galeri: 'Fotoğraf ekle', videolar: 'Video ekle' };
   var DERNEK_ADD = { kasa: 'Kasa durumu ekle', kurullar: 'Yönetim ve denetim kurulu ekle', canli: 'Canlı görüntü ekle' };
 
   function after(page) {
@@ -1100,7 +1112,8 @@
   /* ---------------- "Ekle" seçimi (alttaki çubuk) ---------------- */
   function openChooser() {
     var opts = [['duyurular', 'news', 'Duyuru', 'Vefat, düğün, toplantı, haber'], ['etkinlikler', 'cal', 'Etkinlik', 'Takvime düğün, nişan, mevlit'],
-      ['galeri', 'photo', 'Fotoğraf', 'Fotoğraflar bölümüne'], ['pazar', 'bag', 'Market ilanı', 'Satılık, aranıyor, yardım'], ['rehber', 'shop', 'İşletme', 'Esnaf Rehberine dükkân, usta, lokanta']];
+      ['galeri', 'photo', 'Fotoğraf', 'Fotoğraflar bölümüne'], ['pazar', 'bag', 'Market ilanı', 'Satılık, aranıyor, yardım'], ['rehber', 'shop', 'İşletme', 'Esnaf Rehberine dükkân, usta, lokanta'],
+      ['videolar', 'video', 'Video', 'YouTube ya da Instagram bağlantısı']];
     var root = openSheet('Ne eklemek istersiniz?', '<div class="ed-choose">' + opts.map(function (o) {
       return '<button type="button" data-pick="' + o[0] + '">' + icon(o[1]) + '<b>' + o[2] + '</b><small>' + o[3] + '</small></button>';
     }).join('') + '</div>', '', null);

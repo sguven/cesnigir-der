@@ -129,6 +129,22 @@
 
   // YouTube adresinden gömülü oynatıcı adresi üretir.
   // Desteklenen: watch?v=, youtu.be/, /live/, /embed/, /shorts/, kanal canlı yayını (/channel/UC.../live)
+  // YouTube video bağlantısından videonun kimliği (watch?v=, youtu.be/, shorts/, live/, embed/); değilse ''
+  function ytId(u) {
+    u = String(u || '').trim();
+    if (!u) return '';
+    if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+    var url;
+    try { url = new URL(u); } catch (e) { return ''; }
+    var host = url.hostname.replace(/^(www\.|m\.|music\.)/, ''), id = '';
+    if (host === 'youtu.be') id = url.pathname.split('/')[1] || '';
+    else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+      var p = url.pathname.split('/').filter(Boolean);
+      if (p[0] === 'watch') id = url.searchParams.get('v') || '';
+      else if (p[0] === 'live' || p[0] === 'embed' || p[0] === 'shorts') id = p[1] || '';
+    }
+    return /^[\w-]{6,20}$/.test(id) ? id : '';
+  }
   function ytEmbed(u) {
     u = String(u || '').trim();
     if (!u) return '';
@@ -359,7 +375,7 @@
     SHARE_COLS: SHARE_COLS, shareId: shareId, sharePath: sharePath, shareVer: shareVer, sharePage: sharePage,
     shortCode: shortCode, shortPath: shortPath, shortPage: shortPage,
     untilText: untilText, imgSrc: imgSrc, linkUrl: linkUrl, telHref: telHref, waHref: waHref, arr: arr,
-    ytEmbed: ytEmbed, ytFrame: ytFrame, bindShare: bindShare, warmShare: warmShare,
+    ytId: ytId, ytEmbed: ytEmbed, ytFrame: ytFrame, bindShare: bindShare, warmShare: warmShare,
     MEYDAN: MEYDAN, sb: sb, zaman: zaman, fotoUrl: fotoUrl, fotolar: fotolar, fotolarHtml: fotolarHtml, fotoYukle: fotoYukle
   };
 })();

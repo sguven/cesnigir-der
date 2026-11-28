@@ -210,6 +210,34 @@
     }).join('') + '</div>';
   }
 
+  /* ---------- Videolar ----------
+     data/videolar.json: { baslik, link, aciklama, foto, tarih }. Video siteye yüklenmez, bağlantısı yazılır (YouTube, Instagram, Facebook…).
+     YouTube videosunda yalnız küçük resmi iner (i.ytimg.com); oynatıcı ancak dokununca yüklenir, sayfa telefonda hızlı açılır.
+     Başka sitelerin videosu (kapak fotoğrafı varsa onunla) kendi sitesinde açılır. En son eklenen en üstte. */
+  var OYNAT = '<span class="vid-oynat" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span>';
+  function vSite(u) {
+    var h = ''; try { h = new URL(C.linkUrl(u) || 'https://' + u).hostname.replace(/^(www\.|m\.)/, ''); } catch (e) { return ''; }
+    return /instagram\.com$/.test(h) ? 'Instagram\'da izle' : /(facebook\.com|fb\.watch)$/.test(h) ? 'Facebook\'ta izle' : /tiktok\.com$/.test(h) ? 'TikTok\'ta izle' : /youtu/.test(h) ? 'YouTube\'da izle' : 'Videoyu aç';
+  }
+  function videoCard(x) {
+    var i = data.videolar.indexOf(x), id = C.ytId(x.link), kapak = img(x.foto), ad = x.baslik || 'Köprüköy\'den bir video', ic;
+    if (id) ic = '<button type="button" class="vid-ekran" data-yt="' + esc(id) + '" aria-label="Videoyu oynat: ' + esc(ad) + '">' +
+      '<img src="' + esc(kapak || 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg') + '" alt="' + esc(ad) + '" loading="lazy" width="480" height="360">' + OYNAT + '</button>';
+    else ic = '<a class="vid-ekran' + (kapak ? '' : ' bos') + '" href="' + esc(C.linkUrl(x.link) || '#') + '" target="_blank" rel="noopener" aria-label="Videoyu aç: ' + esc(ad) + '">' +
+      (kapak ? '<img ' + kSrc(kapak) + ' alt="' + esc(ad) + '" loading="lazy">' : '') + OYNAT + '<span class="vid-site">' + esc(vSite(x.link) || 'Videoyu aç') + '</span></a>';
+    return '<div class="vid"' + ek('videolar', i) + '>' + ic + '<div class="vid-yazi box-pad"><h3>' + esc(ad) + '</h3>' +
+      (x.aciklama ? '<p>' + esc(x.aciklama) + '</p>' : '') + (x.tarih ? '<small class="muted">' + esc(C.longDate(x.tarih)) + '</small>' : '') + '</div></div>';
+  }
+  function videoList(list) { return '<div class="vids">' + list.map(videoCard).join('') + '</div>'; }
+  // dokununca küçük resmin yerine YouTube oynatıcısı gelir ve çalmaya başlar
+  function vOynat(b) {
+    var id = b.getAttribute('data-yt'), w = document.createElement('div');
+    w.className = 'vid-ekran oynuyor';
+    w.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?autoplay=1&playsinline=1&rel=0" title="' + esc(b.getAttribute('aria-label').replace(/^Videoyu oynat: /, '')) + '" ' +
+      'allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';
+    b.parentNode.replaceChild(w, b);
+  }
+
   /* ---------- ana sayfa takvimi ----------
      Ay görünümü: köy etkinliği olan günler bordo, resmî ve dinî günler altın çerçeveli. Renkli güne dokununca
      o günün ayrıntısı takvimin altında açılır (evRow: saat, yer, fotoğraf, paylaş düğmeleri). */
@@ -380,6 +408,8 @@
     var g = data.galeri.slice(0, 6);
     if (g.length || E) h += '<section class="section alt"><div class="container"><div class="sec-head"' + ed('ekle:galeri') + '><h2>Fotoğraflardan</h2><a href="#/fotograflar">Tüm fotoğraflar (' + data.galeri.length + ') ›</a></div>' +
       galleryGrid(g, 'strip') + '</div></section>';
+    if (data.videolar.length) h += '<section class="section"><div class="container"><div class="sec-head"' + ed('ekle:videolar') + '><h2>Videolardan</h2><a href="#/fotograflar/video">Tüm videolar (' + data.videolar.length + ') ›</a></div>' +
+      videoList(data.videolar.slice(0, 2)) + '</div></section>';
 
     h += '<section class="section"><div class="container village"><img ' + kSet(B + 'images/koprukoy-gol.jpg') + ' alt="Göl kıyısından Köprüköy ve Çeşnigir Köprüsü." loading="lazy">' +
       '<div><div class="sec-head"><h2>Köyümüz Köprüköy</h2></div>' +
@@ -482,14 +512,19 @@
 
   var fotoSekme = '';   // son açılan bölüm: fotoğraftan "Tüm fotoğraflar"a dönünce aynı bölüm açılır
   function pagePhotos(kat) {
-    var say = { koy: 0, dernek: 0 };
+    var say = { koy: 0, dernek: 0, video: data.videolar.length };
     data.galeri.forEach(function (x) { say[fKat(x)]++; });
-    if (!FOTO_KAT[kat]) kat = fotoSekme || 'koy';
+    // Videolar sekmesi: video yokken ziyaretçiye görünmez; yönetici panelde hep görür (ilk videoyu ekleyebilsin)
+    var bol = ['koy', 'dernek'].concat(say.video || E ? ['video'] : []);
+    if (bol.indexOf(kat) < 0) kat = bol.indexOf(fotoSekme) >= 0 ? fotoSekme : 'koy';
     fotoSekme = kat;
-    var list = data.galeri.filter(function (x) { return fKat(x) === kat; });
-    var sekme = '<nav class="f-tabs" aria-label="Fotoğraf bölümleri">' + ['koy', 'dernek'].map(function (k) {
-      return '<a class="f-tab" href="#/fotograflar/' + k + '"' + (k === kat ? ' aria-current="page"' : '') + '>' + FOTO_KAT[k][1] + ' <small>(' + say[k] + ')</small></a>';
+    var sekme = '<nav class="f-tabs' + (bol.length > 2 ? ' uc' : '') + '" aria-label="Fotoğraf ve video bölümleri">' + bol.map(function (k) {
+      return '<a class="f-tab" href="#/fotograflar/' + k + '"' + (k === kat ? ' aria-current="page"' : '') + '>' + (k === 'video' ? 'Videolar' : FOTO_KAT[k][1]) + ' <small>(' + say[k] + ')</small></a>';
     }).join('') + '</nav>';
+    if (kat === 'video') return band('Videolar', 'Köyümüzden ve derneğimizden videolar. İzlemek için videoya dokunun.') +
+      '<section class="section"><div class="container"' + ed('ekle:videolar') + '>' + sekme +
+      (say.video ? videoList(data.videolar) : '<div class="box empty"><b>Henüz video yok</b>Yeni videolar burada görünecek.</div>') + '</div></section>';
+    var list = data.galeri.filter(function (x) { return fKat(x) === kat; });
     if (!E) setTimeout(fHazirla, 0);
     return band('Fotoğraflar', 'Köyümüzden ve derneğimizden kareler. Büyütmek için fotoğrafa dokunun; altındaki "Yorumlar" düğmesiyle yorum yazabilirsiniz.') +
       '<section class="section"><div class="container"' + ed('ekle:galeri') + '>' + sekme +
@@ -1974,6 +2009,8 @@
         redrawCal('[data-cal-nav="' + dir + '"]'); return; }
       var cd = e.target.closest('[data-cal-day]');
       if (cd) { var ci = cd.getAttribute('data-cal-day'); calSel = calSel === ci ? '' : ci; redrawCal('[data-cal-day="' + ci + '"]'); return; }
+      var yt = e.target.closest('[data-yt]');
+      if (yt) { vOynat(yt); return; }
       var g = e.target.closest('[data-gal]');
       if (g) {
         // bölüm sayfasında oklarla yalnız o bölümün fotoğrafları gezilir
@@ -2016,12 +2053,12 @@
   })();
 
   bind();
-  Promise.all([load('duyurular', []), load('etkinlikler', []), load('resmi-gunler', {}), load('galeri', []), load('pazar', []), load('dernek', {}), load('rehber', [])])
+  Promise.all([load('duyurular', []), load('etkinlikler', []), load('resmi-gunler', {}), load('galeri', []), load('pazar', []), load('dernek', {}), load('rehber', []), load('videolar', [])])
     .then(function (r) {
       data = {
         duyurular: C.arr(r[0]), etkinlikler: C.arr(r[1]),
         resmi: r[2] && typeof r[2] === 'object' ? r[2] : {},
-        galeri: C.arr(r[3]).filter(function (x) { return img(x.foto); }), pazar: C.arr(r[4]), rehber: C.arr(r[6]),
+        galeri: C.arr(r[3]).filter(function (x) { return img(x.foto); }), pazar: C.arr(r[4]), rehber: C.arr(r[6]), videolar: C.arr(r[7]).filter(function (x) { return x && x.link; }),
         dernek: r[5] && typeof r[5] === 'object' && !Array.isArray(r[5]) ? r[5] : {}
       };
       renderChrome();
