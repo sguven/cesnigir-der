@@ -710,6 +710,7 @@ loadAll().then(gltf => {
   // first bot used to stall a frame for 20–200 ms). The loop draws nothing until the shaders are ready (8 s at most).
   try { game = createGame({ scene, camera, P, D, terrH, surfaceAt, surfaceInto, pushOut, look: LOOK, kd, isTouch, touchIn, EYE, village: VILLAGE, solids: () => solids }); } catch (e) { console.error(e); }
   try { atmo.patch(scene); } catch (e) { console.error(e); }
+  car.visible = true; cabin.group.visible = true;   // v1.28: the loop hides a far Toros; its shaders are compiled with the rest
   warming = true;
   return Promise.race([renderer.compileAsync(scene, camera), new Promise(r => setTimeout(r, 8000))]).catch(() => {});
 }).then(() => {
@@ -729,6 +730,7 @@ function warmScene() {
   wc.position.set(cx, 2600, cz); wc.lookAt(cx, 0, cz - 0.01); wc.updateMatrixWorld();
   culler.scale = 1e6; culler.update(wc.position, true);
   if (game) game.warm(true);
+  car.visible = true; cabin.group.visible = true;
   sc.left = -half; sc.right = half; sc.top = half; sc.bottom = -half; sc.near = 1; sc.far = 4000; sc.updateProjectionMatrix();
   wc.getWorldPosition(sun.target.position).setY(0); sun.position.copy(sun.target.position).addScaledVector(sunDir, 1500); sun.shadow.needsUpdate = true;
   renderer.render(scene, wc);
@@ -787,8 +789,9 @@ let thirdPerson = true; try { thirdPerson = localStorage.getItem('kk_tp') !== '0
 let avatar = null, avatarAdded = false, solids = null;
 // v1.18: walls, kerbs, fences, steps, posts … as a collision grid read from the finished scene (src/solids.js)
 function buildSolids() {
-  if (solids) return; solids = createSolids({ scene, terrH, baseH: (x, z) => Math.max(terrH(x, z), bridgeDeckY(x, z, 0.9)), exclude: [car, ...(avatar ? [avatar.root] : [])] });
-  solids.build(window.__solidsSlice || 8).then(s => console.log('[solids]', s.chunks, 'chunks in', Math.round(s.ms), 'ms'));
+  if (solids) return; solids = createSolids({ scene, terrH, baseH: (x, z) => Math.max(terrH(x, z), bridgeDeckY(x, z, 0.9)), deckH: (x, z) => bridgeDeckY(x, z, 0.9), exclude: [car, ...(avatar ? [avatar.root] : [])] });
+  // v1.28: on a phone, 4 ms a frame instead of 8 while the view moves (Walk, Game, Toros…): lighter frames for a little longer
+  solids.build(window.__solidsSlice || (() => isTouch && mode !== 'orbit' ? 4 : 8)).then(s => console.log('[solids]', s.chunks, 'chunks in', Math.round(s.ms), 'ms'));
 }
 function getAvatar() {
   if (!avatar) {
@@ -1309,7 +1312,7 @@ function botToMinimap(bx, bz) {
 }
 // v1.1: #bench / #bench=50 runs the game-mode benchmark once the model is in (src/bench.js)
 const BENCH = parseBench(location.hash);
-const bench = BENCH ? createBench({ cfg: BENCH, renderer, camera, P, touchIn, surfaceAt, setMode, getGame: () => game, perf, shadowMapSize: () => sun.shadow.mapSize.x, preset: () => gamePreset }) : null;
+const bench = BENCH ? createBench({ cfg: BENCH, renderer, camera, P, touchIn, surfaceAt, setMode, getGame: () => game, perf, shadowMapSize: () => sun.shadow.mapSize.x, preset: () => gamePreset, solidsReady: () => !!(solids && solids.ready) }) : null;
 let benchWait = 30;   // frames to let the scene settle after loading before the run starts
 renderer.setAnimationLoop(now => {
   if (warming) return;   // shaders are compiling in the background: drawing now would make each one block
@@ -1395,6 +1398,9 @@ renderer.setAnimationLoop(now => {
     sun.target.position.copy(shadowCentre); sun.position.copy(shadowCentre).addScaledVector(sunDir, 1500);
     shadowFocus.copy(focus); shadowExt = ext; sun.shadow.needsUpdate = true;
   }
+  // v1.28: the parked Toros is ~65 draw calls (body, wheels, chrome, the whole cabin) and was drawn from anywhere in the
+  // village, 700 m away in the Game: now only within 150 m (its cabin within 25 m, where the windows show it)
+  { const cd2 = driving ? 0 : camera.position.distanceToSquared(car.position); car.visible = cd2 < 150 * 150; cabin.group.visible = cd2 < 25 * 25; }
   const shadowRedrawn = carShadow.plan(driving, walkingTP); if (shadowRedrawn) perf.shadowRedrawn();
   const tRender = performance.now();
   renderer.info.reset(); renderer.render(scene, camera); if (inGame && game) game.renderOverlay(renderer); renderMirrors(); placeLabels();

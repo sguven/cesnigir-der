@@ -81,8 +81,13 @@ function deckAt(lx) {
   return POS[1] + PROFILE[i] + (PROFILE[i + 1] - PROFILE[i]) * (f - i);
 }
 /** The deck height at (x, z), or -Infinity off the deck (between the parapets, `margin` m wider). */
+// v1.28: no array per call (the player, every bot and the collision-grid builder ask this many times a frame; the
+// [lx, lz] arrays were a good part of the Game's garbage), and a cheap box test first
+const REACH = DECK_END + DECK_HALF + 2;
 export function bridgeDeckY(x, z, margin = 0) {
-  const [lx, lz] = toLocal(x, z);
+  const dx = x - POS[0], dz = z - POS[2];
+  if (dx > REACH || dx < -REACH || dz > REACH || dz < -REACH) return -Infinity;
+  const lx = dx * BC - dz * BS, lz = dx * BS + dz * BC;
   return Math.abs(lx) <= DECK_END && Math.abs(lz) <= DECK_HALF + margin ? deckAt(lx) : -Infinity;
 }
 /** Is (x, z) within the bridge's footprint (deck and parapets)? Old road samples there are dropped. */

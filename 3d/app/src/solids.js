@@ -26,7 +26,9 @@ const SKIP = /^(Arazi|Su_|Yol|Toprak_Yol|Otlar|Calilar|Gezi_Alani|Pencereler|Cim
 // v1.22: heights are measured from `baseH` (the terrain, or the deck of the Çeşnigir Bridge where it stands over it).
 // Measured from the riverbed, the bridge's piers came out as tall solids right across the deck, so the walker could
 // not cross; what lies under the deck (piers, arches) is now not an obstacle on it.
-export function createSolids({ scene, terrH, baseH = terrH, exclude = [] }) {
+// v1.28: `deckH` (optional): the raised surface baseH takes the maximum of with the terrain (the bridge deck), -Infinity
+// off it. With it the builder knows where baseH is just the terrain and can interpolate it across a triangle.
+export function createSolids({ scene, terrH, baseH = terrH, deckH = null, exclude = [] }) {
   const chunks = new Map();
   const ckey = (ci, cj) => ci * 100003 + cj;
   function chunkAt(ci, cj, make) {
@@ -34,13 +36,8 @@ export function createSolids({ scene, terrH, baseH = terrH, exclude = [] }) {
     if (!c && make) { c = { top: new Float32Array(CH * CH).fill(-1e9), tall: new Uint8Array(CH * CH) }; chunks.set(k, c); }
     return c;
   }
-  function put(x, y, z) {
-    const g = baseH(x, z), h = y - g;
-    if (h < -0.3 || h > TALL_TO) return;
-    const i = Math.floor(x / CELL), j = Math.floor(z / CELL), ci = Math.floor(i / CH), cj = Math.floor(j / CH);
-    const c = chunkAt(ci, cj, true), n = (i - ci * CH) + (j - cj * CH) * CH;
-    if (h > LOW) c.tall[n] = 1; else if (y > c.top[n]) c.top[n] = y;
-  }
+  // v1.28: the last chunk is remembered (one Map lookup per sample was a tenth of the build)
+  let lci = NaN, lcj = NaN, lc = null;
 
   // ---- the job list: one entry per mesh (or per instance of an instanced mesh) ----
   const jobs = [];
@@ -60,7 +57,23 @@ export function createSolids({ scene, terrH, baseH = terrH, exclude = [] }) {
     }
   });
 
-  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), e1 = new THREE.Vector3(), e2 = new THREE.Vector3();
+  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), e1 = new THREE.Vector3(), e2 = new THREE.Vector3(), _cr = new THREE.Vector3();
+  // v1.28: the ground under every sample is interpolated from the ground under the triangle's three corners (the terrain
+  // is flat between its grid points, so this is the same height to a few mm on these small triangles) instead of being
+  // looked up for each sample, and the sample is written straight into the grid. The lookups (terrain and bridge, a
+  // function call with boxed numbers each) made the build ~4× slower than it needed to be and threw away ~35 MB of
+  // garbage a second: on a phone the grid was still being built a minute into the Game, ~8 ms of every frame.
+  // Where a triangle touches the bridge deck (baseH is then not one flat piece) each sample still asks baseH.
+  /** One sample at a + e1·s + e2·r of the current triangle; ga + gb·s + gc·r is the ground under it when `flat`. */
+  function mark(s, r, flat, ga, gb, gc) {
+    const x = a.x + e1.x * s + e2.x * r, y = a.y + e1.y * s + e2.y * r, z = a.z + e1.z * s + e2.z * r;
+    const h = y - (flat ? ga + gb * s + gc * r : baseH(x, z));
+    if (h < -0.3 || h > TALL_TO) return;
+    const i = Math.floor(x / CELL), j = Math.floor(z / CELL), ci = Math.floor(i / CH), cj = Math.floor(j / CH);
+    if (ci !== lci || cj !== lcj) { lci = ci; lcj = cj; lc = chunkAt(ci, cj, true); }
+    const n = (i - ci * CH) + (j - cj * CH) * CH;
+    if (h > LOW) lc.tall[n] = 1; else if (y > lc.top[n]) lc.top[n] = y;
+  }
   /** Sample triangles of the current job until the deadline. Returns true when everything is done. */
   function work(deadline) {
     while (jobs.length) {
@@ -71,15 +84,31 @@ export function createSolids({ scene, terrH, baseH = terrH, exclude = [] }) {
         const t = J.tri * 3, ia = idx ? idx.getX(t) : t, ib = idx ? idx.getX(t + 1) : t + 1, ic = idx ? idx.getX(t + 2) : t + 2;
         a.fromBufferAttribute(pos, ia).applyMatrix4(J.mat); b.fromBufferAttribute(pos, ib).applyMatrix4(J.mat); c.fromBufferAttribute(pos, ic).applyMatrix4(J.mat);
         // skip triangles wholly above TALL_TO or below the ground (cheap test at the centroid)
-        const cx = (a.x + b.x + c.x) / 3, cz = (a.z + b.z + c.z) / 3, gy = baseH(cx, cz);
-        if (Math.min(a.y, b.y, c.y) > gy + TALL_TO || Math.max(a.y, b.y, c.y) < terrH(cx, cz) - 0.3) continue;
+        const cx = (a.x + b.x + c.x) / 3, cz = (a.z + b.z + c.z) / 3, t0 = terrH(cx, cz), gy = deckH === null ? baseH(cx, cz) : Math.max(t0, deckH(cx, cz));
+        if (Math.min(a.y, b.y, c.y) > gy + TALL_TO || Math.max(a.y, b.y, c.y) < t0 - 0.3) continue;
+        // a huge triangle (a ground plate): not an obstacle (the test of the old sampling, so the same triangles are left out)
+        if (Math.max(1, Math.ceil(a.distanceTo(b) / SAMPLE)) * Math.max(1, Math.ceil(a.distanceTo(c) / SAMPLE)) > 40000) continue;
+        // v1.28: sampled along the longest edge every SAMPLE and across the triangle every SAMPLE of its height. The
+        // samples were a grid of (edge 1 / SAMPLE) × (edge 2 / SAMPLE), so a long thin triangle (a trim, a railing, a
+        // plinth: 10 m long, 5 cm wide) got ~1250 samples where ~50 cover it; three quarters of all samples were those.
+        { const lab = a.distanceToSquared(b), lbc = b.distanceToSquared(c), lca = c.distanceToSquared(a);
+          if (lbc >= lab && lbc >= lca) { e1.copy(a); a.copy(b); b.copy(c); c.copy(e1); }        // longest edge first: a→b
+          else if (lca >= lab && lca >= lbc) { e1.copy(a); a.copy(c); c.copy(b); b.copy(e1); } }
         e1.subVectors(b, a); e2.subVectors(c, a);
-        const n1 = Math.max(1, Math.ceil(e1.length() / SAMPLE)), n2 = Math.max(1, Math.ceil(e2.length() / SAMPLE));
-        if (n1 * n2 > 40000) continue;   // a huge triangle (a ground plate): not an obstacle
+        const l1 = e1.length(), hgt = l1 > 1e-9 ? _cr.crossVectors(e1, e2).length() / l1 : 0;
+        const n1 = Math.max(1, Math.ceil(l1 / SAMPLE)), n2 = Math.max(1, Math.ceil(hgt / SAMPLE));
+        // (a triangle over 6 m across could span the 6.9 m wide deck band with all its corners off it: asked per sample)
+        const flat = deckH === null ? baseH === terrH : (n1 <= 30 && n2 <= 30 && deckH(a.x, a.z) === -Infinity && deckH(b.x, b.z) === -Infinity && deckH(c.x, c.z) === -Infinity && deckH(cx, cz) === -Infinity);
+        const ga = flat ? terrH(a.x, a.z) : 0, gb = flat ? terrH(b.x, b.z) - ga : 0, gc = flat ? terrH(c.x, c.z) - ga : 0;
         for (let u = 0; u <= n1; u++) for (let v = 0; v <= n2 - u * n2 / n1 + 1e-6; v++) {
           const s = u / n1, r = v / n2; if (s + r > 1.0001) break;
-          put(a.x + e1.x * s + e2.x * r, a.y + e1.y * s + e2.y * r, a.z + e1.z * s + e2.z * r);
+          mark(s, r, flat, ga, gb, gc);
         }
+        // the two shorter edges too, every SAMPLE (a wall's top edge is often one of them: its highest points)
+        const m1 = Math.max(1, Math.ceil(Math.sqrt(e2.x * e2.x + e2.y * e2.y + e2.z * e2.z) / SAMPLE));
+        for (let k = 1; k < m1; k++) mark(0, k / m1, flat, ga, gb, gc);
+        const m2 = Math.max(1, Math.ceil(b.distanceTo(c) / SAMPLE));
+        for (let k = 1; k < m2; k++) mark(1 - k / m2, k / m2, flat, ga, gb, gc);
       }
       jobs.pop();
     }
@@ -88,10 +117,10 @@ export function createSolids({ scene, terrH, baseH = terrH, exclude = [] }) {
 
   const S = {
     ready: false,
-    /** Build in slices of `ms` per animation frame; resolves when done. */
+    /** Build in slices of `ms` per animation frame (v1.28: or of what ms() returns, asked every frame); resolves when done. */
     build(ms = 8) {
-      const t0 = performance.now();
-      return new Promise(res => { const f = () => { if (work(performance.now() + ms)) { S.ready = true; S.ms = performance.now() - t0; res(S); } else requestAnimationFrame(f); }; f(); });
+      const t0 = performance.now(), slice = typeof ms === 'function' ? ms : () => ms;
+      return new Promise(res => { const f = () => { if (work(performance.now() + slice())) { S.ready = true; S.ms = performance.now() - t0; res(S); } else requestAnimationFrame(f); }; f(); });
     },
     /**
      * The highest solid in a disk of radius r around (x, z) that rises above `above`; Infinity for a tall solid

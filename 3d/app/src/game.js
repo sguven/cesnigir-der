@@ -14,6 +14,7 @@ import { createBotCrowd } from './botchar.js';
 import { viewGun, viewGrenade } from './gunmodels.js';
 import { createArmory } from './armory.js';
 import { joinRoom, ROOMS } from './multi.js';
+import { snapPush, snapSample, snapReset } from './mpsnap.js';
 
 const BOT_NAMES = ['Keskinli', 'Kırıkkaleli', 'Çeşnigir', 'Kapulukaya', 'Hırka', 'Köprübaşı', 'Kızılırmak', 'Bozkır', 'Karakeçili', 'Ceritler', 'Yeşilyurt', 'Göçeri'];
 const botName = (i) => BOT_NAMES[i % BOT_NAMES.length] + (i >= BOT_NAMES.length ? ' ' + (Math.floor(i / BOT_NAMES.length) + 1) : '');
@@ -859,13 +860,16 @@ export function createGame(ctx) {
     const nm = cleanName(m.n); if (nm !== b.name) { b.name = nm; b.label.textContent = nm; }
     if (WEAPONS[m.w]) { b.realW = m.w; const w = MP_GUN[m.w]; if (w !== b.weapon) { group.remove(b.mesh); if (b.char) { b.char.dispose(); b.char = null; } b.weapon = w; b.mesh = botMesh(w); group.add(b.mesh); attachChar(b); } }
     if (m.d && !b.dead) { b.dead = 1; if (b.char) b.char.die(); }
-    else if (!m.d && b.dead) { b.dead = 0; b.x = m.x; b.z = m.z; b.y = m.y; b.tvx = b.tvz = 0; if (b.char) b.char.reset(); b.mesh.rotation.set(0, b.yaw, 0); }
+    else if (!m.d && b.dead) { b.dead = 0; b.x = m.x; b.z = m.z; b.y = m.y; b.tvx = b.tvz = 0; snapReset(b); if (b.char) b.char.reset(); b.mesh.rotation.set(0, b.yaw, 0); }
+    if (Number.isFinite(m.ts)) snapPush(b, nowS(), m.ts, m.x, m.y, m.z, m.r);   // v1.28: drawn a moment in the past, between real positions (src/mpsnap.js)
   }
   function remoteStep(b, dt) {
     const u = b.mesh.userData, x0 = b.x, z0 = b.z;
-    if (b.dead <= 0 && G.time - b.rxT < 0.6) { b.tx += b.tvx * dt; b.tz += b.tvz * dt; }   // carry on a little between messages
-    const k = Math.min(1, dt * 9); b.x += (b.tx - b.x) * k; b.z += (b.tz - b.z) * k; b.y += (b.ty - b.y) * k;
-    turnTo(b, b.tyaw, dt, 12);
+    if (!b.snap || !snapSample(b, nowS())) {   // a page from before v1.28 (no send time in its messages): the old guess ahead
+      if (b.dead <= 0 && G.time - b.rxT < 0.6) { b.tx += b.tvx * dt; b.tz += b.tvz * dt; }   // carry on a little between messages
+      const k = Math.min(1, dt * 9); b.x += (b.tx - b.x) * k; b.z += (b.tz - b.z) * k; b.y += (b.ty - b.y) * k;
+      turnTo(b, b.tyaw, dt, 12);
+    }
     const kv = Math.min(1, dt * 8); b.vx += ((b.x - x0) / Math.max(dt, 1e-3) - b.vx) * kv; b.vz += ((b.z - z0) / Math.max(dt, 1e-3) - b.vz) * kv;
     b.flashT -= dt;
     if (b.firing && b.dead <= 0 && !WEAPONS[b.realW].melee) {   // their gun goes off here at its own rate: no message per shot
@@ -909,16 +913,19 @@ export function createGame(ctx) {
     else if (m.t === 'bye' && b) removeRemote(b);
     else if (m.t === 'hi' && G.mp) sendState();   // a newcomer: let them see us straight away
   }
+  // v1.28: every position message says when it was sent (this page's clock, seconds), so the others can play them back evenly
+  const nowS = () => performance.now() / 1000;
   function sendState() {
     if (!G.mp) return;
     const r2 = (v) => Math.round(v * 100) / 100;
-    G.mp.send({ t: 's', n: myName, x: r2(P.x), y: r2(P.y), z: r2(P.z), r: r2(P.yaw + Math.PI), p: r2(P.pitch), w: G.weapon, d: G.dead > 0 ? 1 : 0, f: G.firing && G.dead <= 0 ? 1 : 0, k: G.kills, de: G.deaths, jt: G.joinT });
+    G.mp.send({ t: 's', ts: r2(nowS()), n: myName, x: r2(P.x), y: r2(P.y), z: r2(P.z), r: r2(P.yaw + Math.PI), p: r2(P.pitch), w: G.weapon, d: G.dead > 0 ? 1 : 0, f: G.firing && G.dead <= 0 ? 1 : 0, k: G.kills, de: G.deaths, jt: G.joinT });
   }
   const _lp = new THREE.Vector3();
   function mpUpdate(dt) {
     if (!G.mp) return;
     // fewer messages the more people there are (the free Supabase plan allows about 100 a second for everyone together)
-    const n = remotes.size + 1, every = Math.max(1 / 6, n * (n - 1) / 70);
+    // v1.28: 10 a second while two or three play (was 6), the same total budget beyond that
+    const n = remotes.size + 1, every = Math.max(1 / 10, n * (n - 1) / 70);
     mpSendT -= dt; if (mpSendT <= 0) { mpSendT = every; sendState(); }
     for (const b of [...remotes.values()]) if (G.time - b.seenAt > 8) removeRemote(b);   // closed the page without saying goodbye
     // names over their heads
@@ -972,13 +979,14 @@ export function createGame(ctx) {
       let s = shadows[i]; if (!s) s = addShadow(i, w);
       if (w !== s.weapon) { group.remove(s.mesh); if (s.char) { s.char.dispose(); s.char = null; } s.weapon = s.realW = w; s.mesh = botMesh(w); group.add(s.mesh); attachChar(s); }
       const dtm = Math.max(0.05, G.time - s.rxT); s.rxT = G.time;
-      if (s.fresh || Math.hypot(x - s.x, z - s.z) > 15) { s.x = x; s.y = y; s.z = z; s.yaw = r; s.tvx = s.tvz = 0; s.fresh = false; }
+      if (s.fresh || Math.hypot(x - s.x, z - s.z) > 15) { s.x = x; s.y = y; s.z = z; s.yaw = r; s.tvx = s.tvz = 0; s.fresh = false; snapReset(s); }
       else { s.tvx = (x - s.lx) / dtm; s.tvz = (z - s.lz) / dtm; }
       s.lx = x; s.lz = z;
       s.tx = x; s.ty = y; s.tz = z; s.tyaw = r; s.firing = !!fi;
       s.pitch = Math.atan2(P.y + EYE - 0.3 - (s.y + 1.45), Math.max(1, len2(s.x - P.x, s.z - P.z)));
       if (dead && !s.dead) { s.dead = 1; if (s.char) s.char.die(); }
-      else if (!dead && s.dead) { s.dead = 0; s.x = x; s.y = y; s.z = z; s.tvx = s.tvz = 0; if (s.char) s.char.reset(); }
+      else if (!dead && s.dead) { s.dead = 0; s.x = x; s.y = y; s.z = z; s.tvx = s.tvz = 0; snapReset(s); if (s.char) s.char.reset(); }
+      if (Number.isFinite(m.ts)) snapPush(s, nowS(), m.ts, x, y, z, r);
     }
   }
   let botSendT = 0;
@@ -988,7 +996,7 @@ export function createGame(ctx) {
     const r2 = (v) => Math.round(v * 100) / 100, a = [];
     const ai = G.bots.filter(o => !o.remote).sort((p, q) => p.id - q.id);
     for (const b of ai) a.push(r2(b.x), r2(b.y), r2(b.z), r2(b.yaw), b.dead > 0 ? 1 : 0, b.flashT > -0.35 && b.dead <= 0 ? 1 : 0, Math.max(0, BOT_GUNS.indexOf(b.weapon)));
-    G.mp.send({ t: 'b', n: ai.length, a });
+    G.mp.send({ t: 'b', ts: r2(nowS()), n: ai.length, a });
   }
   // who runs the bots: decided again whenever someone comes or goes
   function teamTick(dt) {

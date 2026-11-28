@@ -87,6 +87,7 @@ console.log(`shaders compiled in the run ${res.shadersCompiled} · enter ${res.e
 if (res.heap) console.log(`heap ${res.heap.startMB} → ${res.heap.endMB} MB · allocated ${res.heap.allocatedMB} MB (${res.heap.allocMBperSec} MB/s) · GC drops ${res.heap.gcDrops}`);
 if (res.eye) console.log(`eye height: ${res.eye.joltsOver5cm} jolts over 5 cm between frames (largest ${res.eye.maxStepCm} cm)`);
 if (res.stuck) console.log(`route: stepped past an obstacle ${res.stuck}×`);
+if (res.slices) console.log('10 s slices [start s, p50, p95, frames >33 ms, draw calls]:', JSON.stringify(res.slices), res.solidsReadyAt != null ? `· collision grid ready at t=${res.solidsReadyAt} s` : '');
 console.log('longest frames:'); for (const l of res.longest) console.log(`  t=${l.t}s ${l.ms} ms (game ${l.sim}, render ${l.render}) [${l.tags.join(' ')}]` + (l.why ? '  ← ' + l.why : ''));
 if (res.trace) { console.log('main-thread self time over the whole run:'); for (const [n, ms, pc] of res.trace.top) console.log(`  ${String(ms).padStart(8)} ms ${String(pc).padStart(5)} %  ${n}`); console.log(`GC inside frames: ${res.trace.gcMs} ms in ${res.trace.gcCount} collections`); console.log('page work (ms, count):', JSON.stringify(res.trace.dom), 'placeLabels', res.trace.placeLabelsMs, 'updateHud', res.trace.updateHudMs, 'botStep', res.trace.botStepMs); }
 if (res.alloc) { console.log('allocations by function during the run (MB):'); for (const [k, v] of res.alloc) console.log(`  ${String(v).padStart(8)}  ${k}`); }
