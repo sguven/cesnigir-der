@@ -373,18 +373,18 @@
     if (!force && mPend && Date.now() - mPendT < 15000) return Promise.resolve(mPend);
     if (mPendP) return mPendP;
     mPendP = mRpc('forum_bekleyenler', {}).then(function (r) {
-      mPend = { konular: C.arr(r && r.konular), cevaplar: C.arr(r && r.cevaplar), yorumlar: C.arr(r && r.yorumlar), ilanlar: C.arr(r && r.ilanlar), rehber: C.arr(r && r.rehber), fotolar: C.arr(r && r.fotolar), etkinlikler: C.arr(r && r.etkinlikler) }; mPendT = Date.now(); mBadge(); return mPend;
+      mPend = { konular: C.arr(r && r.konular), cevaplar: C.arr(r && r.cevaplar), yorumlar: C.arr(r && r.yorumlar), ilanlar: C.arr(r && r.ilanlar), rehber: C.arr(r && r.rehber), fotolar: C.arr(r && r.fotolar), etkinlikler: C.arr(r && r.etkinlikler), videolar: C.arr(r && r.videolar) }; mPendT = Date.now(); mBadge(); return mPend;
     }).then(function (x) { mPendP = null; return x; }, function (e) { mPendP = null; throw e; });
     return mPendP;
   }
   function mBadge() {
     var a = document.querySelector('.nav [data-nav="meydan"]'), n = mPend ? mPend.konular.length + mPend.cevaplar.length : 0;
-    var ni = mPend ? mPend.ilanlar.length : 0, nr = mPend ? mPend.rehber.length : 0, nf = mPend ? mPend.fotolar.length : 0, ne = mPend ? mPend.etkinlikler.length : 0, all = mPend ? n + mPend.yorumlar.length + ni + nr + nf + ne : 0, pill = $('edPendPill');
+    var ni = mPend ? mPend.ilanlar.length : 0, nr = mPend ? mPend.rehber.length : 0, nf = mPend ? mPend.fotolar.length : 0, ne = mPend ? mPend.etkinlikler.length : 0, nv = mPend ? mPend.videolar.length : 0, all = mPend ? n + mPend.yorumlar.length + ni + nr + nf + ne + nv : 0, pill = $('edPendPill');
     if (pill) { pill.hidden = !all; pill.querySelector('b').textContent = all; }
     say(a, n, ' yazı onay bekliyor');
     say(document.querySelector('.nav [data-nav="pazar"]'), ni, ' ilan onay bekliyor');
     say(document.querySelector('.nav [data-nav="rehber"]'), nr, ' işletme onay bekliyor');
-    say(document.querySelector('.nav [data-nav="fotograflar"]'), nf, ' fotoğraf isteği onay bekliyor');
+    say(document.querySelector('.nav [data-nav="fotograflar"]'), nf + nv, ' fotoğraf ya da video isteği onay bekliyor');
     say(document.querySelector('.nav [data-nav="etkinlikler"]'), ne, ' etkinlik onay bekliyor');
     function say(a, n, ne) {
       if (!a) return;
@@ -408,6 +408,18 @@
         }).join('') + '</div></div>' +
         '<div class="ed-bar"><button type="button" class="ed-btn green" data-fm="onayla" data-tur="foto" data-id="' + x.id + '">' + icon('check') + 'Onayla, yayınla</button>' +
         '<button type="button" class="ed-btn red" data-fm="sil" data-tur="foto" data-id="' + x.id + '">' + icon('trash') + 'Sil</button></div></div>';
+    }
+    if (tur === 'video') {   // ziyaretçinin gönderdiği video bağlantısı: yönetici adını düzeltip onaylayabilir
+      var vid = C.ytId(x.link), vl = C.linkUrl(x.link);
+      return '<div class="ed-m-item">' +
+        '<div class="news-meta"><span class="badge">Video</span><span>' + esc(C.zaman(x.created_at)) + '</span></div>' +
+        (vid ? '<a href="' + esc(vl) + '" target="_blank" rel="noopener noreferrer" style="display:block;max-width:320px;margin:0 0 8px"><img src="https://i.ytimg.com/vi/' + esc(vid) + '/mqdefault.jpg" alt="" style="width:100%;border-radius:6px"></a>' : '') +
+        '<p class="small" style="margin:0 0 6px"><a href="' + esc(vl) + '" target="_blank" rel="noopener noreferrer" style="word-break:break-all">' + esc(x.link) + '</a> <span class="muted">(dokunup izleyebilirsiniz)</span></p>' +
+        '<label class="ed-field" style="display:block;margin:0 0 6px"><span class="ed-label">Videonun adı</span><input type="text" name="va' + x.id + '" value="' + esc(x.baslik) + '" maxlength="120"></label>' +
+        (x.aciklama ? '<div class="ed-m-text">' + esc(x.aciklama) + '</div>' : '') +
+        '<p class="ed-m-by">Gönderen: <b>' + esc(x.ad) + '</b></p>' +
+        '<div class="ed-bar"><button type="button" class="ed-btn green" data-fm="onayla" data-tur="video" data-id="' + x.id + '">' + icon('check') + 'Onayla, yayınla</button>' +
+        '<button type="button" class="ed-btn red" data-fm="sil" data-tur="video" data-id="' + x.id + '">' + icon('trash') + 'Sil</button></div></div>';
     }
     if (tur === 'etkinlik') {   // ziyaretçinin bildirdiği düğün, nişan, mevlit…: telefon yalnız burada görünür, sitede yayınlanmaz
       var et = C.telHref(x.telefon), gun = C.longDate(x.tarih, true), ne = [x.saat, x.yer].filter(Boolean).join(' · ');
@@ -465,10 +477,10 @@
     if (page !== '' && page !== 'meydan' && page !== 'konu' && page !== 'pazar' && page !== 'rehber' && page !== 'fotograflar' && page !== 'etkinlikler' && !ys) return;
     mPendLoad().then(function (p) {
       var konu = main.querySelector('[data-m-konu]'), kid = konu ? +konu.getAttribute('data-m-konu') : 0;
-      var host = null, konular = [], cevaplar = [], yorumlar = [], ilanlar = [], rehber = [], fotolar = [], etkinlikler = [];
-      if (page === '') { konular = p.konular; cevaplar = p.cevaplar; yorumlar = p.yorumlar; ilanlar = p.ilanlar; rehber = p.rehber; fotolar = p.fotolar; etkinlikler = p.etkinlikler; }
+      var host = null, konular = [], cevaplar = [], yorumlar = [], ilanlar = [], rehber = [], fotolar = [], etkinlikler = [], videolar = [];
+      if (page === '') { konular = p.konular; cevaplar = p.cevaplar; yorumlar = p.yorumlar; ilanlar = p.ilanlar; rehber = p.rehber; fotolar = p.fotolar; etkinlikler = p.etkinlikler; videolar = p.videolar; }
       else if (page === 'etkinlikler') { host = main.querySelector('.section > .container'); etkinlikler = p.etkinlikler; }
-      else if (page === 'fotograflar') { host = main.querySelector('.section > .container'); fotolar = p.fotolar; }
+      else if (page === 'fotograflar') { host = main.querySelector('.section > .container'); fotolar = p.fotolar; videolar = p.videolar; }
       else if (page === 'rehber') { host = main.querySelector('.section > .container'); rehber = p.rehber; }
       else if (page === 'pazar') { host = main.querySelector('.section > .container'); ilanlar = p.ilanlar; }
       else if (page === 'meydan') { host = main.querySelector('.m-main'); konular = p.konular; cevaplar = p.cevaplar; }
@@ -477,7 +489,7 @@
         host = ys.querySelector('.y-pend');
         yorumlar = p.yorumlar.filter(function (y) { return y.hedef_tur === ys.getAttribute('data-y') && y.hedef === ys.getAttribute('data-yh'); });
       }
-      var n = konular.length + cevaplar.length + yorumlar.length + ilanlar.length + rehber.length + fotolar.length + etkinlikler.length, old = $('edMPend'), oldW = $('edMPendWrap');
+      var n = konular.length + cevaplar.length + yorumlar.length + ilanlar.length + rehber.length + fotolar.length + etkinlikler.length + videolar.length, old = $('edMPend'), oldW = $('edMPendWrap');
       if (old) old.remove();
       if (oldW) oldW.remove();
       if (page === '') {
@@ -493,7 +505,7 @@
         (n ? '<p class="small muted">Bunları yalnız siz görüyorsunuz. Onaylarsanız sitede görünür; uygun değilse silin.</p>' : '<p class="small muted">Yeni yazı ve cevaplar gelince burada görünecek.</p>') +
         etkinlikler.map(function (i) { return mPendItem(i, 'etkinlik', home); }).join('') +
         ilanlar.map(function (i) { return mPendItem(i, 'ilan', home); }).join('') + rehber.map(function (i) { return mPendItem(i, 'rehber', home); }).join('') +
-        fotolar.map(function (i) { return mPendItem(i, 'foto', home); }).join('') +
+        fotolar.map(function (i) { return mPendItem(i, 'foto', home); }).join('') + videolar.map(function (i) { return mPendItem(i, 'video', home); }).join('') +
         konular.map(function (k) { return mPendItem(k, 'konu', home); }).join('') + cevaplar.map(function (c) { return mPendItem(c, 'cevap', home); }).join('') +
         yorumlar.map(function (y) { return mPendItem(y, 'yorum', home); }).join('') + '</div>'), host.firstChild);
       if (home && mScroll) { mScroll = false; $('edMPend').scrollIntoView({ block: 'start', behavior: 'smooth' }); }
@@ -509,10 +521,11 @@
     e.preventDefault(); e.stopPropagation();
     var islem = b.getAttribute('data-fm'), tur = b.getAttribute('data-tur'), id = +b.getAttribute('data-id');
     var ask = islem !== 'sil' ? Promise.resolve(true) :
-      dialog('Silinsin mi?', tur === 'konu' ? 'Bu yazı ve altındaki bütün cevaplar silinecek. Geri alınamaz.' : tur === 'cevap' ? 'Bu cevap silinecek. Geri alınamaz.' : tur === 'ilan' ? 'Bu ilan isteği silinecek, sitede yayınlanmayacak. Geri alınamaz.' : tur === 'rehber' ? 'Bu işletme isteği silinecek, sitede yayınlanmayacak. Geri alınamaz.' : tur === 'foto' ? 'Gönderilen fotoğraflar silinecek, sitede yayınlanmayacak. Geri alınamaz.' : tur === 'etkinlik' ? 'Bu etkinlik isteği silinecek, takvimde yayınlanmayacak. Geri alınamaz.' : 'Bu yorum silinecek. Geri alınamaz.', 'Evet, sil', { danger: true });
+      dialog('Silinsin mi?', tur === 'konu' ? 'Bu yazı ve altındaki bütün cevaplar silinecek. Geri alınamaz.' : tur === 'cevap' ? 'Bu cevap silinecek. Geri alınamaz.' : tur === 'ilan' ? 'Bu ilan isteği silinecek, sitede yayınlanmayacak. Geri alınamaz.' : tur === 'rehber' ? 'Bu işletme isteği silinecek, sitede yayınlanmayacak. Geri alınamaz.' : tur === 'foto' ? 'Gönderilen fotoğraflar silinecek, sitede yayınlanmayacak. Geri alınamaz.' : tur === 'etkinlik' ? 'Bu etkinlik isteği silinecek, takvimde yayınlanmayacak. Geri alınamaz.' : tur === 'video' ? 'Bu video isteği silinecek, sitede yayınlanmayacak. Geri alınamaz.' : 'Bu yorum silinecek. Geri alınamaz.', 'Evet, sil', { danger: true });
     ask.then(function (ok) {
       if (!ok) return;
       if ((tur === 'ilan' || tur === 'rehber' || tur === 'etkinlik') && islem === 'onayla') { istekYayinla(id, tur); return; }
+      if (tur === 'video' && islem === 'onayla') { var vb = document.querySelector('input[name="va' + id + '"]'); videoYayinla(id, vb ? vb.value.trim() : ''); return; }
       if (tur === 'foto' && islem === 'onayla') { var sec = document.querySelector('input[name="fk' + id + '"]:checked'); fotoYayinla(id, sec ? sec.value : 'koy'); return; }
       busy(islem === 'onayla' ? 'Yayınlanıyor…' : islem === 'sil' ? 'Siliniyor…' : 'Kaydediliyor…');
       mRpc('forum_islem', { tur: tur, kayit: id, islem: islem }).then(function () {
@@ -643,6 +656,27 @@
     }).catch(function (e) {
       busy(false);
       fail(ne + ' yayınlanamadı', e);
+    });
+  }
+
+  /* Ziyaretçinin gönderdiği videoyu yayınlar: data/videolar.json'un başına yazar (gönderenin adı "gonderen"), sonra isteği siler. */
+  function videoYayinla(id, baslik) {
+    var x = (mPend ? mPend.videolar : []).filter(function (i) { return i.id === id; })[0];
+    if (!x) return;
+    var item = clean({ link: x.link, baslik: baslik.length >= 3 ? baslik : x.baslik, aciklama: x.aciklama, tarih: C.todayIso(), gonderen: x.ad }), kaldi = false;
+    busy('Yayınlanıyor…');
+    updateJson(COLS.videolar.file, function (data) { return [item].concat(C.arr(data)); }, 'Panel: video eklendi (ziyaretçinin isteği, ' + x.ad + ') – ' + item.baslik).then(function (list) {
+      site.set('videolar', list);
+      return mRpc('forum_islem', { tur: 'video', kayit: id, islem: 'sil' }).catch(function () { kaldi = true; });
+    }).then(function () {
+      busy(false);
+      if (!kaldi) mPend.videolar = mPend.videolar.filter(function (i) { return i.id !== id; });
+      mPendT = 0; mBadge(); rerender();
+      if (kaldi) dialog('Video yayınlandı', 'Video sitede yayınlandı ama istek listeden kaldırılamadı. Onay bekleyenlerde hâlâ görünüyorsa "Sil" düğmesiyle kaldırın; yeniden onaylamayın.', 'Tamam', { single: true });
+      else toast('Video yayınlandı', 'Herkes 1-2 dakika içinde Videolar bölümünde görecek.');
+    }).catch(function (e) {
+      busy(false);
+      fail('Video yayınlanamadı', e);
     });
   }
 

@@ -69,6 +69,7 @@ panel sayfası adres çubuğundaki anahtarı başka sitelere göndermez (`referr
 | `data/videolar.json` | Videolar (Fotoğraflar sayfasındaki "Videolar" sekmesi ve ana sayfadaki "Videolardan"). Video siteye yüklenmez, YouTube ya da Instagram/Facebook bağlantısı yazılır; YouTube'da yalnız küçük resim iner, oynatıcı dokununca açılır |
 | `data/dernek.json` | Hakkımızda, başkan, yönetim ve denetim kurulu, iletişim, kasa durumu |
 | `araclar/supabase-meydan.sql` | Sizden Gelenler, yorumlar, Market ve Esnaf Rehberi istekleri veritabanı (Supabase) kurulumu |
+| `araclar/supabase-video.sql` | Ziyaretçilerin video göndermesi (video_istekleri tablosu): bir kez SQL Editor'da çalıştırılır; kurulmadıkça "Video gönderin" düğmesi görünmez |
 
 ## Sizden Gelenler (forum)
 
