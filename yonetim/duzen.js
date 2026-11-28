@@ -531,7 +531,7 @@
   /* ---------------- Bize Ulaşın: gelen mesajlar ----------------
      Ziyaretçinin Hakkımızda > Bize Ulaşın formuyla gönderdiği mesajlar sitede yayınlanmaz; yalnız burada görünür.
      Hakkımızda sayfasında formun üstünde liste (en yeni üstte), okunmamışlar "Yeni" işaretli; "Okudum" / "Okunmadı yap" / "Sil".
-     Menüdeki "Bize Ulaşın" yanında ve ana sayfanın başında okunmamış mesaj sayısı yazar.
+     Menüdeki "Hakkımızda" yanında ve ana sayfanın başında okunmamış mesaj sayısı yazar.
      Kurulum: araclar/supabase-mesajlar.sql (mesaj_listesi, mesaj_islem). Kurulmamışsa bu bölüm hiç görünmez. */
   var msj = null, msjT = 0, msjP = null, msjYok = false;
   function msjLoad(force) {
@@ -545,7 +545,7 @@
   }
   function msjYeni() { return msj ? msj.filter(function (m) { return !m.okundu; }).length : 0; }
   function msjBadge() {
-    var a = document.querySelector('.nav [data-nav="bize-ulasin"]'), n = msjYeni();
+    var a = document.querySelector('.nav [data-nav="hakkimizda"]'), n = msjYeni();
     if (!a) return;
     var b = a.querySelector('.ed-count');
     if (!n) { if (b) b.remove(); return; }

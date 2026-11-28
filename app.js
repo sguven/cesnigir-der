@@ -1761,7 +1761,7 @@
     radyoSync();
     realLinks(main);
     if (ilkAcilis) ilkAcilis = false; else { main.classList.remove('gir'); void main.offsetWidth; main.classList.add('gir'); }   // ilk açılışta beklemeden görünsün
-    var navKey = page === 'duyuru' ? 'duyurular' : page === 'etkinlik' ? 'etkinlikler' : page === 'ilan' ? 'pazar' : page === 'isletme' ? 'rehber' : page === 'konu' ? 'meydan' : page === 'foto' ? 'fotograflar' : page;
+    var navKey = page === 'duyuru' ? 'duyurular' : page === 'etkinlik' ? 'etkinlikler' : page === 'ilan' ? 'pazar' : page === 'isletme' ? 'rehber' : page === 'konu' ? 'meydan' : page === 'foto' ? 'fotograflar' : page === 'bize-ulasin' ? 'hakkimizda' : page;
     if (page === 'etkinlik' || page === 'ilan' || page === 'isletme' || page === 'duyuru') { var sp = main.querySelector('[data-share-photo]'); if (sp) C.warmShare(sp.getAttribute('data-share-photo')); }
     document.querySelectorAll('[data-nav]').forEach(function (a) {
       if (a.getAttribute('data-nav') === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
