@@ -368,6 +368,7 @@ export function createGame(ctx) {
       const W = WEAPONS[b.weapon];
       charIn.x = b.x; charIn.y = b.y; charIn.z = b.z; charIn.yaw = b.yaw; charIn.vx = b.vx || 0; charIn.vz = b.vz || 0;
       charIn.pitch = b.remote ? b.pitch : Math.atan2(P.y + EYE - 0.3 - (b.y + 1.45), Math.max(1, dist));
+      charIn.aimYaw = b.remote && !b.shadow ? b.aimYaw : undefined;   // v1.32: the view, when the body lags behind it
       charIn.aim = b.hasLos || b.state === 'search' || b.state === 'chase' || b.state === 'hold' || b.state === 'close';
       charIn.crouch = !!b.crouch && b.state === 'hold';
       charIn.reloadK = b.reloadT > 0 ? 1 - b.reloadT / (W.reload + 0.4) : -1;
@@ -893,9 +894,11 @@ export function createGame(ctx) {
     if (!b.snap || !snapSample(b, nowS())) {   // a page from before v1.28 (no send time in its messages): the old guess ahead
       if (b.dead <= 0 && G.time - b.rxT < 0.6) { b.tx += b.tvx * dt; b.tz += b.tvz * dt; }   // carry on a little between messages
       const k = Math.min(1, dt * 9); b.x += (b.tx - b.x) * k; b.z += (b.tz - b.z) * k; b.y += (b.ty - b.y) * k;
+      if (b.viewYaw !== undefined) b.yaw = b.viewYaw;   // (b.yaw is the body's own turn below)
       turnTo(b, b.tyaw, dt, 12);
     }
     const kv = Math.min(1, dt * 8); b.vx += ((b.x - x0) / Math.max(dt, 1e-3) - b.vx) * kv; b.vz += ((b.z - z0) / Math.max(dt, 1e-3) - b.vz) * kv;
+    if (!b.shadow) bodyFollowsView(b, dt);
     b.flashT -= dt;
     if (b.firing && b.dead <= 0 && !WEAPONS[b.realW].melee) {   // their gun goes off here at its own rate: no message per shot
       b.fireAcc -= dt;
@@ -904,6 +907,20 @@ export function createGame(ctx) {
     if (b.dead > 0 && !b.char) { b.mesh.rotation.x = -Math.PI / 2; b.mesh.position.set(b.x, b.y + 0.15, b.z); }
     else { b.mesh.position.set(b.x, b.y, b.z); b.mesh.rotation.set(0, b.yaw, 0); }
     u.flash.visible = b.flashT > 0 && !b.char;
+  }
+  // v1.32: another player's view turns all the time (a thumb on a phone looks round, wiggles, flicks), and the whole
+  // figure used to turn with it: seen from outside they span round on the spot. Now, as in shooters, the view turns
+  // the head, the chest and the gun at once (aimYaw, lightly smoothed against the thumb's jitter), and the body and
+  // legs follow only when they walk or when the view has gone more than ~50° to one side.
+  const wrapA = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+  function bodyFollowsView(b, dt) {
+    const view = b.yaw; b.viewYaw = view;   // where the messages say they look (set by snapSample / turnTo above)
+    if (b.aimYaw === undefined || b.dead > 0) { b.aimYaw = view; b.bodyYaw = view; }
+    b.aimYaw += wrapA(view - b.aimYaw) * Math.min(1, dt * 18);
+    const d = wrapA(b.aimYaw - b.bodyYaw), moving = Math.hypot(b.vx, b.vz) > 0.8;
+    if (moving || Math.abs(d) > 0.9) b.turning = true; else if (Math.abs(d) < 0.15) b.turning = false;
+    if (b.turning) b.bodyYaw += d * Math.min(1, dt * (moving ? 8 : 5));
+    b.yaw = b.bodyYaw;
   }
   function mpHit(b, dmg, head) {
     if (!G.mp) return;
