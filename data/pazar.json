@@ -3,11 +3,14 @@
     "tur": "Satılık",
     "tarih": "2026-11-28",
     "baslik": "Doğal Gül Suyu (Coşkun Rose)",
-    "aciklama": "Coşkun Rose %100 doğal gül suyu.\nBilgi ve sipariş için Adnan Özcan'ı arayabilir ya da WhatsApp'tan yazabilirsiniz.",
+    "aciklama": "Coşkun Rose %100 doğal gül suyu. Kendi bahçemizin güllerinden üretilmiştir, katkı maddesi içermez.\nBilgi ve sipariş için Adnan Özcan'ı arayabilir ya da WhatsApp'tan yazabilirsiniz.",
     "kisi": "Adnan Özcan",
     "telefon": "05421222904",
-    "foto": "images/yuklenen/2026-11-28-gul-suyu-1-sise.jpg",
+    "foto": "images/yuklenen/2026-11-28-gul-suyu-0-afis.jpg",
     "fotolar": [
+      {
+        "foto": "images/yuklenen/2026-11-28-gul-suyu-1-sise.jpg"
+      },
       {
         "foto": "images/yuklenen/2026-11-28-gul-suyu-2-cuval.jpg"
       },
