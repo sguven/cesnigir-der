@@ -17,7 +17,8 @@
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <!--
   Köprüköy 3D sayfası.
-  3D modelin kendisi ayrı depoda durur (github.com/sguven/koprukoy-3d) ve oradan güncellenir; bu sayfa onu tam ekran açar.
+  3D modelin kendisi bu sitenin içindedir (3d/app/) ve burada güncellenir; bu sayfa onu tam ekran açar.
+  (Kasım 2026'ya kadar ayrı depodan, sguven.github.io/koprukoy-3d adresinden açılıyordu; o depo artık arşivdir.)
   Model büyük (yaklaşık 25 MB) olduğu için kendiliğinden yüklenmez: ziyaretçi "Başlat"a dokununca iner.
   Sitenin diğer sayfalarına hiçbir yük eklemez.
 -->
@@ -60,7 +61,7 @@
 <header class="bar" id="bar">
   <a href="../" aria-label="Çeşnigir-Der ana sayfasına dön">‹ Siteye dön</a>
   <b>Köprüköy 3D</b>
-  <a class="tam" id="tam" href="https://sguven.github.io/koprukoy-3d/" target="_blank" rel="noopener">Tam ekran</a>
+  <a class="tam" id="tam" href="app/" target="_blank" rel="noopener">Tam ekran</a>
 </header>
 <main id="alan">
   <div class="giris" id="giris">
@@ -69,13 +70,13 @@
       <p>Köprüköy'ün sokakları, evleri ve tarihi Çeşnigir Köprüsü. Köyün içinde yürüyün, yukarıdan uçun ya da beyaz Toros'la dolaşın.</p>
       <p class="not">Model büyüktür (yaklaşık 25 MB). Wi-Fi'de açmanızı öneririz. Açılması telefona göre yarım dakika kadar sürebilir.</p>
       <button type="button" class="basla" id="basla">Başlat</button>
-      <a class="yeni" href="https://sguven.github.io/koprukoy-3d/" target="_blank" rel="noopener">Yeni sekmede aç</a>
+      <a class="yeni" href="app/" target="_blank" rel="noopener">Yeni sekmede aç</a>
     </div>
   </div>
 </main>
 <script>
 (function () {
-  var ADRES = 'https://sguven.github.io/koprukoy-3d/';
+  var ADRES = 'app/';   // model bu sitenin içinde: 3d/app/
   var bar = document.getElementById('bar'), alan = document.getElementById('alan');
   // Telefonda (dokunmatik ekran) "Başlat"a dokununca sayfa tam ekrana geçer: tarayıcının adres çubuğu ve sekmeler
   // kaybolur. Tam ekrandan çıkınca (geri tuşu ya da modeldeki "Siteye dön") ana sayfaya dönülür.
@@ -111,7 +112,7 @@
   document.addEventListener('webkitfullscreenchange', tamDegisti);
   // modelin içindeki "Siteye dön" düğmesi
   window.addEventListener('message', function (e) {
-    if (e.origin !== 'https://sguven.github.io' || !e.data || e.data.kk !== 'siteyeDon') return;
+    if (e.origin !== location.origin || !e.data || e.data.kk !== 'siteyeDon') return;
     if (tamEkranMi()) { cikiyor = true; (document.exitFullscreen || document.webkitExitFullscreen).call(document); }   // tamDegisti siteye götürür
     else siteyeDon();
   });
