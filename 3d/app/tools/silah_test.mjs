@@ -9,13 +9,14 @@ const server = http.createServer((req, res) => { const p = decodeURIComponent(re
   if (!fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
   let body = fs.readFileSync(file);
   if (file.endsWith('index.html')) { let s = body.toString(); s = s.replace('https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js', '/three/build/three.module.js').replace('https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/', '/three/examples/jsm/');
-    if (!s.includes('window.__kk')) s = s.replace('</script>\n</body>', 'window.__kk = { setMode, camera, P, surfaceAt, game: () => game };\n</script>\n</body>'); body = Buffer.from(s); }
+    if (!s.includes('window.__kk')) s = s.replace('</script>\n</body>', 'window.__kk = { setMode, camera, P, surfaceAt, scene, game: () => game };\n</script>\n</body>'); body = Buffer.from(s); }
   res.writeHead(200, { 'content-type': mime[path.extname(file)] || 'application/octet-stream' }); res.end(body); });
 await new Promise(r => server.listen(0, r)); const port = server.address().port;
 const browser = await chromium.launch({ args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--disable-dev-shm-usage', '--disable-background-timer-throttling', '--disable-renderer-backgrounding'] });
 const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
-await ctx.addInitScript(() => { try { localStorage.setItem('kk_quality', 'smooth'); } catch (_) {} });
-const pg = await ctx.newPage(); const errs = []; pg.on('pageerror', e => { errs.push(e.message); console.log('[pageerror]', e.message); });
+await ctx.addInitScript(() => { window.__solidsSlice = () => 400; try { localStorage.setItem('kk_quality', 'smooth'); } catch (_) {} });
+const pg = await ctx.newPage(); let solidsReady = false; pg.on('console', m => { if (/\[solids\]/.test(m.text())) { solidsReady = true; console.log(m.text()); } });
+const errs = []; pg.on('pageerror', e => { errs.push(e.message); console.log('[pageerror]', e.message); });
 const t0 = Date.now();
 await pg.goto(`http://localhost:${port}/`, { waitUntil: 'domcontentloaded', timeout: 300000 }); await pg.waitForFunction(() => !document.getElementById('loading'), null, { timeout: 900000 });
 console.log('loaded', ((Date.now() - t0) / 1000).toFixed(0), 's');
@@ -47,41 +48,46 @@ const fireAt = (d, off, wpn, opts = {}) => pg.evaluate(([d, off, wpn, opts]) => 
   return { wpn, d, off, hp: b.dead > 0 ? 'öldü' : b.hp, mark: document.getElementById('hitMark').className, fired }; }, [d, off, wpn, opts]);
 
 
-// find a clear line of sight: turn round until a scoped AWP shot at 80 m lands (trees and houses stop bullets)
-let clear = null;
-for (const spot of [[0, 0], [60, 0], [0, 60], [-60, 0], [0, -60], [120, 40]]) {
-  for (let yd = 0; yd < 360 && !clear; yd += 30) {
-    await pg.evaluate(([dx, dz, yd]) => { const P = window.__kk.P; if (!window.__p0) window.__p0 = [P.x, P.z]; P.x = window.__p0[0] + dx; P.z = window.__p0[1] + dz; P.yaw = yd * Math.PI / 180; }, [spot[0], spot[1], yd]);
-    const r = await fireAt(80, 0, 'awp', { scope: true }); if (r.hp !== 100) clear = [spot, yd];
-  }
-  if (clear) break;
+
+
+
+// v1.34 bullet holes: shoot round at eye level from a few spots, then check every wall mark against the real drawn
+// geometry (a slow full-scene ray, test only): looking at the mark from 3 m out, the first thing hit should be a wall ~3 m away
+{ const t1 = Date.now(); while (!solidsReady && Date.now() - t1 < 600000) await wait(1000); console.log('solids ready', solidsReady); }
+await pg.evaluate(() => { window.__hd = []; const G = window.__kk.game().state; G.spawnSafe = 999; G.god = true; for (const b of G.bots) { b.x += 500; b.z += 500; b.cd = 999; b.reaction = 999; } });
+for (const spot of [[0, 0], [30, 0], [0, 30], [-30, 0], [0, -30], [30, 30]]) {
+  await pg.evaluate(([dx, dz]) => { const k = window.__kk, g = k.game(), G = g.state, P = k.P, cam = k.camera; if (!window.__q0) window.__q0 = [P.x, P.z]; P.x = window.__q0[0] + dx; P.z = window.__q0[1] + dz; P.y = k.surfaceAt(P.x, P.z).y;
+    for (let yd = 0; yd < 360; yd += 30) { P.yaw = yd * Math.PI / 180; cam.position.set(P.x, P.y + 1.6, P.z); cam.rotation.set(0.03, P.yaw, 0, 'YXZ'); cam.updateMatrixWorld(); G.ammo.ak47 = { mag: 30, reserve: 90 }; G.swapT = 0; G.reloading = 0; G.fireCd = 0; G.fired = false; G.lastShot = G.time - 2; G.heat = 0; g.fire(); } }, spot);
 }
-console.log('clear line found at', clear);
-for (let i = 0; i < 3; i++) console.log('AK 1 shot @20 m', await fireAt(20, 0, 'ak47'));
-console.log('AK 3 shots @20 m', await fireAt(20, 0, 'ak47', { n: 3 }));
-console.log('AK 3 shots @80 m', await fireAt(80, 0, 'ak47', { n: 3 }));
-console.log('Deagle 2 shots @15 m', await fireAt(15, 0, 'deagle', { n: 2 }));
-console.log('Deagle 1 shot @60 m', await fireAt(60, 0, 'deagle'));
-console.log('AWP scoped @80 m', await fireAt(80, 0, 'awp', { scope: true }));
-console.log('AWP no scope @20 m (x3 tries)', await fireAt(20, 0, 'awp'), await fireAt(20, 0, 'awp'), await fireAt(20, 0, 'awp'));
-console.log('knife front 1.8 m 20°', await fireAt(1.8, 20, 'knife'));
-console.log('knife front 1.8 m 50° (should miss)', await fireAt(1.8, 50, 'knife'));
-console.log('knife behind 1.5 m', await fireAt(1.5, 0, 'knife', { back: true }));
-await shot('1-isabet');
-// held AK: real frames
-await fireAt(20, 0, 'ak47', { n: 0 }); await wait(200);
-let r = await pg.evaluate(async () => { const G = window.__kk.game().state, P = window.__kk.P, p0 = P.pitch, y0 = P.yaw, m0 = G.ammo.ak47.mag, t0 = G.time; let frames = 0; const c = () => { frames++; if (G.firing) requestAnimationFrame(c); }; G.firing = true; G.fired = false; requestAnimationFrame(c); await new Promise(r => setTimeout(r, 2500)); G.firing = false; const gt = G.time - t0;
-  return { shots: m0 - G.ammo.ak47.mag, gameSec: gt.toFixed(2), fps: (frames / gt).toFixed(1), perSec: ((m0 - G.ammo.ak47.mag) / gt).toFixed(1), climbDeg: ((P.pitch - p0) * 180 / Math.PI).toFixed(1), yawDeg: ((P.yaw - y0) * 180 / Math.PI).toFixed(1) }; });
-console.log('AK held:', r);
-// auto reload
-r = await pg.evaluate(async () => { const g = window.__kk.game(), G = g.state; G.ammo.ak47 = { mag: 0, reserve: 60 }; G.reloading = 0; G.swapT = 0; G.lastShot = G.time - 1; const t0 = G.time; await new Promise(r => setTimeout(r, 1200)); return { gameSec: (G.time - t0).toFixed(2), reloading: G.reloading.toFixed(2), weapon: G.weapon, dead: G.dead, shop: G.shopOpen, throwT: G.throwT, mag: G.ammo.ak47.mag }; });
-console.log('auto reload check:', r);
-await wait(3000); console.log('mag after 3 s', await pg.evaluate(() => window.__kk.game().state.ammo.ak47.mag));
-// empty gun -> pistol
-r = await pg.evaluate(async () => { const G = window.__kk.game().state; G.ammo.ak47 = { mag: 0, reserve: 0 }; G.reloading = 0; G.swapT = 0; G.lastShot = G.time - 1; await new Promise(r => setTimeout(r, 1500)); return { weapon: G.weapon, slots: document.getElementById('ghSlots').children.length, feed: document.getElementById('ghFeed').innerText.split('\n')[0] }; });
-console.log('AK empty ->', r);
-await pg.evaluate(() => { const g = window.__kk.game(); g.state.ammo.ak47 = { mag: 30, reserve: 90 }; g.setWeapon('ak47'); });
-// tracer + flash frame
-await fireAt(40, 2, 'ak47'); await wait(30); await shot('2-iz-mermisi');
+const check = await pg.evaluate(async () => { const THREE = await import('three'); const k = window.__kk, sc = k.scene, h = sc.getObjectByName('Game_BulletHoles'), a = h.instanceMatrix.array;
+  const game = sc.getObjectByName('Arena'); const objs = []; sc.traverse(o => { if (o.isMesh) { let p = o, inGame = false; while (p) { if (p === game) inGame = true; p = p.parent; } if (!inGame) objs.push(o); } });
+  const rc = new THREE.Raycaster(); rc.far = 10; const out = [];
+  for (let i = 0; i < h.count; i++) { const o = i * 16, l = Math.hypot(a[o + 8], a[o + 9], a[o + 10]), n = new THREE.Vector3(a[o + 8] / l, a[o + 9] / l, a[o + 10] / l), p = new THREE.Vector3(a[o + 12], a[o + 13], a[o + 14]);
+    const from = p.clone().addScaledVector(n, 3); rc.set(from, n.clone().negate()); const hit = rc.intersectObjects(objs, false)[0];
+    out.push((n.y > 0.5 ? 'yer ' : 'duvar ') + (hit ? hit.object.name + '@' + hit.distance.toFixed(2) : 'HİÇBİR ŞEY')); if (!hit) (window.__miss = window.__miss || []).push([p.x, p.y, p.z, n.x, n.z]); }
+  // cost of a ray limited to the wall meshes and to 0.6 m either side of the mark
+  const walls = objs.filter(o => /Duvar|whitewash|derWall|limestone|plinth|pilaster|stone|brick|wall/i.test(o.name)); let tris = 0; for (const o of walls) tris += o.geometry.index ? o.geometry.index.count / 3 : o.geometry.attributes.position.count / 3;
+  const names = {}; for (const o of walls) names[o.name] = (names[o.name] || 0) + 1;
+  const rc2 = new THREE.Raycaster(); rc2.near = 0; rc2.far = 1.2; let t0 = performance.now(), n2 = 0;
+  const sph = walls.map(o => { if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere(); return o.geometry.boundingSphere.clone().applyMatrix4(o.matrixWorld); });
+  for (let i = 0; i < h.count; i++) { const o = i * 16, l = Math.hypot(a[o + 8], a[o + 9], a[o + 10]), n = new THREE.Vector3(a[o + 8] / l, a[o + 9] / l, a[o + 10] / l), p = new THREE.Vector3(a[o + 12], a[o + 13], a[o + 14]); const near = walls.filter((w, j) => sph[j].center.distanceTo(p) < sph[j].radius + 1); rc2.set(p.clone().addScaledVector(n, 0.6), n.clone().negate()); rc2.intersectObjects(near, false); n2++; }
+  out.push('wall meshes ' + walls.length + ' tris ' + Math.round(tris) + ' ms/ray ' + ((performance.now() - t0) / n2).toFixed(2) + ' ' + JSON.stringify(names));
+  return out; });
+console.log('marks:', check.length); for (const c of check) console.log('  ', c);
+// look at a wall mark from 2.5 m, then fire a group at that wall and look again
+const mk = await pg.evaluate(() => { const k = window.__kk, h = k.scene.getObjectByName('Game_BulletHoles'), a = h.instanceMatrix.array, P = k.P;
+  for (let i = h.count - 1; i >= 0; i--) { const o = i * 16, l = Math.hypot(a[o + 8], a[o + 9], a[o + 10]), nx = a[o + 8] / l, ny = a[o + 9] / l, nz = a[o + 10] / l; if (Math.abs(ny) > 0.3) continue;
+    const px = a[o + 12], py = a[o + 13], pz = a[o + 14]; P.x = px + nx * 3; P.z = pz + nz * 3; P.y = k.surfaceAt(P.x, P.z).y; P.yaw = Math.atan2(nx, nz); P.pitch = Math.atan2(py - (P.y + 1.6), 3); return [px, py, pz]; } return null; });
+console.log('close-up of', mk); await wait(1200);
+await pg.evaluate(() => { const k = window.__kk, g = k.game(), G = g.state, P = k.P, cam = k.camera; const y0 = P.yaw, p0 = P.pitch; cam.position.set(P.x, P.y + 1.6, P.z);
+  for (let i = 0; i < 7; i++) { P.yaw = y0 + (Math.random() - 0.5) * 0.25; P.pitch = p0 + (Math.random() - 0.5) * 0.2; cam.rotation.set(P.pitch, P.yaw, 0, 'YXZ'); cam.updateMatrixWorld(); G.ammo.ak47 = { mag: 30, reserve: 90 }; G.fireCd = 0; G.fired = false; G.lastShot = G.time - 2; G.heat = 0; g.fire(); }
+  P.yaw = y0; P.pitch = p0; });
+await wait(1500); await shot('9-yakin-duvar');
+const misses = await pg.evaluate(() => window.__miss || []);
+for (const [mi, m] of misses.slice(0, 3).entries()) {
+  console.log('miss', m.map(v => v.toFixed(2)).join(','));
+  await pg.evaluate((m) => { const k = window.__kk, P = k.P; P.x = m[0] + m[3] * 3; P.z = m[2] + m[4] * 3; P.y = k.surfaceAt(P.x, P.z).y; P.yaw = Math.atan2(m[3], m[4]); P.pitch = Math.atan2(m[1] - (P.y + 1.6), 3); }, m);
+  await wait(1500); await shot('8-havada-' + mi);
+}
 console.log('page errors:', errs.length);
 await browser.close(); server.close();
