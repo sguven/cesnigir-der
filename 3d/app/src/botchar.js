@@ -208,7 +208,7 @@ export function createBotCrowd({ url, guns, makeFlash, parent }) {
       // ---- chest: aim stance or relaxed, a flinch when hit
       S.aimW += ((s.aim ? 1 : 0) - S.aimW) * (1 - Math.exp(-dt * 6));
       act.aim.setEffectiveWeight(S.aimW * (1 - S.crouchW * 0.4)); act.rest.setEffectiveWeight((1 - S.aimW) * (1 - S.crouchW * 0.4)); act.crouchUp.setEffectiveWeight(S.crouchW * 0.4);
-      // v1.33: the bones turned by hand below (the spine's twist and bend, the arms reaching the gun) go back to the pose
+      // v1.34: the bones turned by hand below (the spine's twist and bend, the arms reaching the gun) go back to the pose
       // the clips gave them last frame before the mixer runs: three.js only writes a bone when its blended value changed,
       // and in the aim stance (one still pose) it did not, so each frame's twist was added on top of the last one's and
       // the chest and head shook from side to side while the figure moved
