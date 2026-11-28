@@ -164,7 +164,9 @@ export function createBotCrowd({ url, guns, makeFlash, parent }) {
     setWeapon(weapon);
     parent.add(root);
 
-    const S = { phase: rnd(), legYaw: 0, aimW: 0, crouchW: 0, kick: 0, reload: 0, dead: false, deadT: 0, acc: 0, w: [1, 0, 0, 0], back: false, rel: null };
+    // the bones posed by hand after the clips (see update)
+    const HAND = ['spine_01', 'spine_02', 'spine_03', 'upperarm_r', 'lowerarm_r', 'hand_r', 'upperarm_l', 'lowerarm_l', 'hand_l'].map(n => bone[n]).filter(Boolean);
+    const S = { phase: rnd(), anim: null, legYaw: 0, aimW: 0, crouchW: 0, kick: 0, reload: 0, dead: false, deadT: 0, acc: 0, w: [1, 0, 0, 0], back: false, rel: null };
     const gunPos = new THREE.Vector3(), gunQ = new THREE.Quaternion(), tmpP = new THREE.Vector3();
     const qYaw = new THREE.Quaternion(), qPitch = new THREE.Quaternion(), qAcross = new THREE.Quaternion(), qGun = new THREE.Quaternion();
 
@@ -206,7 +208,13 @@ export function createBotCrowd({ url, guns, makeFlash, parent }) {
       // ---- chest: aim stance or relaxed, a flinch when hit
       S.aimW += ((s.aim ? 1 : 0) - S.aimW) * (1 - Math.exp(-dt * 6));
       act.aim.setEffectiveWeight(S.aimW * (1 - S.crouchW * 0.4)); act.rest.setEffectiveWeight((1 - S.aimW) * (1 - S.crouchW * 0.4)); act.crouchUp.setEffectiveWeight(S.crouchW * 0.4);
+      // v1.35: the bones turned by hand below (the spine's twist and bend, the arms reaching the gun) go back to the pose
+      // the clips gave them last frame before the mixer runs: three.js only writes a bone when its blended value changed,
+      // and in the aim stance (one still pose) it did not, so each frame's twist was added on top of the last one's and
+      // the chest and head shook from side to side while the figure moved
+      if (S.anim) for (let i = 0; i < HAND.length; i++) HAND[i].quaternion.copy(S.anim[i]);
       mixer.update(dt);
+      if (!S.anim) S.anim = HAND.map(b => b.quaternion.clone()); else for (let i = 0; i < HAND.length; i++) S.anim[i].copy(HAND[i].quaternion);
       // ---- hips towards the step, chest back towards the target; pitch bends the upper spine
       model.rotation.y = S.legYaw;
       root.updateMatrixWorld(true);
@@ -275,7 +283,7 @@ export function createBotCrowd({ url, guns, makeFlash, parent }) {
       hit() { if (S.dead) return; act.hit.reset(); act.hit.setEffectiveWeight(0.6); act.hit.play(); },
       /** Killed: the fall, the gun kept in the hand. */
       die() {
-        if (S.dead) return; S.dead = true; S.deadT = 0;
+        if (S.dead) return; S.dead = true; S.deadT = 0; S.anim = null;
         // the gun stays in the right hand as he falls (if he was never posed, out of view, it is left out)
         if (S.posed) { root.updateMatrixWorld(true); gun.updateMatrixWorld(true); S.rel = (S.rel || new THREE.Matrix4()).copy(bone.hand_r.matrixWorld).invert().multiply(gun.matrixWorld); }
         else S.rel = null;

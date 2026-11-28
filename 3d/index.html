@@ -54,12 +54,11 @@
   .basla:active{background:var(--bordo-dark);transform:scale(.98)}
   /* telefonda tam ekran: üst çubuk gizlenir, model bütün ekranı kaplar */
   body.tamekran .bar{display:none}
-  /* tam ekrandan kazara çıkılınca (ekran kenarından kaydırma, geri tuşu): oyunu kapatmadan sorulur */
-  .soru{position:fixed;inset:0;z-index:10;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(20,14,10,.6)}
-  .soru.acik{display:flex}
-  .soru .kart{margin:0;text-align:center}
-  .soru .ikinci{display:flex;width:100%;align-items:center;justify-content:center;min-height:54px;margin-top:10px;border:1.5px solid var(--bordo);border-radius:10px;
-    background:#fff;color:var(--bordo);font:inherit;font-size:19px;font-weight:700;cursor:pointer}
+  /* tam ekrandan kazara çıkılınca (ekran kenarından kaydırma, geri tuşu): oyun sürer, üstte küçük bir "Tam ekran" düğmesi çıkar */
+  .geriTam{position:fixed;z-index:10;top:max(8px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);display:none;align-items:center;gap:6px;
+    min-height:40px;padding:0 16px;border:1.5px solid rgba(255,255,255,.8);border-radius:20px;background:rgba(122,46,28,.88);color:#fff;
+    font:inherit;font-size:16px;font-weight:700;cursor:pointer}
+  .geriTam.acik{display:inline-flex}
   .iphone{display:none;margin:12px 0 0;padding:10px 12px;border-radius:10px;background:#F1E7D6;font-size:16px;line-height:1.45;color:var(--ink)}
   body.ios .iphone{display:block}
   body.tamyok .bar .tam{display:none}
@@ -79,7 +78,7 @@
       <p>Köprüköy'ün sokakları, evleri ve tarihi Çeşnigir Köprüsü. Köyün içinde yürüyün, yukarıdan uçun ya da Toros'la dolaşın.</p>
       <p class="not">Model büyüktür (yaklaşık 25 MB). Wi-Fi'de açmanızı öneririz. Açılması telefona göre yarım dakika kadar sürebilir.</p>
       <button type="button" class="basla" id="basla">Başlat</button>
-      <p class="iphone"><b>iPhone'da tam ekran için:</b> Safari'nin alttaki Paylaş düğmesine (kare ve yukarı ok) dokunun, "Ana Ekrana Ekle"yi seçin. Sonra ana ekrandaki Köprüköy 3D simgesinden açın; tarayıcı çubukları olmadan açılır.</p>
+      <p class="iphone"><b>iPhone ve iPad'de tam ekran için:</b> Safari'nin alttaki Paylaş düğmesine (kare ve yukarı ok) dokunun, "Ana Ekrana Ekle"yi seçin. Sonra ana ekrandaki Köprüköy 3D simgesinden açın; tarayıcı çubukları olmadan açılır.</p>
       <a class="yeni" href="app/" target="_blank" rel="noopener">Yeni sekmede aç</a>
     </div>
   </div>
@@ -95,33 +94,38 @@
   var tamVar = !!(kok.requestFullscreen || kok.webkitRequestFullscreen);   // iPhone Safari'de yok
   var uygulama = (window.matchMedia && matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches) || navigator.standalone === true;
   var ios = /iPhone|iPod/.test(navigator.userAgent);
+  // iPad (iPadOS kendini Mac diye tanıtır): tam ekran var ama ekranda aşağı kaydırınca Safari onu kendiliğinden kapatıyor;
+  // oyunda bakmak için hep kaydırıldığından "Tam ekrandan çıktınız" sürekli çıkıyordu. iPad'de de iPhone gibi yalnız
+  // sitenin üst çubuğu gizlenir.
+  var ipad = /iPad/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+  if (ipad) { tamVar = false; ios = true; }
   if (!tamVar) document.body.classList.add('tamyok');
   if (ios && !uygulama) document.body.classList.add('ios');
   function tamEkranMi() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
   function tamEkranaGec() {
-    var f = kok.requestFullscreen || kok.webkitRequestFullscreen;
+    var f = tamVar && (kok.requestFullscreen || kok.webkitRequestFullscreen);
     if (!f) return false;
     try { var r = f.call(kok, { navigationUI: 'hide' }); if (r && r.catch) r.catch(function () { document.body.classList.remove('tamekran'); }); } catch (e) { return false; }
     return true;
   }
   function siteyeDon() { location.href = '../'; }
-  var cikiyor = false, soru = null;
-  // Tam ekrandan çıkınca site hemen açılmaz: ekranın kenarına dokunmak ya da kaydırmak da tam ekranı kapatabiliyor.
-  // Oyun arkada açık kalır, ziyaretçiye "Oyuna dön" / "Siteye dön" diye sorulur.
-  function soruGoster(ac) {
-    if (!soru) {
-      soru = document.createElement('div'); soru.className = 'soru';
-      soru.innerHTML = '<div class="kart"><h1>Tam ekrandan çıktınız</h1><button type="button" class="basla" id="donOyun">Oyuna dön</button>' +
-        '<button type="button" class="ikinci" id="donSite">‹ Siteye dön</button></div>';
-      document.body.appendChild(soru);
-      document.getElementById('donOyun').addEventListener('click', function () { soruGoster(false); tamEkranaGec(); });
-      document.getElementById('donSite').addEventListener('click', siteyeDon);
+  var cikiyor = false, geriTam = null;
+  // Tam ekrandan çıkınca (ekranın kenarından kaydırma, geri tuşu) site açılmaz ve oyun durmaz: yalnız üstte küçük bir
+  // "Tam ekran" düğmesi çıkar. Siteye dönmek için modeldeki "‹ Site" düğmesi ya da telefonun geri tuşu yeter.
+  // (v1.35'e kadar ekranı kaplayan bir "Oyuna dön / Siteye dön" sorusu çıkıyordu; oyunda çok sık çıkıp oyunu bölüyordu.)
+  function geriTamGoster(ac) {
+    if (!geriTam) {
+      geriTam = document.createElement('button'); geriTam.type = 'button'; geriTam.className = 'geriTam'; geriTam.textContent = '⛶ Tam ekran';
+      geriTam.addEventListener('click', function () { geriTamGoster(false); tamEkranaGec(); });
+      document.body.appendChild(geriTam);
     }
-    soru.classList.toggle('acik', ac);
+    geriTam.classList.toggle('acik', ac);
   }
   function tamDegisti() {
-    if (tamEkranMi()) { tamGirildi = true; document.body.classList.add('tamekran'); if (soru) soruGoster(false); }
-    else { document.body.classList.remove('tamekran'); if (cikiyor) siteyeDon(); else if (tamGirildi) soruGoster(true); }
+    if (tamEkranMi()) { tamGirildi = true; document.body.classList.add('tamekran'); if (geriTam) geriTamGoster(false); }
+    else if (cikiyor) siteyeDon();
+    else if (tamGirildi) geriTamGoster(true);   // model bütün ekranı kaplamaya devam eder
+    else document.body.classList.remove('tamekran');
   }
   document.addEventListener('fullscreenchange', tamDegisti);
   document.addEventListener('webkitfullscreenchange', tamDegisti);
